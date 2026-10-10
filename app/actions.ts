@@ -57,7 +57,7 @@ export async function createLink(prevState: ActionState, formData: FormData): Pr
   }
 }
 
-export async function updateLink(id: string, prevState: ActionState, formData: FormData): Promise<ActionState> {
+export async function updateLink(id: string, formData: FormData): Promise<ActionState> {
   const destinationUrl = formData.get('destinationUrl') as string;
   if (!destinationUrl) return { message: 'URL is required' };
 

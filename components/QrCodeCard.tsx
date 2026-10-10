@@ -11,7 +11,7 @@ interface Props {
 export default function QrCodeCard({ shortCode, label }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [url, setUrl] = useState(`https://example.com/id/${shortCode}`);
-  
+
   useEffect(() => {
     setUrl(`${window.location.origin}/id/${shortCode}`);
   }, [shortCode]);
@@ -19,9 +19,9 @@ export default function QrCodeCard({ shortCode, label }: Props) {
   const handleDownload = () => {
     // A 2-inch printed QR code at 300 DPI requires 600x600 pixels.
     // We render at 1024x1024 for a high-res, print-ready asset.
-    const exportSize = 1024; 
+    const exportSize = 1024;
     const padding = exportSize * 0.1; // 10% quiet zone (required by scanners)
-    const drawSize = exportSize - (padding * 2);
+    const drawSize = exportSize - padding * 2;
 
     const offscreen = document.createElement('canvas');
     offscreen.width = exportSize;
@@ -33,7 +33,7 @@ export default function QrCodeCard({ shortCode, label }: Props) {
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, exportSize, exportSize);
 
-    // Get the original QR code canvas rendered by qrcode.react by querying inside our wrapper div
+    // Get the original QR code canvas rendered by qrcode.react
     const originalCanvas = containerRef.current?.querySelector('canvas');
     if (originalCanvas) {
       // Disable smoothing to keep the QR code pixel-perfect and sharp
@@ -51,20 +51,15 @@ export default function QrCodeCard({ shortCode, label }: Props) {
   };
 
   return (
-    <div className="flex flex-col items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-      <div ref={containerRef}>
-        <QRCodeCanvas
-          value={url}
-          size={140}
-          level="H" // High error correction, excellent if a logo is ever overlaid
-          includeMargin={false}
-        />
+    <div className="flex shrink-0 flex-row items-center gap-3 md:flex-col md:items-stretch">
+      <div ref={containerRef} className="shrink-0 rounded-lg border border-[#11140F]/10 bg-white p-2.5">
+        <QRCodeCanvas value={url} size={88} level="H" includeMargin={false} />
       </div>
-      <button 
+      <button
         onClick={handleDownload}
-        className="w-full rounded bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-200 transition-colors"
+        className="rounded-full border border-[#11140F]/15 px-3 py-1.5 text-[11px] font-medium text-[#11140F]/65 hover:border-[#11140F]/30 hover:text-[#11140F] transition-colors whitespace-nowrap"
       >
-        Download High-Res PNG
+        Download PNG
       </button>
     </div>
   );
