@@ -1,0 +1,24 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+model QrLink {
+  id             String    @id @default(cuid())
+  shortCode      String    @unique
+  destinationUrl String
+  label          String?
+  
+  scanCount      Int       @default(0)
+  lastScannedAt  DateTime?
+  
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([shortCode])
+}

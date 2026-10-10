@@ -1,0 +1,87 @@
+'use server';
+
+import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
+import { prisma } from '@/lib/prisma';
+import { normalizeUrl } from '@/lib/normalizeUrl';
+
+// Prevent overriding application routes
+const reservedCodes = ['api', 'id', 'admin', '_next', 'favicon.ico', 'login'];
+
+// Zod schemas for validation
+const linkSchema = z.object({
+  shortCode: z
+    .string()
+    .min(3, 'Must be at least 3 characters')
+    .max(32, 'Must be at most 32 characters')
+    .regex(/^[a-z0-9-_]+$/, 'Only lowercase letters, numbers, hyphens, and underscores allowed')
+    .refine((val) => !reservedCodes.includes(val), 'This short code is reserved'),
+  destinationUrl: z.string().min(1, 'Destination URL is required'),
+  label: z.string().optional(),
+});
+
+export type ActionState = {
+  success?: boolean;
+  errors?: Record<string, string[]>;
+  message?: string;
+};
+
+export async function createLink(prevState: ActionState, formData: FormData): Promise<ActionState> {
+  const validated = linkSchema.safeParse({
+    shortCode: formData.get('shortCode'),
+    destinationUrl: formData.get('destinationUrl'),
+    label: formData.get('label'),
+  });
+
+  if (!validated.success) {
+    return { errors: validated.error.flatten().fieldErrors };
+  }
+
+  const { shortCode, destinationUrl, label } = validated.data;
+  const normalizedUrl = normalizeUrl(destinationUrl);
+
+  try {
+    const existing = await prisma.qrLink.findUnique({ where: { shortCode } });
+    if (existing) {
+      return { errors: { shortCode: ['This short code is already taken'] } };
+    }
+
+    await prisma.qrLink.create({
+      data: { shortCode, destinationUrl: normalizedUrl, label: label || null },
+    });
+
+    revalidatePath('/');
+    return { success: true };
+  } catch (error) {
+    return { message: 'Database error: Failed to create link.' };
+  }
+}
+
+export async function updateLink(id: string, prevState: ActionState, formData: FormData): Promise<ActionState> {
+  const destinationUrl = formData.get('destinationUrl') as string;
+  if (!destinationUrl) return { message: 'URL is required' };
+
+  try {
+    await prisma.qrLink.update({
+      where: { id },
+      data: { destinationUrl: normalizeUrl(destinationUrl) },
+    });
+
+    revalidatePath('/');
+    return { success: true };
+  } catch (error) {
+    return { message: 'Database error: Failed to update link.' };
+  }
+}
+
+export async function deleteLink(id: string): Promise<ActionState> {
+  try {
+    // Hard delete is used here for simplicity. 
+    // For production, consider adding a `deletedAt` field for a soft delete to retain scan history.
+    await prisma.qrLink.delete({ where: { id } });
+    revalidatePath('/');
+    return { success: true };
+  } catch (error) {
+    return { message: 'Database error: Failed to delete link.' };
+  }
+}
