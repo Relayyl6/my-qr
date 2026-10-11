@@ -4,9 +4,10 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { normalizeUrl } from '@/lib/normalizeUrl';
+import { getCurrentUser } from '@/lib/auth';
 
 // Prevent overriding application routes
-const reservedCodes = ['api', 'id', 'admin', '_next', 'favicon.ico', 'login'];
+const reservedCodes = ['api', 'id', 'admin', '_next', 'favicon.ico', 'login', 'signup', 'inactive'];
 
 // Zod schemas for validation
 const linkSchema = z.object({
@@ -27,6 +28,11 @@ export type ActionState = {
 };
 
 export async function createLink(prevState: ActionState, formData: FormData): Promise<ActionState> {
+  const user = await getCurrentUser();
+  if (!user) {
+    return { message: 'You must be signed in to create a link.' };
+  }
+
   const validated = linkSchema.safeParse({
     shortCode: formData.get('shortCode'),
     destinationUrl: formData.get('destinationUrl'),
@@ -47,7 +53,12 @@ export async function createLink(prevState: ActionState, formData: FormData): Pr
     }
 
     await prisma.qrLink.create({
-      data: { shortCode, destinationUrl: normalizedUrl, label: label || null },
+      data: {
+        shortCode,
+        destinationUrl: normalizedUrl,
+        label: label || null,
+        userId: user.id,
+      },
     });
 
     revalidatePath('/');
@@ -58,10 +69,20 @@ export async function createLink(prevState: ActionState, formData: FormData): Pr
 }
 
 export async function updateLink(id: string, formData: FormData): Promise<ActionState> {
+  const user = await getCurrentUser();
+  if (!user) {
+    return { message: 'You must be signed in to update links.' };
+  }
+
   const destinationUrl = formData.get('destinationUrl') as string;
   if (!destinationUrl) return { message: 'URL is required' };
 
   try {
+    const link = await prisma.qrLink.findUnique({ where: { id } });
+    if (!link || (link.userId && link.userId !== user.id)) {
+      return { message: 'Link not found or access denied.' };
+    }
+
     await prisma.qrLink.update({
       where: { id },
       data: { destinationUrl: normalizeUrl(destinationUrl) },
@@ -74,10 +95,42 @@ export async function updateLink(id: string, formData: FormData): Promise<Action
   }
 }
 
-export async function deleteLink(id: string): Promise<ActionState> {
+export async function toggleArchiveLink(id: string): Promise<ActionState> {
+  const user = await getCurrentUser();
+  if (!user) {
+    return { message: 'You must be signed in to archive links.' };
+  }
+
   try {
-    // Hard delete is used here for simplicity. 
-    // For production, consider adding a `deletedAt` field for a soft delete to retain scan history.
+    const link = await prisma.qrLink.findUnique({ where: { id } });
+    if (!link || (link.userId && link.userId !== user.id)) {
+      return { message: 'Link not found or access denied.' };
+    }
+
+    await prisma.qrLink.update({
+      where: { id },
+      data: { isArchived: !link.isArchived },
+    });
+
+    revalidatePath('/');
+    return { success: true };
+  } catch (error) {
+    return { message: 'Database error: Failed to toggle archive state.' };
+  }
+}
+
+export async function deleteLink(id: string): Promise<ActionState> {
+  const user = await getCurrentUser();
+  if (!user) {
+    return { message: 'You must be signed in to delete links.' };
+  }
+
+  try {
+    const link = await prisma.qrLink.findUnique({ where: { id } });
+    if (!link || (link.userId && link.userId !== user.id)) {
+      return { message: 'Link not found or access denied.' };
+    }
+
     await prisma.qrLink.delete({ where: { id } });
     revalidatePath('/');
     return { success: true };

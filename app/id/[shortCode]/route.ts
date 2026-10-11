@@ -23,6 +23,11 @@ export async function GET(
     return NextResponse.redirect(new URL('/not-found', request.url));
   }
 
+  // If the owner archived the link, send to the graceful paused page
+  if (link.isArchived) {
+    return NextResponse.redirect(new URL('/inactive', request.url));
+  }
+
   // 2. Increment scan analytics
   // MUST BE AWAITED: In serverless environments (like Vercel), unawaited promises 
   // are immediately frozen/aborted when the response is returned.

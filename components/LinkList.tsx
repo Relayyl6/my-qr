@@ -1,14 +1,16 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { deleteLink, updateLink } from '@/app/actions';
+import { deleteLink, updateLink, toggleArchiveLink } from '@/app/actions';
 import QrCodeCard from './QrCodeCard';
+import DeleteConfirmModal from './DeleteConfirmModal';
 
 interface QrLink {
   id: string;
   shortCode: string;
   destinationUrl: string;
   label: string | null;
+  isArchived: boolean;
   scanCount: number;
   lastScannedAt: Date | null;
 }
@@ -29,6 +31,8 @@ export default function LinkList({ links }: { links: QrLink[] }) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [tab, setTab] = useState<'active' | 'archived'>('active');
+  const [pendingDeleteLink, setPendingDeleteLink] = useState<QrLink | null>(null);
   const [origin, setOrigin] = useState('');
 
   useEffect(() => {
@@ -41,16 +45,21 @@ export default function LinkList({ links }: { links: QrLink[] }) {
     setTimeout(() => setCopiedId((current) => (current === id ? null : current)), 1800);
   };
 
+  const activeLinks = useMemo(() => links.filter((l) => !l.isArchived), [links]);
+  const archivedLinks = useMemo(() => links.filter((l) => l.isArchived), [links]);
+
+  const currentTabLinks = tab === 'active' ? activeLinks : archivedLinks;
+
   const filteredLinks = useMemo(() => {
-    if (!search.trim()) return links;
+    if (!search.trim()) return currentTabLinks;
     const query = search.toLowerCase();
-    return links.filter(
+    return currentTabLinks.filter(
       (l) =>
         l.shortCode.toLowerCase().includes(query) ||
         (l.label && l.label.toLowerCase().includes(query)) ||
         l.destinationUrl.toLowerCase().includes(query)
     );
-  }, [links, search]);
+  }, [currentTabLinks, search]);
 
   if (links.length === 0) {
     return (
@@ -63,20 +72,52 @@ export default function LinkList({ links }: { links: QrLink[] }) {
 
   return (
     <div className="w-full min-w-0 space-y-4">
-      {/* Search & Filter Bar (shown if multiple links exist) */}
+      {/* Tab Switcher: Active vs Archived */}
+      <div className="flex items-center justify-between gap-2 border-b border-[#11140F]/10 pb-3">
+        <div className="flex gap-2">
+          <button
+            onClick={() => setTab('active')}
+            className={`rounded-full px-3.5 py-1 text-xs font-medium transition-colors ${
+              tab === 'active'
+                ? 'bg-[#11140F] text-[#EEF0EA]'
+                : 'text-[#11140F]/60 hover:text-[#11140F] hover:bg-[#11140F]/5'
+            }`}
+          >
+            Active ({activeLinks.length})
+          </button>
+          <button
+            onClick={() => setTab('archived')}
+            className={`rounded-full px-3.5 py-1 text-xs font-medium transition-colors ${
+              tab === 'archived'
+                ? 'bg-[#11140F] text-[#EEF0EA]'
+                : 'text-[#11140F]/60 hover:text-[#11140F] hover:bg-[#11140F]/5'
+            }`}
+          >
+            Archived ({archivedLinks.length})
+          </button>
+        </div>
+
+        {links.length > 2 && (
+          <div className="text-[11px] text-[#11140F]/45">
+            Total scans: <strong className="text-[#11140F]">{links.reduce((acc, l) => acc + l.scanCount, 0)}</strong>
+          </div>
+        )}
+      </div>
+
+      {/* Search & Filter Bar */}
       {links.length > 2 && (
         <div className="relative w-full min-w-0">
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by label, short code, or URL..."
-            className="w-full min-w-0 rounded-xl border border-[#11140F]/15 bg-white px-3.5 py-2.5 text-[13px] text-[#11140F] placeholder:text-[#11140F]/30 outline-none focus:border-[#11140F] transition-colors"
+            placeholder={`Search ${tab} links...`}
+            className="w-full min-w-0 rounded-xl border border-[#11140F]/15 bg-white px-3.5 py-2 text-[13px] text-[#11140F] placeholder:text-[#11140F]/30 outline-none focus:border-[#11140F] transition-colors"
           />
           {search && (
             <button
               onClick={() => setSearch('')}
-              className="absolute right-3 top-2.5 text-[11px] text-[#11140F]/40 hover:text-[#11140F]"
+              className="absolute right-3 top-2 text-[11px] text-[#11140F]/40 hover:text-[#11140F]"
             >
               Clear
             </button>
@@ -88,7 +129,7 @@ export default function LinkList({ links }: { links: QrLink[] }) {
       <div className="w-full min-w-0 lg:max-h-[640px] lg:overflow-y-auto lg:pr-1.5 space-y-3.5 scroll-smooth">
         {filteredLinks.length === 0 ? (
           <div className="w-full min-w-0 rounded-xl border border-dashed border-[#11140F]/15 p-8 text-center text-[13px] text-[#11140F]/50">
-            No links matching "{search}"
+            {search ? `No links matching "${search}"` : `No ${tab} links.`}
           </div>
         ) : (
           filteredLinks.map((link) => {
@@ -97,20 +138,28 @@ export default function LinkList({ links }: { links: QrLink[] }) {
             return (
               <div
                 key={link.id}
-                className="w-full min-w-0 rounded-xl border border-[#11140F]/10 bg-white p-3.5 sm:p-5 space-y-3"
+                className={`w-full min-w-0 rounded-xl border bg-white p-3.5 sm:p-5 space-y-3 transition-opacity ${
+                  link.isArchived ? 'border-[#11140F]/15 bg-white/70 opacity-80' : 'border-[#11140F]/10'
+                }`}
               >
-                {/* Header row: Label + Live badge on left, Edit & Delete on right */}
+                {/* Header row: Label + Live/Archived badge on left, Actions on right */}
                 <div className="flex items-center justify-between gap-2 border-b border-[#11140F]/5 pb-2.5 min-w-0">
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     <h3 className="text-[14px] sm:text-[15px] font-medium text-[#11140F] truncate">
                       {link.label || link.shortCode}
                     </h3>
-                    <span className="text-[10px] text-[#2F6B4F] bg-[#2F6B4F]/10 rounded-full px-2 py-0.5 shrink-0 font-medium">
-                      Live
-                    </span>
+                    {link.isArchived ? (
+                      <span className="text-[10px] text-[#B8842E] bg-[#B8842E]/10 rounded-full px-2 py-0.5 shrink-0 font-medium">
+                        Paused
+                      </span>
+                    ) : (
+                      <span className="text-[10px] text-[#2F6B4F] bg-[#2F6B4F]/10 rounded-full px-2 py-0.5 shrink-0 font-medium">
+                        Live
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center gap-2.5 shrink-0 text-[12px]">
-                    {editingId !== link.id && (
+                    {editingId !== link.id && !link.isArchived && (
                       <button
                         onClick={() => setEditingId(link.id)}
                         className="font-medium text-[#11140F]/60 hover:text-[#11140F] transition-colors"
@@ -119,7 +168,14 @@ export default function LinkList({ links }: { links: QrLink[] }) {
                       </button>
                     )}
                     <button
-                      onClick={() => deleteLink(link.id)}
+                      onClick={() => toggleArchiveLink(link.id)}
+                      className="font-medium text-[#11140F]/60 hover:text-[#11140F] transition-colors"
+                      title={link.isArchived ? 'Restore link redirect' : 'Pause link redirect'}
+                    >
+                      {link.isArchived ? 'Restore' : 'Pause'}
+                    </button>
+                    <button
+                      onClick={() => setPendingDeleteLink(link)}
                       className="font-medium text-[#B8842E] hover:text-[#8A631F] transition-colors"
                     >
                       Delete
@@ -170,14 +226,14 @@ export default function LinkList({ links }: { links: QrLink[] }) {
                         <div className="flex gap-2">
                           <button
                             type="submit"
-                            className="rounded-full bg-[#11140F] px-3 py-1 text-[11px] sm:text-[12px] font-medium text-white"
+                            className="rounded-full bg-[#11140F] px-3.5 py-1 text-[11px] sm:text-[12px] font-medium text-white"
                           >
                             Save
                           </button>
                           <button
                             type="button"
                             onClick={() => setEditingId(null)}
-                            className="rounded-full border border-[#11140F]/15 px-3 py-1 text-[11px] sm:text-[12px] text-[#11140F]/70"
+                            className="rounded-full border border-[#11140F]/15 px-3.5 py-1 text-[11px] sm:text-[12px] text-[#11140F]/70"
                           >
                             Cancel
                           </button>
@@ -207,6 +263,22 @@ export default function LinkList({ links }: { links: QrLink[] }) {
           })
         )}
       </div>
+
+      {/* Custom Delete Confirmation Modal */}
+      <DeleteConfirmModal
+        isOpen={Boolean(pendingDeleteLink)}
+        onClose={() => setPendingDeleteLink(null)}
+        title={pendingDeleteLink?.label || pendingDeleteLink?.shortCode || ''}
+        isArchived={pendingDeleteLink?.isArchived}
+        onConfirmArchive={
+          pendingDeleteLink && !pendingDeleteLink.isArchived
+            ? () => toggleArchiveLink(pendingDeleteLink.id)
+            : undefined
+        }
+        onConfirmDelete={
+          pendingDeleteLink ? () => deleteLink(pendingDeleteLink.id) : () => {}
+        }
+      />
     </div>
   );
 }

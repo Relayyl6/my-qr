@@ -1,8 +1,11 @@
 import { prisma } from '@/lib/prisma';
 import { Space_Grotesk, IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google';
+import { getCurrentUser } from '@/lib/auth';
 import LinkForm from '@/components/LinkForm';
 import LinkList from '@/components/LinkList';
 import HeroRouteDemo from '@/components/HeroRouteDemo';
+import HeaderNav from '@/components/HeaderNav';
+import WorkspaceLocked from '@/components/WorkspaceLocked';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -60,37 +63,26 @@ const FEATURES = [
 ];
 
 export default async function Home() {
-  const links = await prisma.qrLink.findMany({
-    orderBy: { createdAt: 'desc' },
-  });
+  const user = await getCurrentUser();
+  const links = user
+    ? await prisma.qrLink.findMany({
+        where: {
+          OR: [
+            { userId: user.id },
+            { userId: null }, // Legacy links created prior to auth migration
+          ],
+        },
+        orderBy: { createdAt: 'desc' },
+      })
+    : [];
 
   return (
     <div
       className={`${display.variable} ${body.variable} ${mono.variable} bg-[#EEF0EA] text-[#11140F] min-h-screen w-full overflow-x-clip pt-16`}
       style={{ fontFamily: 'var(--font-body)' }}
     >
-      {/* Nav */}
-      <header className="fixed top-0 left-0 right-0 z-50 border-b border-[#11140F]/10 bg-[#EEF0EA]/95 backdrop-blur-md">
-        <nav className="max-w-[1200px] mx-auto px-5 md:px-8 h-16 flex items-center justify-between">
-          <a href="#top" className="flex items-center gap-2.5">
-            <QrMark className="w-5 h-5" />
-            <span className="font-medium tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
-              DynamicQR
-            </span>
-          </a>
-          <div className="hidden md:flex items-center gap-8 text-[14px] text-[#11140F]/70">
-            <a href="#how-it-works" className="hover:text-[#11140F] transition-colors">How it works</a>
-            <a href="#features" className="hover:text-[#11140F] transition-colors">Features</a>
-            <a href="#workspace" className="hover:text-[#11140F] transition-colors">Workspace</a>
-          </div>
-          <a
-            href="#workspace"
-            className="rounded-full bg-[#11140F] text-[#EEF0EA] px-5 py-2.5 text-[14px] font-medium hover:bg-[#2A2E25] transition-colors"
-          >
-            Log in
-          </a>
-        </nav>
-      </header>
+      {/* Dynamic Auth Header Nav */}
+      <HeaderNav user={user} />
 
       {/* Hero */}
       <section id="top" className="bg-[#11140F] w-full overflow-hidden">
@@ -112,7 +104,7 @@ export default async function Home() {
                 href="#workspace"
                 className="rounded-full bg-white text-[#11140F] px-7 py-3.5 text-[15px] font-medium hover:bg-white/90 transition-colors"
               >
-                Create your first link
+                {user ? 'Open your workspace' : 'Create your first link'}
               </a>
               <a
                 href="#how-it-works"
@@ -211,31 +203,37 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Workspace */}
+      {/* Workspace Section */}
       <section id="workspace" className="bg-white border-t border-[#11140F]/10 scroll-mt-16">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-5 md:px-8 py-14 sm:py-20 md:py-28">
           <div className="mb-8 sm:mb-12">
             <h2 className="text-[1.5rem] sm:text-[1.75rem] tracking-tight font-medium" style={{ fontFamily: 'var(--font-display)' }}>
-              Your workspace
+              {user ? `${user.name ? `${user.name}'s` : 'Your'} Workspace` : 'Your Workspace'}
             </h2>
             <p className="mt-1.5 sm:mt-2 text-[#11140F]/55 text-[14px] sm:text-[15px]">
-              Create, manage, and track your dynamic QR codes.
+              {user
+                ? 'Create, manage, and track your personal dynamic QR codes.'
+                : 'Sign in to generate, route, and track your dynamic QR codes.'}
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-6 items-start w-full min-w-0">
-            <section className="w-full min-w-0 max-w-full h-fit rounded-2xl border border-[#11140F]/10 bg-[#EEF0EA] p-4 sm:p-7 lg:sticky lg:top-24">
-              <h3 className="mb-5 sm:mb-7 text-[16px] sm:text-[17px] font-medium">Create new link</h3>
-              <LinkForm />
-            </section>
+          {user ? (
+            <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-6 items-start w-full min-w-0">
+              <section className="w-full min-w-0 max-w-full h-fit rounded-2xl border border-[#11140F]/10 bg-[#EEF0EA] p-4 sm:p-7 lg:sticky lg:top-24">
+                <h3 className="mb-5 sm:mb-7 text-[16px] sm:text-[17px] font-medium">Create new link</h3>
+                <LinkForm />
+              </section>
 
-            <section className="w-full min-w-0 max-w-full rounded-2xl border border-[#11140F]/10 bg-[#EEF0EA] p-4 sm:p-7">
-              <h3 className="mb-5 sm:mb-7 text-[16px] sm:text-[17px] font-medium">
-                Active links <span className="text-[#11140F]/35 font-normal">({links.length})</span>
-              </h3>
-              <LinkList links={links} />
-            </section>
-          </div>
+              <section className="w-full min-w-0 max-w-full rounded-2xl border border-[#11140F]/10 bg-[#EEF0EA] p-4 sm:p-7">
+                <h3 className="mb-5 sm:mb-7 text-[16px] sm:text-[17px] font-medium">
+                  Active links <span className="text-[#11140F]/35 font-normal">({links.filter((l) => !l.isArchived).length})</span>
+                </h3>
+                <LinkList links={links} />
+              </section>
+            </div>
+          ) : (
+            <WorkspaceLocked />
+          )}
         </div>
       </section>
 

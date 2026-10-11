@@ -3,9 +3,20 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  links     QrLink[]
 }
 
 model QrLink {
@@ -13,6 +24,7 @@ model QrLink {
   shortCode      String    @unique
   destinationUrl String
   label          String?
+  isArchived     Boolean   @default(false)
   
   scanCount      Int       @default(0)
   lastScannedAt  DateTime?
@@ -20,5 +32,9 @@ model QrLink {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
+  userId         String?
+  user           User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([shortCode])
+  @@index([userId])
 }
