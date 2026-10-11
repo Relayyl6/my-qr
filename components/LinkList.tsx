@@ -4,12 +4,17 @@ import { useState, useEffect, useMemo } from 'react';
 import { deleteLink, updateLink, toggleArchiveLink } from '@/app/actions';
 import QrCodeCard from './QrCodeCard';
 import DeleteConfirmModal from './DeleteConfirmModal';
+import AiRoutingComposer from './AiRoutingComposer';
+import QrArtStudio from './QrArtStudio';
+import LandingPageEditor from './LandingPageEditor';
+import { Sparkles, Compass, Palette, Smartphone } from 'lucide-react';
 
 interface QrLink {
   id: string;
   shortCode: string;
   destinationUrl: string;
   label: string | null;
+  type?: string;
   isArchived: boolean;
   scanCount: number;
   lastScannedAt: Date | null;
@@ -34,6 +39,11 @@ export default function LinkList({ links }: { links: QrLink[] }) {
   const [tab, setTab] = useState<'active' | 'archived'>('active');
   const [pendingDeleteLink, setPendingDeleteLink] = useState<QrLink | null>(null);
   const [origin, setOrigin] = useState('');
+
+  // AI Feature Modals state
+  const [activeRouterLink, setActiveRouterLink] = useState<QrLink | null>(null);
+  const [activeArtLink, setActiveArtLink] = useState<QrLink | null>(null);
+  const [activePageLink, setActivePageLink] = useState<QrLink | null>(null);
 
   useEffect(() => {
     setOrigin(window.location.origin);
@@ -98,55 +108,41 @@ export default function LinkList({ links }: { links: QrLink[] }) {
         </div>
 
         {links.length > 2 && (
-          <div className="text-[11px] text-[#11140F]/45">
-            Total scans: <strong className="text-[#11140F]">{links.reduce((acc, l) => acc + l.scanCount, 0)}</strong>
+          <div className="w-48 sm:w-60">
+            <input
+              type="text"
+              placeholder="Search links…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full rounded-full border border-[#11140F]/15 bg-white px-3 py-1 text-xs text-[#11140F] placeholder:text-[#11140F]/35 outline-none focus:border-[#11140F]"
+            />
           </div>
         )}
       </div>
 
-      {/* Search & Filter Bar */}
-      {links.length > 2 && (
-        <div className="relative w-full min-w-0">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={`Search ${tab} links...`}
-            className="w-full min-w-0 rounded-xl border border-[#11140F]/15 bg-white px-3.5 py-2 text-[13px] text-[#11140F] placeholder:text-[#11140F]/30 outline-none focus:border-[#11140F] transition-colors"
-          />
-          {search && (
-            <button
-              onClick={() => setSearch('')}
-              className="absolute right-3 top-2 text-[11px] text-[#11140F]/40 hover:text-[#11140F]"
-            >
-              Clear
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* List container */}
-      <div className="w-full min-w-0 lg:max-h-[640px] lg:overflow-y-auto lg:pr-1.5 space-y-4 sm:space-y-5 scroll-smooth">
+      <div className="space-y-3 w-full min-w-0">
         {filteredLinks.length === 0 ? (
-          <div className="w-full min-w-0 rounded-xl border border-dashed border-[#11140F]/15 p-8 text-center text-[13px] text-[#11140F]/50">
-            {search ? `No links matching "${search}"` : `No ${tab} links.`}
+          <div className="w-full min-w-0 rounded-xl border border-dashed border-[#11140F]/15 p-6 text-center text-xs text-[#11140F]/40">
+            No {tab} links match your search.
           </div>
         ) : (
           filteredLinks.map((link) => {
-            const shortUrl = origin ? `${origin}/id/${link.shortCode}` : '';
+            const shortUrl = `${origin || 'https://dynamicqr.co'}/id/${link.shortCode}`;
 
             return (
               <div
                 key={link.id}
-                className={`w-full min-w-0 rounded-xl border bg-white p-3.5 sm:p-5 space-y-3 transition-opacity ${
-                  link.isArchived ? 'border-[#11140F]/15 bg-white/70 opacity-80' : 'border-[#11140F]/10'
+                className={`w-full min-w-0 rounded-2xl border p-4 sm:p-5 transition-all shadow-xs ${
+                  link.isArchived
+                    ? 'border-[#11140F]/10 bg-[#11140F]/[0.02] opacity-80'
+                    : 'border-[#11140F]/15 bg-white hover:border-[#11140F]/30'
                 }`}
               >
-                {/* Header row: Label + Live/Archived badge on left, Actions on right */}
-                <div className="flex items-center justify-between gap-2 border-b border-[#11140F]/5 pb-2.5 min-w-0">
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <h3 className="text-[14px] sm:text-[15px] font-medium text-[#11140F] truncate">
-                      {link.label || link.shortCode}
+                {/* Header row: Label & primary actions */}
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <h3 className="text-[14px] font-semibold text-[#11140F] truncate" title={link.label || 'Untitled link'}>
+                      {link.label || 'Untitled link'}
                     </h3>
                     {link.isArchived ? (
                       <span className="text-[10px] text-[#B8842E] bg-[#B8842E]/10 rounded-full px-2 py-0.5 shrink-0 font-medium">
@@ -155,6 +151,11 @@ export default function LinkList({ links }: { links: QrLink[] }) {
                     ) : (
                       <span className="text-[10px] text-[#2F6B4F] bg-[#2F6B4F]/10 rounded-full px-2 py-0.5 shrink-0 font-medium">
                         Live
+                      </span>
+                    )}
+                    {link.type === 'landing-page' && (
+                      <span className="text-[10px] text-purple-700 bg-purple-100 rounded-full px-2 py-0.5 shrink-0 font-medium">
+                        Mobile Page
                       </span>
                     )}
                   </div>
@@ -256,6 +257,36 @@ export default function LinkList({ links }: { links: QrLink[] }) {
                       <span className="mx-1">&middot;</span>
                       {timeAgo(link.lastScannedAt)}
                     </div>
+
+                    {/* AI Feature Action Pills */}
+                    {!link.isArchived && (
+                      <div className="pt-2 flex items-center gap-1.5 flex-wrap">
+                        <button
+                          type="button"
+                          onClick={() => setActiveRouterLink(link)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-emerald-500/20 bg-emerald-50/60 hover:bg-emerald-100/80 text-[11px] font-medium text-emerald-800 transition-colors"
+                        >
+                          <Compass className="w-3 h-3 text-emerald-600" />
+                          Smart Router
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setActiveArtLink(link)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-purple-500/20 bg-purple-50/60 hover:bg-purple-100/80 text-[11px] font-medium text-purple-800 transition-colors"
+                        >
+                          <Palette className="w-3 h-3 text-purple-600" />
+                          QR Art Studio
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setActivePageLink(link)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-blue-500/20 bg-blue-50/60 hover:bg-blue-100/80 text-[11px] font-medium text-blue-800 transition-colors"
+                        >
+                          <Smartphone className="w-3 h-3 text-blue-600" />
+                          Prompt-to-Page
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -263,6 +294,42 @@ export default function LinkList({ links }: { links: QrLink[] }) {
           })
         )}
       </div>
+
+      {/* AI Smart Destination Router Modal */}
+      {activeRouterLink && (
+        <div className="fixed inset-0 z-50 bg-[#11140F]/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <AiRoutingComposer
+            linkId={activeRouterLink.id}
+            shortCode={activeRouterLink.shortCode}
+            defaultDestination={activeRouterLink.destinationUrl}
+            onClose={() => setActiveRouterLink(null)}
+          />
+        </div>
+      )}
+
+      {/* AI QR Art Studio Modal */}
+      {activeArtLink && (
+        <div className="fixed inset-0 z-50 bg-[#11140F]/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <QrArtStudio
+            linkId={activeArtLink.id}
+            shortCode={activeArtLink.shortCode}
+            destinationUrl={activeArtLink.destinationUrl}
+            label={activeArtLink.label}
+            onClose={() => setActiveArtLink(null)}
+          />
+        </div>
+      )}
+
+      {/* AI Instant Mobile Landing Page Modal */}
+      {activePageLink && (
+        <div className="fixed inset-0 z-50 bg-[#11140F]/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <LandingPageEditor
+            linkId={activePageLink.id}
+            shortCode={activePageLink.shortCode}
+            onClose={() => setActivePageLink(null)}
+          />
+        </div>
+      )}
 
       {/* Custom Delete Confirmation Modal */}
       <DeleteConfirmModal

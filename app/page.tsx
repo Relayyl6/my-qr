@@ -6,6 +6,8 @@ import LinkList from '@/components/LinkList';
 import HeroRouteDemo from '@/components/HeroRouteDemo';
 import HeaderNav from '@/components/HeaderNav';
 import WorkspaceLocked from '@/components/WorkspaceLocked';
+import CampaignAnalyst from '@/components/CampaignAnalyst';
+import WorkspaceHeaderActions from '@/components/WorkspaceHeaderActions';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -46,18 +48,18 @@ const FEATURES = [
     meta: 'HTTP 307',
   },
   {
-    title: 'Scan activity',
-    body: 'Every link tracks total scans and when it was last used, visible at a glance in your workspace.',
-    meta: 'Live count',
+    title: 'AI Smart Routing',
+    body: 'Dynamic redirects based on visitor device, country, time-of-day, and plain-English routing rules.',
+    meta: 'AI Compiled',
   },
   {
     title: 'Print-ready export',
-    body: 'Download a 1024×1024px PNG with a 10% quiet zone — sharp at 300 DPI on a 2-inch print.',
+    body: 'Download high-contrast 1024×1024px PNG with 10% quiet zone — sharp at 300 DPI on physical prints.',
     meta: '300 DPI',
   },
   {
     title: 'Built to scale',
-    body: 'Backed by pooled, serverless Postgres, so a link works the same at ten scans or ten thousand.',
+    body: 'Backed by pooled, serverless Neon Postgres, so a link works the same at ten scans or ten thousand.',
     meta: 'Neon Postgres',
   },
 ];
@@ -98,55 +100,51 @@ export default async function Home() {
               style={{ fontFamily: 'var(--font-display)' }}
             >
               A QR code you print once.
-              <br />A destination you can change forever.
+              <br />
+              <span className="text-[#96A689]">AI-routed as long as it needs to be.</span>
             </h1>
-            <p className="mt-6 text-white/60 text-[17px] leading-relaxed max-w-[42ch]">
-              DynamicQR separates the printed code from the page it points to. Update the
-              destination any time, and every code already out in the world follows along.
+            <p className="mt-5 text-[#EEF0EA]/70 text-[15px] sm:text-[17px] leading-relaxed max-w-[50ch]">
+              Generate intelligent dynamic QR codes that adapt in real time. Switch destinations anytime, route iOS vs Android automatically, and extract AI campaign intelligence from physical flyers.
             </p>
-            <div className="mt-9 flex flex-wrap items-center gap-4">
+            <div className="mt-8 flex flex-wrap gap-4 items-center">
               <a
                 href="#workspace"
-                className="rounded-full bg-white text-[#11140F] px-7 py-3.5 text-[15px] font-medium hover:bg-white/90 transition-colors"
+                className="rounded-xl bg-white px-5 py-3 text-[14px] font-medium text-[#11140F] hover:bg-[#EEF0EA] transition-colors"
               >
-                {user ? 'Open your workspace' : 'Create your first link'}
+                Open workspace &rarr;
               </a>
               <a
                 href="#how-it-works"
-                className="text-white/70 text-[15px] hover:text-white transition-colors underline underline-offset-4 decoration-white/30"
+                className="rounded-xl border border-white/20 px-5 py-3 text-[14px] font-medium text-white/80 hover:text-white hover:border-white/40 transition-colors"
               >
-                See how it works
+                How it works
               </a>
             </div>
           </div>
-          <div className="flex justify-center lg:justify-end">
-            <HeroRouteDemo />
-          </div>
+
+          <HeroRouteDemo />
         </div>
       </section>
 
-      {/* Problem / Solution */}
-      <section className="max-w-[1200px] mx-auto px-5 md:px-8 py-20 md:py-28">
-        <h2
-          className="text-[2rem] md:text-[2.5rem] leading-tight tracking-tight max-w-[22ch]"
-          style={{ fontFamily: 'var(--font-display)' }}
-        >
-          One typo used to mean a reprint. Now it means an edit.
-        </h2>
-        <div className="mt-12 grid md:grid-cols-2 gap-px bg-[#11140F]/10 rounded-2xl overflow-hidden">
-          <div className="bg-[#EEF0EA] p-8 md:p-10">
-            <p className="text-[13px] font-medium text-[#11140F]/40 mb-4">Without dynamic routing</p>
-            <ol className="space-y-3 text-[15px] text-[#11140F]/60">
-              <li>Print 10,000 flyers with a static code.</li>
-              <li>Find a typo in the destination page a week later.</li>
-              <li>Reprint 10,000 flyers, or live with the mistake.</li>
-            </ol>
-          </div>
-          <div className="bg-white p-8 md:p-10">
-            <p className="text-[13px] font-medium text-[#2F6B4F] mb-4">With DynamicQR</p>
-            <ol className="space-y-3 text-[15px] text-[#11140F]/80">
-              <li>Print 10,000 flyers with a dynamic code.</li>
-              <li>Find a typo in the destination page a week later.</li>
+      {/* The flyer problem */}
+      <section className="max-w-[1200px] mx-auto px-5 md:px-8 py-16 md:py-24">
+        <div className="grid md:grid-cols-[1fr_1.2fr] gap-8 md:gap-14 items-start">
+          <p
+            className="text-[1.3rem] sm:text-[1.5rem] md:text-[1.75rem] leading-snug tracking-tight text-[#11140F]"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
+            A static QR code on a printed flyer is a single point of failure.
+          </p>
+          <div className="space-y-4 text-[14px] sm:text-[15px] text-[#11140F]/65 leading-relaxed">
+            <p>
+              You print 5,000 flyers for an event. Two weeks before the date, the venue changes or the ticketing link breaks. A static QR code leaves you with 5,000 pieces of expensive paper pointing into the void.
+            </p>
+            <p>
+              With DynamicQR, the printed code points to a permanent address you control. When plans shift, you don't reprint — you update where it sends people.
+            </p>
+            <ol className="list-decimal pl-5 space-y-1 pt-2 font-medium text-[#11140F]">
+              <li>Notice the issue.</li>
+              <li>Open your workspace.</li>
               <li>Fix the link. Every flyer updates before the ink's dry.</li>
             </ol>
           </div>
@@ -210,31 +208,41 @@ export default async function Home() {
 
       {/* Workspace Section */}
       <section id="workspace" className="bg-white border-t border-[#11140F]/10 scroll-mt-16">
-        <div className="max-w-[1200px] mx-auto px-4 sm:px-5 md:px-8 py-14 sm:py-20 md:py-28">
-          <div className="mb-8 sm:mb-12">
-            <h2 className="text-[1.5rem] sm:text-[1.75rem] tracking-tight font-medium" style={{ fontFamily: 'var(--font-display)' }}>
-              {user ? `${user.name ? `${user.name}'s` : 'Your'} Workspace` : 'Your Workspace'}
-            </h2>
-            <p className="mt-1.5 sm:mt-2 text-[#11140F]/55 text-[14px] sm:text-[15px]">
-              {user
-                ? 'Create, manage, and track your personal dynamic QR codes.'
-                : 'Sign in to generate, route, and track your dynamic QR codes.'}
-            </p>
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-5 md:px-8 py-14 sm:py-20 md:py-28 space-y-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-[1.5rem] sm:text-[1.75rem] tracking-tight font-medium" style={{ fontFamily: 'var(--font-display)' }}>
+                {user ? `${user.name ? `${user.name}'s` : 'Your'} Workspace` : 'Your Workspace'}
+              </h2>
+              <p className="mt-1 text-[#11140F]/55 text-[14px] sm:text-[15px]">
+                {user
+                  ? 'Create, manage, smart-route, and analyze your dynamic QR codes.'
+                  : 'Sign in to generate, route, and track your dynamic QR codes.'}
+              </p>
+            </div>
+
+            {user && <WorkspaceHeaderActions />}
           </div>
 
           {user ? (
-            <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-6 items-start w-full min-w-0">
-              <section className="w-full min-w-0 max-w-full h-fit rounded-2xl border border-[#11140F]/10 bg-[#EEF0EA] p-4 sm:p-7 lg:sticky lg:top-24">
-                <h3 className="mb-5 sm:mb-7 text-[16px] sm:text-[17px] font-medium">Create new link</h3>
-                <LinkForm />
-              </section>
+            <div className="space-y-8">
+              {/* Feature 3: AI Campaign Analyst Panel */}
+              <CampaignAnalyst />
 
-              <section className="w-full min-w-0 max-w-full rounded-2xl border border-[#11140F]/10 bg-[#EEF0EA] p-4 sm:p-7">
-                <h3 className="mb-5 sm:mb-7 text-[16px] sm:text-[17px] font-medium">
-                  Active links <span className="text-[#11140F]/35 font-normal">({links.filter((l) => !l.isArchived).length})</span>
-                </h3>
-                <LinkList links={links} />
-              </section>
+              {/* Link creation & Link list workspace */}
+              <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-6 items-start w-full min-w-0">
+                <section className="w-full min-w-0 max-w-full h-fit rounded-2xl border border-[#11140F]/10 bg-[#EEF0EA] p-4 sm:p-7 lg:sticky lg:top-24">
+                  <h3 className="mb-5 sm:mb-7 text-[16px] sm:text-[17px] font-medium">Create new link</h3>
+                  <LinkForm />
+                </section>
+
+                <section className="w-full min-w-0 max-w-full rounded-2xl border border-[#11140F]/10 bg-[#EEF0EA] p-4 sm:p-7">
+                  <h3 className="mb-5 sm:mb-7 text-[16px] sm:text-[17px] font-medium">
+                    Active links <span className="text-[#11140F]/35 font-normal">({links.filter((l) => !l.isArchived).length})</span>
+                  </h3>
+                  <LinkList links={links} />
+                </section>
+              </div>
             </div>
           ) : (
             <WorkspaceLocked />
