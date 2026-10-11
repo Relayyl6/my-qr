@@ -1,6 +1,7 @@
 import { z, ZodSchema } from "zod";
 import { generateObject as aiGenerateObject, generateText as aiGenerateText } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
 export interface AIUsage {
   promptTokens: number;
@@ -204,28 +205,107 @@ export class AnthropicProvider implements AIProvider {
 }
 
 /**
- * Stubbed Gemini Provider (same interface, ready to activate)
+ * Google Gemini Provider (Powered by Google Generative AI & Gemini 2.0 Flash)
  */
 export class GeminiProvider implements AIProvider {
   name = "gemini";
+
+  private getClient() {
+    const key =
+      process.env.GEMINI_API_KEY ||
+      process.env.GOOGLE_GENERATIVE_AI_API_KEY ||
+      process.env.GOOGLE_API_KEY;
+    if (!key) return null;
+    return createGoogleGenerativeAI({
+      apiKey: key,
+    });
+  }
 
   async generateObject<T>(opts: {
     schema: ZodSchema<T>;
     system: string;
     prompt: string;
     model?: string;
+    temperature?: number;
+    maxTokens?: number;
   }): Promise<{ data: T; usage: AIUsage }> {
-    const fallback = new NeonGatewayProvider();
-    return fallback.generateObject(opts);
+    const client = this.getClient();
+    let modelId = opts.model || "gemini-2.0-flash";
+    if (modelId.startsWith("gpt-") || modelId.startsWith("claude-")) {
+      modelId = "gemini-2.0-flash";
+    }
+
+    if (!client) {
+      console.warn("[Gemini Provider] No GEMINI_API_KEY found.");
+      throw new Error("AI_PROVIDER_UNCONFIGURED");
+    }
+
+    const result = await aiGenerateObject({
+      model: client(modelId),
+      system: opts.system,
+      prompt: opts.prompt,
+      schema: opts.schema,
+      temperature: opts.temperature ?? 0.2,
+      maxTokens: opts.maxTokens,
+      maxRetries: 0,
+    });
+
+    const usage = result.usage as any;
+    const promptTokens = usage?.inputTokens ?? usage?.promptTokens ?? 50;
+    const completionTokens = usage?.outputTokens ?? usage?.completionTokens ?? 50;
+    const totalTokens = promptTokens + completionTokens;
+
+    return {
+      data: result.object as T,
+      usage: {
+        promptTokens,
+        completionTokens,
+        totalTokens,
+        costUsd: calculateCost(promptTokens, completionTokens, modelId),
+      },
+    };
   }
 
   async generateText(opts: {
     system: string;
     prompt: string;
     model?: string;
+    temperature?: number;
+    stream?: boolean;
   }): Promise<{ text: string; usage: AIUsage }> {
-    const fallback = new NeonGatewayProvider();
-    return fallback.generateText(opts);
+    const client = this.getClient();
+    let modelId = opts.model || "gemini-2.0-flash";
+    if (modelId.startsWith("gpt-") || modelId.startsWith("claude-")) {
+      modelId = "gemini-2.0-flash";
+    }
+
+    if (!client) {
+      console.warn("[Gemini Provider] No GEMINI_API_KEY found.");
+      throw new Error("AI_PROVIDER_UNCONFIGURED");
+    }
+
+    const result = await aiGenerateText({
+      model: client(modelId),
+      system: opts.system,
+      prompt: opts.prompt,
+      temperature: opts.temperature ?? 0.3,
+      maxRetries: 0,
+    });
+
+    const textUsage = result.usage as any;
+    const promptTokens = textUsage?.inputTokens ?? textUsage?.promptTokens ?? 50;
+    const completionTokens = textUsage?.outputTokens ?? textUsage?.completionTokens ?? 50;
+    const totalTokens = promptTokens + completionTokens;
+
+    return {
+      text: result.text,
+      usage: {
+        promptTokens,
+        completionTokens,
+        totalTokens,
+        costUsd: calculateCost(promptTokens, completionTokens, modelId),
+      },
+    };
   }
 }
 
@@ -234,16 +314,26 @@ export class GeminiProvider implements AIProvider {
  * Reads AI_PROVIDER=neon|openai|anthropic|gemini and returns the right instance.
  */
 export function getAIProvider(): AIProvider {
-  const providerName = (process.env.AI_PROVIDER || "neon").toLowerCase();
-  switch (providerName) {
-    case "openai":
-      return new OpenAIProvider();
-    case "anthropic":
-      return new AnthropicProvider();
-    case "gemini":
-      return new GeminiProvider();
-    case "neon":
-    default:
-      return new NeonGatewayProvider();
+  const providerName = (process.env.AI_PROVIDER || "").toLowerCase();
+  if (providerName === "gemini") {
+    return new GeminiProvider();
   }
+  if (providerName === "openai") {
+    return new OpenAIProvider();
+  }
+  if (providerName === "anthropic") {
+    return new AnthropicProvider();
+  }
+  if (providerName === "neon") {
+    return new NeonGatewayProvider();
+  }
+
+  // Auto-detect based on available credentials
+  if (process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+    return new GeminiProvider();
+  }
+  if (process.env.OPENAI_API_KEY) {
+    return new OpenAIProvider();
+  }
+  return new NeonGatewayProvider();
 }

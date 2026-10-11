@@ -10,6 +10,7 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@ai-sdk/google": "^4.0.93",
     "@ai-sdk/openai": "^4.0.91",
     "@neon/config": "^1.8.6",
     "@neon/env": "^1.5.3",
