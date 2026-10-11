@@ -34,8 +34,8 @@ export default function HeroRouteDemo() {
 
   return (
     <div className="w-full max-w-sm">
-      <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
-        <div className="flex items-center gap-5">
+      <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-4 sm:p-6">
+        <div className="flex items-center gap-3 sm:gap-5">
           <div className="shrink-0 rounded-2xl bg-[#EEF0EA] p-3">
             <div className="grid grid-cols-10 grid-rows-10 gap-[1.5px] w-[104px] h-[104px]">
               {GRID.map((on, i) => (

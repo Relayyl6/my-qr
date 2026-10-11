@@ -5,6 +5,7 @@ import LinkList from '@/components/LinkList';
 import HeroRouteDemo from '@/components/HeroRouteDemo';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 const display = Space_Grotesk({ subsets: ['latin'], weight: ['500', '700'], variable: '--font-display' });
 const body = IBM_Plex_Sans({ subsets: ['latin'], weight: ['400', '500', '600'], variable: '--font-body' });
@@ -65,7 +66,7 @@ export default async function Home() {
 
   return (
     <div
-      className={`${display.variable} ${body.variable} ${mono.variable} bg-[#EEF0EA] text-[#11140F] min-h-screen`}
+      className={`${display.variable} ${body.variable} ${mono.variable} bg-[#EEF0EA] text-[#11140F] min-h-screen w-full overflow-x-hidden`}
       style={{ fontFamily: 'var(--font-body)' }}
     >
       {/* Nav */}
@@ -92,11 +93,11 @@ export default async function Home() {
       </header>
 
       {/* Hero */}
-      <section id="top" className="bg-[#11140F]">
-        <div className="max-w-[1200px] mx-auto px-5 md:px-8 py-20 md:py-28 grid lg:grid-cols-[1.1fr_0.9fr] gap-14 items-center">
+      <section id="top" className="bg-[#11140F] w-full overflow-hidden">
+        <div className="max-w-[1200px] mx-auto px-5 md:px-8 py-16 md:py-28 grid lg:grid-cols-[1.1fr_0.9fr] gap-12 lg:gap-14 items-center">
           <div>
             <h1
-              className="text-white text-[2.5rem] md:text-[3.4rem] leading-[1.08] tracking-tight"
+              className="text-white text-[2.2rem] sm:text-[2.8rem] md:text-[3.4rem] leading-[1.08] tracking-tight"
               style={{ fontFamily: 'var(--font-display)' }}
             >
               A QR code you print once.
@@ -222,7 +223,7 @@ export default async function Home() {
             </p>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
+          <div className="grid gap-6 lg:grid-cols-[400px_1fr]">
             <section className="h-fit rounded-2xl border border-[#11140F]/10 bg-[#EEF0EA] p-7">
               <h3 className="mb-7 text-[17px] font-medium">Create new link</h3>
               <LinkForm />

@@ -48,10 +48,10 @@ export default function LinkForm() {
         </label>
         <div className="flex rounded-xl overflow-hidden border border-[#11140F]/15 bg-white focus-within:border-[#11140F] transition-colors">
           <span
-            className="inline-flex items-center border-r border-[#11140F]/10 bg-[#11140F]/[0.03] px-3.5 text-[13px] text-[#11140F]/45"
+            className="inline-flex items-center border-r border-[#11140F]/10 bg-[#11140F]/[0.03] px-3.5 text-[13px] text-[#11140F]/45 select-none"
             style={{ fontFamily: 'var(--font-mono)' }}
           >
-            {origin || 'dynamicqr.co'}/id/
+            /id/
           </span>
           <input
             id="shortCode"
@@ -65,8 +65,12 @@ export default function LinkForm() {
             placeholder="promo-2024"
           />
         </div>
+        {/* Real-time live URL preview */}
+        <p className="mt-2 text-[12px] text-[#11140F]/50 break-all" style={{ fontFamily: 'var(--font-mono)' }}>
+          Preview: <span className="text-[#11140F]/80 font-medium">{origin || 'https://dynamicqr.co'}/id/{shortCode || 'promo-2024'}</span>
+        </p>
         {state.errors?.shortCode && (
-          <p className="mt-2 text-[12px] text-[#B8842E] font-medium">{state.errors.shortCode[0]}</p>
+          <p className="mt-1.5 text-[12px] text-[#B8842E] font-medium">{state.errors.shortCode[0]}</p>
         )}
       </div>
 
