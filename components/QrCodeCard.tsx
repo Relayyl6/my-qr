@@ -51,15 +51,15 @@ export default function QrCodeCard({ shortCode, label }: Props) {
   };
 
   return (
-    <div className="flex shrink-0 flex-col items-center gap-2">
-      <div ref={containerRef} className="shrink-0 rounded-lg border border-[#11140F]/10 bg-white p-2">
-        <QRCodeCanvas value={url} size={76} level="H" includeMargin={false} />
+    <div className="flex shrink-0 flex-col items-center gap-1.5 min-w-0">
+      <div ref={containerRef} className="shrink-0 rounded-lg border border-[#11140F]/10 bg-white p-1.5 sm:p-2">
+        <QRCodeCanvas value={url} size={68} level="H" includeMargin={false} />
       </div>
       <button
         onClick={handleDownload}
-        className="rounded-full border border-[#11140F]/15 px-2.5 py-1 text-[10px] sm:text-[11px] font-medium text-[#11140F]/65 hover:border-[#11140F]/30 hover:text-[#11140F] transition-colors whitespace-nowrap"
+        className="rounded-full border border-[#11140F]/15 px-2 py-0.5 text-[10px] font-medium text-[#11140F]/65 hover:border-[#11140F]/30 hover:text-[#11140F] transition-colors whitespace-nowrap"
       >
-        Download PNG
+        Download
       </button>
     </div>
   );

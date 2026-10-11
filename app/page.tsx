@@ -223,13 +223,13 @@ export default async function Home() {
             </p>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-[400px_1fr] items-start">
-            <section className="h-fit rounded-2xl border border-[#11140F]/10 bg-[#EEF0EA] p-4 sm:p-7 lg:sticky lg:top-24">
+          <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-6 items-start w-full min-w-0">
+            <section className="w-full min-w-0 max-w-full h-fit rounded-2xl border border-[#11140F]/10 bg-[#EEF0EA] p-4 sm:p-7 lg:sticky lg:top-24">
               <h3 className="mb-5 sm:mb-7 text-[16px] sm:text-[17px] font-medium">Create new link</h3>
               <LinkForm />
             </section>
 
-            <section className="rounded-2xl border border-[#11140F]/10 bg-[#EEF0EA] p-4 sm:p-7">
+            <section className="w-full min-w-0 max-w-full rounded-2xl border border-[#11140F]/10 bg-[#EEF0EA] p-4 sm:p-7">
               <h3 className="mb-5 sm:mb-7 text-[16px] sm:text-[17px] font-medium">
                 Active links <span className="text-[#11140F]/35 font-normal">({links.length})</span>
               </h3>

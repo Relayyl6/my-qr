@@ -35,18 +35,18 @@ export default function LinkForm() {
   }, [state.success]);
 
   return (
-    <form ref={formRef} action={formAction} className="space-y-4 sm:space-y-5">
+    <form ref={formRef} action={formAction} className="space-y-4 sm:space-y-5 w-full min-w-0 max-w-full">
       {state.message && (
         <div className="rounded-xl border border-[#B8842E]/30 bg-[#B8842E]/10 p-3 text-[13px] text-[#8A631F] font-medium">
           {state.message}
         </div>
       )}
 
-      <div>
+      <div className="w-full min-w-0">
         <label htmlFor="shortCode" className="block text-[13px] font-medium text-[#11140F]/70 mb-1.5">
           Short code
         </label>
-        <div className="flex rounded-xl overflow-hidden border border-[#11140F]/15 bg-white focus-within:border-[#11140F] transition-colors">
+        <div className="flex w-full min-w-0 rounded-xl overflow-hidden border border-[#11140F]/15 bg-white focus-within:border-[#11140F] transition-colors">
           <span
             className="inline-flex items-center border-r border-[#11140F]/10 bg-[#11140F]/[0.03] px-3 text-[13px] text-[#11140F]/45 select-none shrink-0"
             style={{ fontFamily: 'var(--font-mono)' }}
@@ -65,16 +65,16 @@ export default function LinkForm() {
             placeholder="promo-2024"
           />
         </div>
-        {/* Real-time live URL preview */}
-        <p className="mt-1.5 text-[11px] sm:text-[12px] text-[#11140F]/50 break-all" style={{ fontFamily: 'var(--font-mono)' }}>
-          Preview: <span className="text-[#11140F]/80 font-medium">{origin || 'https://dynamicqr.co'}/id/{shortCode || 'promo-2024'}</span>
+        {/* Real-time live URL preview with strict word breaking to prevent layout expansion */}
+        <p className="mt-1.5 text-[11px] text-[#11140F]/50 break-all leading-normal" style={{ fontFamily: 'var(--font-mono)' }}>
+          Preview: <span className="text-[#11140F]/80 font-medium break-all">{origin || 'https://dynamicqr.co'}/id/{shortCode || 'promo-2024'}</span>
         </p>
         {state.errors?.shortCode && (
           <p className="mt-1 text-[12px] text-[#B8842E] font-medium">{state.errors.shortCode[0]}</p>
         )}
       </div>
 
-      <div>
+      <div className="w-full min-w-0">
         <label htmlFor="destinationUrl" className="block text-[13px] font-medium text-[#11140F]/70 mb-1.5">
           Destination URL
         </label>
@@ -83,7 +83,7 @@ export default function LinkForm() {
           type="url"
           name="destinationUrl"
           required
-          className="block w-full rounded-xl border border-[#11140F]/15 bg-white px-3 py-2.5 sm:py-3 text-[14px] text-[#11140F] placeholder:text-[#11140F]/30 outline-none focus:border-[#11140F] transition-colors"
+          className="block w-full min-w-0 rounded-xl border border-[#11140F]/15 bg-white px-3 py-2.5 sm:py-3 text-[14px] text-[#11140F] placeholder:text-[#11140F]/30 outline-none focus:border-[#11140F] transition-colors"
           placeholder="https://example.com/landing"
         />
         {state.errors?.destinationUrl && (
@@ -91,7 +91,7 @@ export default function LinkForm() {
         )}
       </div>
 
-      <div>
+      <div className="w-full min-w-0">
         <label htmlFor="label" className="block text-[13px] font-medium text-[#11140F]/70 mb-1.5">
           Label <span className="text-[#11140F]/35 font-normal">(optional)</span>
         </label>
@@ -99,7 +99,7 @@ export default function LinkForm() {
           id="label"
           type="text"
           name="label"
-          className="block w-full rounded-xl border border-[#11140F]/15 bg-white px-3 py-2.5 sm:py-3 text-[14px] text-[#11140F] placeholder:text-[#11140F]/30 outline-none focus:border-[#11140F] transition-colors"
+          className="block w-full min-w-0 rounded-xl border border-[#11140F]/15 bg-white px-3 py-2.5 sm:py-3 text-[14px] text-[#11140F] placeholder:text-[#11140F]/30 outline-none focus:border-[#11140F] transition-colors"
           placeholder="Summer promo flyer"
         />
       </div>
