@@ -27,17 +27,22 @@ export async function runAI<T>(opts: {
 
   // 2. Rate limit check (Max 30 calls/minute per user/feature)
   if (opts.userId) {
-    const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
-    const recentCalls = await prisma.aiInvocation.count({
-      where: {
-        userId: opts.userId,
-        feature: opts.feature,
-        createdAt: { gte: oneMinuteAgo },
-      },
-    });
+    try {
+      const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
+      const recentCalls = await prisma.aiInvocation.count({
+        where: {
+          userId: opts.userId,
+          feature: opts.feature,
+          createdAt: { gte: oneMinuteAgo },
+        },
+      });
 
-    if (recentCalls >= 30) {
-      throw new Error("Rate limit exceeded for this feature. Please wait a minute before retrying.");
+      if (recentCalls >= 30) {
+        throw new Error("Rate limit exceeded for this feature. Please wait a minute before retrying.");
+      }
+    } catch (e: any) {
+      if (e.message?.includes("Rate limit exceeded")) throw e;
+      console.warn("[runAI] DB rate-limit check skipped:", e.message);
     }
   }
 
@@ -73,14 +78,19 @@ export async function runAI<T>(opts: {
 
   // 4. Cost budget guard
   if (opts.userId) {
-    const credit = await prisma.aiCredit.findUnique({
-      where: { userId: opts.userId },
-    });
+    try {
+      const credit = await prisma.aiCredit.findUnique({
+        where: { userId: opts.userId },
+      });
 
-    if (credit && Number(credit.usedThisMonth) >= Number(credit.monthlyLimitUsd)) {
-      throw new Error(
-        `Monthly AI budget of $${credit.monthlyLimitUsd.toFixed(2)} reached. Please upgrade your plan.`
-      );
+      if (credit && Number(credit.usedThisMonth) >= Number(credit.monthlyLimitUsd)) {
+        throw new Error(
+          `Monthly AI budget of $${credit.monthlyLimitUsd.toFixed(2)} reached. Please upgrade your plan.`
+        );
+      }
+    } catch (e: any) {
+      if (e.message?.includes("Monthly AI budget")) throw e;
+      console.warn("[runAI] DB credit check skipped:", e.message);
     }
   }
 
@@ -133,18 +143,22 @@ export async function runAI<T>(opts: {
       resultData = promptDef.fallback(opts.input) as T;
       isSuccess = true;
     } else {
-      // Log failed invocation before throwing
-      const latencyMs = Date.now() - startTime;
+      let validErrUserId: string | null = null;
+      if (opts.userId) {
+        const u = await prisma.user.findUnique({ where: { id: opts.userId }, select: { id: true } }).catch(() => null);
+        if (u) validErrUserId = u.id;
+      }
+      const errLatencyMs = Date.now() - startTime;
       await prisma.aiInvocation.create({
         data: {
-          userId: opts.userId ?? null,
+          userId: validErrUserId,
           feature: opts.feature,
           promptKey: opts.promptKey,
           model: promptDef?.model || "unknown",
           inputTokens: 0,
           outputTokens: 0,
           costUsd: 0,
-          latencyMs,
+          latencyMs: errLatencyMs,
           success: false,
           error: errorMsg,
         },
@@ -171,12 +185,21 @@ export async function runAI<T>(opts: {
 
   // 7. Logging to AiInvocation & Credit accounting
   try {
+    let validUserId: string | null = null;
+    if (opts.userId) {
+      const user = await prisma.user.findUnique({
+        where: { id: opts.userId },
+        select: { id: true },
+      }).catch(() => null);
+      if (user) validUserId = user.id;
+    }
+
     await prisma.aiInvocation.create({
       data: {
-        userId: opts.userId ?? null,
+        userId: validUserId,
         feature: opts.feature,
         promptKey: opts.promptKey,
-        model: promptDef?.model || "default",
+        model: promptDef?.model || "gemini-3.8-flash",
         inputTokens: usage.promptTokens,
         outputTokens: usage.completionTokens,
         costUsd: usage.costUsd,
@@ -186,11 +209,11 @@ export async function runAI<T>(opts: {
       },
     });
 
-    if (opts.userId && usage.costUsd > 0) {
+    if (validUserId && usage.costUsd > 0) {
       await prisma.aiCredit.upsert({
-        where: { userId: opts.userId },
+        where: { userId: validUserId },
         create: {
-          userId: opts.userId,
+          userId: validUserId,
           usedThisMonth: usage.costUsd,
           monthlyLimitUsd: 5.00,
         },

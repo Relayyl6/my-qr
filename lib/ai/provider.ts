@@ -230,10 +230,7 @@ export class GeminiProvider implements AIProvider {
     maxTokens?: number;
   }): Promise<{ data: T; usage: AIUsage }> {
     const client = this.getClient();
-    let modelId = opts.model || "gemini-2.0-flash";
-    if (modelId.startsWith("gpt-") || modelId.startsWith("claude-")) {
-      modelId = "gemini-2.0-flash";
-    }
+    let modelId = this.resolveModel(opts.model);
 
     if (!client) {
       console.warn("[Gemini Provider] No GEMINI_API_KEY found.");
@@ -266,6 +263,15 @@ export class GeminiProvider implements AIProvider {
     };
   }
 
+  private resolveModel(model?: string): string {
+    if (!model) return "gemini-3.8-flash";
+    const m = model.toLowerCase();
+    if (m.startsWith("gpt-") || m.startsWith("claude-") || m.includes("2.0") || m.includes("1.5")) {
+      return "gemini-3.8-flash";
+    }
+    return model;
+  }
+
   async generateText(opts: {
     system: string;
     prompt: string;
@@ -274,10 +280,7 @@ export class GeminiProvider implements AIProvider {
     stream?: boolean;
   }): Promise<{ text: string; usage: AIUsage }> {
     const client = this.getClient();
-    let modelId = opts.model || "gemini-2.0-flash";
-    if (modelId.startsWith("gpt-") || modelId.startsWith("claude-")) {
-      modelId = "gemini-2.0-flash";
-    }
+    let modelId = this.resolveModel(opts.model);
 
     if (!client) {
       console.warn("[Gemini Provider] No GEMINI_API_KEY found.");
