@@ -223,8 +223,8 @@ export default async function Home() {
             </p>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-[400px_1fr]">
-            <section className="h-fit rounded-2xl border border-[#11140F]/10 bg-[#EEF0EA] p-7">
+          <div className="grid gap-6 lg:grid-cols-[400px_1fr] items-start">
+            <section className="h-fit rounded-2xl border border-[#11140F]/10 bg-[#EEF0EA] p-7 lg:sticky lg:top-24">
               <h3 className="mb-7 text-[17px] font-medium">Create new link</h3>
               <LinkForm />
             </section>
