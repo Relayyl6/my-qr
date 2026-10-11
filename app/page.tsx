@@ -66,11 +66,11 @@ export default async function Home() {
 
   return (
     <div
-      className={`${display.variable} ${body.variable} ${mono.variable} bg-[#EEF0EA] text-[#11140F] min-h-screen w-full overflow-x-hidden`}
+      className={`${display.variable} ${body.variable} ${mono.variable} bg-[#EEF0EA] text-[#11140F] min-h-screen w-full overflow-x-clip pt-16`}
       style={{ fontFamily: 'var(--font-body)' }}
     >
       {/* Nav */}
-      <header className="sticky top-0 z-30 border-b border-[#11140F]/10 bg-[#EEF0EA]/90 backdrop-blur-sm">
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-[#11140F]/10 bg-[#EEF0EA]/95 backdrop-blur-md">
         <nav className="max-w-[1200px] mx-auto px-5 md:px-8 h-16 flex items-center justify-between">
           <a href="#top" className="flex items-center gap-2.5">
             <QrMark className="w-5 h-5" />
