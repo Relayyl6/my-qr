@@ -25,7 +25,8 @@ export async function runAI<T>(opts: {
     throw new Error(access.reason || "Unauthorized to access this AI feature.");
   }
 
-  // 2. Rate limit check (Max 30 calls/minute per user/feature)
+  // 2. Dynamic Rate limit check per tier
+  const maxCallsPerMinute = access.tierConfig?.rateLimitPerMinute ?? 30;
   if (opts.userId) {
     try {
       const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
@@ -37,8 +38,10 @@ export async function runAI<T>(opts: {
         },
       });
 
-      if (recentCalls >= 30) {
-        throw new Error("Rate limit exceeded for this feature. Please wait a minute before retrying.");
+      if (recentCalls >= maxCallsPerMinute) {
+        throw new Error(
+          `Rate limit exceeded (${maxCallsPerMinute} calls/min on ${access.tierConfig.name} plan). Please wait a minute before retrying.`
+        );
       }
     } catch (e: any) {
       if (e.message?.includes("Rate limit exceeded")) throw e;
@@ -76,16 +79,18 @@ export async function runAI<T>(opts: {
     }
   }
 
-  // 4. Cost budget guard
+  // 4. Dynamic Cost budget guard per tier
+  const tierLimit = access.tierConfig?.monthlyLimitUsd ?? 5.00;
   if (opts.userId) {
     try {
       const credit = await prisma.aiCredit.findUnique({
         where: { userId: opts.userId },
       });
 
-      if (credit && Number(credit.usedThisMonth) >= Number(credit.monthlyLimitUsd)) {
+      const effectiveLimit = credit ? Number(credit.monthlyLimitUsd) : tierLimit;
+      if (credit && Number(credit.usedThisMonth) >= effectiveLimit) {
         throw new Error(
-          `Monthly AI budget of $${credit.monthlyLimitUsd.toFixed(2)} reached. Please upgrade your plan.`
+          `Monthly AI budget of $${effectiveLimit.toFixed(2)} reached for your ${access.tierConfig.name} plan. Please upgrade to a higher plan for more AI compute.`
         );
       }
     } catch (e: any) {
@@ -215,7 +220,7 @@ export async function runAI<T>(opts: {
         create: {
           userId: validUserId,
           usedThisMonth: usage.costUsd,
-          monthlyLimitUsd: 5.00,
+          monthlyLimitUsd: access.tierConfig?.monthlyLimitUsd ?? 5.00,
         },
         update: {
           usedThisMonth: { increment: usage.costUsd },
