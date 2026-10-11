@@ -65,8 +65,9 @@ const FEATURES = [
 export default async function Home() {
   const user = await getCurrentUser();
 
-  if (user) {
-    // Automatically claim any unassigned legacy links to the logged-in user
+  // Security: Only the owner's admin account can claim the original legacy links!
+  const adminEmail = (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();
+  if (user && user.email.toLowerCase() === adminEmail) {
     await prisma.qrLink.updateMany({
       where: { userId: null },
       data: { userId: user.id },
