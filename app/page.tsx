@@ -64,14 +64,18 @@ const FEATURES = [
 
 export default async function Home() {
   const user = await getCurrentUser();
+
+  if (user) {
+    // Automatically claim any unassigned legacy links to the logged-in user
+    await prisma.qrLink.updateMany({
+      where: { userId: null },
+      data: { userId: user.id },
+    });
+  }
+
   const links = user
     ? await prisma.qrLink.findMany({
-        where: {
-          OR: [
-            { userId: user.id },
-            { userId: null }, // Legacy links created prior to auth migration
-          ],
-        },
+        where: { userId: user.id },
         orderBy: { createdAt: 'desc' },
       })
     : [];

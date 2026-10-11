@@ -1,6 +1,0 @@
-{
-  "/inactive/page": "app/inactive/page.js",
-  "/_not-found/page": "app/_not-found/page.js",
-  "/id/[shortCode]/route": "app/id/[shortCode]/route.js",
-  "/page": "app/page.js"
-}
