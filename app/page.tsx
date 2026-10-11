@@ -213,24 +213,24 @@ export default async function Home() {
 
       {/* Workspace */}
       <section id="workspace" className="bg-white border-t border-[#11140F]/10 scroll-mt-16">
-        <div className="max-w-[1200px] mx-auto px-5 md:px-8 py-20 md:py-28">
-          <div className="mb-12">
-            <h2 className="text-[1.75rem] tracking-tight font-medium" style={{ fontFamily: 'var(--font-display)' }}>
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-5 md:px-8 py-14 sm:py-20 md:py-28">
+          <div className="mb-8 sm:mb-12">
+            <h2 className="text-[1.5rem] sm:text-[1.75rem] tracking-tight font-medium" style={{ fontFamily: 'var(--font-display)' }}>
               Your workspace
             </h2>
-            <p className="mt-2 text-[#11140F]/55 text-[15px]">
+            <p className="mt-1.5 sm:mt-2 text-[#11140F]/55 text-[14px] sm:text-[15px]">
               Create, manage, and track your dynamic QR codes.
             </p>
           </div>
 
           <div className="grid gap-6 lg:grid-cols-[400px_1fr] items-start">
-            <section className="h-fit rounded-2xl border border-[#11140F]/10 bg-[#EEF0EA] p-7 lg:sticky lg:top-24">
-              <h3 className="mb-7 text-[17px] font-medium">Create new link</h3>
+            <section className="h-fit rounded-2xl border border-[#11140F]/10 bg-[#EEF0EA] p-4 sm:p-7 lg:sticky lg:top-24">
+              <h3 className="mb-5 sm:mb-7 text-[16px] sm:text-[17px] font-medium">Create new link</h3>
               <LinkForm />
             </section>
 
-            <section className="rounded-2xl border border-[#11140F]/10 bg-[#EEF0EA] p-7 min-h-[420px]">
-              <h3 className="mb-7 text-[17px] font-medium">
+            <section className="rounded-2xl border border-[#11140F]/10 bg-[#EEF0EA] p-4 sm:p-7">
+              <h3 className="mb-5 sm:mb-7 text-[16px] sm:text-[17px] font-medium">
                 Active links <span className="text-[#11140F]/35 font-normal">({links.length})</span>
               </h3>
               <LinkList links={links} />
