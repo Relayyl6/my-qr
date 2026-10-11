@@ -94,6 +94,7 @@ export class NeonGatewayProvider implements AIProvider {
       schema: opts.schema,
       temperature: opts.temperature ?? 0.2,
       maxTokens: opts.maxTokens,
+      maxRetries: 0,
     });
 
     const usage = result.usage as any;
@@ -132,6 +133,7 @@ export class NeonGatewayProvider implements AIProvider {
       system: opts.system,
       prompt: opts.prompt,
       temperature: opts.temperature ?? 0.3,
+      maxRetries: 0,
     });
 
     const textUsage = result.usage as any;
