@@ -10,11 +10,13 @@ interface Props {
 
 export default function QrCodeCard({ shortCode, label }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [url, setUrl] = useState(`https://example.com/id/${shortCode}`);
+  const [origin, setOrigin] = useState('');
 
   useEffect(() => {
-    setUrl(`${window.location.origin}/id/${shortCode}`);
-  }, [shortCode]);
+    setOrigin(window.location.origin);
+  }, []);
+
+  const url = origin ? `${origin}/id/${shortCode}` : `https://dynamicqr.co/id/${shortCode}`;
 
   const handleDownload = () => {
     // A 2-inch printed QR code at 300 DPI requires 600x600 pixels.
@@ -52,9 +54,19 @@ export default function QrCodeCard({ shortCode, label }: Props) {
 
   return (
     <div className="flex shrink-0 flex-col items-center gap-1.5 min-w-0">
-      <div ref={containerRef} className="shrink-0 rounded-lg border border-[#11140F]/10 bg-white p-1.5 sm:p-2">
+      <div
+        ref={containerRef}
+        className="shrink-0 rounded-lg border border-[#11140F]/10 bg-white p-1.5 sm:p-2 shadow-xs"
+        title={`Scan for /id/${shortCode}`}
+      >
         <QRCodeCanvas value={url} size={68} level="H" includeMargin={false} />
       </div>
+      <span
+        className="text-[9px] text-[#11140F]/50 font-mono tracking-tight text-center truncate max-w-[80px]"
+        title={`/id/${shortCode}`}
+      >
+        /{shortCode}
+      </span>
       <button
         onClick={handleDownload}
         className="rounded-full border border-[#11140F]/15 px-2 py-0.5 text-[10px] font-medium text-[#11140F]/65 hover:border-[#11140F]/30 hover:text-[#11140F] transition-colors whitespace-nowrap"

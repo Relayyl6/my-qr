@@ -126,7 +126,7 @@ export default function LinkList({ links }: { links: QrLink[] }) {
       )}
 
       {/* List container */}
-      <div className="w-full min-w-0 lg:max-h-[640px] lg:overflow-y-auto lg:pr-1.5 space-y-3.5 scroll-smooth">
+      <div className="w-full min-w-0 lg:max-h-[640px] lg:overflow-y-auto lg:pr-1.5 space-y-4 sm:space-y-5 scroll-smooth">
         {filteredLinks.length === 0 ? (
           <div className="w-full min-w-0 rounded-xl border border-dashed border-[#11140F]/15 p-8 text-center text-[13px] text-[#11140F]/50">
             {search ? `No links matching "${search}"` : `No ${tab} links.`}

@@ -16,8 +16,13 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: 'DynamicQR | Redefine links',
-  description: 'Manage dynamic QR codes and destinations',
+  title: 'DynamicQR — Intelligent Dynamic QR Code Routing',
+  description: 'A QR code you print once. A destination you can change forever. Intelligent dynamic QR routing with live scan analytics.',
+  icons: {
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
+    apple: '/icon.svg',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

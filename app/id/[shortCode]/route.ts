@@ -8,13 +8,16 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { shortCode: string } }
 ) {
-  const shortCode = params.shortCode;
+  const rawShortCode = params.shortCode;
 
-  if (!shortCode) {
+  if (!rawShortCode) {
     return NextResponse.redirect(new URL('/not-found', request.url));
   }
 
-  // 1. Find the destination URL
+  // Sanitize and decode the incoming shortCode strictly
+  const shortCode = decodeURIComponent(rawShortCode).toLowerCase().trim();
+
+  // 1. Find the unique link record strictly by its shortCode
   const link = await prisma.qrLink.findUnique({
     where: { shortCode },
   });
@@ -28,24 +31,33 @@ export async function GET(
     return NextResponse.redirect(new URL('/inactive', request.url));
   }
 
-  // 2. Increment scan analytics
-  // MUST BE AWAITED: In serverless environments (like Vercel), unawaited promises 
-  // are immediately frozen/aborted when the response is returned.
-  try {
-    await prisma.qrLink.update({
-      where: { id: link.id },
-      data: {
-        scanCount: { increment: 1 },
-        lastScannedAt: new Date(),
-      },
-    });
-  } catch (err) {
-    console.error('Failed to update scan analytics:', err);
+  // 2. Ignore camera background prefetch and preview requests
+  // Many phone cameras (e.g. iOS Camera / Safari Quick Look) send background prefetch
+  // requests when hovering near a QR code. We ONLY count real, intentional navigations!
+  const isPrefetch =
+    request.headers.get('purpose') === 'prefetch' ||
+    request.headers.get('sec-purpose') === 'prefetch' ||
+    request.headers.get('x-purpose') === 'preview' ||
+    request.headers.get('x-moz') === 'prefetch';
+
+  if (!isPrefetch) {
+    try {
+      // Strictly update ONLY this unique record's primary key ID
+      await prisma.qrLink.update({
+        where: { id: link.id },
+        data: {
+          scanCount: { increment: 1 },
+          lastScannedAt: new Date(),
+        },
+      });
+    } catch (err) {
+      console.error('Failed to update scan analytics for link:', link.id, err);
+    }
   }
 
-  // 3. Return a 307 Temporary Redirect
+  // 3. Return a 307 Temporary Redirect to the link's destination
   const response = NextResponse.redirect(link.destinationUrl, 307);
-  
+
   // 4. Set strict cache-control headers
   // The QR code is permanent, but the destination is dynamic. We MUST tell
   // the mobile browser and CDN never to cache this redirect so every scan hits the server.
