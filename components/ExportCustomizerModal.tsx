@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react';
+import QRCode from 'qrcode';
 import {
   Download,
   X,
@@ -15,7 +15,7 @@ import {
   Layers,
   Sparkles,
 } from 'lucide-react';
-import { downloadSvgFile, extractCleanSvgMarkup } from '@/lib/qr/exportVector';
+import { downloadSvgFile } from '@/lib/qr/exportVector';
 
 interface ExportCustomizerModalProps {
   isOpen: boolean;
@@ -49,7 +49,6 @@ export default function ExportCustomizerModal({
   const [customTitle, setCustomTitle] = useState(label || 'Scan to Open');
 
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
-  const hiddenQrRef = useRef<HTMLDivElement>(null);
 
   const safeName = (label || shortCode).toLowerCase().replace(/[^a-z0-9]/g, '-');
   const cleanUrl = url.replace(/^https?:\/\//, '');
@@ -77,166 +76,167 @@ export default function ExportCustomizerModal({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const originalCanvas = hiddenQrRef.current?.querySelector('canvas');
-    const svg = hiddenQrRef.current?.querySelector('svg');
+    // Dimensions based on layout mode
+    let width = 1080;
+    let height = 1080;
+    let qrSize = 900;
+    let qrX = 90;
+    let qrY = 90;
 
-    const drawWithSource = (source: CanvasImageSource) => {
-      // Dimensions based on layout mode
-      let width = 1080;
-      let height = 1080;
-      let qrSize = 900;
-      let qrX = 90;
-      let qrY = 90;
+    if (layoutMode === 'zero-margin') {
+      width = 1024;
+      height = 1024;
+      qrSize = 1024;
+      qrX = 0;
+      qrY = 0;
+    } else if (layoutMode === 'minimal') {
+      width = 1024;
+      height = 1024;
+      qrSize = 920;
+      qrX = 52;
+      qrY = 52;
+    } else if (layoutMode === 'compact-card') {
+      width = 960;
+      height = 1180;
+      qrSize = 740;
+      qrX = 110;
+      qrY = 180;
+    } else if (layoutMode === 'poster') {
+      width = 1080;
+      height = 1350;
+      qrSize = 740;
+      qrX = 170;
+      qrY = 240;
+    }
 
-      if (layoutMode === 'zero-margin') {
-        width = 1024;
-        height = 1024;
-        qrSize = 1024;
-        qrX = 0;
-        qrY = 0;
-      } else if (layoutMode === 'minimal') {
-        width = 1024;
-        height = 1024;
-        qrSize = 920;
-        qrX = 52;
-        qrY = 52;
-      } else if (layoutMode === 'compact-card') {
-        width = 960;
-        height = 1180;
-        qrSize = 740;
-        qrX = 110;
-        qrY = 180;
-      } else if (layoutMode === 'poster') {
-        width = 1080;
-        height = 1350;
-        qrSize = 740;
-        qrX = 170;
-        qrY = 240;
-      }
+    canvas.width = width;
+    canvas.height = height;
 
-      canvas.width = width;
-      canvas.height = height;
+    // Clear or fill background
+    ctx.clearRect(0, 0, width, height);
+    if (!isTransparent) {
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, width, height);
+    }
 
-      // Clear or fill background
-      ctx.clearRect(0, 0, width, height);
-      if (!isTransparent) {
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, width, height);
-      }
+    // Draw border if enabled and not zero-margin
+    if (showBorder && layoutMode !== 'zero-margin') {
+      ctx.strokeStyle = 'rgba(17, 20, 15, 0.12)';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(30, 30, width - 60, height - 60);
+    }
 
-      // Draw border if enabled and not zero-margin
-      if (showBorder && layoutMode !== 'zero-margin') {
-        ctx.strokeStyle = 'rgba(17, 20, 15, 0.12)';
-        ctx.lineWidth = 4;
-        ctx.strokeRect(30, 30, width - 60, height - 60);
-      }
+    // In-memory pure mathematical QR code matrix generation (Zero DOM dependency)
+    const qr = QRCode.create(url, { errorCorrectionLevel: 'H' });
+    const numModules = qr.modules.size;
 
-      // If Zero Margin, just draw pure QR code and exit!
-      if (layoutMode === 'zero-margin') {
-        ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(source, 0, 0, width, height);
-        return;
-      }
-
-      // Minimal mode: pure QR code with clean margin
-      if (layoutMode === 'minimal') {
-        ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(source, qrX, qrY, qrSize, qrSize);
-        return;
-      }
-
-      // Compact Card or Poster
-      let currentY = 100;
-
-      // 1. Header Title
-      if (showTitle) {
-        ctx.fillStyle = '#11140F';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.font = 'bold 46px system-ui, -apple-system, sans-serif';
-        ctx.fillText(customTitle, width / 2, currentY);
-        currentY += 50;
-      }
-
-      // 2. Shortcode
-      if (showShortCode) {
-        ctx.fillStyle = 'rgba(17, 20, 15, 0.55)';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.font = '500 26px monospace';
-        ctx.fillText(`/id/${shortCode}`, width / 2, currentY);
-        currentY += 40;
-      }
-
-      // Adjust QR position based on top elements
-      qrY = Math.max(qrY, currentY + 20);
-
-      // Draw QR Code
-      ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(source, qrX, qrY, qrSize, qrSize);
-
-      let bottomY = qrY + qrSize + 40;
-
-      // 3. URL Pill
-      if (showUrlBadge) {
-        const pillWidth = Math.min(620, width - 120);
-        const pillHeight = 64;
-        const pillX = (width - pillWidth) / 2;
-
-        ctx.fillStyle = '#11140F';
-        const radius = 32;
-        ctx.beginPath();
-        ctx.moveTo(pillX + radius, bottomY);
-        ctx.lineTo(pillX + pillWidth - radius, bottomY);
-        ctx.quadraticCurveTo(pillX + pillWidth, bottomY, pillX + pillWidth, bottomY + radius);
-        ctx.lineTo(pillX + pillWidth, bottomY + pillHeight - radius);
-        ctx.quadraticCurveTo(pillX + pillWidth, bottomY + pillHeight, pillX + pillWidth - radius, bottomY + pillHeight);
-        ctx.lineTo(pillX + radius, bottomY + pillHeight);
-        ctx.quadraticCurveTo(pillX, bottomY + pillHeight, pillX, bottomY + pillHeight - radius);
-        ctx.lineTo(pillX, bottomY + radius);
-        ctx.quadraticCurveTo(pillX, bottomY, pillX + radius, bottomY);
-        ctx.closePath();
-        ctx.fill();
-
-        ctx.fillStyle = '#FFFFFF';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.font = 'bold 24px monospace';
-        ctx.fillText(cleanUrl, width / 2, bottomY + pillHeight / 2);
-
-        bottomY += pillHeight + 30;
-      }
-
-      // 4. "SCAN WITH CAMERA"
-      if (showCameraText) {
-        ctx.fillStyle = 'rgba(17, 20, 15, 0.5)';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.font = 'bold 20px system-ui, -apple-system, sans-serif';
-        ctx.fillText('SCAN WITH CAMERA TO OPEN', width / 2, bottomY);
-        bottomY += 35;
-      }
-
-      // 5. Watermark
-      if (showWatermark) {
-        ctx.fillStyle = 'rgba(17, 20, 15, 0.35)';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.font = '500 16px system-ui, -apple-system, sans-serif';
-        ctx.fillText('DynamicQR • Intelligent Physical Redirects', width / 2, bottomY);
+    const drawMatrix = (destX: number, destY: number, destSize: number) => {
+      const moduleSize = destSize / numModules;
+      ctx.fillStyle = '#11140F';
+      for (let r = 0; r < numModules; r++) {
+        for (let c = 0; c < numModules; c++) {
+          if (qr.modules.get(r, c)) {
+            ctx.fillRect(
+              Math.floor(destX + c * moduleSize),
+              Math.floor(destY + r * moduleSize),
+              Math.ceil(moduleSize),
+              Math.ceil(moduleSize)
+            );
+          }
+        }
       }
     };
 
-    if (originalCanvas) {
-      drawWithSource(originalCanvas);
+    // If Zero Margin, just draw pure QR code and exit!
+    if (layoutMode === 'zero-margin') {
+      drawMatrix(0, 0, width);
       return;
     }
 
-    if (svg) {
-      const svgData = new XMLSerializer().serializeToString(svg);
-      const img = new Image();
-      img.onload = () => drawWithSource(img);
-      img.src = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgData)))}`;
+    // Minimal mode: pure QR code with clean margin
+    if (layoutMode === 'minimal') {
+      drawMatrix(qrX, qrY, qrSize);
+      return;
+    }
+
+    // Compact Card or Poster
+    let currentY = 100;
+
+    // 1. Header Title
+    if (showTitle) {
+      ctx.fillStyle = '#11140F';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = 'bold 46px system-ui, -apple-system, sans-serif';
+      ctx.fillText(customTitle, width / 2, currentY);
+      currentY += 50;
+    }
+
+    // 2. Shortcode
+    if (showShortCode) {
+      ctx.fillStyle = 'rgba(17, 20, 15, 0.55)';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = '500 26px monospace';
+      ctx.fillText(`/id/${shortCode}`, width / 2, currentY);
+      currentY += 40;
+    }
+
+    // Adjust QR position based on top elements
+    qrY = Math.max(qrY, currentY + 20);
+
+    // Draw QR Code
+    drawMatrix(qrX, qrY, qrSize);
+
+    let bottomY = qrY + qrSize + 40;
+
+    // 3. URL Pill
+    if (showUrlBadge) {
+      const pillWidth = Math.min(620, width - 120);
+      const pillHeight = 64;
+      const pillX = (width - pillWidth) / 2;
+
+      ctx.fillStyle = '#11140F';
+      const radius = 32;
+      ctx.beginPath();
+      ctx.moveTo(pillX + radius, bottomY);
+      ctx.lineTo(pillX + pillWidth - radius, bottomY);
+      ctx.quadraticCurveTo(pillX + pillWidth, bottomY, pillX + pillWidth, bottomY + radius);
+      ctx.lineTo(pillX + pillWidth, bottomY + pillHeight - radius);
+      ctx.quadraticCurveTo(pillX + pillWidth, bottomY + pillHeight, pillX + pillWidth - radius, bottomY + pillHeight);
+      ctx.lineTo(pillX + radius, bottomY + pillHeight);
+      ctx.quadraticCurveTo(pillX, bottomY + pillHeight, pillX, bottomY + pillHeight - radius);
+      ctx.lineTo(pillX, bottomY + radius);
+      ctx.quadraticCurveTo(pillX, bottomY, pillX + radius, bottomY);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = 'bold 24px monospace';
+      ctx.fillText(cleanUrl, width / 2, bottomY + pillHeight / 2);
+
+      bottomY += pillHeight + 30;
+    }
+
+    // 4. "SCAN WITH CAMERA"
+    if (showCameraText) {
+      ctx.fillStyle = 'rgba(17, 20, 15, 0.5)';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = 'bold 20px system-ui, -apple-system, sans-serif';
+      ctx.fillText('SCAN WITH CAMERA TO OPEN', width / 2, bottomY);
+      bottomY += 35;
+    }
+
+    // 5. Watermark
+    if (showWatermark) {
+      ctx.fillStyle = 'rgba(17, 20, 15, 0.35)';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = '500 16px system-ui, -apple-system, sans-serif';
+      ctx.fillText('DynamicQR • Intelligent Physical Redirects', width / 2, bottomY);
     }
   };
 
@@ -250,11 +250,22 @@ export default function ExportCustomizerModal({
     link.click();
   };
 
-  const handleDownloadSvg = () => {
-    const svg = hiddenQrRef.current?.querySelector('svg');
-    if (!svg) return;
-    const markup = extractCleanSvgMarkup(svg, label || shortCode, url);
-    downloadSvgFile(`qr-${safeName}.svg`, markup);
+  const handleDownloadSvg = async () => {
+    try {
+      const margin = layoutMode === 'zero-margin' ? 0 : 2;
+      const svgString = await QRCode.toString(url, {
+        type: 'svg',
+        errorCorrectionLevel: 'H',
+        margin,
+        color: {
+          dark: '#11140F',
+          light: isTransparent ? '#00000000' : '#FFFFFF',
+        },
+      });
+      downloadSvgFile(`qr-${safeName}.svg`, svgString);
+    } catch (err) {
+      console.error('Failed to export vector SVG:', err);
+    }
   };
 
   // Tight PDF Print: Zero Wasted Margins
@@ -353,13 +364,6 @@ export default function ExportCustomizerModal({
             <X className="w-4 h-4" />
           </button>
         </div>
-
-        {/* Hidden Source QR Canvas & SVG for instant rendering */}
-        <div ref={hiddenQrRef} className="hidden" aria-hidden="true">
-          <QRCodeCanvas value={url} size={1024} level="H" includeMargin={false} />
-          <QRCodeSVG value={url} size={1024} level="H" includeMargin={false} />
-        </div>
-
         {/* Studio Layout: Controls on Left, Live Canvas Preview on Right */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 flex-1 min-h-0 overflow-y-auto pr-1">
           {/* Left Column: Toggles & Layout Options */}

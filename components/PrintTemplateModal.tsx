@@ -338,6 +338,10 @@ export default function PrintTemplateModal({
       URL.revokeObjectURL(svgUrl);
       setIsExporting(false);
     };
+    img.onerror = () => {
+      URL.revokeObjectURL(svgUrl);
+      setIsExporting(false);
+    };
     img.src = svgUrl;
   };
 

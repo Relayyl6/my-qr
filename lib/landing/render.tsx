@@ -605,16 +605,16 @@ export function RenderLandingPage({
     );
   }
 
-  // Fluid Responsive Mode: Mobile (< 640px), Tablet (640px-768px), Desktop (>= 768px)
+  // Fluid Responsive Mode: Mobile (< 768px), Tablet (768px-1024px), Desktop (>= 1024px)
   return (
     <>
-      <div className="block sm:hidden">
+      <div className="block md:hidden">
         {renderMobileView()}
       </div>
-      <div className="hidden sm:block md:hidden">
+      <div className="hidden md:block lg:hidden">
         {renderTabletView()}
       </div>
-      <div className="hidden md:block">
+      <div className="hidden lg:block">
         {renderDesktopView()}
       </div>
       {renderQrModal()}

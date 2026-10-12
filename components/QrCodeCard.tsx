@@ -1,9 +1,10 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
-import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
+import QRCode from 'qrcode';
+import { QRCodeCanvas } from 'qrcode.react';
 import { Download, ChevronDown, FileImage, FileCode, Printer, Sliders, Crop } from 'lucide-react';
-import { downloadSvgFile, extractCleanSvgMarkup } from '@/lib/qr/exportVector';
+import { downloadSvgFile } from '@/lib/qr/exportVector';
 import PrintTemplateModal from '@/components/PrintTemplateModal';
 import ExportCustomizerModal from '@/components/ExportCustomizerModal';
 
@@ -23,7 +24,6 @@ export default function QrCodeCard({
   isAdmin = false,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const svgRef = useRef<SVGSVGElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const [origin, setOrigin] = useState('');
@@ -49,23 +49,21 @@ export default function QrCodeCard({
   const safeName = (label || shortCode).toLowerCase().replace(/[^a-z0-9]/g, '-');
 
   // 0. Quick Raw Zero-Margin PNG (pure die-cut QR code, zero padding, zero text)
-  const handleDownloadRawPng = () => {
+  const handleDownloadRawPng = async () => {
     setIsMenuOpen(false);
-    const originalCanvas = containerRef.current?.querySelector('canvas');
-    if (!originalCanvas) return;
-    const offscreen = document.createElement('canvas');
-    offscreen.width = 1024;
-    offscreen.height = 1024;
-    const ctx = offscreen.getContext('2d');
-    if (!ctx) return;
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, 1024, 1024);
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(originalCanvas, 0, 0, 1024, 1024);
-    const link = document.createElement('a');
-    link.href = offscreen.toDataURL('image/png');
-    link.download = `qr-${safeName}-zero-margin.png`;
-    link.click();
+    try {
+      const dataUrl = await QRCode.toDataURL(url, {
+        errorCorrectionLevel: 'H',
+        margin: 0,
+        width: 1024,
+      });
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `qr-${safeName}-zero-margin.png`;
+      link.click();
+    } catch (err) {
+      console.error('Failed to export raw QR PNG:', err);
+    }
   };
 
   // 1. High-Resolution 300 DPI Poster PNG Export
@@ -107,69 +105,90 @@ export default function QrCodeCard({
     }
 
     // QR Code in Center
-    const originalCanvas = containerRef.current?.querySelector('canvas');
-    if (originalCanvas) {
-      const qrSize = 740;
-      const qrX = (canvasWidth - qrSize) / 2;
-      const qrY = 240;
+    const qrSize = 740;
+    const qrX = (canvasWidth - qrSize) / 2;
+    const qrY = 240;
 
-      ctx.fillStyle = '#FFFFFF';
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.06)';
-      ctx.shadowBlur = 30;
-      ctx.shadowOffsetY = 10;
-      ctx.fillRect(qrX - 20, qrY - 20, qrSize + 40, qrSize + 40);
-      ctx.shadowColor = 'transparent';
+    ctx.fillStyle = '#FFFFFF';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.06)';
+    ctx.shadowBlur = 30;
+    ctx.shadowOffsetY = 10;
+    ctx.fillRect(qrX - 20, qrY - 20, qrSize + 40, qrSize + 40);
+    ctx.shadowColor = 'transparent';
 
-      ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(originalCanvas, qrX, qrY, qrSize, qrSize);
+    // Direct mathematical QR bit matrix rendering (Zero DOM dependency)
+    const qr = QRCode.create(url, { errorCorrectionLevel: 'H' });
+    const numModules = qr.modules.size;
+    const moduleSize = qrSize / numModules;
 
-      // Pill URL Button
-      const pillWidth = 580;
-      const pillHeight = 70;
-      const pillX = (canvasWidth - pillWidth) / 2;
-      const pillY = 1060;
-
-      ctx.fillStyle = '#11140F';
-      const radius = 35;
-      ctx.beginPath();
-      ctx.moveTo(pillX + radius, pillY);
-      ctx.lineTo(pillX + pillWidth - radius, pillY);
-      ctx.quadraticCurveTo(pillX + pillWidth, pillY, pillX + pillWidth, pillY + radius);
-      ctx.lineTo(pillX + pillWidth, pillY + pillHeight - radius);
-      ctx.quadraticCurveTo(pillX + pillWidth, pillY + pillHeight, pillX + pillWidth - radius, pillY + pillHeight);
-      ctx.lineTo(pillX + radius, pillY + pillHeight);
-      ctx.quadraticCurveTo(pillX, pillY + pillHeight, pillX, pillY + pillHeight - radius);
-      ctx.lineTo(pillX, pillY + radius);
-      ctx.quadraticCurveTo(pillX, pillY, pillX + radius, pillY);
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = 'bold 26px monospace';
-      const cleanUrl = url.replace(/^https?:\/\//, '');
-      ctx.fillText(cleanUrl, canvasWidth / 2, pillY + pillHeight / 2);
-
-      ctx.fillStyle = 'rgba(17, 20, 15, 0.45)';
-      ctx.font = 'bold 20px system-ui, -apple-system, sans-serif';
-      ctx.fillText('SCAN WITH CAMERA TO OPEN', canvasWidth / 2, 1190);
-
-      ctx.fillStyle = 'rgba(17, 20, 15, 0.3)';
-      ctx.font = '500 16px system-ui, -apple-system, sans-serif';
-      ctx.fillText('DynamicQR • Intelligent Physical Redirects', canvasWidth / 2, 1235);
-
-      const link = document.createElement('a');
-      link.href = offscreen.toDataURL('image/png');
-      link.download = `qr-${safeName}.png`;
-      link.click();
+    ctx.fillStyle = '#11140F';
+    for (let r = 0; r < numModules; r++) {
+      for (let c = 0; c < numModules; c++) {
+        if (qr.modules.get(r, c)) {
+          ctx.fillRect(
+            Math.floor(qrX + c * moduleSize),
+            Math.floor(qrY + r * moduleSize),
+            Math.ceil(moduleSize),
+            Math.ceil(moduleSize)
+          );
+        }
+      }
     }
+
+    // Pill URL Button
+    const pillWidth = 580;
+    const pillHeight = 70;
+    const pillX = (canvasWidth - pillWidth) / 2;
+    const pillY = 1060;
+
+    ctx.fillStyle = '#11140F';
+    const radius = 35;
+    ctx.beginPath();
+    ctx.moveTo(pillX + radius, pillY);
+    ctx.lineTo(pillX + pillWidth - radius, pillY);
+    ctx.quadraticCurveTo(pillX + pillWidth, pillY, pillX + pillWidth, pillY + radius);
+    ctx.lineTo(pillX + pillWidth, pillY + pillHeight - radius);
+    ctx.quadraticCurveTo(pillX + pillWidth, pillY + pillHeight, pillX + pillWidth - radius, pillY + pillHeight);
+    ctx.lineTo(pillX + radius, pillY + pillHeight);
+    ctx.quadraticCurveTo(pillX, pillY + pillHeight, pillX, pillY + pillHeight - radius);
+    ctx.lineTo(pillX, pillY + radius);
+    ctx.quadraticCurveTo(pillX, pillY, pillX + radius, pillY);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 26px monospace';
+    const cleanUrl = url.replace(/^https?:\/\//, '');
+    ctx.fillText(cleanUrl, canvasWidth / 2, pillY + pillHeight / 2);
+
+    ctx.fillStyle = 'rgba(17, 20, 15, 0.45)';
+    ctx.font = 'bold 20px system-ui, -apple-system, sans-serif';
+    ctx.fillText('SCAN WITH CAMERA TO OPEN', canvasWidth / 2, 1190);
+
+    ctx.fillStyle = 'rgba(17, 20, 15, 0.3)';
+    ctx.font = '500 16px system-ui, -apple-system, sans-serif';
+    ctx.fillText('DynamicQR • Intelligent Physical Redirects', canvasWidth / 2, 1235);
+
+    const link = document.createElement('a');
+    link.href = offscreen.toDataURL('image/png');
+    link.download = `qr-${safeName}.png`;
+    link.click();
   };
 
   // 2. Pure Vector SVG Export
-  const handleDownloadSvg = () => {
+  const handleDownloadSvg = async () => {
     setIsMenuOpen(false);
-    if (!svgRef.current) return;
-    const markup = extractCleanSvgMarkup(svgRef.current, label || shortCode, url);
-    downloadSvgFile(`qr-${safeName}.svg`, markup);
+    try {
+      const svgString = await QRCode.toString(url, {
+        type: 'svg',
+        errorCorrectionLevel: 'H',
+        margin: 2,
+        color: { dark: '#11140F', light: '#FFFFFF' },
+      });
+      downloadSvgFile(`qr-${safeName}.svg`, svgString);
+    } catch (err) {
+      console.error('Failed to export vector SVG:', err);
+    }
   };
 
   // 3. Print Templates Dialog
@@ -187,11 +206,6 @@ export default function QrCodeCard({
           title={`Scan for /id/${shortCode}`}
         >
           <QRCodeCanvas value={url} size={68} level="H" includeMargin={false} />
-
-          {/* Hidden vector SVG for direct extraction */}
-          <div className="hidden">
-            <QRCodeSVG ref={svgRef} value={url} size={512} level="H" includeMargin={false} />
-          </div>
         </div>
 
         <span

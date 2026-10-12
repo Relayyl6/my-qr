@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useRef, useId } from 'react';
-import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react';
+import { QRCodeSVG } from 'qrcode.react';
+import QRCode from 'qrcode';
 import { generateQrArtSpecAction, saveQrArtworkAction } from '@/lib/ai/features/qr-artist';
 import { QrStyleSpec } from '@/lib/ai/prompts/qr-artist.v1';
 import { ScannabilityResult } from '@/lib/qr/scannability';
@@ -158,7 +159,6 @@ export default function QrArtStudio({
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
   const qrRef = useRef<HTMLDivElement>(null);
-  const hiddenCanvasRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
 
   const qrUrl = typeof window !== 'undefined'
@@ -228,11 +228,8 @@ export default function QrArtStudio({
 
   const emblemUri = getEmblemSvgDataUri(centerEmblem, initialChar, styleSpec.fgColor);
 
-  // High-Resolution 300 DPI Poster Download (Fail-Proof Gradient & Emblem Rendering)
+  // High-Resolution 300 DPI Poster Download (Direct In-Memory QR Matrix Rendering — 100% Guaranteed)
   const handleDownloadPng = () => {
-    const originalCanvas = hiddenCanvasRef.current?.querySelector('canvas');
-    if (!originalCanvas) return;
-
     const canvasWidth = 1080;
     const canvasHeight = 1350;
     const canvas = document.createElement('canvas');
@@ -282,31 +279,47 @@ export default function QrArtStudio({
     ctx.fillRect(qrCardX, qrCardY, qrCardSize, qrCardSize);
     ctx.shadowColor = 'transparent';
 
-    // 5. Offscreen canvas for generative gradient modules
-    const qrTile = document.createElement('canvas');
-    qrTile.width = 1024;
-    qrTile.height = 1024;
-    const tileCtx = qrTile.getContext('2d');
-    if (tileCtx) {
-      tileCtx.imageSmoothingEnabled = false;
-      tileCtx.drawImage(originalCanvas, 0, 0, 1024, 1024);
+    // 5. In-Memory Mathematical QR Code Rendering (Zero DOM dependency)
+    const qr = QRCode.create(qrUrl, { errorCorrectionLevel: 'H' });
+    const numModules = qr.modules.size;
+    const qrDrawSize = 700;
+    const qrDrawX = (canvasWidth - qrDrawSize) / 2;
+    const qrDrawY = qrCardY + (qrCardSize - qrDrawSize) / 2;
+    const moduleSize = qrDrawSize / numModules;
 
-      // Mask artistic gradient into modules
-      tileCtx.globalCompositeOperation = 'source-in';
-      const tileGrad = tileCtx.createLinearGradient(0, 0, 1024, 1024);
-      tileGrad.addColorStop(0, styleSpec.gradientColors[0] || styleSpec.fgColor);
-      tileGrad.addColorStop(1, styleSpec.gradientColors[1] || styleSpec.fgColor);
-      tileCtx.fillStyle = tileGrad;
-      tileCtx.fillRect(0, 0, 1024, 1024);
+    // Linear gradient across QR modules
+    const qrGrad = ctx.createLinearGradient(qrDrawX, qrDrawY, qrDrawX + qrDrawSize, qrDrawY + qrDrawSize);
+    qrGrad.addColorStop(0, styleSpec.gradientColors[0] || styleSpec.fgColor);
+    qrGrad.addColorStop(1, styleSpec.gradientColors[1] || styleSpec.fgColor);
+    ctx.fillStyle = qrGrad;
+
+    // Excavation radius for center emblem (skips center ~22% of modules)
+    const excavateRadius = centerEmblem !== 'none' ? Math.floor(numModules * 0.12) : -1;
+    const centerModule = Math.floor(numModules / 2);
+
+    for (let r = 0; r < numModules; r++) {
+      for (let c = 0; c < numModules; c++) {
+        // Skip modules in center excavation area if emblem is enabled
+        if (
+          centerEmblem !== 'none' &&
+          Math.abs(r - centerModule) <= excavateRadius &&
+          Math.abs(c - centerModule) <= excavateRadius
+        ) {
+          continue;
+        }
+
+        if (qr.modules.get(r, c)) {
+          ctx.fillRect(
+            qrDrawX + c * moduleSize,
+            qrDrawY + r * moduleSize,
+            moduleSize + 0.5,
+            moduleSize + 0.5
+          );
+        }
+      }
     }
 
-    // 6. Draw the gradient QR code onto the white card
-    const qrDrawSize = 720;
-    const qrDrawOffset = (qrCardSize - qrDrawSize) / 2;
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(qrTile, qrCardX + qrDrawOffset, qrCardY + qrDrawOffset, qrDrawSize, qrDrawSize);
-
-    // 7. Pill URL Button
+    // 6. Pill URL Button
     const pillWidth = 580;
     const pillHeight = 70;
     const pillX = (canvasWidth - pillWidth) / 2;
@@ -333,7 +346,7 @@ export default function QrArtStudio({
     const cleanUrl = qrUrl.replace(/^https?:\/\//, '');
     ctx.fillText(cleanUrl, canvasWidth / 2, pillY + pillHeight / 2);
 
-    // 8. Footer prompts
+    // 7. Footer prompts
     ctx.fillStyle = `${styleSpec.fgColor}80`;
     ctx.font = 'bold 20px system-ui, -apple-system, sans-serif';
     ctx.fillText('SCAN WITH CAMERA TO OPEN', canvasWidth / 2, 1190);
@@ -342,7 +355,7 @@ export default function QrArtStudio({
     ctx.font = '500 16px system-ui, -apple-system, sans-serif';
     ctx.fillText(`DynamicQR • ${styleSpec.artisticStyle} Edition`, canvasWidth / 2, 1235);
 
-    // 9. Download helper
+    // 8. Download helper
     const triggerFileDownload = () => {
       const a = document.createElement('a');
       const safeName = (label || shortCode).toLowerCase().replace(/[^a-z0-9]/g, '-');
@@ -351,7 +364,7 @@ export default function QrArtStudio({
       a.click();
     };
 
-    // 10. Center Brand Emblem drawing (if enabled)
+    // 9. Center Brand Emblem drawing (if enabled)
     if (centerEmblem !== 'none' && emblemUri) {
       const emblemImg = new Image();
       emblemImg.onload = () => {
@@ -371,28 +384,43 @@ export default function QrArtStudio({
   };
 
   // Pure Vector SVG Export with Self-Contained Gradient Defs
-  const handleDownloadSvg = () => {
-    if (!svgRef.current) return;
-    const cloned = svgRef.current.cloneNode(true) as SVGSVGElement;
-    cloned.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-    cloned.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+  const handleDownloadSvg = async () => {
+    try {
+      const rawSvg = await QRCode.toString(qrUrl, {
+        type: 'svg',
+        errorCorrectionLevel: 'H',
+        margin: 0,
+        color: {
+          dark: styleSpec.gradientColors[0] || styleSpec.fgColor,
+          light: '#00000000',
+        },
+      });
 
-    // Ensure self-contained defs with gradient inside exported SVG file
-    let defs = cloned.querySelector('defs');
-    if (!defs) {
-      defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-      cloned.insertBefore(defs, cloned.firstChild);
+      const safeName = (label || shortCode).toLowerCase().replace(/[^a-z0-9]/g, '-');
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(rawSvg, 'image/svg+xml');
+      const svgEl = doc.querySelector('svg');
+      if (svgEl) {
+        const defs = doc.createElementNS('http://www.w3.org/2000/svg', 'defs');
+        defs.innerHTML = `
+          <linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="${styleSpec.gradientColors[0]}" />
+            <stop offset="100%" stop-color="${styleSpec.gradientColors[1]}" />
+          </linearGradient>
+        `;
+        svgEl.insertBefore(defs, svgEl.firstChild);
+        const path = svgEl.querySelector('path:not([fill="#00000000"])');
+        if (path) {
+          path.setAttribute('fill', `url(#${gradientId})`);
+        }
+        const markup = extractCleanSvgMarkup(svgEl, label || shortCode, qrUrl);
+        downloadSvgFile(`artistic-qr-${safeName}.svg`, markup);
+      } else {
+        downloadSvgFile(`artistic-qr-${safeName}.svg`, rawSvg);
+      }
+    } catch (err) {
+      console.error('Failed to export vector SVG:', err);
     }
-    defs.innerHTML = `
-      <linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="${styleSpec.gradientColors[0]}" />
-        <stop offset="100%" stop-color="${styleSpec.gradientColors[1]}" />
-      </linearGradient>
-    `;
-
-    const markup = extractCleanSvgMarkup(cloned, label || shortCode, qrUrl);
-    const safeName = (label || shortCode).toLowerCase().replace(/[^a-z0-9]/g, '-');
-    downloadSvgFile(`artistic-qr-${safeName}.svg`, markup);
   };
 
   return (
@@ -569,30 +597,6 @@ export default function QrArtStudio({
                 }
               />
             </div>
-          </div>
-
-          {/* Offscreen High-Res Canvas for 100% Robust 300 DPI Export */}
-          <div ref={hiddenCanvasRef} className="hidden" aria-hidden="true">
-            <QRCodeCanvas
-              value={qrUrl}
-              size={1024}
-              level="H"
-              includeMargin={false}
-              bgColor="rgba(0,0,0,0)"
-              fgColor="#000000"
-              imageSettings={
-                centerEmblem !== 'none'
-                  ? {
-                      src: emblemUri,
-                      x: undefined,
-                      y: undefined,
-                      height: 236,
-                      width: 236,
-                      excavate: true,
-                    }
-                  : undefined
-              }
-            />
           </div>
 
           <div className="space-y-3.5 flex-1 min-w-0">
