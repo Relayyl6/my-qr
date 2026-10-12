@@ -133,8 +133,13 @@ export async function assertFeatureAccess(
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { tier: true },
+      select: { email: true, tier: true },
     });
+
+    const adminEmail = (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();
+    if (user && user.email.toLowerCase() === adminEmail) {
+      return { allowed: true, userTier: "ultra", tierConfig: TIER_CONFIGS.ultra };
+    }
 
     const userTierKey = (user?.tier as string)?.toLowerCase() || "pro";
     const tierConfig = TIER_CONFIGS[userTierKey] || TIER_CONFIGS.pro;

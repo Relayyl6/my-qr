@@ -61,6 +61,12 @@ export async function getCurrentUser() {
       where: { id: userId },
       select: { id: true, email: true, name: true, tier: true, stripeCustomerId: true },
     });
+    if (user) {
+      const adminEmail = (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();
+      if (user.email.toLowerCase() === adminEmail) {
+        user.tier = 'ultra';
+      }
+    }
     return user;
   } catch (error) {
     return null;

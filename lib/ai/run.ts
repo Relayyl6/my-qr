@@ -83,15 +83,24 @@ export async function runAI<T>(opts: {
   const tierLimit = access.tierConfig?.monthlyLimitUsd ?? 5.00;
   if (opts.userId) {
     try {
-      const credit = await prisma.aiCredit.findUnique({
-        where: { userId: opts.userId },
+      const userRecord = await prisma.user.findUnique({
+        where: { id: opts.userId },
+        select: { email: true },
       });
+      const adminEmail = (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();
+      const isAdmin = userRecord && userRecord.email.toLowerCase() === adminEmail;
 
-      const effectiveLimit = credit ? Number(credit.monthlyLimitUsd) : tierLimit;
-      if (credit && Number(credit.usedThisMonth) >= effectiveLimit) {
-        throw new Error(
-          `Monthly AI budget of $${effectiveLimit.toFixed(2)} reached for your ${access.tierConfig.name} plan. Please upgrade to a higher plan for more AI compute.`
-        );
+      if (!isAdmin) {
+        const credit = await prisma.aiCredit.findUnique({
+          where: { userId: opts.userId },
+        });
+
+        const effectiveLimit = credit ? Number(credit.monthlyLimitUsd) : tierLimit;
+        if (credit && Number(credit.usedThisMonth) >= effectiveLimit) {
+          throw new Error(
+            `Monthly AI budget of $${effectiveLimit.toFixed(2)} reached for your ${access.tierConfig.name} plan. Please upgrade to a higher plan for more AI compute.`
+          );
+        }
       }
     } catch (e: any) {
       if (e.message?.includes("Monthly AI budget")) throw e;

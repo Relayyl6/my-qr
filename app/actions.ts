@@ -55,15 +55,20 @@ export async function createLink(prevState: ActionState, formData: FormData): Pr
       plus: 500,
       ultra: 999999,
     };
-    const maxAllowed = linkLimits[tier] ?? 5;
-    const activeCount = await prisma.qrLink.count({
-      where: { userId: user.id, isArchived: false },
-    });
+    const adminEmail = (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();
+    const isAdmin = user.email.toLowerCase() === adminEmail;
 
-    if (activeCount >= maxAllowed) {
-      return {
-        message: `You have reached your limit of ${maxAllowed} active links on the ${(user.tier || 'Free').toUpperCase()} plan. Please upgrade to Pro or Plus to create more.`,
-      };
+    if (!isAdmin) {
+      const maxAllowed = linkLimits[tier] ?? 5;
+      const activeCount = await prisma.qrLink.count({
+        where: { userId: user.id, isArchived: false },
+      });
+
+      if (activeCount >= maxAllowed) {
+        return {
+          message: `You have reached your limit of ${maxAllowed} active links on the ${(user.tier || 'Free').toUpperCase()} plan. Please upgrade to Pro or Plus to create more.`,
+        };
+      }
     }
 
     const existing = await prisma.qrLink.findUnique({ where: { shortCode } });
