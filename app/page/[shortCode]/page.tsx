@@ -30,5 +30,10 @@ export default async function LandingViewPage({
     notFound();
   }
 
-  return <RenderLandingPage spec={result.spec} />;
+  return (
+    <RenderLandingPage
+      spec={result.spec}
+      destinationUrl={result.link.destinationUrl}
+    />
+  );
 }

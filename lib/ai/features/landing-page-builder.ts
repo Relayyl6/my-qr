@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { runAI } from "@/lib/ai/run";
@@ -75,6 +76,10 @@ export async function saveLandingPageAction(
     }),
   ]);
 
+  revalidatePath('/');
+  revalidatePath(`/page/${link.shortCode}`);
+  revalidatePath(`/id/${link.shortCode}`);
+
   return { success: true, pageId: page.id };
 }
 
@@ -104,6 +109,10 @@ export async function revertLandingPageAction(linkId: string) {
       data: { published: false },
     }),
   ]);
+
+  revalidatePath('/');
+  revalidatePath(`/page/${link.shortCode}`);
+  revalidatePath(`/id/${link.shortCode}`);
 
   return { success: true };
 }

@@ -40,9 +40,7 @@ export async function GET(
   }
 
   // Check if link is a prompt-to-page mobile landing page
-  if (link.type === 'landing-page' && link.landingPage && link.landingPage.published) {
-    return NextResponse.redirect(new URL(`/page/${shortCode}`, request.url));
-  }
+  const isLandingPage = link.type === 'landing-page' && Boolean(link.landingPage?.published);
 
   // 2. Ignore camera background prefetch and preview requests
   const isPrefetch =
@@ -70,8 +68,10 @@ export async function GET(
     now: new Date(),
   });
 
-  const finalDestination = evaluation.destination;
-  const ruleFiredId = evaluation.ruleFiredId;
+  const finalDestination = isLandingPage
+    ? new URL(`/page/${shortCode}`, request.url).toString()
+    : evaluation.destination;
+  const ruleFiredId = isLandingPage ? null : evaluation.ruleFiredId;
 
   // 4. Log detailed scan and increment count
   if (!isPrefetch) {

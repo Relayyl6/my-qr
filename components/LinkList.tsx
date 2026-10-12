@@ -274,7 +274,7 @@ export default function LinkList({ links }: { links: QrLink[] }) {
                           </button>
                         </div>
                       </form>
-                    ) : link.type === 'landing-page' && link.landingPage?.published ? (
+                    ) : (link.type === 'landing-page' || Boolean(link.landingPage?.published)) ? (
                       <div className="rounded-xl border border-blue-200 bg-blue-50/70 p-3 min-w-0 w-full space-y-1.5">
                         <div className="flex items-center justify-between gap-2 flex-wrap">
                           <div className="flex items-center gap-1.5 text-[11.5px] font-semibold text-blue-900">

@@ -445,7 +445,7 @@ export default function LandingPageEditor({
         {activeTab === 'preview' && spec && (
           <div className="flex flex-col items-center p-2 bg-[#11140F]/[0.03] rounded-2xl">
             <div className="w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl border-4 border-slate-800 bg-white">
-              <RenderLandingPage spec={spec} />
+              <RenderLandingPage spec={spec} destinationUrl={destinationUrl} />
             </div>
           </div>
         )}

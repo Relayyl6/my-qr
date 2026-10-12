@@ -1,8 +1,36 @@
 import React from "react";
 import { LandingPageSpec, LandingBlock } from "./types";
-import { ExternalLink, Mail, Phone, MapPin, Instagram, Twitter } from "lucide-react";
+import { ExternalLink, Mail, Phone, MapPin, Instagram, Twitter, ArrowUpRight } from "lucide-react";
 
-export function RenderLandingPage({ spec }: { spec: LandingPageSpec }) {
+export function normalizeLandingUrl(url?: string | null, fallbackUrl?: string | null): string {
+  if (!url || url.trim() === "" || url.trim() === "#") {
+    if (fallbackUrl && fallbackUrl.trim() !== "" && fallbackUrl.trim() !== "#") {
+      return normalizeLandingUrl(fallbackUrl);
+    }
+    return "#";
+  }
+  const trimmed = url.trim();
+  if (
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("mailto:") ||
+    trimmed.startsWith("tel:")
+  ) {
+    return trimmed;
+  }
+  if (trimmed.startsWith("//")) {
+    return `https:${trimmed}`;
+  }
+  return `https://${trimmed}`;
+}
+
+export function RenderLandingPage({
+  spec,
+  destinationUrl,
+}: {
+  spec: LandingPageSpec;
+  destinationUrl?: string;
+}) {
   const { theme, blocks } = spec;
 
   return (
@@ -14,9 +42,31 @@ export function RenderLandingPage({ spec }: { spec: LandingPageSpec }) {
       }}
     >
       <div className="w-full max-w-md space-y-5">
+        {destinationUrl && (
+          <a
+            href={normalizeLandingUrl(destinationUrl)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex items-center justify-between w-full p-2.5 rounded-xl border transition-all text-[12px] font-medium shadow-xs"
+            style={{
+              backgroundColor: `${theme.primaryColor}0D`,
+              borderColor: `${theme.primaryColor}26`,
+              color: theme.textColor,
+            }}
+          >
+            <div className="flex items-center gap-2 truncate">
+              <span className="w-2 h-2 rounded-full bg-emerald-600 shrink-0 animate-pulse" />
+              <span className="truncate">
+                Primary Website: <strong className="font-semibold underline">{destinationUrl.replace(/^https?:\/\//, '')}</strong>
+              </span>
+            </div>
+            <ArrowUpRight className="w-3.5 h-3.5 shrink-0 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+          </a>
+        )}
+
         {blocks.map((block, idx) => (
           <div key={idx} className="w-full">
-            {renderBlock(block, theme)}
+            {renderBlock(block, theme, destinationUrl)}
           </div>
         ))}
 
@@ -38,7 +88,11 @@ export function RenderLandingPage({ spec }: { spec: LandingPageSpec }) {
   );
 }
 
-function renderBlock(block: LandingBlock, theme: LandingPageSpec["theme"]) {
+function renderBlock(
+  block: LandingBlock,
+  theme: LandingPageSpec["theme"],
+  destinationUrl?: string
+) {
   switch (block.type) {
     case "hero":
       return (
@@ -74,36 +128,39 @@ function renderBlock(block: LandingBlock, theme: LandingPageSpec["theme"]) {
             </h2>
           )}
           <div className="space-y-2">
-            {block.items.map((item, i) => (
-              <a
-                key={i}
-                href={item.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`block w-full p-4 rounded-2xl border transition-all duration-150 transform active:scale-[0.98] ${
-                  item.highlight
-                    ? "shadow-md hover:shadow-lg"
-                    : "shadow-sm hover:shadow"
-                }`}
-                style={{
-                  backgroundColor: item.highlight ? theme.primaryColor : theme.cardBg,
-                  color: item.highlight ? "#FFFFFF" : theme.textColor,
-                  borderColor: `${theme.textColor}15`,
-                }}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="min-w-0 pr-2">
-                    <p className="font-semibold text-[15px] truncate">{item.title}</p>
-                    {item.subtitle && (
-                      <p className="text-[12px] opacity-80 truncate mt-0.5">
-                        {item.subtitle}
-                      </p>
-                    )}
+            {block.items.map((item, i) => {
+              const targetUrl = normalizeLandingUrl(item.url, destinationUrl);
+              return (
+                <a
+                  key={i}
+                  href={targetUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`block w-full p-4 rounded-2xl border transition-all duration-150 transform active:scale-[0.98] ${
+                    item.highlight
+                      ? "shadow-md hover:shadow-lg"
+                      : "shadow-sm hover:shadow"
+                  }`}
+                  style={{
+                    backgroundColor: item.highlight ? theme.primaryColor : theme.cardBg,
+                    color: item.highlight ? "#FFFFFF" : theme.textColor,
+                    borderColor: `${theme.textColor}15`,
+                  }}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="min-w-0 pr-2">
+                      <p className="font-semibold text-[15px] truncate">{item.title}</p>
+                      {item.subtitle && (
+                        <p className="text-[12px] opacity-80 truncate mt-0.5">
+                          {item.subtitle}
+                        </p>
+                      )}
+                    </div>
+                    <ExternalLink className="w-4 h-4 shrink-0 opacity-60" />
                   </div>
-                  <ExternalLink className="w-4 h-4 shrink-0 opacity-60" />
-                </div>
-              </a>
-            ))}
+                </a>
+              );
+            })}
           </div>
         </div>
       );
