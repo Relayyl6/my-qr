@@ -693,13 +693,18 @@ export default function LandingPageEditor({
                   <div className="w-24 h-4 bg-slate-900 rounded-b-xl mx-auto flex items-center justify-center">
                     <span className="w-2.5 h-2.5 rounded-full bg-slate-800" />
                   </div>
-                  <div className="max-h-[500px] overflow-y-auto">
-                    <RenderLandingPage spec={spec} destinationUrl={destinationUrl} />
+                  <div className="max-h-[520px] overflow-y-auto">
+                    <RenderLandingPage
+                      spec={spec}
+                      destinationUrl={destinationUrl}
+                      forceViewMode="mobile"
+                      shortCode={shortCode}
+                    />
                   </div>
                 </div>
               ) : (
                 // Realistic Desktop Browser Mockup
-                <div className="w-full max-w-2xl rounded-2xl overflow-hidden shadow-2xl border-4 border-slate-700 bg-white">
+                <div className="w-full max-w-4xl rounded-2xl overflow-hidden shadow-2xl border-4 border-slate-700 bg-white">
                   {/* Browser Window Header */}
                   <div className="bg-slate-800 px-4 py-2 flex items-center gap-2">
                     <div className="flex items-center gap-1.5">
@@ -707,12 +712,17 @@ export default function LandingPageEditor({
                       <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
                       <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
                     </div>
-                    <div className="flex-1 max-w-xs mx-auto bg-slate-900/80 rounded-md px-3 py-0.5 text-[11px] font-mono text-slate-300 truncate text-center">
+                    <div className="flex-1 max-w-sm mx-auto bg-slate-900/80 rounded-md px-3 py-0.5 text-[11px] font-mono text-slate-300 truncate text-center">
                       https://dynamicqr.co/page/{shortCode}
                     </div>
                   </div>
-                  <div className="max-h-[500px] overflow-y-auto">
-                    <RenderLandingPage spec={spec} destinationUrl={destinationUrl} />
+                  <div className="max-h-[550px] overflow-y-auto">
+                    <RenderLandingPage
+                      spec={spec}
+                      destinationUrl={destinationUrl}
+                      forceViewMode="desktop"
+                      shortCode={shortCode}
+                    />
                   </div>
                 </div>
               )}

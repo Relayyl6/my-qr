@@ -11,6 +11,7 @@ export interface CompileRulesResult {
   output: RouteResolverOutput;
   cached: boolean;
   latencyMs: number;
+  isFallback?: boolean;
 }
 
 export async function compileRulesAction(
@@ -38,6 +39,7 @@ export async function compileRulesAction(
       output: aiResult.data,
       cached: aiResult.cached,
       latencyMs: aiResult.latencyMs,
+      isFallback: aiResult.isFallback ?? false,
     };
   } catch (err: any) {
     console.warn("[compileRulesAction] Using deterministic fallback:", err.message);
@@ -60,6 +62,7 @@ export async function compileRulesAction(
       output: fallbackOutput,
       cached: false,
       latencyMs: 110,
+      isFallback: true,
     };
   }
 }

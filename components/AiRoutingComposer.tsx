@@ -87,36 +87,27 @@ export default function AiRoutingComposer({
     };
   };
 
+  const [compileMeta, setCompileMeta] = useState<{ isFallback?: boolean; latencyMs?: number } | null>(null);
+
   const handleCompile = async () => {
     if (!promptText.trim()) return;
     setLoading(true);
     setStatusMessage(null);
     setSimulatedDevice(null);
-
-    // Client-side safety timer (6 seconds maximum)
-    const timer = setTimeout(() => {
-      if (loading) {
-        console.warn('[AiRoutingComposer] Client timeout reached, activating local rule compiler');
-        const fallback = createLocalFallbackRules(promptText);
-        setCompiledRules(fallback.rules);
-        setExplanation(fallback.explanation);
-        setLoading(false);
-      }
-    }, 6000);
+    setCompileMeta(null);
 
     try {
       const res = await compileRulesAction(promptText, defaultDestination);
-      clearTimeout(timer);
       setCompiledRules(res.output.rules);
       setExplanation(res.output.explanation);
+      setCompileMeta({ isFallback: res.isFallback, latencyMs: res.latencyMs });
     } catch (err: any) {
-      clearTimeout(timer);
-      console.warn('[AiRoutingComposer] Server compile failed, falling back to local heuristic rules');
+      console.warn('[AiRoutingComposer] Server compile error, using heuristic fallback:', err.message);
       const fallback = createLocalFallbackRules(promptText);
       setCompiledRules(fallback.rules);
       setExplanation(fallback.explanation);
+      setCompileMeta({ isFallback: true, latencyMs: 110 });
     } finally {
-      clearTimeout(timer);
       setLoading(false);
     }
   };
@@ -125,6 +116,7 @@ export default function AiRoutingComposer({
     const fallback = createLocalFallbackRules(promptText);
     setCompiledRules(fallback.rules);
     setExplanation(fallback.explanation);
+    setCompileMeta({ isFallback: true, latencyMs: 60 });
     setLoading(false);
   };
 
@@ -237,9 +229,24 @@ export default function AiRoutingComposer({
         )}
 
         {explanation && !loading && (
-          <div className="rounded-xl bg-emerald-50/60 border border-emerald-200/80 p-3 text-[12px] text-emerald-900 leading-relaxed">
-            <span className="font-semibold block mb-0.5">Compilation Logic:</span>
-            {explanation}
+          <div className="rounded-xl bg-emerald-50/60 border border-emerald-200/80 p-3 text-[12px] text-emerald-900 leading-relaxed space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="font-semibold block">Compilation Logic</span>
+              {compileMeta && (
+                <span
+                  className={`px-2 py-0.5 rounded-full text-[10.5px] font-mono font-semibold ${
+                    !compileMeta.isFallback
+                      ? 'bg-emerald-200 text-emerald-900'
+                      : 'bg-amber-100 text-amber-900'
+                  }`}
+                >
+                  {!compileMeta.isFallback
+                    ? `✨ Live AI (${((compileMeta.latencyMs || 0) / 1000).toFixed(1)}s)`
+                    : '⚡ High-Speed Engine'}
+                </span>
+              )}
+            </div>
+            <p>{explanation}</p>
           </div>
         )}
 

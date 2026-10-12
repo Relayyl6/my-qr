@@ -11,7 +11,7 @@ import { prompt as orchestratorPrompt } from "@/lib/ai/prompts/campaign-orchestr
 
 export async function orchestrateBulkImportAction(
   items: BulkImportRawItem[]
-): Promise<{ output: CampaignOrchestratorOutput; cached: boolean; latencyMs: number }> {
+): Promise<{ output: CampaignOrchestratorOutput; cached: boolean; latencyMs: number; isFallback?: boolean }> {
   const user = await getCurrentUser();
   if (!user) {
     throw new Error("Authentication required for Bulk Campaign Orchestrator.");
@@ -29,6 +29,7 @@ export async function orchestrateBulkImportAction(
       output: aiResult.data,
       cached: aiResult.cached,
       latencyMs: aiResult.latencyMs,
+      isFallback: aiResult.isFallback ?? false,
     };
   } catch (err: any) {
     console.warn("[orchestrateBulkImportAction] Using deterministic fallback:", err.message);
@@ -56,6 +57,7 @@ export async function orchestrateBulkImportAction(
       output: fallbackOutput,
       cached: false,
       latencyMs: 150,
+      isFallback: true,
     };
   }
 }

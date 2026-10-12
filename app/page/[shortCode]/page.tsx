@@ -34,6 +34,7 @@ export default async function LandingViewPage({
     <RenderLandingPage
       spec={result.spec}
       destinationUrl={result.link.destinationUrl}
+      shortCode={params.shortCode}
     />
   );
 }

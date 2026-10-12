@@ -115,29 +115,16 @@ export default function QrArtStudio({
     setLoading(true);
     setSaved(false);
 
-    const safetyTimer = setTimeout(() => {
-      if (loading) {
-        console.warn('[QrArtStudio] Client timeout, activating instant styling generator');
-        const fallback = createLocalFallbackSpec(promptText);
-        setStyleSpec(fallback.styleSpec);
-        setScannability(fallback.scannability);
-        setLoading(false);
-      }
-    }, 5500);
-
     try {
       const res = await generateQrArtSpecAction(promptText);
-      clearTimeout(safetyTimer);
       setStyleSpec(res.styleSpec);
       setScannability(res.scannability);
     } catch (err) {
-      clearTimeout(safetyTimer);
-      console.warn('[QrArtStudio] Server generation failed, using local artwork engine');
+      console.warn('[QrArtStudio] Server generation error, using heuristic artwork engine');
       const fallback = createLocalFallbackSpec(promptText);
       setStyleSpec(fallback.styleSpec);
       setScannability(fallback.scannability);
     } finally {
-      clearTimeout(safetyTimer);
       setLoading(false);
     }
   };

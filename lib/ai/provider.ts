@@ -205,7 +205,8 @@ export class AnthropicProvider implements AIProvider {
 }
 
 /**
- * Google Gemini Provider (Powered by Google Generative AI & Gemini 2.0 Flash)
+ * Google Gemini Provider (Powered by Google Generative AI)
+ * Resilient multi-model cascade: gemini-flash-lite-latest -> gemini-3.5-flash -> gemini-3.8-flash
  */
 export class GeminiProvider implements AIProvider {
   name = "gemini";
@@ -221,6 +222,13 @@ export class GeminiProvider implements AIProvider {
     });
   }
 
+  // Active models available on Google Gemini API
+  private getCandidateModels(requestedModel?: string): string[] {
+    const primary = this.resolveModel(requestedModel);
+    const candidates = [primary, "gemini-flash-lite-latest", "gemini-3.5-flash", "gemini-3.8-flash"];
+    return Array.from(new Set(candidates));
+  }
+
   async generateObject<T>(opts: {
     schema: ZodSchema<T>;
     system: string;
@@ -230,45 +238,59 @@ export class GeminiProvider implements AIProvider {
     maxTokens?: number;
   }): Promise<{ data: T; usage: AIUsage }> {
     const client = this.getClient();
-    let modelId = this.resolveModel(opts.model);
-
     if (!client) {
       console.warn("[Gemini Provider] No GEMINI_API_KEY found.");
       throw new Error("AI_PROVIDER_UNCONFIGURED");
     }
 
-    const result = await aiGenerateObject({
-      model: client(modelId),
-      system: opts.system,
-      prompt: opts.prompt,
-      schema: opts.schema,
-      temperature: opts.temperature ?? 0.2,
-      maxTokens: opts.maxTokens,
-      maxRetries: 0,
-    });
+    const candidateModels = this.getCandidateModels(opts.model);
+    let lastError: any = null;
 
-    const usage = result.usage as any;
-    const promptTokens = usage?.inputTokens ?? usage?.promptTokens ?? 50;
-    const completionTokens = usage?.outputTokens ?? usage?.completionTokens ?? 50;
-    const totalTokens = promptTokens + completionTokens;
+    for (const modelId of candidateModels) {
+      try {
+        const result = await aiGenerateObject({
+          model: client(modelId),
+          system: opts.system,
+          prompt: opts.prompt,
+          schema: opts.schema,
+          temperature: opts.temperature ?? 0.2,
+          maxTokens: opts.maxTokens,
+          maxRetries: 1,
+        });
 
-    return {
-      data: result.object as T,
-      usage: {
-        promptTokens,
-        completionTokens,
-        totalTokens,
-        costUsd: calculateCost(promptTokens, completionTokens, modelId),
-      },
-    };
+        const usage = result.usage as any;
+        const promptTokens = usage?.inputTokens ?? usage?.promptTokens ?? 50;
+        const completionTokens = usage?.outputTokens ?? usage?.completionTokens ?? 50;
+        const totalTokens = promptTokens + completionTokens;
+
+        return {
+          data: result.object as T,
+          usage: {
+            promptTokens,
+            completionTokens,
+            totalTokens,
+            costUsd: calculateCost(promptTokens, completionTokens, modelId),
+          },
+        };
+      } catch (err: any) {
+        lastError = err;
+        console.warn(`[Gemini Provider] Model '${modelId}' returned: ${err.message}. Trying next candidate...`);
+      }
+    }
+
+    throw lastError || new Error("All Gemini candidate models failed.");
   }
 
   private resolveModel(model?: string): string {
-    if (!model) return "gemini-3.8-flash";
+    if (!model) return "gemini-flash-lite-latest";
     const m = model.toLowerCase();
-    if (m.startsWith("gpt-") || m.startsWith("claude-") || m.includes("2.0") || m.includes("1.5")) {
-      return "gemini-3.8-flash";
+    if (m.startsWith("gpt-") || m.startsWith("claude-")) {
+      return "gemini-flash-lite-latest";
     }
+    if (m.includes("3.5")) return "gemini-3.5-flash";
+    if (m.includes("3.8")) return "gemini-3.8-flash";
+    if (m.includes("flash-lite") || m.includes("lite")) return "gemini-flash-lite-latest";
+    if (m.includes("flash")) return "gemini-flash-lite-latest";
     return model;
   }
 
@@ -280,47 +302,55 @@ export class GeminiProvider implements AIProvider {
     stream?: boolean;
   }): Promise<{ text: string; usage: AIUsage }> {
     const client = this.getClient();
-    let modelId = this.resolveModel(opts.model);
-
     if (!client) {
       console.warn("[Gemini Provider] No GEMINI_API_KEY found.");
       throw new Error("AI_PROVIDER_UNCONFIGURED");
     }
 
-    const result = await aiGenerateText({
-      model: client(modelId),
-      system: opts.system,
-      prompt: opts.prompt,
-      temperature: opts.temperature ?? 0.3,
-      maxRetries: 0,
-    });
+    const candidateModels = this.getCandidateModels(opts.model);
+    let lastError: any = null;
 
-    const textUsage = result.usage as any;
-    const promptTokens = textUsage?.inputTokens ?? textUsage?.promptTokens ?? 50;
-    const completionTokens = textUsage?.outputTokens ?? textUsage?.completionTokens ?? 50;
-    const totalTokens = promptTokens + completionTokens;
+    for (const modelId of candidateModels) {
+      try {
+        const result = await aiGenerateText({
+          model: client(modelId),
+          system: opts.system,
+          prompt: opts.prompt,
+          temperature: opts.temperature ?? 0.3,
+          maxRetries: 1,
+        });
 
-    return {
-      text: result.text,
-      usage: {
-        promptTokens,
-        completionTokens,
-        totalTokens,
-        costUsd: calculateCost(promptTokens, completionTokens, modelId),
-      },
-    };
+        const textUsage = result.usage as any;
+        const promptTokens = textUsage?.inputTokens ?? textUsage?.promptTokens ?? 50;
+        const completionTokens = textUsage?.outputTokens ?? textUsage?.completionTokens ?? 50;
+        const totalTokens = promptTokens + completionTokens;
+
+        return {
+          text: result.text,
+          usage: {
+            promptTokens,
+            completionTokens,
+            totalTokens,
+            costUsd: calculateCost(promptTokens, completionTokens, modelId),
+          },
+        };
+      } catch (err: any) {
+        lastError = err;
+        console.warn(`[Gemini Provider] Model '${modelId}' returned: ${err.message}. Trying next candidate...`);
+      }
+    }
+
+    throw lastError || new Error("All Gemini candidate models failed.");
   }
 }
 
 /**
  * Factory getAIProvider()
- * Reads AI_PROVIDER=neon|openai|anthropic|gemini and returns the right instance.
+ * Reads AI_PROVIDER=gemini|openai|anthropic|neon.
+ * Defaults to Gemini whenever GEMINI_API_KEY is present to avoid zero-credit OpenAI failures.
  */
 export function getAIProvider(): AIProvider {
   const providerName = (process.env.AI_PROVIDER || "").toLowerCase();
-  if (providerName === "gemini") {
-    return new GeminiProvider();
-  }
   if (providerName === "openai") {
     return new OpenAIProvider();
   }
@@ -330,13 +360,22 @@ export function getAIProvider(): AIProvider {
   if (providerName === "neon") {
     return new NeonGatewayProvider();
   }
-
-  // Auto-detect based on available credentials
-  if (process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+  if (providerName === "gemini") {
     return new GeminiProvider();
   }
+
+  // Priority default: Always use Gemini if credentials exist (OpenAI has 0 credit)
+  if (
+    process.env.GEMINI_API_KEY ||
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY ||
+    process.env.GOOGLE_API_KEY
+  ) {
+    return new GeminiProvider();
+  }
+
   if (process.env.OPENAI_API_KEY) {
     return new OpenAIProvider();
   }
+
   return new NeonGatewayProvider();
 }

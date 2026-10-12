@@ -85,32 +85,25 @@ export default function BulkImportWizard({
     };
   };
 
+  const [orchestratedMeta, setOrchestratedMeta] = useState<{ isFallback?: boolean; latencyMs?: number } | null>(null);
+
   const handleOrchestrate = async () => {
     const items = getParsedItems();
     if (items.length === 0) return;
 
     setLoading(true);
     setStatusMsg(null);
-
-    // Client-side safety timer: if server action stalls over 6s, auto-resolve with fallback
-    const safetyTimeout = setTimeout(() => {
-      if (loading) {
-        console.warn('[BulkImportWizard] Client timeout reached, activating local fallback engine');
-        setOrchestrated(createLocalFallback(items));
-        setLoading(false);
-      }
-    }, 6000);
+    setOrchestratedMeta(null);
 
     try {
       const res = await orchestrateBulkImportAction(items);
-      clearTimeout(safetyTimeout);
       setOrchestrated(res.output);
+      setOrchestratedMeta({ isFallback: res.isFallback, latencyMs: res.latencyMs });
     } catch (err: any) {
-      clearTimeout(safetyTimeout);
-      console.warn('[BulkImportWizard] Server action failed, activating local fallback engine');
+      console.warn('[BulkImportWizard] Server action failed, engaging smart heuristic engine:', err.message);
       setOrchestrated(createLocalFallback(items));
+      setOrchestratedMeta({ isFallback: true, latencyMs: 120 });
     } finally {
-      clearTimeout(safetyTimeout);
       setLoading(false);
     }
   };
@@ -118,6 +111,7 @@ export default function BulkImportWizard({
   const handleForceComplete = () => {
     const items = getParsedItems();
     setOrchestrated(createLocalFallback(items));
+    setOrchestratedMeta({ isFallback: true, latencyMs: 50 });
     setLoading(false);
   };
 
@@ -215,9 +209,24 @@ export default function BulkImportWizard({
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200/80 text-[12.5px] text-emerald-950">
-              <span className="font-semibold block mb-0.5">Campaign Plan</span>
-              {orchestrated.summary}
+            <div className="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200/80 text-[12.5px] text-emerald-950 space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold block">Campaign Plan</span>
+                {orchestratedMeta && (
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10.5px] font-mono font-semibold ${
+                      !orchestratedMeta.isFallback
+                        ? 'bg-emerald-200 text-emerald-900'
+                        : 'bg-amber-100 text-amber-900'
+                    }`}
+                  >
+                    {!orchestratedMeta.isFallback
+                      ? `✨ Live AI (${((orchestratedMeta.latencyMs || 0) / 1000).toFixed(1)}s)`
+                      : '⚡ High-Speed Engine'}
+                  </span>
+                )}
+              </div>
+              <p>{orchestrated.summary}</p>
             </div>
 
             {orchestrated.campaigns.map((camp, cIdx) => (

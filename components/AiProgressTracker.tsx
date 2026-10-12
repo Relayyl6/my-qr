@@ -41,7 +41,7 @@ export default function AiProgressTracker({
     return () => clearInterval(interval);
   }, []);
 
-  // Stage progression
+  // Stage progression calibrated for realistic neural model generation (8-16s)
   useEffect(() => {
     const stageInterval = setInterval(() => {
       setCurrentStageIndex((prev) => {
@@ -50,14 +50,15 @@ export default function AiProgressTracker({
         }
         return prev;
       });
-    }, 1100);
+    }, 3200);
 
     const progressInterval = setInterval(() => {
       setProgressPercent((prev) => {
-        if (prev >= 95) return 95;
-        return prev + Math.floor(Math.random() * 12) + 5;
+        if (prev >= 92) return 92;
+        // Smooth gradual advancement matching real AI latency
+        return Math.min(92, prev + Math.floor(Math.random() * 4) + 3);
       });
-    }, 300);
+    }, 550);
 
     return () => {
       clearInterval(stageInterval);
@@ -93,8 +94,13 @@ export default function AiProgressTracker({
       {/* Progress Bar */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between text-[11.5px]">
-          <span className="font-medium text-emerald-950">
-            {stages[currentStageIndex]?.label || 'Finalizing...'}
+          <span className="font-medium text-emerald-950 flex items-center gap-1.5">
+            <span>{stages[currentStageIndex]?.label || 'Finalizing...'}</span>
+            {elapsedSeconds > 15 && (
+              <span className="text-[10px] text-emerald-700 font-normal">
+                (deep synthesis in progress...)
+              </span>
+            )}
           </span>
           <span className="font-mono font-bold text-emerald-700">{progressPercent}%</span>
         </div>

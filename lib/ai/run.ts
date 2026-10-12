@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { AIFeatureName, assertFeatureAccess } from "./flags";
-import { getAIProvider, AIUsage } from "./provider";
+import { getAIProvider, AIUsage, AIProvider } from "./provider";
 import { getPrompt, PromptDefinition } from "./prompts";
 
 export interface AIResult<T> {
@@ -8,6 +8,7 @@ export interface AIResult<T> {
   usage: AIUsage;
   cached: boolean;
   latencyMs: number;
+  isFallback?: boolean;
 }
 
 export async function runAI<T>(opts: {
@@ -125,46 +126,58 @@ export async function runAI<T>(opts: {
     ? promptDef.buildUserPrompt(opts.input)
     : String(opts.input);
 
-  const AI_TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS || 4500);
+  // Generous server execution window (120s ceiling for serverless boundaries, never cutting off legitimate inference)
+  const AI_TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS || 120000);
+  let isFallback = false;
 
   try {
-    let timer: NodeJS.Timeout;
+    let timer: NodeJS.Timeout | undefined;
     const timeoutPromise = new Promise<never>((_, reject) => {
       timer = setTimeout(() => {
-        reject(new Error(`AI_TIMEOUT: Operation exceeded ${AI_TIMEOUT_MS}ms`));
+        reject(new Error(`AI_TIMEOUT: Upstream inference exceeded safety window of ${Math.round(AI_TIMEOUT_MS / 1000)}s`));
       }, AI_TIMEOUT_MS);
     });
 
-    if (promptDef?.schema) {
-      const providerPromise = provider.generateObject<T>({
-        schema: promptDef.schema,
-        system,
-        prompt: userPrompt,
-        model: promptDef.model,
-        temperature: promptDef.temperature,
+    const executeWithProvider = async (targetProvider: AIProvider) => {
+      if (promptDef?.schema) {
+        return await targetProvider.generateObject<T>({
+          schema: promptDef.schema,
+          system,
+          prompt: userPrompt,
+          model: promptDef.model,
+          temperature: promptDef.temperature,
+        });
+      } else {
+        const textRes = await targetProvider.generateText({
+          system,
+          prompt: userPrompt,
+          model: promptDef?.model,
+          temperature: promptDef?.temperature,
+        });
+        return { data: textRes.text as unknown as T, usage: textRes.usage };
+      }
+    };
+
+    try {
+      const res = await Promise.race([executeWithProvider(provider), timeoutPromise]).finally(() => {
+        if (timer) clearTimeout(timer);
       });
-      const res = await Promise.race([providerPromise, timeoutPromise]).finally(() => clearTimeout(timer));
       resultData = res.data;
       usage = res.usage;
-    } else {
-      const providerPromise = provider.generateText({
-        system,
-        prompt: userPrompt,
-        model: promptDef?.model,
-        temperature: promptDef?.temperature,
-      });
-      const res = await Promise.race([providerPromise, timeoutPromise]).finally(() => clearTimeout(timer));
-      resultData = res.text as unknown as T;
-      usage = res.usage;
+      isSuccess = true;
+    } catch (primaryErr: any) {
+      // If primary is Gemini, do NOT failover to OpenAI (user has zero credits on OpenAI)
+      // GeminiProvider already handled internal multi-model retries (flash-lite -> 3.5 -> 3.8)
+      console.warn(`[runAI] Provider '${provider.name}' inference failed: ${primaryErr.message}`);
+      throw primaryErr;
     }
-    isSuccess = true;
   } catch (err: any) {
-    console.warn(`[runAI] Provider '${provider.name}' call resolved with fallback for ${opts.promptKey}:`, err.message);
+    console.warn(`[runAI] Live AI execution error for ${opts.promptKey} (${err.message}). Engaging smart deterministic engine as safety fallback.`);
     errorMsg = err.message;
+    isFallback = true;
 
     // Check for defined deterministic fallback
     if (promptDef?.fallback) {
-      console.info(`[runAI] Applying graceful deterministic fallback for ${opts.promptKey}`);
       resultData = promptDef.fallback(opts.input) as T;
       isSuccess = true;
     } else {
@@ -277,5 +290,6 @@ export async function runAI<T>(opts: {
     usage,
     cached: false,
     latencyMs,
+    isFallback,
   };
 }
