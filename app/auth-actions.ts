@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { hashPassword, verifyPassword, createSession, destroySession } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
+import { sendEmail, buildWelcomeEmailHtml } from '@/lib/email/send';
 
 const authSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -45,6 +46,16 @@ export async function signUp(prevState: AuthState, formData: FormData): Promise<
         name: name || null,
       },
     });
+
+    // Send welcome onboarding email asynchronously via Nodemailer
+    sendEmail({
+      to: email,
+      subject: '🚀 Welcome to DynamicQR - One code, printed once',
+      html: buildWelcomeEmailHtml({
+        email,
+        name: user.name,
+      }),
+    }).catch((err) => console.error('[Welcome Email Error]:', err));
 
     await createSession(user.id);
     revalidatePath('/');

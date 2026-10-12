@@ -21,8 +21,8 @@ export const PLANS: Record<string, PlanDetails> = {
   pro: {
     id: "pro",
     name: "Pro",
-    monthlyPrice: 12,
-    yearlyPrice: 120, // $10/mo billed yearly
+    monthlyPrice: 5,
+    yearlyPrice: 48, // $4/mo billed yearly ($48/yr)
     monthlyAiBudget: 5.0,
     maxLinks: 50,
     priceIdMonthly: process.env.STRIPE_PRICE_PRO_MONTHLY,
@@ -31,8 +31,8 @@ export const PLANS: Record<string, PlanDetails> = {
   plus: {
     id: "plus",
     name: "Plus",
-    monthlyPrice: 29,
-    yearlyPrice: 290,
+    monthlyPrice: 12,
+    yearlyPrice: 120, // $10/mo billed yearly ($120/yr)
     monthlyAiBudget: 15.0,
     maxLinks: 500,
     priceIdMonthly: process.env.STRIPE_PRICE_PLUS_MONTHLY,
@@ -41,8 +41,8 @@ export const PLANS: Record<string, PlanDetails> = {
   ultra: {
     id: "ultra",
     name: "Ultra",
-    monthlyPrice: 79,
-    yearlyPrice: 790,
+    monthlyPrice: 29,
+    yearlyPrice: 290, // ~$24/mo billed yearly ($290/yr)
     monthlyAiBudget: 50.0,
     maxLinks: 999999,
     priceIdMonthly: process.env.STRIPE_PRICE_ULTRA_MONTHLY,

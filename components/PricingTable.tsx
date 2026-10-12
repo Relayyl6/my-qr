@@ -149,11 +149,11 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
 
             <div className="mt-6 flex items-baseline gap-1">
               <span className="text-4xl font-bold tracking-tight text-[#11140F]">
-                ${interval === 'year' ? '10' : '12'}
+                ${interval === 'year' ? '4' : '5'}
               </span>
               <span className="text-[13px] text-[#11140F]/50">/month</span>
               {interval === 'year' && (
-                <span className="text-[11px] text-[#2F6B4F] ml-1">billed yearly ($120)</span>
+                <span className="text-[11px] text-[#2F6B4F] ml-1">billed yearly ($48)</span>
               )}
             </div>
 
@@ -226,11 +226,11 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
 
             <div className="mt-6 flex items-baseline gap-1">
               <span className="text-4xl font-bold tracking-tight text-[#11140F]">
-                ${interval === 'year' ? '24' : '29'}
+                ${interval === 'year' ? '10' : '12'}
               </span>
               <span className="text-[13px] text-[#11140F]/50">/month</span>
               {interval === 'year' && (
-                <span className="text-[11px] text-[#2F6B4F] ml-1">billed yearly ($290)</span>
+                <span className="text-[11px] text-[#2F6B4F] ml-1">billed yearly ($120)</span>
               )}
             </div>
 
@@ -303,11 +303,11 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
 
             <div className="mt-6 flex items-baseline gap-1">
               <span className="text-4xl font-bold tracking-tight text-[#11140F]">
-                ${interval === 'year' ? '65' : '79'}
+                ${interval === 'year' ? '24' : '29'}
               </span>
               <span className="text-[13px] text-[#11140F]/50">/month</span>
               {interval === 'year' && (
-                <span className="text-[11px] text-[#2F6B4F] ml-1">billed yearly ($790)</span>
+                <span className="text-[11px] text-[#2F6B4F] ml-1">billed yearly ($290)</span>
               )}
             </div>
 

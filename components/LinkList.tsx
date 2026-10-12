@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { deleteLink, updateLink, toggleArchiveLink } from '@/app/actions';
+import { deleteLink, updateLink, toggleArchiveLink, checkDestinationHealth } from '@/app/actions';
 import QrCodeCard from './QrCodeCard';
 import DeleteConfirmModal from './DeleteConfirmModal';
 import AiRoutingComposer from './AiRoutingComposer';
 import QrArtStudio from './QrArtStudio';
 import LandingPageEditor from './LandingPageEditor';
-import { Sparkles, Compass, Palette, Smartphone } from 'lucide-react';
+import { Sparkles, Compass, Palette, Smartphone, Activity, CheckCircle2, AlertTriangle } from 'lucide-react';
 
 interface QrLink {
   id: string;
@@ -39,6 +39,8 @@ export default function LinkList({ links }: { links: QrLink[] }) {
   const [tab, setTab] = useState<'active' | 'archived'>('active');
   const [pendingDeleteLink, setPendingDeleteLink] = useState<QrLink | null>(null);
   const [origin, setOrigin] = useState('');
+  const [healthMap, setHealthMap] = useState<Record<string, { ok: boolean; status?: number; error?: string }>>({});
+  const [checkingHealthId, setCheckingHealthId] = useState<string | null>(null);
 
   // AI Feature Modals state
   const [activeRouterLink, setActiveRouterLink] = useState<QrLink | null>(null);
@@ -48,6 +50,13 @@ export default function LinkList({ links }: { links: QrLink[] }) {
   useEffect(() => {
     setOrigin(window.location.origin);
   }, []);
+
+  const handleCheckHealth = async (id: string, url: string) => {
+    setCheckingHealthId(id);
+    const result = await checkDestinationHealth(url);
+    setHealthMap((prev) => ({ ...prev, [id]: result }));
+    setCheckingHealthId(null);
+  };
 
   const handleCopy = (id: string, shortUrl: string) => {
     navigator.clipboard.writeText(shortUrl);
@@ -250,6 +259,39 @@ export default function LinkList({ links }: { links: QrLink[] }) {
                         </p>
                       </div>
                     )}
+
+                    {/* Destination Health Sentinel */}
+                    <div className="flex items-center gap-2 text-[11px]">
+                      {healthMap[link.id] ? (
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full font-medium ${
+                            healthMap[link.id].ok
+                              ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                              : 'bg-red-50 text-red-800 border border-red-200'
+                          }`}
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              healthMap[link.id].ok ? 'bg-emerald-600' : 'bg-red-600'
+                            }`}
+                          />
+                          {healthMap[link.id].ok
+                            ? `Live (${healthMap[link.id].status || 200} OK)`
+                            : `Offline / Error (${healthMap[link.id].error || `HTTP ${healthMap[link.id].status}`})`}
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleCheckHealth(link.id, link.destinationUrl)}
+                          disabled={checkingHealthId === link.id}
+                          className="inline-flex items-center gap-1 text-[11px] text-[#11140F]/50 hover:text-[#11140F] transition-colors"
+                        >
+                          <Activity className={`w-3 h-3 ${checkingHealthId === link.id ? 'animate-spin' : ''}`} />
+                          {checkingHealthId === link.id ? 'Pinging URL…' : 'Ping link health'}
+                        </button>
+                      )}
+                    </div>
+
 
                     {/* Scan count & relative time */}
                     <div className="text-[11px] text-[#11140F]/45 truncate">

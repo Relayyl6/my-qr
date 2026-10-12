@@ -204,3 +204,28 @@ export async function deleteLink(id: string): Promise<ActionState> {
     return { message: 'Database error: Failed to delete link.' };
   }
 }
+
+export async function checkDestinationHealth(url: string): Promise<{ ok: boolean; status?: number; error?: string }> {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: { 'User-Agent': 'DynamicQR-HealthSentinel/1.0' },
+      signal: controller.signal,
+      redirect: 'follow',
+    });
+    clearTimeout(timeout);
+
+    return {
+      ok: res.status >= 200 && res.status < 400,
+      status: res.status,
+    };
+  } catch (error: any) {
+    return {
+      ok: false,
+      error: error.name === 'AbortError' ? 'Timeout (4s)' : 'Host unreachable',
+    };
+  }
+}
+

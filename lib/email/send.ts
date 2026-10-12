@@ -288,3 +288,69 @@ export function buildMonthlyResetEmailHtml({
   `;
 }
 
+/**
+ * Builds HTML template for New User Welcome & Onboarding
+ */
+export function buildWelcomeEmailHtml({
+  email,
+  name,
+}: {
+  email: string;
+  name?: string | null;
+}): string {
+  const greeting = name ? `Hi ${name},` : "Hi there,";
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Welcome to DynamicQR</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #EEF0EA; margin: 0; padding: 40px 20px;">
+  <div style="max-width: 540px; margin: 0 auto; background: #ffffff; border-radius: 20px; border: 1px solid rgba(17,20,15,0.1); overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.04);">
+    <div style="background: #11140F; padding: 32px; text-align: left;">
+      <span style="font-family: monospace; font-size: 11px; color: #96A689; text-transform: uppercase; letter-spacing: 1.5px; font-weight: bold;">
+        Welcome to DynamicQR
+      </span>
+      <h1 style="color: #ffffff; font-size: 24px; margin: 10px 0 0; font-weight: 700;">
+        One code, printed once.
+      </h1>
+    </div>
+
+    <div style="padding: 32px; color: #11140F;">
+      <p style="font-size: 15px; line-height: 1.6; margin: 0 0 16px; color: #374151;">
+        ${greeting} thank you for creating your DynamicQR account! You'll never have to worry about broken printed flyers, outdated event brochures, or reprinting expensive materials again.
+      </p>
+
+      <div style="background: #F7F8F5; border: 1px solid rgba(17,20,15,0.08); border-radius: 14px; padding: 20px; margin: 24px 0;">
+        <div style="font-size: 13px; font-weight: 700; color: #11140F; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+          🚀 Quick-Start Checklist:
+        </div>
+        <div style="margin-bottom: 10px; font-size: 13.5px; line-height: 1.5; color: #374151;">
+          <strong>1. Create your dynamic link:</strong> Choose a memorable short code and set today's destination URL.
+        </div>
+        <div style="margin-bottom: 10px; font-size: 13.5px; line-height: 1.5; color: #374151;">
+          <strong>2. Export print-ready PNG:</strong> High-contrast 1024×1024px assets with 10% quiet-zone buffers ready for 300 DPI physical prints.
+        </div>
+        <div style="font-size: 13.5px; line-height: 1.5; color: #374151;">
+          <strong>3. Update anytime:</strong> Whenever your campaign changes, edit the destination in your workspace. Every flyer out in the world updates immediately!
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 28px;">
+        <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://dynamicqr.co"}/#workspace" style="display: inline-block; background: #11140F; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 14px 28px; border-radius: 12px;">
+          Open Your Workspace &rarr;
+        </a>
+      </div>
+    </div>
+
+    <div style="background: #FAFAFA; border-top: 1px solid #EEEEEE; padding: 18px 30px; text-align: center; font-size: 12px; color: #9CA3AF;">
+      DynamicQR • Sent to ${email} • <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://dynamicqr.co"}/privacy" style="color: #6B7280;">Privacy Policy</a>
+    </div>
+  </div>
+</body>
+</html>
+  `;
+}
+
+

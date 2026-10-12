@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Sparkles, ArrowLeft, Activity, DollarSign, Clock, ShieldAlert } from "lucide-react";
 
@@ -7,6 +8,10 @@ export const dynamic = "force-dynamic";
 
 export default async function AiUsageAdminPage() {
   const user = await getCurrentUser();
+  const adminEmail = (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();
+  if (!user || user.email.toLowerCase() !== adminEmail) {
+    redirect('/');
+  }
 
   // Load invocations from database
   const invocations = await prisma.aiInvocation.findMany({
