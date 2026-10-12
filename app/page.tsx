@@ -324,7 +324,7 @@ export default async function Home() {
                   <h3 className="mb-5 sm:mb-7 text-[16px] sm:text-[17px] font-medium">
                     Active links <span className="text-[#11140F]/35 font-normal">({links.filter((l) => !l.isArchived).length})</span>
                   </h3>
-                  <LinkList links={links} />
+                  <LinkList links={links} userTier={user.tier || 'free'} isAdmin={isAdmin} />
                 </section>
               </div>
             </div>

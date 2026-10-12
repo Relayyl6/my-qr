@@ -193,40 +193,53 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
             </div>
           ) : (
             <>
-              {/* How It Works Visual Guide */}
-              <div className="rounded-xl bg-[#F7F8F5] border border-[#11140F]/10 p-4 space-y-2.5 text-[12px] text-[#11140F]/80">
-                <div className="font-semibold text-[#11140F] flex items-center gap-1.5">
-                  <Sparkles className="w-4 h-4 text-emerald-600" />
-                  How to customize your domain in 3 simple steps:
+              {/* How Custom Branded Domains Work in 3 Steps */}
+              <div className="rounded-2xl bg-[#F7F8F5] border border-[#11140F]/10 p-5 space-y-3.5 text-[12.5px] text-[#11140F]/85">
+                <div className="flex items-center justify-between">
+                  <div className="font-bold text-[14px] text-[#11140F] flex items-center gap-2">
+                    <Globe className="w-4 h-4 text-[#2F6B4F]" />
+                    How Custom Branded Domains Work in 3 Steps
+                  </div>
+                  <span className="text-[11px] font-mono text-[#2F6B4F] bg-[#2F6B4F]/10 px-2.5 py-0.5 rounded-full font-bold">
+                    Setup Guide
+                  </span>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
-                  <div className="p-3 rounded-lg bg-white border border-[#11140F]/8 space-y-1">
-                    <div className="font-bold text-[#2F6B4F] flex items-center gap-1">
-                      <span className="w-4 h-4 rounded-full bg-[#2F6B4F]/10 text-[#2F6B4F] flex items-center justify-center text-[10px]">1</span>
-                      Add Subdomain
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 pt-1">
+                  {/* Step 1 */}
+                  <div className="p-3.5 rounded-xl bg-white border border-[#11140F]/8 space-y-1.5 shadow-2xs">
+                    <div className="font-bold text-[#2F6B4F] flex items-center gap-1.5 text-[13px]">
+                      <span className="w-5 h-5 rounded-full bg-[#2F6B4F] text-white flex items-center justify-center text-[11px] font-bold">1</span>
+                      Enter Subdomain
                     </div>
-                    <p className="text-[11.5px] text-[#11140F]/65 leading-relaxed">
-                      Enter your subdomain below (e.g. <code className="font-mono text-[#11140F]/85">qr.yourbrand.com</code>) and click Add.
+                    <p className="text-[12px] text-[#11140F]/70 leading-relaxed">
+                      In the input box below, type your desired subdomain (e.g. <code className="font-mono text-[#11140F] font-semibold">qr.yourcompany.com</code> or <code className="font-mono text-[#11140F] font-semibold">go.yourbrand.com</code>) and click <strong>"+ Add Domain"</strong>.
                     </p>
                   </div>
 
-                  <div className="p-3 rounded-lg bg-white border border-[#11140F]/8 space-y-1">
-                    <div className="font-bold text-[#2F6B4F] flex items-center gap-1">
-                      <span className="w-4 h-4 rounded-full bg-[#2F6B4F]/10 text-[#2F6B4F] flex items-center justify-center text-[10px]">2</span>
-                      Add DNS CNAME
+                  {/* Step 2 */}
+                  <div className="p-3.5 rounded-xl bg-white border border-[#11140F]/8 space-y-2 shadow-2xs">
+                    <div className="font-bold text-[#2F6B4F] flex items-center gap-1.5 text-[13px]">
+                      <span className="w-5 h-5 rounded-full bg-[#2F6B4F] text-white flex items-center justify-center text-[11px] font-bold">2</span>
+                      Add 2 DNS Records
                     </div>
-                    <p className="text-[11.5px] text-[#11140F]/65 leading-relaxed">
-                      In your domain registrar (Namecheap, GoDaddy, Cloudflare), add a CNAME record pointing to <code className="font-mono text-[#11140F]/85">cname.vercel-dns.com</code>.
-                    </p>
+                    <div className="text-[11.5px] text-[#11140F]/75 space-y-1.5 leading-snug">
+                      <p>In your registrar (Namecheap, GoDaddy, Cloudflare, etc.):</p>
+                      <div className="p-2 rounded-lg bg-[#F7F8F5] border border-[#11140F]/8 font-mono text-[11px] space-y-1">
+                        <div><strong>• CNAME:</strong> Host <code className="text-[#2F6B4F]">qr</code> &rarr; <code className="text-[#11140F]">cname.vercel-dns.com</code></div>
+                        <div><strong>• TXT:</strong> Host <code className="text-[#2F6B4F]">_dynamicqr.qr</code> &rarr; copy TXT value</div>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="p-3 rounded-lg bg-white border border-[#11140F]/8 space-y-1">
-                    <div className="font-bold text-[#2F6B4F] flex items-center gap-1">
-                      <span className="w-4 h-4 rounded-full bg-[#2F6B4F]/10 text-[#2F6B4F] flex items-center justify-center text-[10px]">3</span>
-                      Verify & Print
+                  {/* Step 3 */}
+                  <div className="p-3.5 rounded-xl bg-white border border-[#11140F]/8 space-y-1.5 shadow-2xs">
+                    <div className="font-bold text-[#2F6B4F] flex items-center gap-1.5 text-[13px]">
+                      <span className="w-5 h-5 rounded-full bg-[#2F6B4F] text-white flex items-center justify-center text-[11px] font-bold">3</span>
+                      Verify DNS & Print
                     </div>
-                    <p className="text-[11.5px] text-[#11140F]/65 leading-relaxed">
-                      Click "Verify DNS". All your QR flyer short links will immediately display under your branded domain!
+                    <p className="text-[12px] text-[#11140F]/70 leading-relaxed">
+                      Click <strong>"Verify DNS"</strong> (or <strong>"Instant Verify (Test Mode)"</strong>). The badge changes to <span className="text-emerald-700 font-bold">Active & Verified</span>, and all your QR links and print posters will serve directly from your custom domain!
                     </p>
                   </div>
                 </div>

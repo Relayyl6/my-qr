@@ -35,7 +35,15 @@ function timeAgo(date: Date | null) {
   return `Scanned ${days}d ago`;
 }
 
-export default function LinkList({ links }: { links: QrLink[] }) {
+export default function LinkList({
+  links,
+  userTier = 'free',
+  isAdmin = false,
+}: {
+  links: QrLink[];
+  userTier?: string;
+  isAdmin?: boolean;
+}) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
@@ -220,6 +228,8 @@ export default function LinkList({ links }: { links: QrLink[] }) {
                     shortCode={link.shortCode}
                     label={link.label}
                     customDomain={link.customDomain?.domain}
+                    userTier={userTier}
+                    isAdmin={isAdmin}
                   />
 
                   <div className="flex-1 min-w-0 space-y-2">
@@ -387,15 +397,26 @@ export default function LinkList({ links }: { links: QrLink[] }) {
                             ? 'Edit Mobile Page'
                             : 'Prompt-to-Page'}
                         </button>
-                        <a
-                          href={`/api/links/${link.id}/export`}
-                          download
-                          title="Download complete scan history as CSV"
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#11140F]/15 bg-white hover:bg-[#EEF0EA] text-[11px] font-medium text-[#11140F]/75 transition-colors"
-                        >
-                          <Download className="w-3 h-3 text-[#11140F]/60" />
-                          Export CSV
-                        </a>
+                        {isAdmin || ['pro', 'plus', 'ultra'].includes(userTier.toLowerCase()) ? (
+                          <a
+                            href={`/api/links/${link.id}/export`}
+                            download
+                            title="Download complete scan history as CSV"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#11140F]/15 bg-white hover:bg-[#EEF0EA] text-[11px] font-medium text-[#11140F]/75 transition-colors"
+                          >
+                            <Download className="w-3 h-3 text-[#11140F]/60" />
+                            Export CSV
+                          </a>
+                        ) : (
+                          <a
+                            href="/pricing"
+                            title="Unlock CSV scan history downloads on Pro, Plus, or Ultra"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#11140F]/10 bg-[#11140F]/[0.03] text-[11px] font-medium text-[#11140F]/45 hover:text-[#11140F] transition-colors"
+                          >
+                            <Download className="w-3 h-3 opacity-40" />
+                            CSV (Pro)
+                          </a>
+                        )}
                       </div>
                     )}
                   </div>

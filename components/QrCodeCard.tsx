@@ -10,9 +10,17 @@ interface Props {
   shortCode: string;
   label?: string | null;
   customDomain?: string | null;
+  userTier?: string;
+  isAdmin?: boolean;
 }
 
-export default function QrCodeCard({ shortCode, label, customDomain }: Props) {
+export default function QrCodeCard({
+  shortCode,
+  label,
+  customDomain,
+  userTier = 'free',
+  isAdmin = false,
+}: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -236,6 +244,8 @@ export default function QrCodeCard({ shortCode, label, customDomain }: Props) {
         shortCode={shortCode}
         label={label}
         url={url}
+        userTier={userTier}
+        isAdmin={isAdmin}
       />
     </>
   );

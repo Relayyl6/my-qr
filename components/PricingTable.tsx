@@ -206,7 +206,11 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span><strong>Physical Print Kits</strong> (Table tents & badges)</span>
+                <span><strong>Configurable Print Studio</strong> (Hide footers & slugs, color themes)</span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
+                <span><strong>CSV Scan History</strong> download</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
@@ -297,19 +301,23 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
+                <span><strong>100% White-Label Prints</strong> (Zero watermarks, custom logos)</span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
+                <span><strong>Full-Page Posters</strong> (A4 & Letter size kits)</span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
                 <span><strong>AI QR Art Studio</strong> (Stylized icons)</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span>25 Mobile Landing Pages</span>
+                <span>25 Mobile Landing Pages with custom buttons</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
                 <span>Bulk CSV link creator (up to 500)</span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span>Priority email usage warnings</span>
               </li>
             </ul>
           </div>
