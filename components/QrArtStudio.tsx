@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useId } from 'react';
-import { QRCodeSVG } from 'qrcode.react';
+import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react';
 import { generateQrArtSpecAction, saveQrArtworkAction } from '@/lib/ai/features/qr-artist';
 import { QrStyleSpec } from '@/lib/ai/prompts/qr-artist.v1';
 import { ScannabilityResult } from '@/lib/qr/scannability';
@@ -65,12 +65,12 @@ const ART_PRESETS: ArtPreset[] = [
   },
   {
     name: 'Cyberpunk Neon',
-    prompt: 'Cyberpunk Neon Electric Indigo with Radiant Cyan Glow & Obsidian Shadow',
-    fgColor: '#312E81',
+    prompt: 'Cyberpunk Neon Electric Indigo with Radiant Cyan Glow & Vivid Violet',
+    fgColor: '#06B6D4',
     gradientColors: ['#4338CA', '#06B6D4'],
     accentColor: '#38BDF8',
-    cornerDotColor: '#4F46E5',
-    bgColor: '#F8FAFC',
+    cornerDotColor: '#818CF8',
+    bgColor: '#05050A',
     emblem: 'sparkles',
   },
   {
@@ -158,6 +158,8 @@ export default function QrArtStudio({
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
   const qrRef = useRef<HTMLDivElement>(null);
+  const hiddenCanvasRef = useRef<HTMLDivElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
 
   const qrUrl = typeof window !== 'undefined'
     ? `${window.location.origin}/id/${shortCode}`
@@ -226,107 +228,122 @@ export default function QrArtStudio({
 
   const emblemUri = getEmblemSvgDataUri(centerEmblem, initialChar, styleSpec.fgColor);
 
-  // High-Resolution 300 DPI Poster Download
+  // High-Resolution 300 DPI Poster Download (Fail-Proof Gradient & Emblem Rendering)
   const handleDownloadPng = () => {
-    if (!qrRef.current) return;
-    const svg = qrRef.current.querySelector('svg');
-    if (!svg) return;
-
-    const svgData = new XMLSerializer().serializeToString(svg);
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    const img = new Image();
+    const originalCanvas = hiddenCanvasRef.current?.querySelector('canvas');
+    if (!originalCanvas) return;
 
     const canvasWidth = 1080;
     const canvasHeight = 1350;
+    const canvas = document.createElement('canvas');
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
-    img.onload = () => {
-      if (!ctx) return;
+    // 1. Fill canvas background with subtle art palette gradient
+    const grad = ctx.createLinearGradient(0, 0, canvasWidth, canvasHeight);
+    grad.addColorStop(0, styleSpec.bgColor || '#FFFFFF');
+    grad.addColorStop(1, styleSpec.gradientColors?.[1] ? `${styleSpec.gradientColors[1]}25` : '#FFFFFF');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-      // Fill canvas background with subtle gradient
-      const grad = ctx.createLinearGradient(0, 0, canvasWidth, canvasHeight);
-      grad.addColorStop(0, styleSpec.bgColor || '#FFFFFF');
-      grad.addColorStop(1, styleSpec.gradientColors?.[1] ? `${styleSpec.gradientColors[1]}20` : '#FFFFFF');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    // 2. Outer designer border frame
+    ctx.strokeStyle = `${styleSpec.fgColor}30`;
+    ctx.lineWidth = 4;
+    ctx.strokeRect(40, 40, canvasWidth - 80, canvasHeight - 80);
 
-      // Outer border frame
-      ctx.strokeStyle = `${styleSpec.fgColor}25`;
-      ctx.lineWidth = 4;
-      ctx.strokeRect(40, 40, canvasWidth - 80, canvasHeight - 80);
+    // 3. Header Title
+    const displayName = label?.trim() || `/${shortCode}`;
+    ctx.fillStyle = styleSpec.fgColor;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = 'bold 48px system-ui, -apple-system, sans-serif';
 
-      // Header Title
-      const displayName = label?.trim() || `/${shortCode}`;
-      ctx.fillStyle = styleSpec.fgColor;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.font = 'bold 48px system-ui, -apple-system, sans-serif';
+    const maxChars = 30;
+    const truncatedTitle = displayName.length > maxChars ? `${displayName.slice(0, maxChars)}…` : displayName;
+    ctx.fillText(truncatedTitle, canvasWidth / 2, 130);
 
-      const maxChars = 30;
-      const truncatedTitle = displayName.length > maxChars ? `${displayName.slice(0, maxChars)}…` : displayName;
-      ctx.fillText(truncatedTitle, canvasWidth / 2, 130);
+    if (label?.trim()) {
+      ctx.fillStyle = `${styleSpec.fgColor}90`;
+      ctx.font = '500 28px monospace';
+      ctx.fillText(`/id/${shortCode}`, canvasWidth / 2, 185);
+    }
 
-      if (label?.trim()) {
-        ctx.fillStyle = `${styleSpec.fgColor}90`;
-        ctx.font = '500 28px monospace';
-        ctx.fillText(`/id/${shortCode}`, canvasWidth / 2, 185);
-      }
+    // 4. White QR card backing with shadow
+    const qrCardSize = 780;
+    const qrCardX = (canvasWidth - qrCardSize) / 2;
+    const qrCardY = 240;
 
-      // Draw QR Code centered on a clean white card
-      const qrCardSize = 780;
-      const qrCardX = (canvasWidth - qrCardSize) / 2;
-      const qrCardY = 240;
+    ctx.fillStyle = '#FFFFFF';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.08)';
+    ctx.shadowBlur = 30;
+    ctx.shadowOffsetY = 10;
+    ctx.fillRect(qrCardX, qrCardY, qrCardSize, qrCardSize);
+    ctx.shadowColor = 'transparent';
 
-      ctx.fillStyle = '#FFFFFF';
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.08)';
-      ctx.shadowBlur = 30;
-      ctx.shadowOffsetY = 10;
-      ctx.fillRect(qrCardX, qrCardY, qrCardSize, qrCardSize);
-      ctx.shadowColor = 'transparent';
+    // 5. Offscreen canvas for generative gradient modules
+    const qrTile = document.createElement('canvas');
+    qrTile.width = 1024;
+    qrTile.height = 1024;
+    const tileCtx = qrTile.getContext('2d');
+    if (tileCtx) {
+      tileCtx.imageSmoothingEnabled = false;
+      tileCtx.drawImage(originalCanvas, 0, 0, 1024, 1024);
 
-      const qrDrawSize = 720;
-      const qrDrawOffset = (qrCardSize - qrDrawSize) / 2;
-      ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(img, qrCardX + qrDrawOffset, qrCardY + qrDrawOffset, qrDrawSize, qrDrawSize);
+      // Mask artistic gradient into modules
+      tileCtx.globalCompositeOperation = 'source-in';
+      const tileGrad = tileCtx.createLinearGradient(0, 0, 1024, 1024);
+      tileGrad.addColorStop(0, styleSpec.gradientColors[0] || styleSpec.fgColor);
+      tileGrad.addColorStop(1, styleSpec.gradientColors[1] || styleSpec.fgColor);
+      tileCtx.fillStyle = tileGrad;
+      tileCtx.fillRect(0, 0, 1024, 1024);
+    }
 
-      // Pill URL Button
-      const pillWidth = 580;
-      const pillHeight = 70;
-      const pillX = (canvasWidth - pillWidth) / 2;
-      const pillY = 1060;
+    // 6. Draw the gradient QR code onto the white card
+    const qrDrawSize = 720;
+    const qrDrawOffset = (qrCardSize - qrDrawSize) / 2;
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(qrTile, qrCardX + qrDrawOffset, qrCardY + qrDrawOffset, qrDrawSize, qrDrawSize);
 
-      ctx.fillStyle = styleSpec.fgColor;
-      const radius = 35;
-      ctx.beginPath();
-      ctx.moveTo(pillX + radius, pillY);
-      ctx.lineTo(pillX + pillWidth - radius, pillY);
-      ctx.quadraticCurveTo(pillX + pillWidth, pillY, pillX + pillWidth, pillY + radius);
-      ctx.lineTo(pillX + pillWidth, pillY + pillHeight - radius);
-      ctx.quadraticCurveTo(pillX + pillWidth, pillY + pillHeight, pillX + pillWidth - radius, pillY + pillHeight);
-      ctx.lineTo(pillX + radius, pillY + pillHeight);
-      ctx.quadraticCurveTo(pillX, pillY + pillHeight, pillX, pillY + pillHeight - radius);
-      ctx.lineTo(pillX, pillY + radius);
-      ctx.quadraticCurveTo(pillX, pillY, pillX + radius, pillY);
-      ctx.closePath();
-      ctx.fill();
+    // 7. Pill URL Button
+    const pillWidth = 580;
+    const pillHeight = 70;
+    const pillX = (canvasWidth - pillWidth) / 2;
+    const pillY = 1060;
 
-      // Draw URL text inside pill
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = 'bold 26px monospace';
-      const cleanUrl = qrUrl.replace(/^https?:\/\//, '');
-      ctx.fillText(cleanUrl, canvasWidth / 2, pillY + pillHeight / 2);
+    ctx.fillStyle = styleSpec.fgColor;
+    const radius = 35;
+    ctx.beginPath();
+    ctx.moveTo(pillX + radius, pillY);
+    ctx.lineTo(pillX + pillWidth - radius, pillY);
+    ctx.quadraticCurveTo(pillX + pillWidth, pillY, pillX + pillWidth, pillY + radius);
+    ctx.lineTo(pillX + pillWidth, pillY + pillHeight - radius);
+    ctx.quadraticCurveTo(pillX + pillWidth, pillY + pillHeight, pillX + pillWidth - radius, pillY + pillHeight);
+    ctx.lineTo(pillX + radius, pillY + pillHeight);
+    ctx.quadraticCurveTo(pillX, pillY + pillHeight, pillX, pillY + pillHeight - radius);
+    ctx.lineTo(pillX, pillY + radius);
+    ctx.quadraticCurveTo(pillX, pillY, pillX + radius, pillY);
+    ctx.closePath();
+    ctx.fill();
 
-      // Footer
-      ctx.fillStyle = `${styleSpec.fgColor}80`;
-      ctx.font = 'bold 20px system-ui, -apple-system, sans-serif';
-      ctx.fillText('SCAN WITH CAMERA TO OPEN', canvasWidth / 2, 1190);
+    // Draw URL text inside pill
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 26px monospace';
+    const cleanUrl = qrUrl.replace(/^https?:\/\//, '');
+    ctx.fillText(cleanUrl, canvasWidth / 2, pillY + pillHeight / 2);
 
-      ctx.fillStyle = `${styleSpec.fgColor}60`;
-      ctx.font = '500 16px system-ui, -apple-system, sans-serif';
-      ctx.fillText(`DynamicQR • ${styleSpec.artisticStyle} Edition`, canvasWidth / 2, 1235);
+    // 8. Footer prompts
+    ctx.fillStyle = `${styleSpec.fgColor}80`;
+    ctx.font = 'bold 20px system-ui, -apple-system, sans-serif';
+    ctx.fillText('SCAN WITH CAMERA TO OPEN', canvasWidth / 2, 1190);
 
+    ctx.fillStyle = `${styleSpec.fgColor}60`;
+    ctx.font = '500 16px system-ui, -apple-system, sans-serif';
+    ctx.fillText(`DynamicQR • ${styleSpec.artisticStyle} Edition`, canvasWidth / 2, 1235);
+
+    // 9. Download helper
+    const triggerFileDownload = () => {
       const a = document.createElement('a');
       const safeName = (label || shortCode).toLowerCase().replace(/[^a-z0-9]/g, '-');
       a.download = `artistic-qr-${safeName}.png`;
@@ -334,14 +351,46 @@ export default function QrArtStudio({
       a.click();
     };
 
-    img.src = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgData)))}`;
+    // 10. Center Brand Emblem drawing (if enabled)
+    if (centerEmblem !== 'none' && emblemUri) {
+      const emblemImg = new Image();
+      emblemImg.onload = () => {
+        const emblemSize = 166;
+        const emblemX = (canvasWidth - emblemSize) / 2;
+        const emblemY = qrCardY + (qrCardSize - emblemSize) / 2;
+        ctx.drawImage(emblemImg, emblemX, emblemY, emblemSize, emblemSize);
+        triggerFileDownload();
+      };
+      emblemImg.onerror = () => {
+        triggerFileDownload();
+      };
+      emblemImg.src = emblemUri;
+    } else {
+      triggerFileDownload();
+    }
   };
 
+  // Pure Vector SVG Export with Self-Contained Gradient Defs
   const handleDownloadSvg = () => {
-    if (!qrRef.current) return;
-    const svg = qrRef.current.querySelector('svg');
-    if (!svg) return;
-    const markup = extractCleanSvgMarkup(svg, label || shortCode, qrUrl);
+    if (!svgRef.current) return;
+    const cloned = svgRef.current.cloneNode(true) as SVGSVGElement;
+    cloned.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    cloned.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+
+    // Ensure self-contained defs with gradient inside exported SVG file
+    let defs = cloned.querySelector('defs');
+    if (!defs) {
+      defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      cloned.insertBefore(defs, cloned.firstChild);
+    }
+    defs.innerHTML = `
+      <linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="${styleSpec.gradientColors[0]}" />
+        <stop offset="100%" stop-color="${styleSpec.gradientColors[1]}" />
+      </linearGradient>
+    `;
+
+    const markup = extractCleanSvgMarkup(cloned, label || shortCode, qrUrl);
     const safeName = (label || shortCode).toLowerCase().replace(/[^a-z0-9]/g, '-');
     downloadSvgFile(`artistic-qr-${safeName}.svg`, markup);
   };
@@ -499,6 +548,7 @@ export default function QrArtStudio({
 
             <div className="bg-white p-3.5 rounded-2xl shadow-inner border border-black/5">
               <QRCodeSVG
+                ref={svgRef}
                 value={qrUrl}
                 size={190}
                 level="H"
@@ -519,6 +569,30 @@ export default function QrArtStudio({
                 }
               />
             </div>
+          </div>
+
+          {/* Offscreen High-Res Canvas for 100% Robust 300 DPI Export */}
+          <div ref={hiddenCanvasRef} className="hidden" aria-hidden="true">
+            <QRCodeCanvas
+              value={qrUrl}
+              size={1024}
+              level="H"
+              includeMargin={false}
+              bgColor="rgba(0,0,0,0)"
+              fgColor="#000000"
+              imageSettings={
+                centerEmblem !== 'none'
+                  ? {
+                      src: emblemUri,
+                      x: undefined,
+                      y: undefined,
+                      height: 236,
+                      width: 236,
+                      excavate: true,
+                    }
+                  : undefined
+              }
+            />
           </div>
 
           <div className="space-y-3.5 flex-1 min-w-0">

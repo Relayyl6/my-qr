@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { QRCodeSVG } from 'qrcode.react';
+import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react';
 import {
   Download,
   X,
@@ -77,14 +77,10 @@ export default function ExportCustomizerModal({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Get source SVG from hidden QR element
+    const originalCanvas = hiddenQrRef.current?.querySelector('canvas');
     const svg = hiddenQrRef.current?.querySelector('svg');
-    if (!svg) return;
 
-    const svgData = new XMLSerializer().serializeToString(svg);
-    const img = new Image();
-
-    img.onload = () => {
+    const drawWithSource = (source: CanvasImageSource) => {
       // Dimensions based on layout mode
       let width = 1080;
       let height = 1080;
@@ -138,14 +134,14 @@ export default function ExportCustomizerModal({
       // If Zero Margin, just draw pure QR code and exit!
       if (layoutMode === 'zero-margin') {
         ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(img, 0, 0, width, height);
+        ctx.drawImage(source, 0, 0, width, height);
         return;
       }
 
       // Minimal mode: pure QR code with clean margin
       if (layoutMode === 'minimal') {
         ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(img, qrX, qrY, qrSize, qrSize);
+        ctx.drawImage(source, qrX, qrY, qrSize, qrSize);
         return;
       }
 
@@ -177,7 +173,7 @@ export default function ExportCustomizerModal({
 
       // Draw QR Code
       ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(img, qrX, qrY, qrSize, qrSize);
+      ctx.drawImage(source, qrX, qrY, qrSize, qrSize);
 
       let bottomY = qrY + qrSize + 40;
 
@@ -231,7 +227,17 @@ export default function ExportCustomizerModal({
       }
     };
 
-    img.src = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgData)))}`;
+    if (originalCanvas) {
+      drawWithSource(originalCanvas);
+      return;
+    }
+
+    if (svg) {
+      const svgData = new XMLSerializer().serializeToString(svg);
+      const img = new Image();
+      img.onload = () => drawWithSource(img);
+      img.src = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgData)))}`;
+    }
   };
 
   const handleDownloadPng = () => {
@@ -348,8 +354,9 @@ export default function ExportCustomizerModal({
           </button>
         </div>
 
-        {/* Hidden Source QR SVG for canvas rendering */}
+        {/* Hidden Source QR Canvas & SVG for instant rendering */}
         <div ref={hiddenQrRef} className="hidden" aria-hidden="true">
+          <QRCodeCanvas value={url} size={1024} level="H" includeMargin={false} />
           <QRCodeSVG value={url} size={1024} level="H" includeMargin={false} />
         </div>
 

@@ -21,49 +21,86 @@ export const prompt: PromptDefinition<{ prompt: string }, QrStyleSpec> = {
   cacheTtlSeconds: 86400,
   system: `You are an elite creative director and computational visual designer.
 Translate artistic style prompts into high-contrast, scannable QR code visual palettes.
-CRITICAL CONSTRAINT: Always ensure high contrast (luminance delta) between fgColor and bgColor so mobile phone cameras can effortlessly read the QR code.
-Never generate low-contrast combinations like grey on white or light-yellow on white.
-Always set errorCorrectionLevel to 'H'.`,
+CRITICAL CONSTRAINTS:
+1. Always ensure high contrast (luminance delta) between fgColor and bgColor so mobile phone cameras can effortlessly read the QR code.
+2. For gradientColors, choose 2 rich, vibrant, saturated colors that visibly pop (e.g., Electric Indigo #4338CA to Radiant Cyan #06B6D4 for Cyberpunk; Rich Bronze #78350F to Radiant Gold #D97706 for Luxury; Deep Crimson #9F1239 to Radiant Tangerine #EA580C for Sunset). Never use muddy black or dim greys for gradientColors.
+3. Always set errorCorrectionLevel to 'H'.`,
   buildUserPrompt: (input) => `
 Artistic Prompt: "${input.prompt}"
 
-Generate the precise QR visual specification with high-contrast colors and stylistic flair.
+Generate the precise QR visual specification with high-contrast colors, vibrant gradient pairs, and stylistic flair.
 `,
   schema: qrStyleSpecSchema,
   fallback: (input) => {
     const p = input.prompt.toLowerCase();
-    if (p.includes("emerald") || p.includes("green") || p.includes("nature")) {
+    if (p.includes("cyberpunk") || p.includes("neon") || p.includes("electric") || p.includes("indigo") || p.includes("cyan")) {
       return {
-        fgColor: "#064E3B",
+        fgColor: "#06B6D4",
+        bgColor: "#05050A",
+        accentColor: "#38BDF8",
+        cornerDotColor: "#818CF8",
+        gradientType: "linear",
+        gradientColors: ["#4338CA", "#06B6D4"],
+        artisticStyle: "Cyberpunk Neon",
+        errorCorrectionLevel: "H",
+      };
+    }
+    if (p.includes("emerald") || p.includes("green") || p.includes("nature") || p.includes("botanical")) {
+      return {
+        fgColor: "#059669",
         bgColor: "#F0FDF4",
-        accentColor: "#059669",
+        accentColor: "#10B981",
         cornerDotColor: "#047857",
         gradientType: "linear",
-        gradientColors: ["#ECFDF5", "#D1FAE5"],
+        gradientColors: ["#064E3B", "#059669"],
         artisticStyle: "Emerald Botanical",
         errorCorrectionLevel: "H",
       };
     }
-    if (p.includes("gold") || p.includes("luxury") || p.includes("vip")) {
+    if (p.includes("gold") || p.includes("luxury") || p.includes("vip") || p.includes("amber")) {
       return {
-        fgColor: "#1A1714",
-        bgColor: "#FDFBF7",
-        accentColor: "#B8842E",
-        cornerDotColor: "#94681E",
+        fgColor: "#D97706",
+        bgColor: "#FFFBEB",
+        accentColor: "#F59E0B",
+        cornerDotColor: "#B45309",
         gradientType: "linear",
-        gradientColors: ["#FAF7F2", "#F5EFE6"],
-        artisticStyle: "Luxury Gold",
+        gradientColors: ["#78350F", "#D97706"],
+        artisticStyle: "Warm Gold Foil",
+        errorCorrectionLevel: "H",
+      };
+    }
+    if (p.includes("sunset") || p.includes("ember") || p.includes("crimson") || p.includes("orange")) {
+      return {
+        fgColor: "#EA580C",
+        bgColor: "#FFF1F2",
+        accentColor: "#F97316",
+        cornerDotColor: "#BE123C",
+        gradientType: "linear",
+        gradientColors: ["#9F1239", "#EA580C"],
+        artisticStyle: "Sunset Ember",
+        errorCorrectionLevel: "H",
+      };
+    }
+    if (p.includes("ocean") || p.includes("sapphire") || p.includes("blue") || p.includes("water")) {
+      return {
+        fgColor: "#0284C7",
+        bgColor: "#F0F9FF",
+        accentColor: "#38BDF8",
+        cornerDotColor: "#1D4ED8",
+        gradientType: "linear",
+        gradientColors: ["#1E3A8A", "#0284C7"],
+        artisticStyle: "Oceanic Sapphire",
         errorCorrectionLevel: "H",
       };
     }
     return {
-      fgColor: "#0F172A",
-      bgColor: "#F8FAFC",
-      accentColor: "#3B82F6",
-      cornerDotColor: "#1D4ED8",
+      fgColor: "#18181B",
+      bgColor: "#FFFFFF",
+      accentColor: "#E11D48",
+      cornerDotColor: "#BE123C",
       gradientType: "linear",
-      gradientColors: ["#F1F5F9", "#E2E8F0"],
-      artisticStyle: "Modern Architectural",
+      gradientColors: ["#09090B", "#3F3F46"],
+      artisticStyle: "Swiss Minimalist",
       errorCorrectionLevel: "H",
     };
   },
