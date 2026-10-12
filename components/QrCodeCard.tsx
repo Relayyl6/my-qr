@@ -1,7 +1,10 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
-import { QRCodeCanvas } from 'qrcode.react';
+import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
+import { Download, ChevronDown, FileImage, FileCode, Printer } from 'lucide-react';
+import { downloadSvgFile, extractCleanSvgMarkup } from '@/lib/qr/exportVector';
+import PrintTemplateModal from '@/components/PrintTemplateModal';
 
 interface Props {
   shortCode: string;
@@ -10,16 +13,31 @@ interface Props {
 
 export default function QrCodeCard({ shortCode, label }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
   const [origin, setOrigin] = useState('');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
 
   useEffect(() => {
     setOrigin(window.location.origin);
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const url = origin ? `${origin}/id/${shortCode}` : `https://dynamicqr.co/id/${shortCode}`;
+  const safeName = (label || shortCode).toLowerCase().replace(/[^a-z0-9]/g, '-');
 
-  const handleDownload = () => {
-    // High-resolution 300 DPI print-ready poster canvas
+  // 1. High-Resolution 300 DPI Poster PNG Export
+  const handleDownloadPng = () => {
+    setIsMenuOpen(false);
     const canvasWidth = 1080;
     const canvasHeight = 1350;
 
@@ -29,61 +47,55 @@ export default function QrCodeCard({ shortCode, label }: Props) {
     const ctx = offscreen.getContext('2d');
     if (!ctx) return;
 
-    // 1. Fill clean background
+    // Fill clean background
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-    // 2. Draw subtle border outline
+    // Subtle border outline
     ctx.strokeStyle = 'rgba(17, 20, 15, 0.08)';
     ctx.lineWidth = 4;
     ctx.strokeRect(40, 40, canvasWidth - 80, canvasHeight - 80);
 
-    // 3. Render Top Header (Name / Label)
+    // Header Label / Title
     const displayName = label?.trim() || `/${shortCode}`;
     ctx.fillStyle = '#11140F';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-
-    // Title font
     ctx.font = 'bold 48px system-ui, -apple-system, sans-serif';
-    // Truncate if exceptionally long
+
     const maxChars = 32;
     const truncatedTitle = displayName.length > maxChars ? `${displayName.slice(0, maxChars)}…` : displayName;
     ctx.fillText(truncatedTitle, canvasWidth / 2, 130);
 
-    // Subtitle path if label is distinct
     if (label?.trim()) {
       ctx.fillStyle = 'rgba(17, 20, 15, 0.55)';
       ctx.font = '500 28px monospace';
       ctx.fillText(`/id/${shortCode}`, canvasWidth / 2, 185);
     }
 
-    // 4. Draw QR Code in Center
+    // QR Code in Center
     const originalCanvas = containerRef.current?.querySelector('canvas');
     if (originalCanvas) {
       const qrSize = 740;
       const qrX = (canvasWidth - qrSize) / 2;
       const qrY = 240;
 
-      // Draw white quiet-zone card under QR
       ctx.fillStyle = '#FFFFFF';
       ctx.shadowColor = 'rgba(0, 0, 0, 0.06)';
       ctx.shadowBlur = 30;
       ctx.shadowOffsetY = 10;
       ctx.fillRect(qrX - 20, qrY - 20, qrSize + 40, qrSize + 40);
-      ctx.shadowColor = 'transparent'; // reset shadow
+      ctx.shadowColor = 'transparent';
 
-      // Disable smoothing to ensure pixel-perfect, crisp vector-like modules
       ctx.imageSmoothingEnabled = false;
       ctx.drawImage(originalCanvas, qrX, qrY, qrSize, qrSize);
 
-      // 5. Render Bottom Section (Clean Link Pill & Instructions)
+      // Pill URL Button
       const pillWidth = 580;
       const pillHeight = 70;
       const pillX = (canvasWidth - pillWidth) / 2;
       const pillY = 1060;
 
-      // Draw Pill background
       ctx.fillStyle = '#11140F';
       const radius = 35;
       ctx.beginPath();
@@ -99,13 +111,11 @@ export default function QrCodeCard({ shortCode, label }: Props) {
       ctx.closePath();
       ctx.fill();
 
-      // Draw Full URL inside Pill
       ctx.fillStyle = '#FFFFFF';
       ctx.font = 'bold 26px monospace';
       const cleanUrl = url.replace(/^https?:\/\//, '');
       ctx.fillText(cleanUrl, canvasWidth / 2, pillY + pillHeight / 2);
 
-      // Footer call-to-action
       ctx.fillStyle = 'rgba(17, 20, 15, 0.45)';
       ctx.font = 'bold 20px system-ui, -apple-system, sans-serif';
       ctx.fillText('SCAN WITH CAMERA TO OPEN', canvasWidth / 2, 1190);
@@ -114,39 +124,109 @@ export default function QrCodeCard({ shortCode, label }: Props) {
       ctx.font = '500 16px system-ui, -apple-system, sans-serif';
       ctx.fillText('DynamicQR • Intelligent Physical Redirects', canvasWidth / 2, 1235);
 
-      // Export file
       const link = document.createElement('a');
       link.href = offscreen.toDataURL('image/png');
-      const safeName = (label || shortCode).toLowerCase().replace(/[^a-z0-9]/g, '-');
       link.download = `qr-${safeName}.png`;
       link.click();
-    } else {
-      console.error('Could not find canvas element to export');
     }
   };
 
+  // 2. Pure Vector SVG Export
+  const handleDownloadSvg = () => {
+    setIsMenuOpen(false);
+    if (!svgRef.current) return;
+    const markup = extractCleanSvgMarkup(svgRef.current, label || shortCode, url);
+    downloadSvgFile(`qr-${safeName}.svg`, markup);
+  };
+
+  // 3. Print Templates Dialog
+  const handleOpenPrintTemplates = () => {
+    setIsMenuOpen(false);
+    setIsPrintModalOpen(true);
+  };
+
   return (
-    <div className="flex shrink-0 flex-col items-center gap-1.5 min-w-0">
-      <div
-        ref={containerRef}
-        className="shrink-0 rounded-lg border border-[#11140F]/10 bg-white p-1.5 sm:p-2 shadow-xs"
-        title={`Scan for /id/${shortCode}`}
-      >
-        <QRCodeCanvas value={url} size={68} level="H" includeMargin={false} />
+    <>
+      <div className="flex shrink-0 flex-col items-center gap-1.5 min-w-0">
+        <div
+          ref={containerRef}
+          className="shrink-0 rounded-lg border border-[#11140F]/10 bg-white p-1.5 sm:p-2 shadow-xs relative"
+          title={`Scan for /id/${shortCode}`}
+        >
+          <QRCodeCanvas value={url} size={68} level="H" includeMargin={false} />
+
+          {/* Hidden vector SVG for direct extraction */}
+          <div className="hidden">
+            <QRCodeSVG ref={svgRef} value={url} size={512} level="H" includeMargin={false} />
+          </div>
+        </div>
+
+        <span
+          className="text-[9px] text-[#11140F]/50 font-mono tracking-tight text-center truncate max-w-[80px]"
+          title={`/id/${shortCode}`}
+        >
+          /{shortCode}
+        </span>
+
+        {/* Export Dropdown Trigger */}
+        <div className="relative" ref={menuRef}>
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="rounded-full border border-[#11140F]/15 px-2.5 py-0.5 text-[10px] font-medium text-[#11140F]/75 hover:border-[#11140F]/30 hover:text-[#11140F] transition-colors whitespace-nowrap cursor-pointer flex items-center gap-1 bg-white"
+            title="Download PNG, vector SVG, or print physical templates"
+          >
+            <span>Export</span>
+            <ChevronDown className={`w-3 h-3 transition-transform ${isMenuOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          {/* Dropdown Menu */}
+          {isMenuOpen && (
+            <div className="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 z-30 w-44 rounded-2xl border border-[#11140F]/10 bg-white p-1.5 shadow-xl text-left">
+              <button
+                onClick={handleDownloadPng}
+                className="w-full flex items-center gap-2 px-2.5 py-2 text-[11px] font-medium text-[#11140F] rounded-xl hover:bg-[#EEF0EA] transition-colors"
+              >
+                <FileImage className="w-3.5 h-3.5 text-[#2F6B4F]" />
+                <div className="leading-tight">
+                  <div>Poster PNG</div>
+                  <div className="text-[9px] text-[#11140F]/50">300 DPI high-res</div>
+                </div>
+              </button>
+
+              <button
+                onClick={handleDownloadSvg}
+                className="w-full flex items-center gap-2 px-2.5 py-2 text-[11px] font-medium text-[#11140F] rounded-xl hover:bg-[#EEF0EA] transition-colors"
+              >
+                <FileCode className="w-3.5 h-3.5 text-[#2F6B4F]" />
+                <div className="leading-tight">
+                  <div>Vector SVG</div>
+                  <div className="text-[9px] text-[#11140F]/50">Infinite scale for print</div>
+                </div>
+              </button>
+
+              <button
+                onClick={handleOpenPrintTemplates}
+                className="w-full flex items-center gap-2 px-2.5 py-2 text-[11px] font-medium text-[#11140F] rounded-xl hover:bg-[#EEF0EA] transition-colors"
+              >
+                <Printer className="w-3.5 h-3.5 text-[#2F6B4F]" />
+                <div className="leading-tight">
+                  <div>Print Templates</div>
+                  <div className="text-[9px] text-[#11140F]/50">Table tent, sign, PDF</div>
+                </div>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
-      <span
-        className="text-[9px] text-[#11140F]/50 font-mono tracking-tight text-center truncate max-w-[80px]"
-        title={`/id/${shortCode}`}
-      >
-        /{shortCode}
-      </span>
-      <button
-        onClick={handleDownload}
-        className="rounded-full border border-[#11140F]/15 px-2 py-0.5 text-[10px] font-medium text-[#11140F]/65 hover:border-[#11140F]/30 hover:text-[#11140F] transition-colors whitespace-nowrap cursor-pointer"
-        title="Download 300 DPI print-ready QR image with name & URL"
-      >
-        Download
-      </button>
-    </div>
+
+      {/* Physical Print Template Modal */}
+      <PrintTemplateModal
+        isOpen={isPrintModalOpen}
+        onClose={() => setIsPrintModalOpen(false)}
+        shortCode={shortCode}
+        label={label}
+        url={url}
+      />
+    </>
   );
 }

@@ -13,7 +13,9 @@ import {
   Palette,
   X,
   Check,
+  FileCode,
 } from 'lucide-react';
+import { downloadSvgFile, extractCleanSvgMarkup } from '@/lib/qr/exportVector';
 
 interface QrArtStudioProps {
   linkId: string;
@@ -192,6 +194,15 @@ export default function QrArtStudio({
     img.src = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgData)))}`;
   };
 
+  const handleDownloadSvg = () => {
+    if (!qrRef.current) return;
+    const svg = qrRef.current.querySelector('svg');
+    if (!svg) return;
+    const markup = extractCleanSvgMarkup(svg, label || shortCode, qrUrl);
+    const safeName = (label || shortCode).toLowerCase().replace(/[^a-z0-9]/g, '-');
+    downloadSvgFile(`artistic-qr-${safeName}.svg`, markup);
+  };
+
   const handleSaveArtwork = async () => {
     if (!styleSpec || !scannability) return;
     try {
@@ -340,6 +351,15 @@ export default function QrArtStudio({
               >
                 <Download className="w-3.5 h-3.5" />
                 Download Print PNG (300 DPI)
+              </button>
+              <button
+                type="button"
+                onClick={handleDownloadSvg}
+                className="px-3.5 py-2 rounded-xl border border-[#11140F]/15 bg-white text-[#11140F] text-[12px] font-medium hover:bg-[#EEF0EA] transition-colors flex items-center gap-1.5 cursor-pointer"
+                title="Download scalable SVG for Figma, Illustrator, or print presses"
+              >
+                <FileCode className="w-3.5 h-3.5 text-[#2F6B4F]" />
+                Vector SVG
               </button>
               <button
                 type="button"
