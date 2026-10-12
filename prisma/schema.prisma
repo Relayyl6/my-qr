@@ -20,6 +20,7 @@ model User {
   updatedAt            DateTime       @updatedAt
   
   links         QrLink[]
+  customDomains CustomDomain[]
   aiCredit      AiCredit?
   aiInvocations AiInvocation[]
 }
@@ -41,6 +42,9 @@ model QrLink {
   userId         String?
   user           User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  customDomainId String?
+  customDomain   CustomDomain?  @relation(fields: [customDomainId], references: [id], onDelete: SetNull)
+
   routingRules   RoutingRule[]
   scans          Scan[]
   artworks       QrArtwork[]
@@ -48,6 +52,7 @@ model QrLink {
 
   @@index([shortCode])
   @@index([userId])
+  @@index([customDomainId])
 }
 
 model RoutingRule {
@@ -136,4 +141,23 @@ model AiCache {
   expiresAt DateTime
 
   @@index([expiresAt])
+}
+
+model CustomDomain {
+  id              String   @id @default(cuid())
+  domain          String   @unique
+  status          String   @default("pending") // 'pending' | 'verified' | 'failed'
+  cnameTarget     String   @default("cname.dynamicqr.co")
+  verificationTxt String
+  
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  links           QrLink[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([domain])
+  @@index([userId])
 }

@@ -8,6 +8,7 @@ import HeaderNav from '@/components/HeaderNav';
 import WorkspaceLocked from '@/components/WorkspaceLocked';
 import CampaignAnalyst from '@/components/CampaignAnalyst';
 import WorkspaceHeaderActions from '@/components/WorkspaceHeaderActions';
+import BrandedDomainsManager from '@/components/BrandedDomainsManager';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -82,6 +83,15 @@ export default async function Home() {
         orderBy: { createdAt: 'desc' },
       })
     : [];
+
+  const customDomains = user
+    ? await prisma.customDomain.findMany({
+        where: { userId: user.id },
+        orderBy: { createdAt: 'desc' },
+      })
+    : [];
+
+  const isAdmin = !!(user && user.email.toLowerCase() === adminEmail);
 
   return (
     <div
@@ -228,6 +238,13 @@ export default async function Home() {
             <div className="space-y-8">
               {/* Feature 3: AI Campaign Analyst Panel */}
               <CampaignAnalyst />
+
+              {/* Feature 4: Custom Branded Domains (Plus & Ultra) */}
+              <BrandedDomainsManager
+                initialDomains={customDomains}
+                userTier={user.tier || 'free'}
+                isAdmin={isAdmin}
+              />
 
               {/* Link creation & Link list workspace */}
               <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-6 items-start w-full min-w-0">

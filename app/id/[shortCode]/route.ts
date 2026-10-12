@@ -26,6 +26,7 @@ export async function GET(
         orderBy: { priority: 'desc' },
       },
       landingPage: true,
+      customDomain: true,
     },
   });
 
