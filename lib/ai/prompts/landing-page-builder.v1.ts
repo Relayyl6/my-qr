@@ -5,6 +5,7 @@ import { landingPageSpecSchema, LandingPageSpec } from "@/lib/landing/types";
 export interface LandingPageBuilderInput {
   prompt: string;
   businessName?: string;
+  destinationUrl?: string;
 }
 
 export const prompt: PromptDefinition<LandingPageBuilderInput, LandingPageSpec> = {
@@ -23,12 +24,15 @@ Include:
   buildUserPrompt: (input) => `
 Business Name / Context: ${input.businessName || "Mobile Landing"}
 User Prompt: "${input.prompt}"
+Primary Destination URL: ${input.destinationUrl || "https://example.com"}
 
 Generate the complete structured landing page specification.
+CRITICAL RULE: The primary call-to-action button in the LinkList block MUST have its "url" set to "${input.destinationUrl || "https://example.com"}" so customers arrive at the owner's actual destination website.
 `,
   schema: landingPageSpecSchema,
   fallback: (input) => {
     const name = input.businessName || "My Showcase";
+    const mainUrl = input.destinationUrl || "https://example.com";
     return {
       businessName: name,
       bio: "Welcome to our official mobile destination.",
@@ -52,7 +56,7 @@ Generate the complete structured landing page specification.
           items: [
             {
               title: "Visit Main Website",
-              url: "https://example.com",
+              url: mainUrl,
               subtitle: "Explore our full catalog & company info",
               highlight: true,
             },

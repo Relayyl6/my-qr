@@ -19,6 +19,7 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
     }
 
     if (!isLoggedIn) {
+      alert(`Please sign in to your DynamicQR account to activate the ${planId.toUpperCase()} plan.`);
       window.location.href = '/#workspace';
       return;
     }

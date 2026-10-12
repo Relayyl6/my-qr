@@ -55,22 +55,26 @@ export async function POST(req: NextRequest) {
     // Check or create Stripe Customer
     let customerId = user.stripeCustomerId;
     if (!customerId) {
-      const customer = await stripe.customers.create({
-        email: user.email,
-        name: user.name || undefined,
-        metadata: { userId: user.id },
-      });
-      customerId = customer.id;
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { stripeCustomerId: customerId },
-      });
+      try {
+        const customer = await stripe.customers.create({
+          email: user.email,
+          name: user.name || undefined,
+          metadata: { userId: user.id },
+        });
+        customerId = customer.id;
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { stripeCustomerId: customerId },
+        });
+      } catch (custErr: any) {
+        console.warn("[Billing] Stripe customer create non-fatal warning:", custErr.message);
+      }
     }
 
-    const session = await stripe.checkout.sessions.create({
-      customer: customerId,
-      line_items: [
-        {
+    const configuredPriceId = interval === "year" ? plan.priceIdYearly : plan.priceIdMonthly;
+    const lineItem = configuredPriceId && configuredPriceId.startsWith("price_")
+      ? { price: configuredPriceId, quantity: 1 }
+      : {
           price_data: {
             currency: "usd",
             product_data: {
@@ -83,8 +87,10 @@ export async function POST(req: NextRequest) {
             },
           },
           quantity: 1,
-        },
-      ],
+        };
+
+    const sessionParams: any = {
+      line_items: [lineItem],
       mode: "subscription",
       success_url: `${origin}/billing/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/pricing`,
@@ -92,7 +98,15 @@ export async function POST(req: NextRequest) {
         userId: user.id,
         tier: planId,
       },
-    });
+    };
+
+    if (customerId) {
+      sessionParams.customer = customerId;
+    } else {
+      sessionParams.customer_email = user.email;
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams);
 
     return NextResponse.json({ url: session.url });
   } catch (error: any) {

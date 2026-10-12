@@ -7,7 +7,8 @@ import DeleteConfirmModal from './DeleteConfirmModal';
 import AiRoutingComposer from './AiRoutingComposer';
 import QrArtStudio from './QrArtStudio';
 import LandingPageEditor from './LandingPageEditor';
-import { Sparkles, Compass, Palette, Smartphone, Activity, CheckCircle2, AlertTriangle, Download } from 'lucide-react';
+import { Sparkles, Compass, Palette, Smartphone, Activity, CheckCircle2, AlertTriangle, Download, ExternalLink } from 'lucide-react';
+import { revertLandingPageAction } from '@/lib/ai/features/landing-page-builder';
 
 interface QrLink {
   id: string;
@@ -18,6 +19,7 @@ interface QrLink {
   isArchived: boolean;
   scanCount: number;
   lastScannedAt: Date | null;
+  landingPage?: { id: string; spec: any; published: boolean } | null;
 }
 
 function timeAgo(date: Date | null) {
@@ -41,6 +43,7 @@ export default function LinkList({ links }: { links: QrLink[] }) {
   const [origin, setOrigin] = useState('');
   const [healthMap, setHealthMap] = useState<Record<string, { ok: boolean; status?: number; error?: string }>>({});
   const [checkingHealthId, setCheckingHealthId] = useState<string | null>(null);
+  const [revertingId, setRevertingId] = useState<string | null>(null);
 
   // AI Feature Modals state
   const [activeRouterLink, setActiveRouterLink] = useState<QrLink | null>(null);
@@ -50,6 +53,21 @@ export default function LinkList({ links }: { links: QrLink[] }) {
   useEffect(() => {
     setOrigin(window.location.origin);
   }, []);
+
+  const handleQuickRevert = async (linkId: string) => {
+    if (!confirm('Revert this link back to direct URL redirection? (Your mobile showcase page will be unlinked)')) {
+      return;
+    }
+    setRevertingId(linkId);
+    try {
+      await revertLandingPageAction(linkId);
+      window.location.reload();
+    } catch (err: any) {
+      alert('Failed to revert: ' + err.message);
+    } finally {
+      setRevertingId(null);
+    }
+  };
 
   const handleCheckHealth = async (id: string, url: string) => {
     setCheckingHealthId(id);
@@ -249,6 +267,35 @@ export default function LinkList({ links }: { links: QrLink[] }) {
                           </button>
                         </div>
                       </form>
+                    ) : link.type === 'landing-page' && link.landingPage?.published ? (
+                      <div className="rounded-xl border border-blue-200 bg-blue-50/70 p-3 min-w-0 w-full space-y-1.5">
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                          <div className="flex items-center gap-1.5 text-[11.5px] font-semibold text-blue-900">
+                            <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse shrink-0" />
+                            <span>Mobile Page Live</span>
+                            <a
+                              href={`/page/${link.shortCode}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[10.5px] font-mono bg-blue-100 text-blue-800 hover:text-blue-950 px-1.5 py-0.5 rounded underline flex items-center gap-0.5"
+                            >
+                              /page/{link.shortCode}
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </a>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleQuickRevert(link.id)}
+                            disabled={revertingId === link.id}
+                            className="text-[11px] font-semibold text-red-600 hover:text-red-700 underline cursor-pointer"
+                          >
+                            {revertingId === link.id ? 'Reverting…' : 'Revert to Direct URL'}
+                          </button>
+                        </div>
+                        <p className="text-[11px] text-blue-800/80 truncate">
+                          Primary destination: <span className="font-mono text-blue-950 font-medium">{link.destinationUrl}</span>
+                        </p>
+                      </div>
                     ) : (
                       <div className="rounded-lg bg-[#EEF0EA] p-2 min-w-0 w-full overflow-hidden">
                         <p className="text-[9px] text-[#11140F]/40 uppercase tracking-wider font-medium">
@@ -322,10 +369,16 @@ export default function LinkList({ links }: { links: QrLink[] }) {
                         <button
                           type="button"
                           onClick={() => setActivePageLink(link)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-blue-500/20 bg-blue-50/60 hover:bg-blue-100/80 text-[11px] font-medium text-blue-800 transition-colors"
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border text-[11px] font-medium transition-colors ${
+                            link.type === 'landing-page' && link.landingPage?.published
+                              ? 'border-blue-400 bg-blue-100/80 text-blue-900 font-semibold'
+                              : 'border-blue-500/20 bg-blue-50/60 hover:bg-blue-100/80 text-blue-800'
+                          }`}
                         >
                           <Smartphone className="w-3 h-3 text-blue-600" />
-                          Prompt-to-Page
+                          {link.type === 'landing-page' && link.landingPage?.published
+                            ? 'Edit Mobile Page'
+                            : 'Prompt-to-Page'}
                         </button>
                         <a
                           href={`/api/links/${link.id}/export`}
@@ -377,6 +430,15 @@ export default function LinkList({ links }: { links: QrLink[] }) {
           <LandingPageEditor
             linkId={activePageLink.id}
             shortCode={activePageLink.shortCode}
+            destinationUrl={activePageLink.destinationUrl}
+            initialSpec={activePageLink.landingPage?.spec}
+            isCurrentlyActive={activePageLink.type === 'landing-page' && Boolean(activePageLink.landingPage?.published)}
+            onSaved={() => {
+              window.location.reload();
+            }}
+            onReverted={() => {
+              window.location.reload();
+            }}
             onClose={() => setActivePageLink(null)}
           />
         </div>
