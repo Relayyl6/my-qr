@@ -114,8 +114,13 @@ export default async function PricingPage() {
         </div>
       </main>
 
-      <footer className="border-t border-[#11140F]/10 py-10 text-center text-[13px] text-[#11140F]/45">
-        <p>&copy; {new Date().getFullYear()} DynamicQR. Built with Next.js, Neon PostgreSQL, and Gemini AI.</p>
+      <footer className="border-t border-[#11140F]/10 py-10 max-w-[1200px] mx-auto px-5 flex flex-col sm:flex-row items-center justify-between gap-4 text-[13px] text-[#11140F]/50">
+        <p>&copy; {new Date().getFullYear()} DynamicQR • All rights reserved.</p>
+        <div className="flex items-center gap-6 text-[12.5px]">
+          <Link href="/terms" className="hover:text-[#11140F] transition-colors">Terms</Link>
+          <Link href="/privacy" className="hover:text-[#11140F] transition-colors">Privacy</Link>
+          <Link href="/refund" className="hover:text-[#11140F] transition-colors">Refund Policy</Link>
+        </div>
       </footer>
     </div>
   );

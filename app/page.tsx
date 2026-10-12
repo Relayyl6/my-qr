@@ -250,12 +250,18 @@ export default async function Home() {
         </div>
       </section>
 
-      <footer className="max-w-[1200px] mx-auto px-5 md:px-8 py-10 flex flex-col sm:flex-row items-center justify-between gap-4 text-[13px] text-[#11140F]/45">
+      <footer className="max-w-[1200px] mx-auto px-5 md:px-8 py-10 flex flex-col sm:flex-row items-center justify-between gap-4 text-[13px] text-[#11140F]/55 border-t border-[#11140F]/10">
         <div className="flex items-center gap-2">
           <QrMark className="w-4 h-4" fill="#11140F99" />
-          <span>DynamicQR</span>
+          <span className="font-medium text-[#11140F]">DynamicQR</span>
         </div>
-        <p>One code, printed once. Routed as long as it needs to be.</p>
+        <div className="flex items-center gap-6 flex-wrap text-[12.5px]">
+          <a href="/pricing" className="hover:text-[#11140F] transition-colors">Pricing</a>
+          <a href="/terms" className="hover:text-[#11140F] transition-colors">Terms</a>
+          <a href="/privacy" className="hover:text-[#11140F] transition-colors">Privacy</a>
+          <a href="/refund" className="hover:text-[#11140F] transition-colors">Refund Policy</a>
+        </div>
+        <p className="text-[12px] text-[#11140F]/45">One code, printed once. Routed as long as it needs to be.</p>
       </footer>
     </div>
   );
