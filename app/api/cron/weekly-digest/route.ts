@@ -4,6 +4,7 @@ import { aggregateUserScans } from "@/lib/analytics/aggregate";
 import { runAI } from "@/lib/ai/run";
 import { CampaignAnalystOutput } from "@/lib/ai/prompts/campaign-analyst.v1";
 import "@/lib/ai/prompts/campaign-analyst.v1";
+import { sendEmail, buildWeeklyDigestEmailHtml } from "@/lib/email/send";
 
 export const dynamic = "force-dynamic";
 
@@ -40,11 +41,25 @@ export async function GET(request: Request) {
           cacheKey: `weekly-digest-${user.id}-${Date.now()}`,
         });
 
+        const emailHtml = buildWeeklyDigestEmailHtml({
+          email: user.email,
+          totalScans: stats.totalScans,
+          summary: result.data.summary,
+          recommendations: (result.data.suggestedActions || []).map((a) => `${a.title}: ${a.description}`),
+        });
+
+        const emailResult = await sendEmail({
+          to: user.email,
+          subject: `📈 Your DynamicQR Weekly Report: ${stats.totalScans} scans this week`,
+          html: emailHtml,
+        });
+
         summaries.push({
           userId: user.id,
           email: user.email,
           totalScans: stats.totalScans,
           brief: result.data.summary,
+          emailDispatched: emailResult.success,
         });
       }
     }
