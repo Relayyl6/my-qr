@@ -17,6 +17,7 @@ import {
   ShieldCheck,
   Globe,
   Sparkles,
+  Share2,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 
@@ -42,10 +43,10 @@ export function normalizeLandingUrl(url?: string | null, fallbackUrl?: string | 
   return `https://${trimmed}`;
 }
 
-interface RenderLandingPageProps {
+export interface RenderLandingPageProps {
   spec: LandingPageSpec;
   destinationUrl?: string;
-  forceViewMode?: 'mobile' | 'desktop' | 'responsive';
+  forceViewMode?: 'mobile' | 'tablet' | 'desktop' | 'responsive';
   shortCode?: string;
 }
 
@@ -81,8 +82,8 @@ export function RenderLandingPage({
   const contactBlock = blocks.find((b) => b.type === 'contact') as Extract<LandingBlock, { type: 'contact' }> | undefined;
   const contentBlocks = blocks.filter((b) => b.type !== 'hero');
 
-  // Render Mobile View layout
-  const renderMobileLayout = () => (
+  // 1. MOBILE PHONE LAYOUT (< 640px)
+  const renderMobileView = () => (
     <div
       className="min-h-screen w-full flex flex-col items-center px-4 py-8 selection:bg-emerald-200 transition-colors"
       style={{
@@ -90,13 +91,13 @@ export function RenderLandingPage({
         color: theme.textColor,
       }}
     >
-      <div className="w-full max-w-md space-y-5 transition-all">
+      <div className="w-full max-w-md space-y-4 transition-all">
         {destinationUrl && (
           <a
             href={normalizeLandingUrl(destinationUrl)}
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex items-center justify-between w-full p-2.5 rounded-xl border transition-all text-[12px] font-medium shadow-xs"
+            className="group flex items-center justify-between w-full p-2.5 rounded-xl border transition-all text-[12px] font-medium shadow-2xs"
             style={{
               backgroundColor: `${theme.primaryColor}0D`,
               borderColor: `${theme.primaryColor}26`,
@@ -115,7 +116,7 @@ export function RenderLandingPage({
 
         {blocks.map((block, idx) => (
           <div key={idx} className="w-full">
-            {renderBlock(block, theme, destinationUrl)}
+            {renderMobileBlock(block, theme, destinationUrl)}
           </div>
         ))}
 
@@ -129,15 +130,137 @@ export function RenderLandingPage({
           >
             <span>⚡ Powered by <strong>DynamicQR</strong></span>
             <span>&middot;</span>
-            <span className="underline">Create your free code</span>
+            <span className="underline">Create your code</span>
           </a>
         </div>
       </div>
     </div>
   );
 
-  // Render Desktop-Optimized layout
-  const renderDesktopLayout = () => (
+  // 2. TABLET LAYOUT (640px – 900px)
+  const renderTabletView = () => (
+    <div
+      className="min-h-screen w-full flex flex-col items-center px-6 py-8 selection:bg-emerald-200 transition-colors"
+      style={{
+        backgroundColor: theme.backgroundColor,
+        color: theme.textColor,
+      }}
+    >
+      <div className="w-full max-w-3xl space-y-6">
+        {/* Tablet Top Header Card */}
+        <div
+          className="p-6 rounded-3xl border shadow-sm flex items-center justify-between gap-4"
+          style={{
+            backgroundColor: theme.cardBg,
+            borderColor: `${theme.textColor}15`,
+          }}
+        >
+          <div className="flex items-center gap-4 min-w-0">
+            {heroBlock?.avatarUrl ? (
+              <img
+                src={heroBlock.avatarUrl}
+                alt={spec.businessName}
+                className="w-16 h-16 rounded-2xl object-cover border-2 shrink-0"
+                style={{ borderColor: theme.primaryColor }}
+              />
+            ) : (
+              <div
+                className="w-16 h-16 rounded-2xl flex items-center justify-center font-bold text-white text-2xl shrink-0"
+                style={{ backgroundColor: theme.primaryColor }}
+              >
+                {spec.businessName.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-bold tracking-tight truncate">
+                  {heroBlock?.title || spec.businessName}
+                </h1>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
+                  Verified
+                </span>
+              </div>
+              {(heroBlock?.subtitle || spec.bio) && (
+                <p className="text-[13px] opacity-75 truncate mt-0.5">
+                  {heroBlock?.subtitle || spec.bio}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={handleCopyLink}
+              className="p-2 rounded-xl border bg-white hover:bg-slate-50 transition-colors"
+              style={{ borderColor: `${theme.textColor}15` }}
+              title="Copy link"
+            >
+              {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4 opacity-70" />}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowQrModal(true)}
+              className="p-2 rounded-xl border bg-white hover:bg-slate-50 transition-colors"
+              style={{ borderColor: `${theme.textColor}15` }}
+              title="Scan on mobile"
+            >
+              <Smartphone className="w-4 h-4 text-emerald-700" />
+            </button>
+          </div>
+        </div>
+
+        {/* Primary Destination CTA */}
+        {destinationUrl && (
+          <a
+            href={normalizeLandingUrl(destinationUrl)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex items-center justify-between w-full p-3.5 rounded-2xl border transition-all text-[13px] font-semibold shadow-xs"
+            style={{
+              backgroundColor: `${theme.primaryColor}0D`,
+              borderColor: `${theme.primaryColor}26`,
+              color: theme.textColor,
+            }}
+          >
+            <div className="flex items-center gap-2.5 truncate">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 shrink-0 animate-pulse" />
+              <span className="truncate">
+                Primary Destination: <strong className="underline">{destinationUrl.replace(/^https?:\/\//, '')}</strong>
+              </span>
+            </div>
+            <ArrowUpRight className="w-4 h-4 shrink-0 opacity-70 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+          </a>
+        )}
+
+        {/* Content Blocks in Tablet 2-Column Grid */}
+        <div className="space-y-6">
+          {contentBlocks.map((block, idx) => (
+            <div key={idx} className="w-full">
+              {renderDesktopBlock(block, theme, destinationUrl)}
+            </div>
+          ))}
+        </div>
+
+        {/* Tablet Footer */}
+        <div className="pt-6 pb-4 text-center">
+          <a
+            href={process.env.NEXT_PUBLIC_APP_URL || "https://my-qr-sandy.vercel.app"}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-black/5 hover:bg-black/10 transition-colors text-[11px] opacity-75 hover:opacity-100 font-medium"
+          >
+            <span>⚡ Powered by <strong>DynamicQR</strong></span>
+            <span>&middot;</span>
+            <span className="underline">Create your code</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+
+  // 3. WIDESCREEN DESKTOP BENTO LAYOUT (>= 900px)
+  const renderDesktopView = () => (
     <div
       className="min-h-screen w-full flex flex-col selection:bg-emerald-200 transition-colors"
       style={{
@@ -145,8 +268,11 @@ export function RenderLandingPage({
         color: theme.textColor,
       }}
     >
-      {/* Top Desktop Floating Navigation Header */}
-      <header className="sticky top-0 z-30 px-6 py-4 backdrop-blur-md border-b bg-white/70 transition-all" style={{ borderColor: `${theme.textColor}12` }}>
+      {/* Top Floating Glassmorphism Bar */}
+      <header
+        className="sticky top-0 z-30 px-6 py-3.5 backdrop-blur-md border-b bg-white/75 transition-all"
+        style={{ borderColor: `${theme.textColor}12` }}
+      >
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             {heroBlock?.avatarUrl ? (
@@ -169,7 +295,7 @@ export function RenderLandingPage({
                 <span className="font-bold text-[15px] tracking-tight">{spec.businessName}</span>
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
                   <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                  Verified Destination
+                  Verified Showcase
                 </span>
               </div>
               {spec.bio && (
@@ -199,7 +325,7 @@ export function RenderLandingPage({
               )}
             </button>
 
-            {/* Scan on Phone Button */}
+            {/* Scan on Mobile Button */}
             <button
               type="button"
               onClick={() => setShowQrModal(true)}
@@ -210,7 +336,7 @@ export function RenderLandingPage({
               <span>Scan on Mobile</span>
             </button>
 
-            {/* Main Destination Action */}
+            {/* Main Destination Button */}
             {destinationUrl && (
               <a
                 href={normalizeLandingUrl(destinationUrl)}
@@ -227,11 +353,11 @@ export function RenderLandingPage({
         </div>
       </header>
 
-      {/* Main Desktop Grid */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-10">
+      {/* Main 2-Column Desktop Grid */}
+      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-8">
         <div className="grid grid-cols-12 gap-8 items-start">
-          {/* Left Column: Sticky Brand Profile & Mobile QR Companion */}
-          <div className="col-span-12 lg:col-span-5 xl:col-span-4 space-y-6 lg:sticky lg:top-24">
+          {/* Left Column: Sticky Brand Profile & Mobile Companion QR */}
+          <div className="col-span-12 md:col-span-5 xl:col-span-4 space-y-6 md:sticky md:top-24">
             {/* Elevated Brand Profile Card */}
             <div
               className="rounded-3xl p-7 border shadow-xl backdrop-blur-xs space-y-5"
@@ -300,7 +426,7 @@ export function RenderLandingPage({
                 </a>
               )}
 
-              {/* Contact Details (if contact block exists) */}
+              {/* Contact Details */}
               {contactBlock && (
                 <div className="pt-3 border-t space-y-2.5 text-[12.5px]" style={{ borderColor: `${theme.textColor}12` }}>
                   <span className="text-[11px] font-bold uppercase tracking-wider opacity-60 block">
@@ -356,7 +482,7 @@ export function RenderLandingPage({
               )}
             </div>
 
-            {/* Live QR Smartphone Companion Card */}
+            {/* Live QR Mobile Companion Card */}
             <div
               className="rounded-3xl p-6 border shadow-sm flex items-center gap-4"
               style={{
@@ -373,9 +499,9 @@ export function RenderLandingPage({
                 />
               </div>
               <div className="space-y-1">
-                <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-800">
+                <div className="flex items-center gap-1.5 text-[11.5px] font-bold text-emerald-800">
                   <Smartphone className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Open on Mobile</span>
+                  <span>Open on Smartphone</span>
                 </div>
                 <p className="text-[12px] opacity-75 leading-relaxed">
                   Scan this live code with your phone camera to browse this page natively on mobile.
@@ -384,8 +510,8 @@ export function RenderLandingPage({
             </div>
           </div>
 
-          {/* Right Column: Expansive Desktop Content Grid */}
-          <div className="col-span-12 lg:col-span-7 xl:col-span-8 space-y-6">
+          {/* Right Column: Expansive Content Canvas */}
+          <div className="col-span-12 md:col-span-7 xl:col-span-8 space-y-6">
             {contentBlocks.map((block, idx) => (
               <div key={idx} className="w-full">
                 {renderDesktopBlock(block, theme, destinationUrl)}
@@ -408,72 +534,96 @@ export function RenderLandingPage({
           <span className="underline">Create your free code</span>
         </a>
       </footer>
-
-      {/* Scan on Mobile Modal */}
-      {showQrModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-150"
-          onClick={() => setShowQrModal(false)}
-        >
-          <div
-            className="w-full max-w-sm rounded-3xl bg-white p-7 shadow-2xl text-center space-y-4 border border-slate-100"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="mx-auto w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
-              <QrCode className="w-5 h-5 text-emerald-600" />
-            </div>
-            <div>
-              <h3 className="text-[16px] font-bold text-slate-900">Scan to View on Mobile</h3>
-              <p className="text-[12.5px] text-slate-500 mt-1">
-                Point your phone&apos;s camera at this code to open {spec.businessName}&apos;s mobile showcase.
-              </p>
-            </div>
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 inline-block shadow-inner">
-              <QRCodeSVG
-                value={pageUrl}
-                size={180}
-                level="Q"
-                includeMargin={false}
-              />
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowQrModal(false)}
-              className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-[13px] font-semibold transition-colors cursor-pointer"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 
-  // If forced mode is mobile, return mobile
+  // Modal QR Code Dialog
+  const renderQrModal = () => (
+    showQrModal && (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-150"
+        onClick={() => setShowQrModal(false)}
+      >
+        <div
+          className="w-full max-w-sm rounded-3xl bg-white p-7 shadow-2xl text-center space-y-4 border border-slate-100"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="mx-auto w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
+            <QrCode className="w-5 h-5 text-emerald-600" />
+          </div>
+          <div>
+            <h3 className="text-[16px] font-bold text-slate-900">Scan to View on Mobile</h3>
+            <p className="text-[12.5px] text-slate-500 mt-1">
+              Point your phone&apos;s camera at this code to open {spec.businessName}&apos;s mobile showcase.
+            </p>
+          </div>
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 inline-block shadow-inner">
+            <QRCodeSVG
+              value={pageUrl}
+              size={180}
+              level="Q"
+              includeMargin={false}
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowQrModal(false)}
+            className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-[13px] font-semibold transition-colors cursor-pointer"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    )
+  );
+
+  // Forced View Modes (for Editor Live Previews)
   if (forceViewMode === 'mobile') {
-    return renderMobileLayout();
+    return (
+      <>
+        {renderMobileView()}
+        {renderQrModal()}
+      </>
+    );
   }
 
-  // If forced mode is desktop, return desktop
+  if (forceViewMode === 'tablet') {
+    return (
+      <>
+        {renderTabletView()}
+        {renderQrModal()}
+      </>
+    );
+  }
+
   if (forceViewMode === 'desktop') {
-    return renderDesktopLayout();
+    return (
+      <>
+        {renderDesktopView()}
+        {renderQrModal()}
+      </>
+    );
   }
 
-  // Responsive mode: Phone view on small screens, widescreen desktop view on lg and up
+  // Fluid Responsive Mode: Mobile (< 640px), Tablet (640px-768px), Desktop (>= 768px)
   return (
     <>
-      <div className="block lg:hidden">
-        {renderMobileLayout()}
+      <div className="block sm:hidden">
+        {renderMobileView()}
       </div>
-      <div className="hidden lg:block">
-        {renderDesktopLayout()}
+      <div className="hidden sm:block md:hidden">
+        {renderTabletView()}
       </div>
+      <div className="hidden md:block">
+        {renderDesktopView()}
+      </div>
+      {renderQrModal()}
     </>
   );
 }
 
-// Mobile Block Renderer
-function renderBlock(
+// Mobile Blocks Renderer
+function renderMobileBlock(
   block: LandingBlock,
   theme: LandingPageSpec["theme"],
   destinationUrl?: string
@@ -495,9 +645,9 @@ function renderBlock(
               {block.badgeText}
             </span>
           )}
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{block.title}</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{block.title}</h1>
           {block.subtitle && (
-            <p className="text-[14px] sm:text-[15px] opacity-75 max-w-sm sm:max-w-md mx-auto leading-relaxed">
+            <p className="text-[14px] opacity-75 max-w-sm mx-auto leading-relaxed">
               {block.subtitle}
             </p>
           )}
@@ -505,7 +655,6 @@ function renderBlock(
       );
 
     case "linkList":
-      const isMultiButton = block.items.length >= 2;
       return (
         <div className="space-y-2.5">
           {block.title && (
@@ -513,7 +662,7 @@ function renderBlock(
               {block.title}
             </h2>
           )}
-          <div className={isMultiButton ? "grid grid-cols-1 sm:grid-cols-2 gap-2.5" : "space-y-2"}>
+          <div className="space-y-2">
             {block.items.map((item, i) => {
               const targetUrl = normalizeLandingUrl(item.url, destinationUrl);
               return (
@@ -522,10 +671,10 @@ function renderBlock(
                   href={targetUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`block w-full p-4 rounded-2xl border transition-all duration-150 transform active:scale-[0.98] ${
+                  className={`block w-full p-3.5 rounded-2xl border transition-all duration-150 transform active:scale-[0.98] ${
                     item.highlight
-                      ? "shadow-md hover:shadow-lg ring-2 ring-emerald-500/20"
-                      : "shadow-sm hover:shadow"
+                      ? "shadow-md ring-2 ring-emerald-500/20"
+                      : "shadow-2xs"
                   }`}
                   style={{
                     backgroundColor: item.highlight ? theme.primaryColor : theme.cardBg,
@@ -535,7 +684,7 @@ function renderBlock(
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="min-w-0 pr-2">
-                      <p className="font-semibold text-[14.5px] sm:text-[15px] truncate">{item.title}</p>
+                      <p className="font-semibold text-[14px] truncate">{item.title}</p>
                       {item.subtitle && (
                         <p className="text-[12px] opacity-80 truncate mt-0.5">
                           {item.subtitle}
@@ -554,22 +703,22 @@ function renderBlock(
     case "menu":
       return (
         <div
-          className="p-5 sm:p-6 rounded-2xl border shadow-sm space-y-3.5"
+          className="p-5 rounded-2xl border shadow-sm space-y-3"
           style={{
             backgroundColor: theme.cardBg,
             borderColor: `${theme.textColor}15`,
           }}
         >
-          <h2 className="text-[14px] font-bold uppercase tracking-wider opacity-90 border-b pb-2" style={{ borderColor: `${theme.textColor}10` }}>
+          <h2 className="text-[13px] font-bold uppercase tracking-wider opacity-90 border-b pb-2" style={{ borderColor: `${theme.textColor}10` }}>
             {block.title}
           </h2>
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {block.items.map((m, i) => (
               <div key={i} className="flex items-baseline justify-between gap-2 border-b border-dashed pb-2 last:border-0" style={{ borderColor: `${theme.textColor}15` }}>
                 <div className="min-w-0 pr-2">
-                  <span className="font-semibold text-[14px]">{m.name}</span>
+                  <span className="font-semibold text-[13.5px]">{m.name}</span>
                   {m.description && (
-                    <p className="text-[12px] opacity-70 mt-0.5">{m.description}</p>
+                    <p className="text-[11.5px] opacity-70 mt-0.5">{m.description}</p>
                   )}
                 </div>
                 <span className="font-mono font-bold text-[13px] shrink-0" style={{ color: theme.accentColor }}>
@@ -584,46 +733,46 @@ function renderBlock(
     case "contact":
       return (
         <div
-          className="p-5 sm:p-6 rounded-2xl border shadow-sm space-y-3.5"
+          className="p-5 rounded-2xl border shadow-sm space-y-3"
           style={{
             backgroundColor: theme.cardBg,
             borderColor: `${theme.textColor}15`,
           }}
         >
-          <h2 className="text-[13px] font-bold uppercase tracking-wider opacity-80">
+          <h2 className="text-[12.5px] font-bold uppercase tracking-wider opacity-80">
             {block.title}
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[13px]">
+          <div className="space-y-2 text-[12.5px]">
             {block.phone && (
-              <a href={`tel:${block.phone}`} className="flex items-center gap-2.5 opacity-80 hover:opacity-100">
-                <Phone className="w-4 h-4 shrink-0" />
+              <a href={`tel:${block.phone}`} className="flex items-center gap-2 opacity-80 hover:opacity-100">
+                <Phone className="w-3.5 h-3.5 shrink-0" />
                 <span>{block.phone}</span>
               </a>
             )}
             {block.email && (
-              <a href={`mailto:${block.email}`} className="flex items-center gap-2.5 opacity-80 hover:opacity-100">
-                <Mail className="w-4 h-4 shrink-0" />
+              <a href={`mailto:${block.email}`} className="flex items-center gap-2 opacity-80 hover:opacity-100">
+                <Mail className="w-3.5 h-3.5 shrink-0" />
                 <span>{block.email}</span>
               </a>
             )}
             {block.address && (
-              <div className="flex items-start gap-2.5 opacity-80 sm:col-span-2">
-                <MapPin className="w-4 h-4 shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2 opacity-80">
+                <MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                 <span>{block.address}</span>
               </div>
             )}
           </div>
           {(block.instagram || block.twitter) && (
-            <div className="flex items-center gap-3 pt-2 border-t" style={{ borderColor: `${theme.textColor}10` }}>
+            <div className="flex items-center gap-2 pt-2 border-t" style={{ borderColor: `${theme.textColor}10` }}>
               {block.instagram && (
-                <a href={`https://instagram.com/${block.instagram.replace('@','')}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-[12px] opacity-75 hover:opacity-100">
-                  <Instagram className="w-4 h-4" />
+                <a href={`https://instagram.com/${block.instagram.replace('@','')}`} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-[11px] opacity-75 hover:opacity-100">
+                  <Instagram className="w-3.5 h-3.5" />
                   <span>@{block.instagram.replace('@','')}</span>
                 </a>
               )}
               {block.twitter && (
-                <a href={`https://twitter.com/${block.twitter.replace('@','')}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-[12px] opacity-75 hover:opacity-100">
-                  <Twitter className="w-4 h-4" />
+                <a href={`https://twitter.com/${block.twitter.replace('@','')}`} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-[11px] opacity-75 hover:opacity-100">
+                  <Twitter className="w-3.5 h-3.5" />
                   <span>@{block.twitter.replace('@','')}</span>
                 </a>
               )}
@@ -634,7 +783,7 @@ function renderBlock(
   }
 }
 
-// Desktop Block Renderer (Expansive multi-column layouts)
+// Desktop & Tablet Expansive Block Renderer
 function renderDesktopBlock(
   block: LandingBlock,
   theme: LandingPageSpec["theme"],
@@ -642,17 +791,16 @@ function renderDesktopBlock(
 ) {
   switch (block.type) {
     case "hero":
-      // Handled in the desktop sticky left sidebar
       return null;
 
     case "linkList":
       return (
-        <div className="space-y-4">
+        <div className="space-y-3.5">
           <div className="flex items-center justify-between">
-            <h2 className="text-[14px] font-bold uppercase tracking-wider opacity-70">
+            <h2 className="text-[13px] font-bold uppercase tracking-wider opacity-70">
               {block.title || "Featured Actions & Links"}
             </h2>
-            <span className="text-[12px] font-mono opacity-50">{block.items.length} items</span>
+            <span className="text-[11.5px] font-mono opacity-50">{block.items.length} items</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             {block.items.map((item, i) => {
@@ -678,7 +826,7 @@ function renderDesktopBlock(
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0 pr-2">
                       <div className="flex items-center gap-2">
-                        <p className="font-bold text-[15px] truncate">{item.title}</p>
+                        <p className="font-bold text-[14.5px] truncate">{item.title}</p>
                         {isHighlight && (
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase bg-white/20 text-white shrink-0">
                             Featured
@@ -686,7 +834,7 @@ function renderDesktopBlock(
                         )}
                       </div>
                       {item.subtitle && (
-                        <p className={`text-[12.5px] truncate mt-0.5 ${isHighlight ? 'text-white/80' : 'opacity-70'}`}>
+                        <p className={`text-[12px] truncate mt-0.5 ${isHighlight ? 'text-white/80' : 'opacity-70'}`}>
                           {item.subtitle}
                         </p>
                       )}
@@ -715,12 +863,12 @@ function renderDesktopBlock(
           }}
         >
           <div className="flex items-center justify-between border-b pb-3" style={{ borderColor: `${theme.textColor}10` }}>
-            <h2 className="text-[15px] font-bold uppercase tracking-wider opacity-90">
+            <h2 className="text-[14px] font-bold uppercase tracking-wider opacity-90">
               {block.title}
             </h2>
-            <span className="text-[12px] font-mono opacity-50">{block.items.length} items</span>
+            <span className="text-[11.5px] font-mono opacity-50">{block.items.length} items</span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             {block.items.map((m, i) => (
               <div
                 key={i}
@@ -729,8 +877,8 @@ function renderDesktopBlock(
               >
                 <div>
                   <div className="flex items-baseline justify-between gap-2">
-                    <span className="font-bold text-[14.5px]">{m.name}</span>
-                    <span className="font-mono font-bold text-[13.5px] shrink-0" style={{ color: theme.accentColor }}>
+                    <span className="font-bold text-[14px]">{m.name}</span>
+                    <span className="font-mono font-bold text-[13px] shrink-0" style={{ color: theme.accentColor }}>
                       {m.price}
                     </span>
                   </div>
@@ -753,10 +901,10 @@ function renderDesktopBlock(
             borderColor: `${theme.textColor}15`,
           }}
         >
-          <h2 className="text-[14px] font-bold uppercase tracking-wider opacity-80">
+          <h2 className="text-[13px] font-bold uppercase tracking-wider opacity-80">
             {block.title}
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[13px]">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[12.5px]">
             {block.phone && (
               <a
                 href={`tel:${block.phone}`}

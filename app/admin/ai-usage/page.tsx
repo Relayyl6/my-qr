@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Sparkles, ArrowLeft, Activity, DollarSign, Clock, ShieldAlert } from "lucide-react";
+import AiInvocationsTable from "@/components/AiInvocationsTable";
 
 export const dynamic = "force-dynamic";
 
@@ -159,55 +160,8 @@ export default async function AiUsageAdminPage() {
           </div>
         </div>
 
-        {/* Recent Invocations Log */}
-        <div className="rounded-2xl border border-[#11140F]/10 bg-white p-5 shadow-sm space-y-3">
-          <h2 className="text-[14px] font-semibold text-[#11140F]">Recent AI Invocations (Last 100)</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-[12px]">
-              <thead>
-                <tr className="border-b border-[#11140F]/10 text-[#11140F]/50 font-semibold uppercase text-[10.5px]">
-                  <th className="py-2">Time</th>
-                  <th className="py-2">Feature / Prompt</th>
-                  <th className="py-2">Model</th>
-                  <th className="py-2">Tokens (In/Out)</th>
-                  <th className="py-2">Cost</th>
-                  <th className="py-2">Latency</th>
-                  <th className="py-2">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#11140F]/5">
-                {invocations.map((inv) => (
-                  <tr key={inv.id} className="hover:bg-[#11140F]/[0.01]">
-                    <td className="py-2 text-[#11140F]/60 whitespace-nowrap">
-                      {new Date(inv.createdAt).toLocaleTimeString()}
-                    </td>
-                    <td className="py-2 font-mono">
-                      <span className="font-semibold text-[#11140F]">{inv.feature}</span>
-                      <span className="text-[10px] text-[#11140F]/50 block">{inv.promptKey}</span>
-                    </td>
-                    <td className="py-2 font-mono text-[#11140F]/70">{inv.model}</td>
-                    <td className="py-2 font-mono">
-                      {inv.inputTokens} / {inv.outputTokens}
-                    </td>
-                    <td className="py-2 font-mono text-emerald-700">${Number(inv.costUsd).toFixed(5)}</td>
-                    <td className="py-2 font-mono">{inv.latencyMs}ms</td>
-                    <td className="py-2">
-                      {inv.success ? (
-                        <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10.5px] font-medium">
-                          OK
-                        </span>
-                      ) : (
-                        <span className="px-1.5 py-0.5 rounded bg-red-100 text-red-800 text-[10.5px] font-medium" title={inv.error || ''}>
-                          FAIL
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        {/* Recent Invocations Log with Smart Pagination & Filters */}
+        <AiInvocationsTable invocations={invocations} />
       </div>
     </div>
   );

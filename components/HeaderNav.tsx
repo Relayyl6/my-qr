@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { signOut } from '@/app/auth-actions';
 import AuthModal from './AuthModal';
-
 import Link from 'next/link';
+import { LayoutGrid, Sparkles, CreditCard, Shield } from 'lucide-react';
 
 interface Props {
   user: {
@@ -13,6 +13,10 @@ interface Props {
     name: string | null;
     tier?: string;
   } | null;
+  isAdmin?: boolean;
+  activeTab?: 'workspace' | 'overview';
+  onTabChange?: (tab: 'workspace' | 'overview') => void;
+  announcementBanner?: string | null;
 }
 
 function QrMark({ className = 'w-5 h-5', fill = '#11140F' }: { className?: string; fill?: string }) {
@@ -32,7 +36,13 @@ function QrMark({ className = 'w-5 h-5', fill = '#11140F' }: { className?: strin
   );
 }
 
-export default function HeaderNav({ user }: Props) {
+export default function HeaderNav({
+  user,
+  isAdmin = false,
+  activeTab = 'workspace',
+  onTabChange,
+  announcementBanner,
+}: Props) {
   const [authOpen, setAuthOpen] = useState(false);
   const [authTab, setAuthTab] = useState<'login' | 'signup'>('login');
 
@@ -41,61 +51,184 @@ export default function HeaderNav({ user }: Props) {
     setAuthOpen(true);
   };
 
+  const handleTabClick = (tab: 'workspace' | 'overview') => {
+    if (onTabChange) {
+      onTabChange(tab);
+      window.history.replaceState(null, '', `#${tab}`);
+    } else {
+      window.location.hash = tab;
+    }
+  };
+
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 border-b border-[#11140F]/10 bg-[#EEF0EA]/95 backdrop-blur-md">
-        <nav className="max-w-[1200px] mx-auto px-4 sm:px-5 md:px-8 h-16 flex items-center justify-between">
-          <a href="#top" className="flex items-center gap-2.5">
-            <QrMark className="w-5 h-5" />
-            <span className="font-medium tracking-tight font-display text-[17px]">
-              DynamicQR
+      <header className="sticky top-0 left-0 right-0 z-50 w-full border-b border-[#11140F]/10 bg-[#EEF0EA]/95 backdrop-blur-md shadow-2xs">
+        {/* System Broadcast Announcement */}
+        {announcementBanner && (
+          <div className="bg-gradient-to-r from-emerald-800 via-teal-800 to-[#11140F] text-white px-4 py-1.5 text-[12px] font-medium text-center flex items-center justify-center gap-2 shadow-xs shrink-0">
+            <span className="px-1.5 py-0.2 rounded bg-white/20 text-[9.5px] font-mono uppercase tracking-wider font-bold">
+              SYSTEM BROADCAST
             </span>
-          </a>
+            <span className="truncate">{announcementBanner}</span>
+          </div>
+        )}
 
-          <div className="hidden md:flex items-center gap-8 text-[14px] text-[#11140F]/70">
-            <a href="/#workspace" className="hover:text-[#11140F] font-semibold text-[#11140F] transition-colors">Workspace</a>
-            <a href="/#overview" className="hover:text-[#11140F] transition-colors">Product Tour</a>
-            <Link href="/pricing" className="hover:text-[#11140F] font-medium transition-colors text-[#2F6B4F]">
-              Pricing
-            </Link>
+        <nav className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-8">
+          {/* Main Top Navigation Row */}
+          <div className="h-16 flex items-center justify-between gap-3 sm:gap-6">
+            {/* Left: DynamicQR Brand Logo */}
+            <div className="flex items-center gap-3 shrink-0">
+              <a
+                href="#top"
+                onClick={(e) => {
+                  if (onTabChange) {
+                    e.preventDefault();
+                    handleTabClick('overview');
+                  }
+                }}
+                className="flex items-center gap-2.5 group cursor-pointer"
+              >
+                <div className="w-8 h-8 rounded-xl bg-[#11140F] flex items-center justify-center text-white shadow-xs group-hover:bg-[#2A2E25] transition-colors">
+                  <QrMark className="w-4.5 h-4.5" fill="#FFFFFF" />
+                </div>
+                <span className="font-bold tracking-tight text-[16.5px] sm:text-[18px] text-[#11140F]">
+                  DynamicQR
+                </span>
+              </a>
+            </div>
+
+            {/* Center: Unified Segmented View Tabs (Desktop & Tablet) */}
+            <div className="hidden sm:flex items-center p-1 bg-white/90 rounded-2xl border border-[#11140F]/10 shadow-2xs">
+              <button
+                type="button"
+                onClick={() => handleTabClick('workspace')}
+                className={`px-3.5 sm:px-4 py-1.5 rounded-xl text-[12.5px] sm:text-[13px] font-semibold flex items-center gap-2 transition-all cursor-pointer ${
+                  activeTab === 'workspace'
+                    ? 'bg-[#11140F] text-white shadow-xs'
+                    : 'text-[#11140F]/65 hover:text-[#11140F] hover:bg-[#EEF0EA]'
+                }`}
+              >
+                <LayoutGrid className="w-3.5 h-3.5 shrink-0" />
+                <span>Workspace</span>
+                {user && (
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                      activeTab === 'workspace' ? 'bg-emerald-400' : 'bg-emerald-600'
+                    }`}
+                  />
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleTabClick('overview')}
+                className={`px-3.5 sm:px-4 py-1.5 rounded-xl text-[12.5px] sm:text-[13px] font-semibold flex items-center gap-2 transition-all cursor-pointer ${
+                  activeTab === 'overview'
+                    ? 'bg-[#11140F] text-white shadow-xs'
+                    : 'text-[#11140F]/65 hover:text-[#11140F] hover:bg-[#EEF0EA]'
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                <span>Product Tour</span>
+              </button>
+
+              <Link
+                href="/pricing"
+                className="px-3 sm:px-3.5 py-1.5 rounded-xl text-[12.5px] sm:text-[13px] font-semibold text-[#2F6B4F] hover:bg-[#2F6B4F]/10 transition-colors flex items-center gap-1.5"
+              >
+                <CreditCard className="w-3.5 h-3.5 shrink-0" />
+                <span>Pricing</span>
+              </Link>
+            </div>
+
+            {/* Right: User State, Tier Pill, Admin Console & Auth Actions */}
+            <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-900 text-amber-300 text-[11px] font-mono font-bold uppercase tracking-wider hover:bg-slate-800 transition-colors shadow-2xs border border-amber-400/30"
+                  title="Sovereign Admin Console"
+                >
+                  <Shield className="w-3 h-3 text-amber-400" />
+                  <span>Admin</span>
+                </Link>
+              )}
+
+              {user ? (
+                <div className="flex items-center gap-2">
+                  <Link
+                    href="/pricing"
+                    className="rounded-full bg-[#2F6B4F]/10 text-[#2F6B4F] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider hover:bg-[#2F6B4F]/20 transition-colors border border-[#2F6B4F]/20"
+                    title="Click to view plan limits or upgrade"
+                  >
+                    {user.tier || 'free'}
+                  </Link>
+                  <span className="hidden lg:inline-block text-[12.5px] text-[#11140F]/70 font-medium max-w-[130px] truncate">
+                    {user.name || user.email.split('@')[0]}
+                  </span>
+                  <button
+                    onClick={() => signOut()}
+                    className="rounded-full border border-[#11140F]/15 bg-white px-3 sm:px-3.5 py-1.5 text-[12px] sm:text-[13px] font-medium text-[#11140F]/80 hover:bg-white/80 transition-colors shadow-2xs cursor-pointer"
+                  >
+                    Log out
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => openAuth('login')}
+                    className="rounded-full bg-[#11140F] text-[#EEF0EA] px-3.5 sm:px-4 py-1.5 sm:py-2 text-[12px] sm:text-[13px] font-medium hover:bg-[#2A2E25] transition-colors shadow-2xs cursor-pointer"
+                  >
+                    Log in
+                  </button>
+                  <button
+                    onClick={() => openAuth('signup')}
+                    className="hidden xs:inline-block rounded-full border border-[#11140F]/15 bg-white px-3.5 py-1.5 text-[12px] sm:text-[13px] font-medium text-[#11140F] hover:bg-white/80 transition-colors shadow-2xs cursor-pointer"
+                  >
+                    Sign up
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            {user ? (
-              <div className="flex items-center gap-2.5">
-                <Link
-                  href="/pricing"
-                  className="rounded-full bg-[#2F6B4F]/10 text-[#2F6B4F] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider hover:bg-[#2F6B4F]/20 transition-colors"
-                  title="Click to manage subscription or upgrade"
-                >
-                  {user.tier || 'pro'}
-                </Link>
-                <span className="hidden sm:inline-block text-[13px] text-[#11140F]/70 font-medium">
-                  {user.name || user.email.split('@')[0]}
-                </span>
-                <button
-                  onClick={() => signOut()}
-                  className="rounded-full border border-[#11140F]/15 bg-white px-3.5 py-1.5 text-[12px] sm:text-[13px] font-medium text-[#11140F]/80 hover:bg-white/80 transition-colors"
-                >
-                  Log out
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => openAuth('login')}
-                  className="rounded-full bg-[#11140F] text-[#EEF0EA] px-4 sm:px-5 py-2 sm:py-2.5 text-[12px] sm:text-[14px] font-medium hover:bg-[#2A2E25] transition-colors"
-                >
-                  Log in
-                </button>
-                <button
-                  onClick={() => openAuth('signup')}
-                  className="hidden sm:inline-block rounded-full border border-[#11140F]/15 bg-white px-4 py-2 text-[13px] font-medium text-[#11140F] hover:bg-white/80 transition-colors"
-                >
-                  Sign up
-                </button>
-              </div>
-            )}
+          {/* Mobile Bottom Tab Bar (< sm screens) */}
+          <div className="sm:hidden pb-2.5 pt-0.5">
+            <div className="grid grid-cols-3 p-1 bg-white/95 rounded-2xl border border-[#11140F]/10 shadow-xs gap-1">
+              <button
+                type="button"
+                onClick={() => handleTabClick('workspace')}
+                className={`py-1.5 rounded-xl text-[12px] font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                  activeTab === 'workspace'
+                    ? 'bg-[#11140F] text-white shadow-xs'
+                    : 'text-[#11140F]/65 hover:text-[#11140F]'
+                }`}
+              >
+                <LayoutGrid className="w-3.5 h-3.5 shrink-0" />
+                <span>Workspace</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleTabClick('overview')}
+                className={`py-1.5 rounded-xl text-[12px] font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                  activeTab === 'overview'
+                    ? 'bg-[#11140F] text-white shadow-xs'
+                    : 'text-[#11140F]/65 hover:text-[#11140F]'
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                <span>Tour</span>
+              </button>
+
+              <Link
+                href="/pricing"
+                className="py-1.5 rounded-xl text-[12px] font-semibold text-[#2F6B4F] flex items-center justify-center gap-1.5 hover:bg-[#2F6B4F]/10 transition-colors"
+              >
+                <CreditCard className="w-3.5 h-3.5 shrink-0" />
+                <span>Pricing</span>
+              </Link>
+            </div>
           </div>
         </nav>
       </header>

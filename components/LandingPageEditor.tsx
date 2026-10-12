@@ -25,6 +25,7 @@ import {
   Trash2,
   Star,
   Smartphone,
+  Tablet,
   Monitor,
   ArrowUp,
   ArrowDown,
@@ -57,7 +58,7 @@ export default function LandingPageEditor({
   );
   const [spec, setSpec] = useState<LandingPageSpec | null>(initialSpec || null);
   const [activeTab, setActiveTab] = useState<'prompt' | 'links' | 'preview'>('prompt');
-  const [viewportMode, setViewportMode] = useState<'mobile' | 'desktop'>('mobile');
+  const [viewportMode, setViewportMode] = useState<'mobile' | 'tablet' | 'desktop'>('mobile');
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [reverting, setReverting] = useState(false);
@@ -239,10 +240,10 @@ export default function LandingPageEditor({
           </div>
           <div>
             <h3 className="text-[15px] font-semibold text-[#11140F] flex items-center gap-2">
-              Prompt-to-Page Studio for <span className="font-mono text-emerald-700">/{shortCode}</span>
+              Adaptive Showcase Studio for <span className="font-mono text-emerald-700">/{shortCode}</span>
             </h3>
             <p className="text-[12px] text-[#11140F]/55 truncate max-w-md">
-              Primary destination: <span className="font-mono text-[#11140F]/80">{destinationUrl}</span>
+              Adaptive single-page showcase &middot; Primary: <span className="font-mono text-[#11140F]/80">{destinationUrl}</span>
             </p>
           </div>
         </div>
@@ -263,9 +264,9 @@ export default function LandingPageEditor({
             <>
               <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse shrink-0" />
               <div>
-                <strong className="text-blue-900 font-semibold">Active Mode: Mobile Showcase Page</strong>
+                <strong className="text-blue-900 font-semibold">Active Mode: Adaptive Showcase (Mobile, Tablet & Desktop)</strong>
                 <p className="text-[#11140F]/60 text-[11px]">
-                  Scans load your showcase at <code>/page/{shortCode}</code>
+                  Scans load your adaptive showcase at <code>/page/{shortCode}</code>
                 </p>
               </div>
             </>
@@ -275,7 +276,7 @@ export default function LandingPageEditor({
               <div>
                 <strong className="text-emerald-900 font-semibold">Active Mode: Direct URL Redirect</strong>
                 <p className="text-[#11140F]/60 text-[11px]">
-                  Scans instantly redirect to your destination URL
+                  Scans instantly redirect directly to your destination URL
                 </p>
               </div>
             </>
@@ -317,7 +318,7 @@ export default function LandingPageEditor({
             }`}
           >
             <Edit3 className="w-3.5 h-3.5" />
-            AI Prompt
+            AI Prompt & Design
           </button>
           <button
             type="button"
@@ -330,7 +331,7 @@ export default function LandingPageEditor({
             }`}
           >
             <Sliders className="w-3.5 h-3.5" />
-            Customize Buttons & Desktop View
+            Customize Buttons & Content
           </button>
           <button
             type="button"
@@ -343,7 +344,7 @@ export default function LandingPageEditor({
             }`}
           >
             <Eye className="w-3.5 h-3.5" />
-            Live Preview
+            Live Multi-Device Preview
           </button>
         </div>
 
@@ -376,7 +377,7 @@ export default function LandingPageEditor({
           <div className="space-y-4 pt-1">
             <div className="space-y-1.5">
               <label className="block text-[12.5px] font-medium text-[#11140F]/70">
-                Describe your business or mobile offer:
+                Describe what showcase page you want (Adapts across Mobile, Tablet & Desktop):
               </label>
               <textarea
                 rows={4}
@@ -667,7 +668,19 @@ export default function LandingPageEditor({
                   }`}
                 >
                   <Smartphone className="w-3.5 h-3.5" />
-                  Mobile View (Phone)
+                  Mobile (Phone)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewportMode('tablet')}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-medium transition-all ${
+                    viewportMode === 'tablet'
+                      ? 'bg-white text-[#11140F] shadow-xs font-semibold'
+                      : 'text-[#11140F]/60 hover:text-[#11140F]'
+                  }`}
+                >
+                  <Tablet className="w-3.5 h-3.5" />
+                  Tablet (iPad)
                 </button>
                 <button
                   type="button"
@@ -679,7 +692,7 @@ export default function LandingPageEditor({
                   }`}
                 >
                   <Monitor className="w-3.5 h-3.5" />
-                  Desktop View (PC / Tablet)
+                  Desktop (PC / Mac)
                 </button>
               </div>
             </div>
@@ -698,6 +711,22 @@ export default function LandingPageEditor({
                       spec={spec}
                       destinationUrl={destinationUrl}
                       forceViewMode="mobile"
+                      shortCode={shortCode}
+                    />
+                  </div>
+                </div>
+              ) : viewportMode === 'tablet' ? (
+                // Realistic Tablet Mockup
+                <div className="w-[640px] max-w-full rounded-[28px] overflow-hidden shadow-2xl border-[8px] border-slate-800 bg-white relative">
+                  {/* Tablet Camera Dot */}
+                  <div className="h-4 bg-slate-800 flex items-center justify-center">
+                    <span className="w-2 h-2 rounded-full bg-slate-700" />
+                  </div>
+                  <div className="max-h-[540px] overflow-y-auto">
+                    <RenderLandingPage
+                      spec={spec}
+                      destinationUrl={destinationUrl}
+                      forceViewMode="tablet"
                       shortCode={shortCode}
                     />
                   </div>

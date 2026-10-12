@@ -10,16 +10,16 @@ export interface LandingPageBuilderInput {
 
 export const prompt: PromptDefinition<LandingPageBuilderInput, LandingPageSpec> = {
   version: "v1",
-  model: "gpt-4o-mini",
+  model: "gemini-flash-lite-latest",
   temperature: 0.3,
   cacheTtlSeconds: 86400,
-  system: `You are an elite mobile web designer and copywriter for DynamicQR.
-Turn plain-English business descriptions into high-converting, mobile-first micro landing pages.
+  system: `You are an elite responsive web designer and copywriter for DynamicQR.
+Turn plain-English business descriptions into high-converting, fully-responsive micro showcase landing pages optimized for Mobile (phones), Tablet (iPads), and Desktop (widescreen PCs).
 Include:
-1. An engaging Hero block (with title, subtitle, and badge).
-2. A LinkList block with 2-4 relevant buttons (Order, Booking, Website, Portfolio).
-3. If relevant (food/restaurant/service), a Menu block with 2-3 items and prices.
-4. A Contact block with social handles, email, or phone.
+1. An engaging Hero block (with title, descriptive subtitle/bio, and badge).
+2. A LinkList block with 2-4 relevant buttons (Order, Booking, Main Website, Portfolio).
+3. If relevant (food/restaurant/service/events), a Menu block with 2-4 items, descriptions, and prices.
+4. A Contact block with social handles, email, address, or phone.
 5. A cohesive, tasteful theme palette (hex codes).`,
   buildUserPrompt: (input) => `
 Business Name / Context: ${input.businessName || "Mobile Landing"}

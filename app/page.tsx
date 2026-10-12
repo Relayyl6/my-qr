@@ -4,7 +4,6 @@ import { getCurrentUser } from '@/lib/auth';
 import LinkForm from '@/components/LinkForm';
 import LinkList from '@/components/LinkList';
 import HeroRouteDemo from '@/components/HeroRouteDemo';
-import HeaderNav from '@/components/HeaderNav';
 import WorkspaceLocked from '@/components/WorkspaceLocked';
 import CampaignAnalyst from '@/components/CampaignAnalyst';
 import WorkspaceHeaderActions from '@/components/WorkspaceHeaderActions';
@@ -344,15 +343,13 @@ export default async function Home() {
 
   return (
     <div
-      className={`${display.variable} ${body.variable} ${mono.variable} bg-[#EEF0EA] text-[#11140F] min-h-screen w-full overflow-x-clip pt-16`}
+      className={`${display.variable} ${body.variable} ${mono.variable} bg-[#EEF0EA] text-[#11140F] min-h-screen w-full overflow-x-clip`}
       style={{ fontFamily: 'var(--font-body)' }}
     >
-      {/* Dynamic Auth Header Nav */}
-      <HeaderNav user={user} />
-
-      {/* Tabbed View: Dedicated Workspace vs Product Tour */}
+      {/* Unified Navigation & Tabbed View: Dedicated Workspace vs Product Tour */}
       <HomeTabs
         user={user}
+        isAdmin={isAdmin}
         overviewContent={overviewContent}
         workspaceContent={workspaceContent}
         announcementBanner={announcementBanner}
