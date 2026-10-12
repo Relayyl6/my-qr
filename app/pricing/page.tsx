@@ -60,7 +60,7 @@ export default async function PricingPage() {
             Predictable plans for growing campaigns.
           </h1>
           <p className="text-[15px] sm:text-[17px] text-[#11140F]/65 leading-relaxed">
-            Every plan includes lightning-fast 307 redirects on Neon Postgres, 300 DPI print-ready exports, and generous monthly AI budgets powered by Gemini 3.8 Flash.
+            Every plan includes lightning-fast 307 redirects on Neon Postgres, 300 DPI print-ready exports, and generous monthly AI intelligence budgets.
           </p>
         </div>
 
@@ -100,7 +100,7 @@ export default async function PricingPage() {
             <div className="rounded-2xl border border-[#11140F]/10 bg-white p-5 sm:p-6 space-y-2">
               <h3 className="font-medium text-[15px] text-[#11140F]">How does AI credit budgeting work?</h3>
               <p className="text-[14px] text-[#11140F]/65 leading-relaxed">
-                Every plan includes a generous monthly AI dollar budget backed by Gemini 3.8 Flash. Because Gemini Flash costs ~$0.0003 per operation, a $5.00/mo Pro budget provides roughly 15,000 AI operations each month.
+                Every plan includes a generous monthly AI compute allowance. Because our optimized neural models run at ultra-low cost per query, a $5.00/mo Pro budget provides roughly 15,000 AI routing, enrichment, and analysis operations each month.
               </p>
             </div>
 

@@ -48,7 +48,7 @@ export default function PrivacyPage() {
         <section className="space-y-3">
           <h2 className="text-xl font-semibold">2. Artificial Intelligence Data Processing</h2>
           <p>
-            Our AI features (URL Enricher, Smart Route Resolver, Campaign Analyst, and QR Art Studio) process input prompts and public web page metadata using Gemini and secure AI Gateways. We do not use your private QR routing data or scan logs to train public foundation models.
+            Our AI features (URL Enricher, Smart Route Resolver, Campaign Analyst, and QR Art Studio) process input prompts and public web page metadata using isolated, secure AI processing engines. We do not use your private QR routing data or scan logs to train public models.
           </p>
         </section>
 

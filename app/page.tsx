@@ -9,6 +9,7 @@ import WorkspaceLocked from '@/components/WorkspaceLocked';
 import CampaignAnalyst from '@/components/CampaignAnalyst';
 import WorkspaceHeaderActions from '@/components/WorkspaceHeaderActions';
 import BrandedDomainsManager from '@/components/BrandedDomainsManager';
+import PlanUsageMeter from '@/components/PlanUsageMeter';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -92,6 +93,58 @@ export default async function Home() {
     : [];
 
   const isAdmin = !!(user && user.email.toLowerCase() === adminEmail);
+
+  // Plan capacity & usage calculations
+  const tier = (user?.tier || 'free').toLowerCase();
+  const linkLimits: Record<string, number> = {
+    free: 5,
+    pro: 50,
+    plus: 500,
+    ultra: 999999,
+  };
+  const scanLimits: Record<string, number> = {
+    free: 1000,
+    pro: 25000,
+    plus: 250000,
+    ultra: 999999,
+  };
+
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const daysUntilReset = Math.max(1, Math.ceil((nextMonth.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+
+  const monthlyScansCount = user
+    ? await prisma.scan.count({
+        where: {
+          qrLink: { userId: user.id },
+          scannedAt: { gte: startOfMonth },
+        },
+      })
+    : 0;
+
+  const aiCredit = user
+    ? await prisma.aiCredit.findUnique({
+        where: { userId: user.id },
+      })
+    : null;
+
+  const activeLinksCount = links.filter((l) => !l.isArchived).length;
+  const maxLinks = isAdmin ? 999999 : (linkLimits[tier] ?? 5);
+  const maxScans = isAdmin ? 999999 : (scanLimits[tier] ?? 1000);
+  const aiUsedUsd = aiCredit?.usedThisMonth ? Number(aiCredit.usedThisMonth) : 0;
+  const aiLimitUsd = isAdmin
+    ? 999.0
+    : aiCredit?.monthlyLimitUsd
+    ? Number(aiCredit.monthlyLimitUsd)
+    : tier === 'ultra'
+    ? 50
+    : tier === 'plus'
+    ? 15
+    : tier === 'pro'
+    ? 5
+    : 0.5;
+
 
   return (
     <div
@@ -236,6 +289,19 @@ export default async function Home() {
 
           {user ? (
             <div className="space-y-8">
+              {/* Plan Capacity & Usage Meter with Real-time Counters */}
+              <PlanUsageMeter
+                userTier={user.tier || 'free'}
+                isAdmin={isAdmin}
+                activeLinksCount={activeLinksCount}
+                maxLinks={maxLinks}
+                monthlyScansCount={monthlyScansCount}
+                maxScans={maxScans}
+                aiUsedUsd={aiUsedUsd}
+                aiLimitUsd={aiLimitUsd}
+                daysUntilReset={daysUntilReset}
+              />
+
               {/* Feature 3: AI Campaign Analyst Panel */}
               <CampaignAnalyst />
 

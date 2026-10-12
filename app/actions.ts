@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { normalizeUrl } from '@/lib/normalizeUrl';
 import { getCurrentUser } from '@/lib/auth';
+import { sendEmail, buildLimitWarningEmailHtml } from '@/lib/email/send';
 
 // Prevent overriding application routes
 const reservedCodes = ['api', 'id', 'admin', '_next', 'favicon.ico', 'login', 'signup', 'inactive'];
@@ -65,8 +66,24 @@ export async function createLink(prevState: ActionState, formData: FormData): Pr
       });
 
       if (activeCount >= maxAllowed) {
+        // Asynchronously notify user via Nodemailer
+        if (user.email) {
+          sendEmail({
+            to: user.email,
+            subject: `⚠️ Limit Reached: ${maxAllowed}/${maxAllowed} QR links used on DynamicQR`,
+            html: buildLimitWarningEmailHtml({
+              email: user.email,
+              tier: user.tier || 'free',
+              metricName: 'Active QR Links',
+              used: activeCount,
+              limit: maxAllowed,
+              percentUsed: 100,
+            }),
+          }).catch((err) => console.error('[Limit Email Notification Error]:', err));
+        }
+
         return {
-          message: `You have reached your limit of ${maxAllowed} active links on the ${(user.tier || 'Free').toUpperCase()} plan. Please upgrade to Pro or Plus to create more.`,
+          message: `You have reached your limit of ${maxAllowed} active links on the ${(user.tier || 'Free').toUpperCase()} plan. You can delete or archive previous unused links to free up slots immediately, or upgrade for higher limits.`,
         };
       }
     }
@@ -84,6 +101,31 @@ export async function createLink(prevState: ActionState, formData: FormData): Pr
         userId: user.id,
       },
     });
+
+    // If approaching or at limit (>= 80%), dispatch a notification email
+    if (!isAdmin && user.email) {
+      const maxAllowed = linkLimits[tier] ?? 5;
+      const newActiveCount = await prisma.qrLink.count({
+        where: { userId: user.id, isArchived: false },
+      });
+      const percent = Math.round((newActiveCount / maxAllowed) * 100);
+      if (percent >= 80) {
+        sendEmail({
+          to: user.email,
+          subject: percent >= 100
+            ? `⚠️ Limit Reached: ${newActiveCount}/${maxAllowed} QR links used on DynamicQR`
+            : `⚠️ Plan Notice: You have used ${percent}% of your QR link capacity (${newActiveCount}/${maxAllowed})`,
+          html: buildLimitWarningEmailHtml({
+            email: user.email,
+            tier: user.tier || 'free',
+            metricName: 'Active QR Links',
+            used: newActiveCount,
+            limit: maxAllowed,
+            percentUsed: percent,
+          }),
+        }).catch((err) => console.error('[Limit Email Notification Error]:', err));
+      }
+    }
 
     revalidatePath('/');
     return { success: true };
