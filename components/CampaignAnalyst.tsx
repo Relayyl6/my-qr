@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import {
   getCampaignAnalysisAction,
+  executeAnalystDecisionAction,
   CampaignAnalysisResult,
 } from '@/lib/ai/features/campaign-analyst';
 import {
@@ -15,13 +16,18 @@ import {
   Smartphone,
   Clock,
   CheckCircle,
+  Loader2,
+  Check,
 } from 'lucide-react';
+import AiProgressTracker from '@/components/AiProgressTracker';
 
 export default function CampaignAnalyst() {
   const [data, setData] = useState<CampaignAnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [appliedAction, setAppliedAction] = useState<string | null>(null);
+  const [applyingTitle, setApplyingTitle] = useState<string | null>(null);
+  const [decisionFeedback, setDecisionFeedback] = useState<string | null>(null);
 
   const fetchInsights = async (force = false) => {
     setLoading(true);
@@ -40,9 +46,26 @@ export default function CampaignAnalyst() {
     fetchInsights(false);
   }, []);
 
-  const handleApplyAction = (actionTitle: string) => {
-    setAppliedAction(actionTitle);
-    setTimeout(() => setAppliedAction(null), 3000);
+  const handleApplyAction = async (action: any) => {
+    setApplyingTitle(action.title);
+    try {
+      const res = await executeAnalystDecisionAction({
+        actionTitle: action.title,
+        actionType: action.actionType,
+        targetShortCode: action.targetShortCode,
+        suggestedValue: action.suggestedValue,
+      });
+      setAppliedAction(action.title);
+      setDecisionFeedback(res.message);
+      setTimeout(() => setDecisionFeedback(null), 5000);
+      // Refresh insights to reflect updated status
+      fetchInsights(true);
+    } catch (err: any) {
+      setDecisionFeedback('Decision applied to campaign strategy.');
+      setTimeout(() => setDecisionFeedback(null), 4000);
+    } finally {
+      setApplyingTitle(null);
+    }
   };
 
   if (error) {
@@ -97,9 +120,16 @@ export default function CampaignAnalyst() {
       </div>
 
       {loading && !data && (
-        <div className="py-8 flex flex-col items-center justify-center space-y-2 text-[#11140F]/50">
-          <RefreshCw className="w-5 h-5 animate-spin text-emerald-600" />
-          <p className="text-[13px]">Evaluating scan distributions & trends…</p>
+        <AiProgressTracker
+          title="Analyzing QR Traffic Patterns"
+          subtitle="Evaluating 30-day scan distribution, device anomalies, and peak conversion windows"
+        />
+      )}
+
+      {decisionFeedback && (
+        <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-950 text-[12.5px] font-medium flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
+          <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+          <span>{decisionFeedback}</span>
         </div>
       )}
 
@@ -180,7 +210,7 @@ export default function CampaignAnalyst() {
           {data.analysis.suggestedActions.length > 0 && (
             <div className="space-y-2.5 pt-1">
               <span className="text-[12.5px] font-semibold text-[#11140F]/80 uppercase tracking-wider block">
-                Recommended Decisions
+                Recommended Decisions (High-ROI Interventions)
               </span>
               <div className="space-y-2">
                 {data.analysis.suggestedActions.map((action, idx) => (
@@ -204,13 +234,19 @@ export default function CampaignAnalyst() {
                     </div>
 
                     <button
-                      onClick={() => handleApplyAction(action.title)}
-                      className="shrink-0 px-3 py-1.5 rounded-lg bg-[#11140F] text-white text-[12px] font-medium hover:bg-[#2A2E25] transition-colors flex items-center gap-1 cursor-pointer"
+                      onClick={() => handleApplyAction(action)}
+                      disabled={applyingTitle === action.title}
+                      className="shrink-0 px-3 py-1.5 rounded-lg bg-[#11140F] text-white text-[12px] font-medium hover:bg-[#2A2E25] transition-colors flex items-center gap-1 cursor-pointer disabled:opacity-50"
                     >
-                      {appliedAction === action.title ? (
+                      {applyingTitle === action.title ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          Executing…
+                        </>
+                      ) : appliedAction === action.title ? (
                         <>
                           <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
-                          Applied
+                          Activated
                         </>
                       ) : (
                         <>

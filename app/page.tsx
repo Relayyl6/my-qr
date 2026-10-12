@@ -94,6 +94,16 @@ export default async function Home() {
       })
     : [];
 
+  let announcementBanner: string | null = null;
+  try {
+    const sysRecord = await prisma.aiCache.findUnique({
+      where: { key: 'system_sovereignty_config' },
+    });
+    if (sysRecord && (sysRecord.value as any)?.announcementBanner) {
+      announcementBanner = (sysRecord.value as any).announcementBanner;
+    }
+  } catch (e) {}
+
   const isAdmin = !!(user && user.email.toLowerCase() === adminEmail);
 
   // Plan capacity & usage calculations
@@ -345,6 +355,7 @@ export default async function Home() {
         user={user}
         overviewContent={overviewContent}
         workspaceContent={workspaceContent}
+        announcementBanner={announcementBanner}
       />
 
       <footer className="max-w-[1200px] mx-auto px-5 md:px-8 py-10 flex flex-col sm:flex-row items-center justify-between gap-4 text-[13px] text-[#11140F]/55 border-t border-[#11140F]/10">

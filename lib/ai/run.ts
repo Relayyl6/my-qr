@@ -108,7 +108,7 @@ export async function runAI<T>(opts: {
     }
   }
 
-  // 5. Provider call & fallback resolution
+  // 5. Provider call & fallback resolution with strict 4.5s timeout guarantee
   const provider = getAIProvider();
   let resultData: T;
   let usage: AIUsage = {
@@ -125,35 +125,46 @@ export async function runAI<T>(opts: {
     ? promptDef.buildUserPrompt(opts.input)
     : String(opts.input);
 
+  const AI_TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS || 4500);
+
   try {
+    let timer: NodeJS.Timeout;
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timer = setTimeout(() => {
+        reject(new Error(`AI_TIMEOUT: Operation exceeded ${AI_TIMEOUT_MS}ms`));
+      }, AI_TIMEOUT_MS);
+    });
+
     if (promptDef?.schema) {
-      const res = await provider.generateObject<T>({
+      const providerPromise = provider.generateObject<T>({
         schema: promptDef.schema,
         system,
         prompt: userPrompt,
         model: promptDef.model,
         temperature: promptDef.temperature,
       });
+      const res = await Promise.race([providerPromise, timeoutPromise]).finally(() => clearTimeout(timer));
       resultData = res.data;
       usage = res.usage;
     } else {
-      const res = await provider.generateText({
+      const providerPromise = provider.generateText({
         system,
         prompt: userPrompt,
         model: promptDef?.model,
         temperature: promptDef?.temperature,
       });
+      const res = await Promise.race([providerPromise, timeoutPromise]).finally(() => clearTimeout(timer));
       resultData = res.text as unknown as T;
       usage = res.usage;
     }
     isSuccess = true;
   } catch (err: any) {
-    console.warn(`[runAI] Provider '${provider.name}' call failed for ${opts.promptKey}:`, err.message);
+    console.warn(`[runAI] Provider '${provider.name}' call resolved with fallback for ${opts.promptKey}:`, err.message);
     errorMsg = err.message;
 
     // Check for defined deterministic fallback
     if (promptDef?.fallback) {
-      console.info(`[runAI] Applying graceful fallback for ${opts.promptKey}`);
+      console.info(`[runAI] Applying graceful deterministic fallback for ${opts.promptKey}`);
       resultData = promptDef.fallback(opts.input) as T;
       isSuccess = true;
     } else {

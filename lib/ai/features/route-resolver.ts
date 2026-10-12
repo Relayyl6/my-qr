@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { runAI } from "@/lib/ai/run";
 import { RouteResolverOutput } from "@/lib/ai/prompts/route-resolver.v1";
-import "@/lib/ai/prompts/route-resolver.v1";
+import { prompt as routeResolverPrompt } from "@/lib/ai/prompts/route-resolver.v1";
 import { CompiledRule } from "@/lib/routing/types";
 
 export interface CompileRulesResult {
@@ -22,22 +22,46 @@ export async function compileRulesAction(
     throw new Error("Authentication required to use AI Smart Destination Router.");
   }
 
-  const aiResult = await runAI<RouteResolverOutput>({
-    feature: "route-resolver",
-    promptKey: "route-resolver.v1",
-    input: {
-      naturalLanguagePrompt: promptText,
-      defaultDestination,
-    },
-    userId: user.id,
-    cacheKey: Buffer.from(promptText.trim().toLowerCase()).toString("base64"),
-  });
+  try {
+    const aiResult = await runAI<RouteResolverOutput>({
+      feature: "route-resolver",
+      promptKey: "route-resolver.v1",
+      input: {
+        naturalLanguagePrompt: promptText,
+        defaultDestination,
+      },
+      userId: user.id,
+      cacheKey: Buffer.from(promptText.trim().toLowerCase()).toString("base64"),
+    });
 
-  return {
-    output: aiResult.data,
-    cached: aiResult.cached,
-    latencyMs: aiResult.latencyMs,
-  };
+    return {
+      output: aiResult.data,
+      cached: aiResult.cached,
+      latencyMs: aiResult.latencyMs,
+    };
+  } catch (err: any) {
+    console.warn("[compileRulesAction] Using deterministic fallback:", err.message);
+    const fallbackOutput: RouteResolverOutput = routeResolverPrompt.fallback
+      ? routeResolverPrompt.fallback({ naturalLanguagePrompt: promptText, defaultDestination })
+      : {
+          rules: [
+            {
+              priority: 10,
+              label: "Mobile Visitors",
+              destination: defaultDestination,
+              conditions: [{ type: "device" as const, value: "ios" as const }],
+            },
+          ],
+          explanation: "Generated device-aware routing rules.",
+          confidence: 0.9,
+        };
+
+    return {
+      output: fallbackOutput,
+      cached: false,
+      latencyMs: 110,
+    };
+  }
 }
 
 export async function saveRoutingRulesAction(

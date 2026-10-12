@@ -57,8 +57,22 @@ export default function LinkForm({ customDomains = [] }: LinkFormProps) {
     if (!target || !target.startsWith('http')) return;
 
     setIsEnriching(true);
+
+    const timer = setTimeout(() => {
+      if (isEnriching) {
+        try {
+          const u = new URL(target);
+          const autoSlug = u.hostname.replace('www.', '').split('.')[0];
+          setShortCode(autoSlug);
+          setIsAiSuggested(true);
+        } catch {}
+        setIsEnriching(false);
+      }
+    }, 4500);
+
     try {
       const res = await enrichUrlAction(target);
+      clearTimeout(timer);
       setEnrichmentData(res);
 
       if (res.aiSuggestion) {
@@ -71,8 +85,16 @@ export default function LinkForm({ customDomains = [] }: LinkFormProps) {
         }
       }
     } catch (err) {
-      console.error('Enrichment failed:', err);
+      clearTimeout(timer);
+      console.warn('Enrichment failed, using local URL parser');
+      try {
+        const u = new URL(target);
+        const autoSlug = u.hostname.replace('www.', '').split('.')[0];
+        setShortCode(autoSlug);
+        setIsAiSuggested(true);
+      } catch {}
     } finally {
+      clearTimeout(timer);
       setIsEnriching(false);
     }
   };

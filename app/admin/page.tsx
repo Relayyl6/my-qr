@@ -15,8 +15,14 @@ import {
   Database,
   Mail,
   CreditCard,
+  Globe,
+  Flame,
+  ExternalLink,
 } from 'lucide-react';
 import AdminUserRow from '@/components/AdminUserRow';
+import AdminDomainRow from '@/components/AdminDomainRow';
+import AdminSovereigntyControls from '@/components/AdminSovereigntyControls';
+import { adminGetSystemConfig, adminGetAuditLogs } from '@/app/admin/actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,7 +35,7 @@ export default async function AdminDashboardPage() {
     redirect('/');
   }
 
-  // Load aggregated SaaS metrics
+  // Load aggregated SaaS metrics & sovereign records concurrently
   const [
     totalUsers,
     freeUsersCount,
@@ -40,6 +46,10 @@ export default async function AdminDashboardPage() {
     totalScansCount,
     totalCustomDomains,
     recentUsers,
+    topLinks,
+    customDomains,
+    systemConfig,
+    auditLogs,
   ] = await Promise.all([
     prisma.user.count(),
     prisma.user.count({ where: { tier: 'free' } }),
@@ -64,6 +74,34 @@ export default async function AdminDashboardPage() {
         },
       },
     }),
+    prisma.qrLink.findMany({
+      orderBy: { scanCount: 'desc' },
+      take: 8,
+      select: {
+        id: true,
+        shortCode: true,
+        destinationUrl: true,
+        label: true,
+        scanCount: true,
+        lastScannedAt: true,
+        user: { select: { email: true } },
+      },
+    }),
+    prisma.customDomain.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 15,
+      select: {
+        id: true,
+        domain: true,
+        status: true,
+        cnameTarget: true,
+        verificationTxt: true,
+        createdAt: true,
+        user: { select: { email: true } },
+      },
+    }),
+    adminGetSystemConfig(),
+    adminGetAuditLogs(),
   ]);
 
   // Calculate MRR & ARR Run Rate
@@ -86,14 +124,14 @@ export default async function AdminDashboardPage() {
             <span className="text-[#11140F]/20">/</span>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#11140F] text-white text-[12px] font-mono uppercase tracking-wider">
               <Shield className="w-3.5 h-3.5 text-emerald-400" />
-              Super-Admin Command Center
+              Super-Admin Sovereign Command
             </div>
           </div>
 
           <div className="flex items-center gap-3">
             <Link
               href="/admin/ai-usage"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-[#11140F]/15 text-[#11140F] text-[12.5px] font-medium hover:bg-[#EEF0EA] transition-colors"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-[#11140F]/15 text-[#11140F] text-[12.5px] font-medium hover:bg-[#EEF0EA] transition-colors shadow-xs"
             >
               <Sparkles className="w-3.5 h-3.5 text-purple-600" />
               AI Observability & Costs &rarr;
@@ -103,10 +141,10 @@ export default async function AdminDashboardPage() {
 
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#11140F]">
-            MicroSaaS Executive Overview
+            Super-Admin Sovereign Console
           </h1>
           <p className="text-[14px] text-[#11140F]/60 mt-1">
-            Real-time subscriber tiers, MRR revenue run-rate, active volume, and customer directory.
+            Authoritative platform-wide governance, customer link fleets, instant domain overrides & MRR telemetry.
           </p>
         </div>
 
@@ -165,87 +203,108 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Subscription Tier Breakdown */}
+        {/* Sovereignty Governance Panel */}
+        <AdminSovereigntyControls
+          initialConfig={systemConfig}
+          auditLogs={auditLogs}
+        />
+
+        {/* Top 8 Scanned Links Across Entire Platform */}
         <div className="rounded-2xl border border-[#11140F]/10 bg-white p-6 shadow-xs space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-[15px] text-[#11140F] flex items-center gap-2">
-              <Layers className="w-4 h-4 text-[#2F6B4F]" />
-              Subscriber Distribution by Tier
-            </h3>
-            <span className="text-[12px] font-mono text-[#11140F]/50">
-              {totalCustomDomains} Custom Domains Registered
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                <Flame className="w-4 h-4 text-amber-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-[15px] text-[#11140F]">
+                  Top Scanned QR Codes Across Platform
+                </h3>
+                <p className="text-[12px] text-[#11140F]/50">
+                  Real-time leaderboard of highest traffic dynamic destinations
+                </p>
+              </div>
+            </div>
+            <span className="text-[11.5px] font-mono text-[#11140F]/50">
+              Live Edge Traffic
             </span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="p-3.5 rounded-xl border border-gray-200 bg-gray-50/50">
-              <span className="text-[11px] font-semibold text-gray-500 uppercase">Free Plan</span>
-              <p className="text-xl font-bold text-gray-800 mt-0.5">{freeUsersCount}</p>
-              <span className="text-[11px] text-gray-500">5 links limit</span>
-            </div>
-
-            <div className="p-3.5 rounded-xl border border-emerald-200 bg-emerald-50/50">
-              <span className="text-[11px] font-semibold text-emerald-700 uppercase">Pro ($5/mo)</span>
-              <p className="text-xl font-bold text-emerald-900 mt-0.5">{proUsersCount}</p>
-              <span className="text-[11px] text-emerald-600">${proUsersCount * 5}/mo revenue</span>
-            </div>
-
-            <div className="p-3.5 rounded-xl border border-blue-200 bg-blue-50/50">
-              <span className="text-[11px] font-semibold text-blue-700 uppercase">Plus ($12/mo)</span>
-              <p className="text-xl font-bold text-blue-900 mt-0.5">{plusUsersCount}</p>
-              <span className="text-[11px] text-blue-600">${plusUsersCount * 12}/mo revenue</span>
-            </div>
-
-            <div className="p-3.5 rounded-xl border border-purple-200 bg-purple-50/50">
-              <span className="text-[11px] font-semibold text-purple-700 uppercase">Ultra ($29/mo)</span>
-              <p className="text-xl font-bold text-purple-900 mt-0.5">{ultraUsersCount}</p>
-              <span className="text-[11px] text-purple-600">${ultraUsersCount * 29}/mo revenue</span>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+            {topLinks.map((link) => (
+              <div
+                key={link.id}
+                className="p-3.5 rounded-xl border border-[#11140F]/10 bg-[#11140F]/[0.015] space-y-1.5"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-mono font-bold text-[13px] text-emerald-800 truncate">
+                    /id/{link.shortCode}
+                  </span>
+                  <span className="font-mono text-[11px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                    {link.scanCount} scans
+                  </span>
+                </div>
+                <p className="text-[11px] text-[#11140F]/50 truncate font-mono">
+                  → {link.destinationUrl}
+                </p>
+                <div className="flex items-center justify-between pt-1 border-t border-[#11140F]/5 text-[10.5px] text-[#11140F]/40">
+                  <span className="truncate max-w-[120px]">{link.user?.email || 'System'}</span>
+                  <span>
+                    {link.lastScannedAt ? new Date(link.lastScannedAt).toLocaleDateString() : 'Never'}
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* System Health Indicators */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="rounded-xl border border-[#11140F]/10 bg-white p-4 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
-              <Database className="w-4 h-4" />
-            </div>
-            <div>
-              <span className="text-[12px] text-[#11140F]/50 font-medium">Database Layer</span>
-              <p className="text-[13px] font-semibold text-[#11140F]">Neon Serverless Postgres</p>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-[#11140F]/10 bg-white p-4 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center shrink-0">
-              <CreditCard className="w-4 h-4" />
-            </div>
-            <div>
-              <span className="text-[12px] text-[#11140F]/50 font-medium">Billing Pipeline</span>
-              <p className="text-[13px] font-semibold text-[#11140F]">Stripe Subscriptions</p>
+        {/* Custom Domain Registry (Instant Sovereign Force-Verify) */}
+        <div className="rounded-2xl border border-[#11140F]/10 bg-white overflow-hidden shadow-xs space-y-0">
+          <div className="p-5 border-b border-[#11140F]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                <Globe className="w-4 h-4 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-[16px] text-[#11140F]">
+                  Branded Custom Domains ({customDomains.length})
+                </h3>
+                <p className="text-[12.5px] text-[#11140F]/50">
+                  Instant force-verification bypass for customer domains without waiting for DNS propagation
+                </p>
+              </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-[#11140F]/10 bg-white p-4 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center shrink-0">
-              <Mail className="w-4 h-4" />
-            </div>
-            <div>
-              <span className="text-[12px] text-[#11140F]/50 font-medium">Transactional Email</span>
-              <p className="text-[13px] font-semibold text-[#11140F]">Nodemailer SMTP</p>
-            </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-[#11140F]/10 bg-[#F7F8F5]/80 text-[11.5px] uppercase font-semibold text-[#11140F]/50 tracking-wider">
+                  <th className="py-3 px-4">Custom Domain</th>
+                  <th className="py-3 px-4">Owner Email</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4">CNAME Target</th>
+                  <th className="py-3 px-4 text-right">Sovereign Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {customDomains.map((d) => (
+                  <AdminDomainRow key={d.id} domain={d} />
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
 
-        {/* User Management Directory */}
+        {/* Customer Directory Management */}
         <div className="rounded-2xl border border-[#11140F]/10 bg-white overflow-hidden shadow-xs space-y-0">
           <div className="p-5 border-b border-[#11140F]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h3 className="font-semibold text-[16px] text-[#11140F]">
-                Customer Directory ({recentUsers.length})
+                Customer Fleet Directory ({recentUsers.length})
               </h3>
               <p className="text-[12.5px] text-[#11140F]/50">
-                Manage user subscription tiers and reset AI quotas directly.
+                Manage user subscription tiers, inspect links, and adjust AI compute budgets directly.
               </p>
             </div>
           </div>
@@ -254,12 +313,12 @@ export default async function AdminDashboardPage() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-[#11140F]/10 bg-[#F7F8F5]/80 text-[11.5px] uppercase font-semibold text-[#11140F]/50 tracking-wider">
-                  <th className="py-3 px-4">User Email</th>
+                  <th className="py-3 px-4">Customer Email</th>
                   <th className="py-3 px-4">Joined</th>
                   <th className="py-3 px-4">Current Plan</th>
-                  <th className="py-3 px-4">Links</th>
-                  <th className="py-3 px-4">Stripe Status</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-3 px-4">Link Fleet</th>
+                  <th className="py-3 px-4">Stripe Billing</th>
+                  <th className="py-3 px-4 text-right">Sovereign Actions</th>
                 </tr>
               </thead>
               <tbody>

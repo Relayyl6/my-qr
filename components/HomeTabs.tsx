@@ -13,9 +13,15 @@ interface HomeTabsProps {
   } | null;
   overviewContent: React.ReactNode;
   workspaceContent: React.ReactNode;
+  announcementBanner?: string | null;
 }
 
-export default function HomeTabs({ user, overviewContent, workspaceContent }: HomeTabsProps) {
+export default function HomeTabs({
+  user,
+  overviewContent,
+  workspaceContent,
+  announcementBanner,
+}: HomeTabsProps) {
   // If user is logged in, default directly to the dedicated Workspace tab; otherwise Overview tour
   const [activeTab, setActiveTab] = useState<'workspace' | 'overview'>(
     user ? 'workspace' : 'overview'
@@ -43,6 +49,16 @@ export default function HomeTabs({ user, overviewContent, workspaceContent }: Ho
 
   return (
     <div className="w-full min-h-screen flex flex-col">
+      {/* Platform-Wide Sovereign Broadcast Announcement */}
+      {announcementBanner && (
+        <div className="bg-gradient-to-r from-emerald-700 via-teal-700 to-[#11140F] text-white px-4 py-2 text-[12.5px] font-medium text-center flex items-center justify-center gap-2 shadow-sm shrink-0">
+          <span className="px-1.5 py-0.5 rounded bg-white/20 text-[10px] font-mono uppercase tracking-wider font-bold">
+            SYSTEM BROADCAST
+          </span>
+          <span>{announcementBanner}</span>
+        </div>
+      )}
+
       {/* Top Tab Bar Navigation */}
       <div className="sticky top-16 z-40 bg-[#EEF0EA]/95 backdrop-blur-md border-b border-[#11140F]/10 px-4 sm:px-6 shadow-2xs">
         <div className="max-w-[1200px] mx-auto flex items-center justify-between gap-3 py-2.5">
