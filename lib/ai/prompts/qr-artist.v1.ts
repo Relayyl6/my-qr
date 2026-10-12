@@ -16,7 +16,7 @@ export type QrStyleSpec = z.infer<typeof qrStyleSpecSchema>;
 
 export const prompt: PromptDefinition<{ prompt: string }, QrStyleSpec> = {
   version: "v1",
-  model: "gpt-4o-mini",
+  model: "gemini-flash-lite-latest",
   temperature: 0.4,
   cacheTtlSeconds: 86400,
   system: `You are an elite creative director and computational visual designer.

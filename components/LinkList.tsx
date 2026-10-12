@@ -21,6 +21,7 @@ interface QrLink {
   lastScannedAt: Date | null;
   landingPage?: { id: string; spec: any; published: boolean } | null;
   customDomain?: { id: string; domain: string } | null;
+  routingRules?: any[];
 }
 
 function timeAgo(date: Date | null) {
@@ -370,10 +371,24 @@ export default function LinkList({
                         <button
                           type="button"
                           onClick={() => setActiveRouterLink(link)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-emerald-500/20 bg-emerald-50/60 hover:bg-emerald-100/80 text-[11px] font-medium text-emerald-800 transition-colors"
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-medium transition-colors cursor-pointer ${
+                            link.routingRules && link.routingRules.length > 0
+                              ? 'border-emerald-500 bg-emerald-100/90 hover:bg-emerald-200/90 text-emerald-950 font-semibold shadow-xs'
+                              : 'border-emerald-500/20 bg-emerald-50/60 hover:bg-emerald-100/80 text-emerald-800'
+                          }`}
                         >
-                          <Compass className="w-3 h-3 text-emerald-600" />
-                          Smart Router
+                          {link.routingRules && link.routingRules.length > 0 ? (
+                            <>
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse shrink-0" />
+                              <Compass className="w-3 h-3 text-emerald-800 shrink-0" />
+                              <span>Smart Router ({link.routingRules.length})</span>
+                            </>
+                          ) : (
+                            <>
+                              <Compass className="w-3 h-3 text-emerald-600 shrink-0" />
+                              <span>Smart Router</span>
+                            </>
+                          )}
                         </button>
                         <button
                           type="button"

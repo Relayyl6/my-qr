@@ -391,22 +391,55 @@ export default function LandingPageEditor({
               </p>
             </div>
 
+            {/* Quick Inspiration Pills */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-[11px] font-medium text-[#11140F]/60">Inspirations:</span>
+              <button
+                type="button"
+                onClick={() => setPromptText('Create an artisanal showcase & links page with our core website, booking specials, opening hours, and Instagram link.')}
+                className="px-2 py-0.5 rounded-lg text-[11px] font-medium bg-[#11140F]/5 hover:bg-[#11140F]/10 text-[#11140F]/80 transition-colors"
+              >
+                🌿 Artisanal Craft & Studio
+              </button>
+              <button
+                type="button"
+                onClick={() => setPromptText('Bistro & natural wine bar with seasonal dining menu, table reservations link, and evening cocktail specials.')}
+                className="px-2 py-0.5 rounded-lg text-[11px] font-medium bg-[#11140F]/5 hover:bg-[#11140F]/10 text-[#11140F]/80 transition-colors"
+              >
+                🍽️ Dining & Bistro Specials
+              </button>
+              <button
+                type="button"
+                onClick={() => setPromptText('Luxury architectural estates & residences showcase with private viewing schedule, downloadable brochure, and concierge.')}
+                className="px-2 py-0.5 rounded-lg text-[11px] font-medium bg-[#11140F]/5 hover:bg-[#11140F]/10 text-[#11140F]/80 transition-colors"
+              >
+                🏢 Luxury Real Estate
+              </button>
+              <button
+                type="button"
+                onClick={() => setPromptText('Digital software studio showcase with client case studies, live demo links, technical consulting, and calendar booking.')}
+                className="px-2 py-0.5 rounded-lg text-[11px] font-medium bg-[#11140F]/5 hover:bg-[#11140F]/10 text-[#11140F]/80 transition-colors"
+              >
+                💼 Executive Tech Portfolio
+              </button>
+            </div>
+
             <div className="flex justify-end gap-2">
               <button
                 type="button"
                 onClick={handleGenerate}
                 disabled={loading || !promptText.trim()}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#11140F] text-white text-[12.5px] font-medium hover:bg-[#2A2E25] transition-colors disabled:opacity-50 cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#11140F] text-white text-[12.5px] font-medium hover:bg-[#2A2E25] transition-colors disabled:opacity-50 cursor-pointer shadow-sm"
               >
                 {loading ? (
                   <>
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    Generating Mobile Showcase…
+                    Generating Adaptive Showcase…
                   </>
                 ) : (
                   <>
                     <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-                    Generate Mobile Page with AI
+                    Generate Adaptive Showcase with AI
                   </>
                 )}
               </button>

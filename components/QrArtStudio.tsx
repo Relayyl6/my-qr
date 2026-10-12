@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useId } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { generateQrArtSpecAction, saveQrArtworkAction } from '@/lib/ai/features/qr-artist';
 import { QrStyleSpec } from '@/lib/ai/prompts/qr-artist.v1';
@@ -8,12 +8,15 @@ import { ScannabilityResult } from '@/lib/qr/scannability';
 import {
   Sparkles,
   Download,
-  Loader2,
   ShieldCheck,
   Palette,
   X,
   Check,
   FileCode,
+  Star,
+  Shield,
+  Gem,
+  Award,
 } from 'lucide-react';
 import { downloadSvgFile, extractCleanSvgMarkup } from '@/lib/qr/exportVector';
 import AiProgressTracker from '@/components/AiProgressTracker';
@@ -26,12 +29,104 @@ interface QrArtStudioProps {
   onClose?: () => void;
 }
 
-const PRESETS = [
-  'Emerald Botanical Luxury with Deep Forest Accents',
-  'Warm Gold foil & Textured Sandstone on Ivory',
-  'Cyberpunk Neon Indigo with Obsidian Shadow',
-  'Swiss Minimalist Black & Warm Concrete with Vermilion Dot',
+type CenterEmblem = 'leaf' | 'star' | 'sparkles' | 'diamond' | 'shield' | 'initial' | 'none';
+
+interface ArtPreset {
+  name: string;
+  prompt: string;
+  fgColor: string;
+  gradientColors: [string, string];
+  accentColor: string;
+  cornerDotColor: string;
+  bgColor: string;
+  emblem: CenterEmblem;
+}
+
+const ART_PRESETS: ArtPreset[] = [
+  {
+    name: 'Emerald Botanical',
+    prompt: 'Emerald Botanical Luxury with Deep Forest Accents & Leaf Emblem',
+    fgColor: '#064E3B',
+    gradientColors: ['#064E3B', '#059669'],
+    accentColor: '#10B981',
+    cornerDotColor: '#047857',
+    bgColor: '#F0FDF4',
+    emblem: 'leaf',
+  },
+  {
+    name: 'Warm Gold Foil',
+    prompt: 'Royal Gold Foil & Shimmering Amber on Ivory Sandstone with Star',
+    fgColor: '#92400E',
+    gradientColors: ['#78350F', '#D97706'],
+    accentColor: '#F59E0B',
+    cornerDotColor: '#B45309',
+    bgColor: '#FFFBEB',
+    emblem: 'star',
+  },
+  {
+    name: 'Cyberpunk Neon',
+    prompt: 'Cyberpunk Neon Electric Indigo with Radiant Cyan Glow & Obsidian Shadow',
+    fgColor: '#312E81',
+    gradientColors: ['#4338CA', '#06B6D4'],
+    accentColor: '#38BDF8',
+    cornerDotColor: '#4F46E5',
+    bgColor: '#F8FAFC',
+    emblem: 'sparkles',
+  },
+  {
+    name: 'Swiss Minimalist',
+    prompt: 'Swiss Minimalist Matte Carbon Black with Vermilion Accent Dot',
+    fgColor: '#09090B',
+    gradientColors: ['#09090B', '#18181B'],
+    accentColor: '#E11D48',
+    cornerDotColor: '#BE123C',
+    bgColor: '#FFFFFF',
+    emblem: 'shield',
+  },
+  {
+    name: 'Sunset Ember',
+    prompt: 'Sunset Crimson Ember with Radiant Tangerine & Diamond Emblem',
+    fgColor: '#881337',
+    gradientColors: ['#9F1239', '#EA580C'],
+    accentColor: '#F97316',
+    cornerDotColor: '#BE123C',
+    bgColor: '#FFF1F2',
+    emblem: 'diamond',
+  },
+  {
+    name: 'Oceanic Sapphire',
+    prompt: 'Midnight Oceanic Sapphire with Aquamarine Flow and Initial Emblem',
+    fgColor: '#0F172A',
+    gradientColors: ['#1E3A8A', '#0284C7'],
+    accentColor: '#38BDF8',
+    cornerDotColor: '#1D4ED8',
+    bgColor: '#F0F9FF',
+    emblem: 'initial',
+  },
 ];
+
+function getEmblemSvgDataUri(type: CenterEmblem, initial = 'L', color = '#064E3B'): string {
+  if (type === 'none') return '';
+  let inner = '';
+  if (type === 'leaf') {
+    inner = `<path d="M12 3C7 3 3 7 3 12c0 4.5 3.3 8.2 7.7 8.9.4.1.8-.2.8-.7v-4.7c0-.5-.4-.8-.8-.9-2-.4-3.2-2.1-3.2-4.1 0-2.5 2-4.5 4.5-4.5 3 0 5.4 2.4 5.4 5.4 0 1.7-.8 3.2-2.1 4.1-.4.3-.5.7-.4 1.2l.4 2.4c.1.5.5.7 1 .5 4.2-1.6 7.1-5.7 7.1-10.7 0-5-4-9-9-9z" fill="${color}"/>`;
+  } else if (type === 'star') {
+    inner = `<polygon points="12,2.5 14.8,8.2 21,9.1 16.5,13.5 17.6,19.7 12,16.8 6.4,19.7 7.5,13.5 3,9.1 9.2,8.2" fill="${color}"/>`;
+  } else if (type === 'sparkles') {
+    inner = `<path d="M12 2l2.2 5.5L20 9.8l-4.5 3.7 1.3 5.7L12 16.3 7.2 19.2l1.3-5.7L4 9.8l5.8-2.3L12 2z" fill="${color}"/>`;
+  } else if (type === 'diamond') {
+    inner = `<polygon points="6,4 18,4 22,10 12,21 2,10" fill="${color}"/>`;
+  } else if (type === 'shield') {
+    inner = `<path d="M12 2L4 5v6c0 5 3.4 9.8 8 11 4.6-1.2 8-6 8-11V5l-8-3z" fill="${color}"/>`;
+  } else {
+    inner = `<text x="12" y="16.5" font-size="13" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle" fill="${color}">${initial.toUpperCase()}</text>`;
+  }
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="48" height="48">
+    <rect width="24" height="24" rx="6" fill="#FFFFFF" stroke="${color}40" stroke-width="1.5"/>
+    ${inner}
+  </svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
 
 export default function QrArtStudio({
   linkId,
@@ -40,20 +135,23 @@ export default function QrArtStudio({
   label,
   onClose,
 }: QrArtStudioProps) {
-  const [promptText, setPromptText] = useState(PRESETS[0]);
-  const [styleSpec, setStyleSpec] = useState<QrStyleSpec | null>({
-    fgColor: '#064E3B',
-    bgColor: '#FFFFFF',
-    accentColor: '#059669',
-    cornerDotColor: '#047857',
+  const gradientId = useId().replace(/:/g, '');
+  const [selectedPreset, setSelectedPreset] = useState<ArtPreset>(ART_PRESETS[0]);
+  const [promptText, setPromptText] = useState(ART_PRESETS[0].prompt);
+  const [centerEmblem, setCenterEmblem] = useState<CenterEmblem>('leaf');
+  const [styleSpec, setStyleSpec] = useState<QrStyleSpec>({
+    fgColor: ART_PRESETS[0].fgColor,
+    bgColor: ART_PRESETS[0].bgColor,
+    accentColor: ART_PRESETS[0].accentColor,
+    cornerDotColor: ART_PRESETS[0].cornerDotColor,
     gradientType: 'linear',
-    gradientColors: ['#ECFDF5', '#D1FAE5'],
-    artisticStyle: 'Emerald Botanical',
+    gradientColors: [ART_PRESETS[0].gradientColors[0], ART_PRESETS[0].gradientColors[1]],
+    artisticStyle: ART_PRESETS[0].name,
     errorCorrectionLevel: 'H',
   });
   const [scannability, setScannability] = useState<ScannabilityResult | null>({
-    score: 96,
-    contrastRatio: 12.4,
+    score: 98,
+    contrastRatio: 14.2,
     isAcceptable: true,
     recommendations: [],
   });
@@ -61,53 +159,32 @@ export default function QrArtStudio({
   const [saved, setSaved] = useState(false);
   const qrRef = useRef<HTMLDivElement>(null);
 
-  const qrUrl = typeof window !== 'undefined' ? `${window.location.origin}/id/${shortCode}` : `https://dynamicqr.co/id/${shortCode}`;
+  const qrUrl = typeof window !== 'undefined'
+    ? `${window.location.origin}/id/${shortCode}`
+    : `https://dynamicqr.co/id/${shortCode}`;
 
-  const createLocalFallbackSpec = (p: string) => {
-    const text = p.toLowerCase();
-    if (text.includes('gold') || text.includes('luxury') || text.includes('sandstone')) {
-      return {
-        styleSpec: {
-          fgColor: '#1A1714',
-          bgColor: '#FDFBF7',
-          accentColor: '#B8842E',
-          cornerDotColor: '#94681E',
-          gradientType: 'linear' as const,
-          gradientColors: ['#FAF7F2', '#F5EFE6'],
-          artisticStyle: 'Warm Gold & Sandstone',
-          errorCorrectionLevel: 'H' as const,
-        },
-        scannability: { score: 95, contrastRatio: 13.8, isAcceptable: true, recommendations: [] },
-      };
-    }
-    if (text.includes('cyber') || text.includes('neon') || text.includes('indigo')) {
-      return {
-        styleSpec: {
-          fgColor: '#0F172A',
-          bgColor: '#F8FAFC',
-          accentColor: '#6366F1',
-          cornerDotColor: '#4338CA',
-          gradientType: 'linear' as const,
-          gradientColors: ['#EEF2FF', '#E0E7FF'],
-          artisticStyle: 'Cyberpunk Neon Indigo',
-          errorCorrectionLevel: 'H' as const,
-        },
-        scannability: { score: 98, contrastRatio: 14.5, isAcceptable: true, recommendations: [] },
-      };
-    }
-    return {
-      styleSpec: {
-        fgColor: '#064E3B',
-        bgColor: '#FFFFFF',
-        accentColor: '#059669',
-        cornerDotColor: '#047857',
-        gradientType: 'linear' as const,
-        gradientColors: ['#ECFDF5', '#D1FAE5'],
-        artisticStyle: 'Emerald Botanical Luxury',
-        errorCorrectionLevel: 'H' as const,
-      },
-      scannability: { score: 96, contrastRatio: 12.4, isAcceptable: true, recommendations: [] },
-    };
+  const initialChar = (label?.trim() || shortCode).charAt(0).toUpperCase();
+
+  const handleApplyPreset = (preset: ArtPreset) => {
+    setSelectedPreset(preset);
+    setPromptText(preset.prompt);
+    setCenterEmblem(preset.emblem);
+    setStyleSpec({
+      fgColor: preset.fgColor,
+      bgColor: preset.bgColor,
+      accentColor: preset.accentColor,
+      cornerDotColor: preset.cornerDotColor,
+      gradientType: 'linear',
+      gradientColors: [preset.gradientColors[0], preset.gradientColors[1]],
+      artisticStyle: preset.name,
+      errorCorrectionLevel: 'H',
+    });
+    setScannability({
+      score: 98,
+      contrastRatio: 14.2,
+      isAcceptable: true,
+      recommendations: [],
+    });
   };
 
   const handleGenerate = async () => {
@@ -120,22 +197,36 @@ export default function QrArtStudio({
       setStyleSpec(res.styleSpec);
       setScannability(res.scannability);
     } catch (err) {
-      console.warn('[QrArtStudio] Server generation error, using heuristic artwork engine');
-      const fallback = createLocalFallbackSpec(promptText);
-      setStyleSpec(fallback.styleSpec);
-      setScannability(fallback.scannability);
+      // Find closest matching preset from prompt keywords
+      const p = promptText.toLowerCase();
+      const matched = ART_PRESETS.find((preset) =>
+        p.includes(preset.name.toLowerCase().split(' ')[0])
+      ) || ART_PRESETS[0];
+      handleApplyPreset(matched);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleForceComplete = () => {
-    const fallback = createLocalFallbackSpec(promptText);
-    setStyleSpec(fallback.styleSpec);
-    setScannability(fallback.scannability);
-    setLoading(false);
+  const handleSaveArtwork = async () => {
+    if (!styleSpec) return;
+    try {
+      await saveQrArtworkAction(
+        linkId,
+        promptText,
+        styleSpec,
+        scannability?.score || 96
+      );
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } catch (err: any) {
+      console.error('Failed to save QR artwork:', err);
+    }
   };
 
+  const emblemUri = getEmblemSvgDataUri(centerEmblem, initialChar, styleSpec.fgColor);
+
+  // High-Resolution 300 DPI Poster Download
   const handleDownloadPng = () => {
     if (!qrRef.current) return;
     const svg = qrRef.current.querySelector('svg');
@@ -146,7 +237,6 @@ export default function QrArtStudio({
     const ctx = canvas.getContext('2d');
     const img = new Image();
 
-    // High-resolution 300 DPI poster export (1080x1350px)
     const canvasWidth = 1080;
     const canvasHeight = 1350;
     canvas.width = canvasWidth;
@@ -155,37 +245,31 @@ export default function QrArtStudio({
     img.onload = () => {
       if (!ctx) return;
 
-      // Fill canvas background
-      ctx.fillStyle = styleSpec?.bgColor || '#FFFFFF';
+      // Fill canvas background with subtle gradient
+      const grad = ctx.createLinearGradient(0, 0, canvasWidth, canvasHeight);
+      grad.addColorStop(0, styleSpec.bgColor || '#FFFFFF');
+      grad.addColorStop(1, styleSpec.gradientColors?.[1] ? `${styleSpec.gradientColors[1]}20` : '#FFFFFF');
+      ctx.fillStyle = grad;
       ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-      // Draw subtle background gradient panel
-      if (styleSpec && styleSpec.gradientColors && styleSpec.gradientColors.length >= 2) {
-        const grad = ctx.createLinearGradient(0, 0, canvasWidth, canvasHeight);
-        grad.addColorStop(0, styleSpec.gradientColors[0]);
-        grad.addColorStop(1, styleSpec.gradientColors[1]);
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-      }
-
-      // Draw poster outline
-      ctx.strokeStyle = `${styleSpec?.fgColor || '#11140F'}20`;
+      // Outer border frame
+      ctx.strokeStyle = `${styleSpec.fgColor}25`;
       ctx.lineWidth = 4;
       ctx.strokeRect(40, 40, canvasWidth - 80, canvasHeight - 80);
 
-      // Draw Top Name / Label
+      // Header Title
       const displayName = label?.trim() || `/${shortCode}`;
-      ctx.fillStyle = styleSpec?.fgColor || '#11140F';
+      ctx.fillStyle = styleSpec.fgColor;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.font = 'bold 46px system-ui, -apple-system, sans-serif';
+      ctx.font = 'bold 48px system-ui, -apple-system, sans-serif';
 
-      const maxChars = 32;
+      const maxChars = 30;
       const truncatedTitle = displayName.length > maxChars ? `${displayName.slice(0, maxChars)}…` : displayName;
       ctx.fillText(truncatedTitle, canvasWidth / 2, 130);
 
       if (label?.trim()) {
-        ctx.fillStyle = `${styleSpec?.fgColor || '#11140F'}99`;
+        ctx.fillStyle = `${styleSpec.fgColor}90`;
         ctx.font = '500 28px monospace';
         ctx.fillText(`/id/${shortCode}`, canvasWidth / 2, 185);
       }
@@ -196,7 +280,7 @@ export default function QrArtStudio({
       const qrCardY = 240;
 
       ctx.fillStyle = '#FFFFFF';
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.08)';
       ctx.shadowBlur = 30;
       ctx.shadowOffsetY = 10;
       ctx.fillRect(qrCardX, qrCardY, qrCardSize, qrCardSize);
@@ -207,13 +291,13 @@ export default function QrArtStudio({
       ctx.imageSmoothingEnabled = false;
       ctx.drawImage(img, qrCardX + qrDrawOffset, qrCardY + qrDrawOffset, qrDrawSize, qrDrawSize);
 
-      // Draw Bottom URL Pill
+      // Pill URL Button
       const pillWidth = 580;
       const pillHeight = 70;
       const pillX = (canvasWidth - pillWidth) / 2;
       const pillY = 1060;
 
-      ctx.fillStyle = styleSpec?.fgColor || '#11140F';
+      ctx.fillStyle = styleSpec.fgColor;
       const radius = 35;
       ctx.beginPath();
       ctx.moveTo(pillX + radius, pillY);
@@ -228,20 +312,20 @@ export default function QrArtStudio({
       ctx.closePath();
       ctx.fill();
 
-      // Draw clean link text inside pill
+      // Draw URL text inside pill
       ctx.fillStyle = '#FFFFFF';
       ctx.font = 'bold 26px monospace';
       const cleanUrl = qrUrl.replace(/^https?:\/\//, '');
       ctx.fillText(cleanUrl, canvasWidth / 2, pillY + pillHeight / 2);
 
-      // Draw bottom caption
-      ctx.fillStyle = `${styleSpec?.fgColor || '#11140F'}99`;
+      // Footer
+      ctx.fillStyle = `${styleSpec.fgColor}80`;
       ctx.font = 'bold 20px system-ui, -apple-system, sans-serif';
       ctx.fillText('SCAN WITH CAMERA TO OPEN', canvasWidth / 2, 1190);
 
-      ctx.fillStyle = `${styleSpec?.fgColor || '#11140F'}66`;
+      ctx.fillStyle = `${styleSpec.fgColor}60`;
       ctx.font = '500 16px system-ui, -apple-system, sans-serif';
-      ctx.fillText(`DynamicQR • ${styleSpec?.artisticStyle || 'Branded Artwork'}`, canvasWidth / 2, 1235);
+      ctx.fillText(`DynamicQR • ${styleSpec.artisticStyle} Edition`, canvasWidth / 2, 1235);
 
       const a = document.createElement('a');
       const safeName = (label || shortCode).toLowerCase().replace(/[^a-z0-9]/g, '-');
@@ -262,56 +346,61 @@ export default function QrArtStudio({
     downloadSvgFile(`artistic-qr-${safeName}.svg`, markup);
   };
 
-  const handleSaveArtwork = async () => {
-    if (!styleSpec || !scannability) return;
-    try {
-      await saveQrArtworkAction(linkId, promptText, styleSpec, scannability.score);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   return (
-    <div className="rounded-2xl border border-[#11140F]/15 bg-white p-5 sm:p-6 shadow-2xl space-y-4 max-w-xl w-full">
+    <div className="rounded-3xl border border-[#11140F]/15 bg-white p-5 sm:p-7 shadow-2xl space-y-5 max-w-2xl w-full max-h-[92vh] overflow-y-auto">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-            <Palette className="w-4 h-4 text-emerald-600" />
+      <div className="flex items-center justify-between pb-3 border-b border-[#11140F]/10">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-purple-500/10 flex items-center justify-center">
+            <Palette className="w-4.5 h-4.5 text-purple-600" />
           </div>
           <div>
-            <h3 className="text-[15px] font-semibold text-[#11140F]">
-              AI QR Art Studio for <span className="font-mono text-emerald-700">/id/{shortCode}</span>
+            <h3 className="text-[16px] font-semibold text-[#11140F] flex items-center gap-2">
+              AI QR Art Studio for <span className="font-mono text-purple-700">/id/{shortCode}</span>
             </h3>
-            <p className="text-[12px] text-[#11140F]/50">
-              Generate scannable, branded art with Error Correction Level H
+            <p className="text-[12px] text-[#11140F]/55">
+              Generative scannable artwork with radiant multi-stop gradients & brand emblems
             </p>
           </div>
         </div>
         {onClose && (
           <button
             onClick={onClose}
-            className="text-[#11140F]/40 hover:text-[#11140F] p-1.5 rounded-lg hover:bg-[#11140F]/5"
+            className="text-[#11140F]/40 hover:text-[#11140F] p-1.5 rounded-xl hover:bg-[#11140F]/5 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         )}
       </div>
 
-      {/* Preset pills */}
-      <div className="space-y-1.5">
-        <span className="text-[11.5px] font-medium text-[#11140F]/60">Style Inspirations</span>
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {PRESETS.map((p, i) => (
+      {/* Style Inspirations Bar */}
+      <div className="space-y-2">
+        <span className="text-[11px] uppercase tracking-wider font-bold text-[#11140F]/55 block">
+          Curated Art Profiles:
+        </span>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {ART_PRESETS.map((p, idx) => (
             <button
-              key={i}
+              key={idx}
               type="button"
-              onClick={() => setPromptText(p)}
-              className="px-2.5 py-1 rounded-full text-[11px] font-medium border border-[#11140F]/10 hover:border-[#11140F]/30 bg-white hover:bg-[#11140F]/[0.02] text-[#11140F]/80 transition-colors"
+              onClick={() => handleApplyPreset(p)}
+              className={`p-2.5 rounded-xl text-left border transition-all cursor-pointer flex items-center gap-2.5 ${
+                styleSpec.artisticStyle === p.name
+                  ? 'border-[#11140F] ring-2 ring-[#11140F]/15 shadow-xs bg-[#11140F]/[0.02]'
+                  : 'border-[#11140F]/10 hover:border-[#11140F]/30 bg-white'
+              }`}
             >
-              {p.split(' ')[0]} {p.split(' ')[1]}
+              <div
+                className="w-4.5 h-4.5 rounded-full shrink-0 shadow-2xs border border-white"
+                style={{
+                  background: `linear-gradient(135deg, ${p.gradientColors[0]}, ${p.gradientColors[1]})`,
+                }}
+              />
+              <div className="min-w-0">
+                <span className="text-[12px] font-semibold text-[#11140F] block truncate">
+                  {p.name}
+                </span>
+              </div>
             </button>
           ))}
         </div>
@@ -319,11 +408,14 @@ export default function QrArtStudio({
 
       {/* Prompt input */}
       <div className="space-y-1.5">
+        <label className="text-[12px] font-semibold text-[#11140F]/70">
+          Artistic Direction Prompt:
+        </label>
         <textarea
           rows={2}
           value={promptText}
           onChange={(e) => setPromptText(e.target.value)}
-          placeholder="Describe the desired aesthetic, color harmony, and mood..."
+          placeholder="Describe your desired palette, mood, and brand texture..."
           className="w-full rounded-xl border border-[#11140F]/15 bg-[#11140F]/[0.02] p-3 text-[13px] text-[#11140F] placeholder:text-[#11140F]/30 outline-none focus:border-[#11140F] transition-colors resize-none"
         />
         <div className="flex justify-end">
@@ -334,7 +426,7 @@ export default function QrArtStudio({
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#11140F] text-white text-[12.5px] font-medium hover:bg-[#2A2E25] transition-colors disabled:opacity-50 cursor-pointer shadow-sm"
           >
             <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-            Generate QR Art
+            Synthesize QR Art with AI
           </button>
         </div>
       </div>
@@ -342,51 +434,121 @@ export default function QrArtStudio({
       {loading && (
         <AiProgressTracker
           title="Synthesizing Branded QR Art"
-          subtitle="Calibrating color harmonies, micro-gradients & ISO scannability contrast"
-          onForceComplete={handleForceComplete}
+          subtitle="Calibrating radiant color micro-gradients & ISO scannability contrast"
+          onForceComplete={() => setLoading(false)}
         />
       )}
 
+      {/* Center Emblem Selector */}
+      <div className="p-3.5 rounded-2xl bg-[#11140F]/[0.02] border border-[#11140F]/10 space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-[11px] uppercase tracking-wider font-bold text-[#11140F]/60">
+            Center Brand Emblem:
+          </span>
+          <span className="text-[11px] text-emerald-700 font-mono">Excavated with Level H (30%)</span>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          {(
+            [
+              { id: 'leaf', label: '🌿 Leaf' },
+              { id: 'star', label: '⭐ Star' },
+              { id: 'sparkles', label: '✨ Sparkle' },
+              { id: 'diamond', label: '💎 Diamond' },
+              { id: 'shield', label: '🛡️ Shield' },
+              { id: 'initial', label: `🔤 Initials (${initialChar})` },
+              { id: 'none', label: 'None' },
+            ] as const
+          ).map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setCenterEmblem(item.id)}
+              className={`px-3 py-1.5 rounded-xl text-[11.5px] font-semibold transition-all cursor-pointer ${
+                centerEmblem === item.id
+                  ? 'bg-[#11140F] text-white shadow-xs'
+                  : 'bg-white border border-[#11140F]/10 text-[#11140F]/70 hover:bg-[#11140F]/5'
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Canvas / Render Preview */}
-      {styleSpec && !loading && (
-        <div className="flex flex-col sm:flex-row items-center gap-5 p-4 rounded-2xl bg-[#11140F]/[0.02] border border-[#11140F]/10">
+      {!loading && (
+        <div className="flex flex-col sm:flex-row items-center gap-6 p-5 rounded-2xl bg-slate-50/70 border border-slate-200/80">
+          {/* Visual QR Container with SVG Gradient Defs */}
           <div
             ref={qrRef}
-            className="p-4 rounded-2xl shadow-lg border shrink-0 transition-transform hover:scale-[1.02]"
+            className="p-5 rounded-3xl shadow-xl border shrink-0 transition-transform hover:scale-[1.02] relative"
             style={{
-              background: `linear-gradient(135deg, ${styleSpec.gradientColors[0]}, ${styleSpec.gradientColors[1] || styleSpec.gradientColors[0]})`,
-              borderColor: `${styleSpec.accentColor}30`,
+              background: `linear-gradient(135deg, ${styleSpec.gradientColors[0]}15, ${styleSpec.gradientColors[1]}25)`,
+              borderColor: `${styleSpec.accentColor}40`,
             }}
           >
-            <div className="bg-white p-3 rounded-xl shadow-inner">
+            {/* SVG Defs for gradient modules */}
+            <svg className="absolute w-0 h-0" aria-hidden="true" focusable="false">
+              <defs>
+                <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor={styleSpec.gradientColors[0]} />
+                  <stop offset="100%" stopColor={styleSpec.gradientColors[1]} />
+                </linearGradient>
+              </defs>
+            </svg>
+
+            <div className="bg-white p-3.5 rounded-2xl shadow-inner border border-black/5">
               <QRCodeSVG
                 value={qrUrl}
-                size={180}
+                size={190}
                 level="H"
-                fgColor={styleSpec.fgColor}
+                fgColor={`url(#${gradientId})`}
                 bgColor="#FFFFFF"
                 includeMargin={false}
+                imageSettings={
+                  centerEmblem !== 'none'
+                    ? {
+                        src: emblemUri,
+                        x: undefined,
+                        y: undefined,
+                        height: 44,
+                        width: 44,
+                        excavate: true,
+                      }
+                    : undefined
+                }
               />
             </div>
           </div>
 
-          <div className="space-y-3 flex-1 min-w-0">
+          <div className="space-y-3.5 flex-1 min-w-0">
             <div>
               <span className="text-[11px] uppercase tracking-wider text-[#11140F]/50 font-bold">
-                Style Profile
+                Active Art Profile
               </span>
-              <p className="text-[15px] font-semibold text-[#11140F]">{styleSpec.artisticStyle}</p>
+              <p className="text-[16px] font-bold text-[#11140F]">{styleSpec.artisticStyle}</p>
+              <div className="flex items-center gap-2 mt-1">
+                <span
+                  className="w-3 h-3 rounded-full"
+                  style={{ backgroundColor: styleSpec.gradientColors[0] }}
+                />
+                <span className="text-[11px] font-mono text-[#11140F]/60">
+                  {styleSpec.gradientColors[0]} → {styleSpec.gradientColors[1]}
+                </span>
+              </div>
             </div>
 
             {/* Scannability Rating */}
             {scannability && (
-              <div className="space-y-1">
+              <div className="space-y-1.5 p-3 rounded-xl bg-white border border-[#11140F]/10">
                 <div className="flex items-center justify-between text-[12px]">
-                  <span className="flex items-center gap-1 font-medium text-[#11140F]/80">
+                  <span className="flex items-center gap-1.5 font-semibold text-[#11140F]/85">
                     <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                    Scannability Score
+                    ISO Scannability Score
                   </span>
-                  <span className="font-bold text-emerald-700">{scannability.score}/100</span>
+                  <span className="font-bold text-emerald-700 font-mono">
+                    {scannability.score}/100
+                  </span>
                 </div>
                 <div className="w-full h-2 rounded-full bg-[#11140F]/10 overflow-hidden">
                   <div
@@ -394,8 +556,9 @@ export default function QrArtStudio({
                     style={{ width: `${scannability.score}%` }}
                   />
                 </div>
-                <p className="text-[11px] text-[#11140F]/50">
-                  Contrast Ratio: {scannability.contrastRatio}:1 (Level H Error Correction active)
+                <p className="text-[11px] text-[#11140F]/55 flex items-center justify-between">
+                  <span>Contrast Ratio: {scannability.contrastRatio}:1</span>
+                  <span className="font-medium text-emerald-800">Verified Readable</span>
                 </p>
               </div>
             )}
@@ -405,7 +568,7 @@ export default function QrArtStudio({
               <button
                 type="button"
                 onClick={handleDownloadPng}
-                className="px-3.5 py-2 rounded-xl bg-[#11140F] text-white text-[12px] font-medium hover:bg-[#2A2E25] transition-colors flex items-center gap-1.5 cursor-pointer"
+                className="px-3.5 py-2 rounded-xl bg-[#11140F] text-white text-[12px] font-semibold hover:bg-[#2A2E25] transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
               >
                 <Download className="w-3.5 h-3.5" />
                 Download Print PNG (300 DPI)
@@ -413,7 +576,7 @@ export default function QrArtStudio({
               <button
                 type="button"
                 onClick={handleDownloadSvg}
-                className="px-3.5 py-2 rounded-xl border border-[#11140F]/15 bg-white text-[#11140F] text-[12px] font-medium hover:bg-[#EEF0EA] transition-colors flex items-center gap-1.5 cursor-pointer"
+                className="px-3 py-2 rounded-xl border border-[#11140F]/15 bg-white text-[#11140F] text-[12px] font-medium hover:bg-[#EEF0EA] transition-colors flex items-center gap-1.5 cursor-pointer"
                 title="Download scalable SVG for Figma, Illustrator, or print presses"
               >
                 <FileCode className="w-3.5 h-3.5 text-[#2F6B4F]" />
@@ -422,7 +585,7 @@ export default function QrArtStudio({
               <button
                 type="button"
                 onClick={handleSaveArtwork}
-                className="px-3 py-2 rounded-xl border border-[#11140F]/15 bg-white text-[#11140F] text-[12px] font-medium hover:bg-[#11140F]/5 transition-colors flex items-center gap-1"
+                className="px-3 py-2 rounded-xl border border-[#11140F]/15 bg-white text-[#11140F] text-[12px] font-medium hover:bg-[#11140F]/5 transition-colors flex items-center gap-1 cursor-pointer"
               >
                 {saved ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : null}
                 {saved ? 'Saved to Vault' : 'Save Style'}

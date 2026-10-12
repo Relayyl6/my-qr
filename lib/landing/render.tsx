@@ -373,7 +373,7 @@ export function RenderLandingPage({
                   </div>
                 ) : (
                   <div
-                    className="w-20 h-20 rounded-2xl flex items-center justify-center font-bold text-white text-3xl shadow-sm"
+                    className="w-16 h-16 rounded-2xl flex items-center justify-center font-bold text-white text-2xl shadow-md border-2 border-white/20 shrink-0"
                     style={{ backgroundColor: theme.primaryColor }}
                   >
                     {spec.businessName.charAt(0).toUpperCase()}

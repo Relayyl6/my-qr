@@ -81,7 +81,7 @@ export default async function Home() {
   const links = user
     ? await prisma.qrLink.findMany({
         where: { userId: user.id },
-        include: { landingPage: true, customDomain: true },
+        include: { landingPage: true, customDomain: true, routingRules: true },
         orderBy: { createdAt: 'desc' },
       })
     : [];
