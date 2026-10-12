@@ -20,11 +20,18 @@ export function RenderLandingPage({ spec }: { spec: LandingPageSpec }) {
           </div>
         ))}
 
-        {/* Footer */}
+        {/* Viral Growth Footer */}
         <div className="pt-8 pb-4 text-center">
-          <p className="text-[11px] opacity-40">
-            Powered by <span className="font-semibold">DynamicQR</span>
-          </p>
+          <a
+            href={process.env.NEXT_PUBLIC_APP_URL || "https://my-qr-sandy.vercel.app"}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/5 hover:bg-black/10 transition-colors text-[11px] opacity-75 hover:opacity-100 font-medium"
+          >
+            <span>⚡ Powered by <strong>DynamicQR</strong></span>
+            <span>&middot;</span>
+            <span className="underline">Create your free code</span>
+          </a>
         </div>
       </div>
     </div>

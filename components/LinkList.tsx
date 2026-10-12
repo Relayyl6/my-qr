@@ -7,7 +7,7 @@ import DeleteConfirmModal from './DeleteConfirmModal';
 import AiRoutingComposer from './AiRoutingComposer';
 import QrArtStudio from './QrArtStudio';
 import LandingPageEditor from './LandingPageEditor';
-import { Sparkles, Compass, Palette, Smartphone, Activity, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Sparkles, Compass, Palette, Smartphone, Activity, CheckCircle2, AlertTriangle, Download } from 'lucide-react';
 
 interface QrLink {
   id: string;
@@ -327,6 +327,15 @@ export default function LinkList({ links }: { links: QrLink[] }) {
                           <Smartphone className="w-3 h-3 text-blue-600" />
                           Prompt-to-Page
                         </button>
+                        <a
+                          href={`/api/links/${link.id}/export`}
+                          download
+                          title="Download complete scan history as CSV"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#11140F]/15 bg-white hover:bg-[#EEF0EA] text-[11px] font-medium text-[#11140F]/75 transition-colors"
+                        >
+                          <Download className="w-3 h-3 text-[#11140F]/60" />
+                          Export CSV
+                        </a>
                       </div>
                     )}
                   </div>

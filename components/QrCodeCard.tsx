@@ -168,6 +168,13 @@ export default function QrCodeCard({ shortCode, label }: Props) {
           /{shortCode}
         </span>
 
+        <span
+          className="text-[8.5px] font-mono text-emerald-800 bg-emerald-50 border border-emerald-200/50 px-1 py-0.5 rounded font-semibold tracking-tight"
+          title="Level H Error Correction: 30% damage tolerance for physical print reliability"
+        >
+          300 DPI &middot; H
+        </span>
+
         {/* Export Dropdown Trigger */}
         <div className="relative" ref={menuRef}>
           <button
