@@ -9,9 +9,10 @@ import PrintTemplateModal from '@/components/PrintTemplateModal';
 interface Props {
   shortCode: string;
   label?: string | null;
+  customDomain?: string | null;
 }
 
-export default function QrCodeCard({ shortCode, label }: Props) {
+export default function QrCodeCard({ shortCode, label, customDomain }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -32,7 +33,9 @@ export default function QrCodeCard({ shortCode, label }: Props) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const url = origin ? `${origin}/id/${shortCode}` : `https://dynamicqr.co/id/${shortCode}`;
+  const url = customDomain
+    ? `https://${customDomain}/id/${shortCode}`
+    : (origin ? `${origin}/id/${shortCode}` : `https://dynamicqr.co/id/${shortCode}`);
   const safeName = (label || shortCode).toLowerCase().replace(/[^a-z0-9]/g, '-');
 
   // 1. High-Resolution 300 DPI Poster PNG Export

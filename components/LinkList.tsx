@@ -20,6 +20,7 @@ interface QrLink {
   scanCount: number;
   lastScannedAt: Date | null;
   landingPage?: { id: string; spec: any; published: boolean } | null;
+  customDomain?: { id: string; domain: string } | null;
 }
 
 function timeAgo(date: Date | null) {
@@ -154,7 +155,9 @@ export default function LinkList({ links }: { links: QrLink[] }) {
           </div>
         ) : (
           filteredLinks.map((link) => {
-            const shortUrl = `${origin || 'https://dynamicqr.co'}/id/${link.shortCode}`;
+            const shortUrl = link.customDomain?.domain
+              ? `https://${link.customDomain.domain}/id/${link.shortCode}`
+              : `${origin || 'https://dynamicqr.co'}/id/${link.shortCode}`;
 
             return (
               <div
@@ -213,7 +216,11 @@ export default function LinkList({ links }: { links: QrLink[] }) {
 
                 {/* Content: QR code on left, URL and details on right */}
                 <div className="flex items-start gap-3 sm:gap-4 min-w-0">
-                  <QrCodeCard shortCode={link.shortCode} label={link.label} />
+                  <QrCodeCard
+                    shortCode={link.shortCode}
+                    label={link.label}
+                    customDomain={link.customDomain?.domain}
+                  />
 
                   <div className="flex-1 min-w-0 space-y-2">
                     {/* Short URL + Copy Button */}

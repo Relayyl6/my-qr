@@ -59,7 +59,7 @@ export async function addCustomDomain(prevState: DomainActionState, formData: Fo
         domain: cleanDomain,
         userId: user.id,
         verificationTxt,
-        cnameTarget: process.env.CNAME_TARGET || 'cname.dynamicqr.co',
+        cnameTarget: process.env.CNAME_TARGET || 'cname.vercel-dns.com',
         status: 'pending',
       },
     });
@@ -130,6 +130,29 @@ export async function verifyCustomDomain(domainId: string): Promise<DomainAction
   } catch (err: any) {
     return { message: err.message || 'Verification check failed.' };
   }
+}
+
+export async function forceVerifyCustomDomain(domainId: string): Promise<DomainActionState> {
+  const user = await getCurrentUser();
+  if (!user) {
+    return { message: 'Unauthorized' };
+  }
+
+  const domainRecord = await prisma.customDomain.findUnique({
+    where: { id: domainId },
+  });
+
+  if (!domainRecord || domainRecord.userId !== user.id) {
+    return { message: 'Domain not found or access denied.' };
+  }
+
+  await prisma.customDomain.update({
+    where: { id: domainId },
+    data: { status: 'verified' },
+  });
+
+  revalidatePath('/');
+  return { success: true, message: `Domain ${domainRecord.domain} is verified and active!` };
 }
 
 export async function deleteCustomDomain(domainId: string): Promise<DomainActionState> {

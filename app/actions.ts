@@ -20,6 +20,7 @@ const linkSchema = z.object({
     .refine((val) => !reservedCodes.includes(val), 'This short code is reserved'),
   destinationUrl: z.string().min(1, 'Destination URL is required'),
   label: z.string().optional(),
+  customDomainId: z.string().optional(),
 });
 
 export type ActionState = {
@@ -38,13 +39,14 @@ export async function createLink(prevState: ActionState, formData: FormData): Pr
     shortCode: formData.get('shortCode'),
     destinationUrl: formData.get('destinationUrl'),
     label: formData.get('label'),
+    customDomainId: formData.get('customDomainId'),
   });
 
   if (!validated.success) {
     return { errors: validated.error.flatten().fieldErrors };
   }
 
-  const { shortCode, destinationUrl, label } = validated.data;
+  const { shortCode, destinationUrl, label, customDomainId } = validated.data;
 
   try {
     const normalizedUrl = normalizeUrl(destinationUrl);
@@ -99,6 +101,7 @@ export async function createLink(prevState: ActionState, formData: FormData): Pr
         destinationUrl: normalizedUrl,
         label: label || null,
         userId: user.id,
+        customDomainId: customDomainId && customDomainId !== 'default' ? customDomainId : null,
       },
     });
 
@@ -208,23 +211,33 @@ export async function deleteLink(id: string): Promise<ActionState> {
 export async function checkDestinationHealth(url: string): Promise<{ ok: boolean; status?: number; error?: string }> {
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 4000);
+    const timeout = setTimeout(() => controller.abort(), 6000);
     const res = await fetch(url, {
       method: 'GET',
-      headers: { 'User-Agent': 'DynamicQR-HealthSentinel/1.0' },
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+      },
       signal: controller.signal,
       redirect: 'follow',
     });
     clearTimeout(timeout);
 
+    // 200-399 are live.
+    // 403 / 429 from platforms like Google Scholar or Cloudflare indicate automated crawler blocks, but are live for real visitors
+    const isBotProtected = res.status === 403 || res.status === 429;
+    const ok = (res.status >= 200 && res.status < 400) || isBotProtected;
+
     return {
-      ok: res.status >= 200 && res.status < 400,
+      ok,
       status: res.status,
+      error: isBotProtected ? 'Bot Shield Active (Live for Visitors)' : undefined,
     };
   } catch (error: any) {
     return {
       ok: false,
-      error: error.name === 'AbortError' ? 'Timeout (4s)' : 'Host unreachable',
+      error: error.name === 'AbortError' ? 'Timeout (6s)' : 'Host unreachable',
     };
   }
 }

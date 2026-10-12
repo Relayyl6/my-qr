@@ -81,7 +81,7 @@ export default async function Home() {
   const links = user
     ? await prisma.qrLink.findMany({
         where: { userId: user.id },
-        include: { landingPage: true },
+        include: { landingPage: true, customDomain: true },
         orderBy: { createdAt: 'desc' },
       })
     : [];
@@ -317,7 +317,7 @@ export default async function Home() {
               <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-6 items-start w-full min-w-0">
                 <section className="w-full min-w-0 max-w-full h-fit rounded-2xl border border-[#11140F]/10 bg-[#EEF0EA] p-4 sm:p-7 lg:sticky lg:top-24">
                   <h3 className="mb-5 sm:mb-7 text-[16px] sm:text-[17px] font-medium">Create new link</h3>
-                  <LinkForm />
+                  <LinkForm customDomains={customDomains} />
                 </section>
 
                 <section className="w-full min-w-0 max-w-full rounded-2xl border border-[#11140F]/10 bg-[#EEF0EA] p-4 sm:p-7">

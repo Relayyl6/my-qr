@@ -19,11 +19,16 @@ function SubmitBtn() {
   );
 }
 
-export default function LinkForm() {
+interface LinkFormProps {
+  customDomains?: { id: string; domain: string; status: string }[];
+}
+
+export default function LinkForm({ customDomains = [] }: LinkFormProps) {
   const [state, formAction] = useFormState(createLink, {});
   const [shortCode, setShortCode] = useState('');
   const [destinationUrl, setDestinationUrl] = useState('');
   const [label, setLabel] = useState('');
+  const [selectedDomainId, setSelectedDomainId] = useState('default');
   const [origin, setOrigin] = useState('');
   const [isAiSuggested, setIsAiSuggested] = useState(false);
   const [isEnriching, setIsEnriching] = useState(false);
@@ -41,6 +46,7 @@ export default function LinkForm() {
       setShortCode('');
       setDestinationUrl('');
       setLabel('');
+      setSelectedDomainId('default');
       setIsAiSuggested(false);
       setEnrichmentData(null);
     }
@@ -175,6 +181,29 @@ export default function LinkForm() {
         </div>
       )}
 
+      {/* Custom Branded Domain Selector (if user has connected domains) */}
+      {customDomains.length > 0 && (
+        <div className="w-full min-w-0">
+          <label htmlFor="customDomainId" className="block text-[13px] font-medium text-[#11140F]/70 mb-1.5">
+            Serving Domain Prefix
+          </label>
+          <select
+            id="customDomainId"
+            name="customDomainId"
+            value={selectedDomainId}
+            onChange={(e) => setSelectedDomainId(e.target.value)}
+            className="w-full rounded-xl border border-[#11140F]/15 bg-white px-3 py-2 sm:py-2.5 text-[13px] font-mono text-[#11140F] outline-none focus:border-[#11140F] transition-colors"
+          >
+            <option value="default">{(origin || 'https://my-qr-sandy.vercel.app').replace(/^https?:\/\//, '')} (Default)</option>
+            {customDomains.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.domain} {d.status === 'verified' ? '✓ (Active)' : '(Pending DNS)'}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
       {/* Short Code Field */}
       <div className="w-full min-w-0">
         <div className="flex items-center justify-between mb-1.5">
@@ -211,7 +240,11 @@ export default function LinkForm() {
           />
         </div>
         <p className="mt-1.5 text-[11px] text-[#11140F]/50 break-all leading-normal" style={{ fontFamily: 'var(--font-mono)' }}>
-          Preview: <span className="text-[#11140F]/80 font-medium break-all">{origin || 'https://dynamicqr.co'}/id/{shortCode || 'promo-2024'}</span>
+          Preview: <span className="text-[#11140F]/80 font-medium break-all">
+            {selectedDomainId !== 'default'
+              ? `https://${customDomains.find((d) => d.id === selectedDomainId)?.domain || 'qr.yourbrand.com'}`
+              : (origin || 'https://dynamicqr.co')}/id/{shortCode || 'promo-2024'}
+          </span>
         </p>
         {state.errors?.shortCode && (
           <p className="mt-1 text-[12px] text-[#B8842E] font-medium">{state.errors.shortCode[0]}</p>
