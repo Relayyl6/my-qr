@@ -44,9 +44,28 @@ export async function createLink(prevState: ActionState, formData: FormData): Pr
   }
 
   const { shortCode, destinationUrl, label } = validated.data;
-  const normalizedUrl = normalizeUrl(destinationUrl);
 
   try {
+    const normalizedUrl = normalizeUrl(destinationUrl);
+    // Check active link limit based on subscription tier
+    const tier = (user.tier || 'free').toLowerCase();
+    const linkLimits: Record<string, number> = {
+      free: 5,
+      pro: 50,
+      plus: 500,
+      ultra: 999999,
+    };
+    const maxAllowed = linkLimits[tier] ?? 5;
+    const activeCount = await prisma.qrLink.count({
+      where: { userId: user.id, isArchived: false },
+    });
+
+    if (activeCount >= maxAllowed) {
+      return {
+        message: `You have reached your limit of ${maxAllowed} active links on the ${(user.tier || 'Free').toUpperCase()} plan. Please upgrade to Pro or Plus to create more.`,
+      };
+    }
+
     const existing = await prisma.qrLink.findUnique({ where: { shortCode } });
     if (existing) {
       return { errors: { shortCode: ['This short code is already taken'] } };

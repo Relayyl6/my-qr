@@ -83,8 +83,13 @@ export default function LinkForm() {
   return (
     <form ref={formRef} action={formAction} className="space-y-4 sm:space-y-5 w-full min-w-0 max-w-full">
       {state.message && (
-        <div className="rounded-xl border border-[#B8842E]/30 bg-[#B8842E]/10 p-3 text-[13px] text-[#8A631F] font-medium">
-          {state.message}
+        <div className="rounded-xl border border-[#B8842E]/30 bg-[#B8842E]/10 p-3 text-[13px] text-[#8A631F] font-medium flex items-center justify-between gap-2">
+          <span>{state.message}</span>
+          {state.message.toLowerCase().includes('upgrade') && (
+            <a href="/pricing" className="underline font-bold text-[#11140F] shrink-0 hover:opacity-80">
+              View Plans &rarr;
+            </a>
+          )}
         </div>
       )}
 

@@ -13,9 +13,11 @@ model User {
   email         String         @unique
   password      String
   name          String?
-  tier          String         @default("pro") // 'free' | 'pro' | 'premium'
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  tier                 String         @default("pro") // 'free' | 'pro' | 'plus' | 'ultra'
+  stripeCustomerId     String?        @unique
+  stripeSubscriptionId String?
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
   
   links         QrLink[]
   aiCredit      AiCredit?

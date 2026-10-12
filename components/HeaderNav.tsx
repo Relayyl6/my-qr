@@ -4,11 +4,14 @@ import { useState } from 'react';
 import { signOut } from '@/app/auth-actions';
 import AuthModal from './AuthModal';
 
+import Link from 'next/link';
+
 interface Props {
   user: {
     id: string;
     email: string;
     name: string | null;
+    tier?: string;
   } | null;
 }
 
@@ -50,14 +53,24 @@ export default function HeaderNav({ user }: Props) {
           </a>
 
           <div className="hidden md:flex items-center gap-8 text-[14px] text-[#11140F]/70">
-            <a href="#how-it-works" className="hover:text-[#11140F] transition-colors">How it works</a>
-            <a href="#features" className="hover:text-[#11140F] transition-colors">Features</a>
-            <a href="#workspace" className="hover:text-[#11140F] transition-colors">Workspace</a>
+            <a href="/#how-it-works" className="hover:text-[#11140F] transition-colors">How it works</a>
+            <a href="/#features" className="hover:text-[#11140F] transition-colors">Features</a>
+            <a href="/#workspace" className="hover:text-[#11140F] transition-colors">Workspace</a>
+            <Link href="/pricing" className="hover:text-[#11140F] font-medium transition-colors text-[#2F6B4F]">
+              Pricing
+            </Link>
           </div>
 
           <div className="flex items-center gap-3">
             {user ? (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
+                <Link
+                  href="/pricing"
+                  className="rounded-full bg-[#2F6B4F]/10 text-[#2F6B4F] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider hover:bg-[#2F6B4F]/20 transition-colors"
+                  title="Click to manage subscription or upgrade"
+                >
+                  {user.tier || 'pro'}
+                </Link>
                 <span className="hidden sm:inline-block text-[13px] text-[#11140F]/70 font-medium">
                   {user.name || user.email.split('@')[0]}
                 </span>

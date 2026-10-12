@@ -59,7 +59,7 @@ export async function getCurrentUser() {
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, email: true, name: true },
+      select: { id: true, email: true, name: true, tier: true, stripeCustomerId: true },
     });
     return user;
   } catch (error) {
