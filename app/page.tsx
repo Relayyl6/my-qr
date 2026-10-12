@@ -10,6 +10,7 @@ import CampaignAnalyst from '@/components/CampaignAnalyst';
 import WorkspaceHeaderActions from '@/components/WorkspaceHeaderActions';
 import BrandedDomainsManager from '@/components/BrandedDomainsManager';
 import PlanUsageMeter from '@/components/PlanUsageMeter';
+import HomeTabs from '@/components/HomeTabs';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -146,15 +147,8 @@ export default async function Home() {
     ? 5
     : 0.5;
 
-
-  return (
-    <div
-      className={`${display.variable} ${body.variable} ${mono.variable} bg-[#EEF0EA] text-[#11140F] min-h-screen w-full overflow-x-clip pt-16`}
-      style={{ fontFamily: 'var(--font-body)' }}
-    >
-      {/* Dynamic Auth Header Nav */}
-      <HeaderNav user={user} />
-
+  const overviewContent = (
+    <>
       {/* Hero */}
       <section id="top" className="bg-[#11140F] w-full overflow-hidden">
         <div className="max-w-[1200px] mx-auto px-5 md:px-8 py-16 md:py-28 grid lg:grid-cols-[1.1fr_0.9fr] gap-12 lg:gap-14 items-center">
@@ -269,70 +263,89 @@ export default async function Home() {
           ))}
         </div>
       </section>
+    </>
+  );
 
-      {/* Workspace Section */}
-      <section id="workspace" className="bg-white border-t border-[#11140F]/10 scroll-mt-16">
-        <div className="max-w-[1200px] mx-auto px-4 sm:px-5 md:px-8 py-14 sm:py-20 md:py-28 space-y-8">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h2 className="text-[1.5rem] sm:text-[1.75rem] tracking-tight font-medium" style={{ fontFamily: 'var(--font-display)' }}>
-                {user ? `${user.name ? `${user.name}'s` : 'Your'} Workspace` : 'Your Workspace'}
-              </h2>
-              <p className="mt-1 text-[#11140F]/55 text-[14px] sm:text-[15px]">
-                {user
-                  ? 'Create, manage, smart-route, and analyze your dynamic QR codes.'
-                  : 'Sign in to generate, route, and track your dynamic QR codes.'}
-              </p>
-            </div>
-
-            {user && <WorkspaceHeaderActions />}
-          </div>
-
-          {user ? (
-            <div className="space-y-8">
-              {/* Plan Capacity & Usage Meter with Real-time Counters */}
-              <PlanUsageMeter
-                userTier={user.tier || 'free'}
-                isAdmin={isAdmin}
-                activeLinksCount={activeLinksCount}
-                maxLinks={maxLinks}
-                monthlyScansCount={monthlyScansCount}
-                maxScans={maxScans}
-                aiUsedUsd={aiUsedUsd}
-                aiLimitUsd={aiLimitUsd}
-                daysUntilReset={daysUntilReset}
-              />
-
-              {/* Feature 3: AI Campaign Analyst Panel */}
-              <CampaignAnalyst />
-
-              {/* Feature 4: Custom Branded Domains (Plus & Ultra) */}
-              <BrandedDomainsManager
-                initialDomains={customDomains}
-                userTier={user.tier || 'free'}
-                isAdmin={isAdmin}
-              />
-
-              {/* Link creation & Link list workspace */}
-              <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-6 items-start w-full min-w-0">
-                <section className="w-full min-w-0 max-w-full h-fit rounded-2xl border border-[#11140F]/10 bg-[#EEF0EA] p-4 sm:p-7 lg:sticky lg:top-24">
-                  <h3 className="mb-5 sm:mb-7 text-[16px] sm:text-[17px] font-medium">Create new link</h3>
-                  <LinkForm customDomains={customDomains} />
-                </section>
-
-                <section className="w-full min-w-0 max-w-full rounded-2xl border border-[#11140F]/10 bg-[#EEF0EA] p-4 sm:p-7">
-                  <h3 className="mb-5 sm:mb-7 text-[16px] sm:text-[17px] font-medium">
-                    Active links <span className="text-[#11140F]/35 font-normal">({links.filter((l) => !l.isArchived).length})</span>
-                  </h3>
-                  <LinkList links={links} userTier={user.tier || 'free'} isAdmin={isAdmin} />
-                </section>
-              </div>
-            </div>
-          ) : (
-            <WorkspaceLocked />
-          )}
+  const workspaceContent = (
+    <div className="space-y-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2
+            className="text-[1.5rem] sm:text-[1.75rem] tracking-tight font-medium"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
+            {user ? `${user.name ? `${user.name}'s` : 'Your'} Workspace` : 'Your Workspace'}
+          </h2>
+          <p className="mt-1 text-[#11140F]/55 text-[14px] sm:text-[15px]">
+            {user
+              ? 'Create, manage, smart-route, and analyze your dynamic QR codes.'
+              : 'Sign in to generate, route, and track your dynamic QR codes.'}
+          </p>
         </div>
-      </section>
+
+        {user && <WorkspaceHeaderActions />}
+      </div>
+
+      {user ? (
+        <div className="space-y-8">
+          {/* Plan Capacity & Usage Meter with Real-time Counters */}
+          <PlanUsageMeter
+            userTier={user.tier || 'free'}
+            isAdmin={isAdmin}
+            activeLinksCount={activeLinksCount}
+            maxLinks={maxLinks}
+            monthlyScansCount={monthlyScansCount}
+            maxScans={maxScans}
+            aiUsedUsd={aiUsedUsd}
+            aiLimitUsd={aiLimitUsd}
+            daysUntilReset={daysUntilReset}
+          />
+
+          {/* Feature 3: AI Campaign Analyst Panel */}
+          <CampaignAnalyst />
+
+          {/* Feature 4: Custom Branded Domains (Plus & Ultra) */}
+          <BrandedDomainsManager
+            initialDomains={customDomains}
+            userTier={user.tier || 'free'}
+            isAdmin={isAdmin}
+          />
+
+          {/* Link creation & Link list workspace */}
+          <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-6 items-start w-full min-w-0">
+            <section className="w-full min-w-0 max-w-full h-fit rounded-2xl border border-[#11140F]/10 bg-white p-4 sm:p-7 shadow-xs lg:sticky lg:top-36">
+              <h3 className="mb-5 sm:mb-7 text-[16px] sm:text-[17px] font-medium">Create new link</h3>
+              <LinkForm customDomains={customDomains} />
+            </section>
+
+            <section className="w-full min-w-0 max-w-full rounded-2xl border border-[#11140F]/10 bg-white p-4 sm:p-7 shadow-xs">
+              <h3 className="mb-5 sm:mb-7 text-[16px] sm:text-[17px] font-medium">
+                Active links <span className="text-[#11140F]/35 font-normal">({links.filter((l) => !l.isArchived).length})</span>
+              </h3>
+              <LinkList links={links} userTier={user.tier || 'free'} isAdmin={isAdmin} />
+            </section>
+          </div>
+        </div>
+      ) : (
+        <WorkspaceLocked />
+      )}
+    </div>
+  );
+
+  return (
+    <div
+      className={`${display.variable} ${body.variable} ${mono.variable} bg-[#EEF0EA] text-[#11140F] min-h-screen w-full overflow-x-clip pt-16`}
+      style={{ fontFamily: 'var(--font-body)' }}
+    >
+      {/* Dynamic Auth Header Nav */}
+      <HeaderNav user={user} />
+
+      {/* Tabbed View: Dedicated Workspace vs Product Tour */}
+      <HomeTabs
+        user={user}
+        overviewContent={overviewContent}
+        workspaceContent={workspaceContent}
+      />
 
       <footer className="max-w-[1200px] mx-auto px-5 md:px-8 py-10 flex flex-col sm:flex-row items-center justify-between gap-4 text-[13px] text-[#11140F]/55 border-t border-[#11140F]/10">
         <div className="flex items-center gap-2">

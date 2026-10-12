@@ -35,13 +35,13 @@ export function RenderLandingPage({
 
   return (
     <div
-      className="min-h-screen w-full flex flex-col items-center px-4 py-8 sm:py-12 selection:bg-emerald-200"
+      className="min-h-screen w-full flex flex-col items-center px-4 py-8 sm:py-12 selection:bg-emerald-200 transition-colors"
       style={{
         backgroundColor: theme.backgroundColor,
         color: theme.textColor,
       }}
     >
-      <div className="w-full max-w-md space-y-5">
+      <div className="w-full max-w-md sm:max-w-xl md:max-w-2xl space-y-5 transition-all">
         {destinationUrl && (
           <a
             href={normalizeLandingUrl(destinationUrl)}
@@ -57,7 +57,7 @@ export function RenderLandingPage({
             <div className="flex items-center gap-2 truncate">
               <span className="w-2 h-2 rounded-full bg-emerald-600 shrink-0 animate-pulse" />
               <span className="truncate">
-                Primary Website: <strong className="font-semibold underline">{destinationUrl.replace(/^https?:\/\//, '')}</strong>
+                Primary Destination: <strong className="font-semibold underline">{destinationUrl.replace(/^https?:\/\//, '')}</strong>
               </span>
             </div>
             <ArrowUpRight className="w-3.5 h-3.5 shrink-0 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
@@ -110,9 +110,9 @@ function renderBlock(
               {block.badgeText}
             </span>
           )}
-          <h1 className="text-2xl font-bold tracking-tight">{block.title}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{block.title}</h1>
           {block.subtitle && (
-            <p className="text-[14px] opacity-75 max-w-xs mx-auto leading-relaxed">
+            <p className="text-[14px] sm:text-[15px] opacity-75 max-w-sm sm:max-w-md mx-auto leading-relaxed">
               {block.subtitle}
             </p>
           )}
@@ -120,6 +120,7 @@ function renderBlock(
       );
 
     case "linkList":
+      const isMultiButton = block.items.length >= 2;
       return (
         <div className="space-y-2.5">
           {block.title && (
@@ -127,7 +128,7 @@ function renderBlock(
               {block.title}
             </h2>
           )}
-          <div className="space-y-2">
+          <div className={isMultiButton ? "grid grid-cols-1 sm:grid-cols-2 gap-2.5" : "space-y-2"}>
             {block.items.map((item, i) => {
               const targetUrl = normalizeLandingUrl(item.url, destinationUrl);
               return (
@@ -138,7 +139,7 @@ function renderBlock(
                   rel="noopener noreferrer"
                   className={`block w-full p-4 rounded-2xl border transition-all duration-150 transform active:scale-[0.98] ${
                     item.highlight
-                      ? "shadow-md hover:shadow-lg"
+                      ? "shadow-md hover:shadow-lg ring-2 ring-emerald-500/20"
                       : "shadow-sm hover:shadow"
                   }`}
                   style={{
@@ -147,9 +148,9 @@ function renderBlock(
                     borderColor: `${theme.textColor}15`,
                   }}
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <div className="min-w-0 pr-2">
-                      <p className="font-semibold text-[15px] truncate">{item.title}</p>
+                      <p className="font-semibold text-[14.5px] sm:text-[15px] truncate">{item.title}</p>
                       {item.subtitle && (
                         <p className="text-[12px] opacity-80 truncate mt-0.5">
                           {item.subtitle}
@@ -168,7 +169,7 @@ function renderBlock(
     case "menu":
       return (
         <div
-          className="p-5 rounded-2xl border shadow-sm space-y-3.5"
+          className="p-5 sm:p-6 rounded-2xl border shadow-sm space-y-3.5"
           style={{
             backgroundColor: theme.cardBg,
             borderColor: `${theme.textColor}15`,
@@ -198,7 +199,7 @@ function renderBlock(
     case "contact":
       return (
         <div
-          className="p-5 rounded-2xl border shadow-sm space-y-3"
+          className="p-5 sm:p-6 rounded-2xl border shadow-sm space-y-3.5"
           style={{
             backgroundColor: theme.cardBg,
             borderColor: `${theme.textColor}15`,
@@ -207,7 +208,7 @@ function renderBlock(
           <h2 className="text-[13px] font-bold uppercase tracking-wider opacity-80">
             {block.title}
           </h2>
-          <div className="space-y-2 text-[13px]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[13px]">
             {block.phone && (
               <a href={`tel:${block.phone}`} className="flex items-center gap-2.5 opacity-80 hover:opacity-100">
                 <Phone className="w-4 h-4 shrink-0" />
@@ -221,7 +222,7 @@ function renderBlock(
               </a>
             )}
             {block.address && (
-              <div className="flex items-start gap-2.5 opacity-80">
+              <div className="flex items-start gap-2.5 opacity-80 sm:col-span-2">
                 <MapPin className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>{block.address}</span>
               </div>

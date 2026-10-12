@@ -53,9 +53,8 @@ export default function HeaderNav({ user }: Props) {
           </a>
 
           <div className="hidden md:flex items-center gap-8 text-[14px] text-[#11140F]/70">
-            <a href="/#how-it-works" className="hover:text-[#11140F] transition-colors">How it works</a>
-            <a href="/#features" className="hover:text-[#11140F] transition-colors">Features</a>
-            <a href="/#workspace" className="hover:text-[#11140F] transition-colors">Workspace</a>
+            <a href="/#workspace" className="hover:text-[#11140F] font-semibold text-[#11140F] transition-colors">Workspace</a>
+            <a href="/#overview" className="hover:text-[#11140F] transition-colors">Product Tour</a>
             <Link href="/pricing" className="hover:text-[#11140F] font-medium transition-colors text-[#2F6B4F]">
               Pricing
             </Link>
