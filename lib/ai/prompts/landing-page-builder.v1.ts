@@ -10,7 +10,7 @@ export interface LandingPageBuilderInput {
 
 export const prompt: PromptDefinition<LandingPageBuilderInput, LandingPageSpec> = {
   version: "v1",
-  model: "gemini-flash-lite-latest",
+  model: "gemini-3.8-flash",
   temperature: 0.3,
   cacheTtlSeconds: 86400,
   system: `You are an elite responsive web designer and copywriter for DynamicQR.

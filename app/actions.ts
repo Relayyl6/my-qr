@@ -19,8 +19,8 @@ const linkSchema = z.object({
     .regex(/^[a-z0-9-_]+$/, 'Only lowercase letters, numbers, hyphens, and underscores allowed')
     .refine((val) => !reservedCodes.includes(val), 'This short code is reserved'),
   destinationUrl: z.string().min(1, 'Destination URL is required'),
-  label: z.string().optional(),
-  customDomainId: z.string().optional(),
+  label: z.string().nullish(),
+  customDomainId: z.string().nullish(),
 });
 
 export type ActionState = {

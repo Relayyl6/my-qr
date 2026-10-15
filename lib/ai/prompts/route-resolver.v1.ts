@@ -17,7 +17,7 @@ export type RouteResolverOutput = z.infer<typeof routeResolverOutputSchema>;
 
 export const prompt: PromptDefinition<RouteResolverInput, RouteResolverOutput> = {
   version: "v1",
-  model: "gemini-flash-lite-latest",
+  model: "gemini-3.8-flash",
   temperature: 0.1,
   cacheTtlSeconds: 86400,
   system: `You are an elite traffic engineer and routing compiler for DynamicQR.

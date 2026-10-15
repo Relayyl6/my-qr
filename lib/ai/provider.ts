@@ -225,7 +225,7 @@ export class GeminiProvider implements AIProvider {
   // Active models available on Google Gemini API
   private getCandidateModels(requestedModel?: string): string[] {
     const primary = this.resolveModel(requestedModel);
-    const candidates = [primary, "gemini-flash-lite-latest", "gemini-3.5-flash", "gemini-3.8-flash"];
+    const candidates = [primary, "gemini-3.8-flash", "gemini-3.5-flash", "gemini-flash-lite-latest"];
     return Array.from(new Set(candidates));
   }
 
@@ -282,15 +282,15 @@ export class GeminiProvider implements AIProvider {
   }
 
   private resolveModel(model?: string): string {
-    if (!model) return "gemini-flash-lite-latest";
+    if (!model) return "gemini-3.8-flash";
     const m = model.toLowerCase();
     if (m.startsWith("gpt-") || m.startsWith("claude-")) {
-      return "gemini-flash-lite-latest";
+      return "gemini-3.8-flash";
     }
     if (m.includes("3.5")) return "gemini-3.5-flash";
     if (m.includes("3.8")) return "gemini-3.8-flash";
     if (m.includes("flash-lite") || m.includes("lite")) return "gemini-flash-lite-latest";
-    if (m.includes("flash")) return "gemini-flash-lite-latest";
+    if (m.includes("flash")) return "gemini-3.8-flash";
     return model;
   }
 

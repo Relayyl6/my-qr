@@ -133,7 +133,8 @@ export default function LinkForm({ customDomains = [] }: LinkFormProps) {
         </div>
         <input
           id="destinationUrl"
-          type="url"
+          type="text"
+          inputMode="url"
           name="destinationUrl"
           required
           value={destinationUrl}
@@ -189,7 +190,7 @@ export default function LinkForm({ customDomains = [] }: LinkFormProps) {
       )}
 
       {/* Custom Branded Domain Selector (if user has connected domains) */}
-      {customDomains.length > 0 && (
+      {customDomains.length > 0 ? (
         <div className="w-full min-w-0">
           <label htmlFor="customDomainId" className="block text-[13px] font-medium text-[#11140F]/70 mb-1.5">
             Serving Domain Prefix
@@ -209,6 +210,8 @@ export default function LinkForm({ customDomains = [] }: LinkFormProps) {
             ))}
           </select>
         </div>
+      ) : (
+        <input type="hidden" name="customDomainId" value="default" />
       )}
 
       {/* Short Code Field */}
@@ -272,7 +275,22 @@ export default function LinkForm({ customDomains = [] }: LinkFormProps) {
           className="block w-full min-w-0 rounded-xl border border-[#11140F]/15 bg-white px-3 py-2.5 sm:py-3 text-[14px] text-[#11140F] placeholder:text-[#11140F]/30 outline-none focus:border-[#11140F] transition-colors"
           placeholder="Summer promo flyer"
         />
+        {state.errors?.label && (
+          <p className="mt-1 text-[12px] text-[#B8842E] font-medium">{state.errors.label[0]}</p>
+        )}
       </div>
+
+      {state.errors && Object.keys(state.errors).filter(k => k !== 'destinationUrl' && k !== 'shortCode' && k !== 'label').length > 0 && (
+        <div className="rounded-lg bg-amber-50 p-2.5 border border-amber-200 text-[12px] text-amber-800 space-y-0.5">
+          {Object.entries(state.errors)
+            .filter(([k]) => k !== 'destinationUrl' && k !== 'shortCode' && k !== 'label')
+            .map(([field, errs]) => (
+              <p key={field} className="font-medium">
+                {field}: {errs.join(', ')}
+              </p>
+            ))}
+        </div>
+      )}
 
       <SubmitBtn />
     </form>
