@@ -304,9 +304,9 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
               {simulatedDevice === 'android' && (
                 /* Google Pixel Realistic Hardware Mockup */
                 <div className="w-[245px] sm:w-[260px] h-[460px] rounded-[42px] bg-gradient-to-b from-[#2E333D] via-[#1F232B] to-[#121418] p-[8px] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.15)] relative border border-white/10 flex flex-col justify-between transition-all duration-300 animate-fade-in">
-                  {/* Physical Hardware Buttons */}
-                  <div className="absolute -right-[3px] top-28 w-[3px] h-10 bg-white/30 rounded-r" />
-                  <div className="absolute -right-[3px] top-42 w-[3px] h-16 bg-white/30 rounded-r" />
+                  {/* Physical Hardware Buttons — placed cleanly on the straight side edge below the 42px curved corner */}
+                  <div className="absolute -right-[3px] top-[100px] w-[3px] h-8 bg-white/30 rounded-r shadow-xs" />
+                  <div className="absolute -right-[3px] top-[148px] w-[3px] h-14 bg-white/30 rounded-r shadow-xs" />
 
                   {/* Display Screen */}
                   <div className="w-full h-full rounded-[34px] bg-[#0E1116] overflow-hidden relative flex flex-col justify-between p-3 select-none">
@@ -379,75 +379,93 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
               )}
 
               {simulatedDevice === 'desktop' && (
-                /* Mac/PC Realistic Hardware Desktop Mockup */
-                <div className="w-full max-w-[340px] sm:max-w-[370px] h-[370px] sm:h-[400px] rounded-2xl bg-[#1B1E22] border border-white/15 p-3.5 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.12)] flex flex-col justify-between transition-all duration-300 animate-fade-in">
-                  {/* macOS / PC Window Chrome Header */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between pb-2 border-b border-white/10">
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-3 h-3 rounded-full bg-[#FF5F56] border border-[#E0443E]" />
-                        <div className="w-3 h-3 rounded-full bg-[#FFBD2E] border border-[#DEA123]" />
-                        <div className="w-3 h-3 rounded-full bg-[#27C93F] border border-[#1AAB29]" />
-                      </div>
-                      <div className="text-[11px] font-mono text-white/50 flex items-center gap-1.5">
-                        <Globe2 className="w-3 h-3 text-emerald-400" />
-                        <span>festival-summer.com</span>
-                      </div>
-                      <div className="w-10" />
+                /* Authentic MacBook Physical Hardware Body Mockup */
+                <div className="w-full flex flex-col items-center transition-all duration-300 animate-fade-in select-none">
+                  {/* MacBook Aluminum Display Lid */}
+                  <div className="w-[305px] sm:w-[340px] rounded-t-2xl bg-gradient-to-b from-[#2B2F37] via-[#1E2128] to-[#14161B] p-2.5 sm:p-3 pb-1.5 border-t border-x border-white/20 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.9)] relative">
+                    {/* FaceTime HD Camera Dot */}
+                    <div className="w-2 h-2 rounded-full bg-black border border-white/20 mx-auto mb-1.5 flex items-center justify-center shadow-xs">
+                      <div className="w-0.5 h-0.5 rounded-full bg-teal-400/60" />
                     </div>
 
-                    {/* Omnibox / URL Bar */}
-                    <div className="rounded-lg bg-black/60 border border-white/10 px-2.5 py-1.5 flex items-center gap-2 text-[10.5px] font-mono">
-                      <Lock className="w-3 h-3 text-emerald-400 shrink-0" />
-                      <span className="text-white/70 truncate">https://my-qr-sandy.vercel.app/id/summer-festival</span>
-                      <span className="ml-auto text-[9.5px] text-emerald-400 font-semibold bg-emerald-500/10 px-1.5 py-0.5 rounded shrink-0">
-                        307
-                      </span>
+                    {/* Display Screen with macOS Browser Window Inside */}
+                    <div className="w-full h-[295px] sm:h-[315px] rounded-lg bg-[#0F1216] border border-black/80 p-2.5 sm:p-3 flex flex-col justify-between overflow-hidden shadow-inner">
+                      {/* macOS Window Chrome Header */}
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between pb-1.5 border-b border-white/10">
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F56] border border-[#E0443E]" />
+                            <div className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E] border border-[#DEA123]" />
+                            <div className="w-2.5 h-2.5 rounded-full bg-[#27C93F] border border-[#1AAB29]" />
+                          </div>
+                          <div className="text-[10px] font-mono text-white/50 flex items-center gap-1">
+                            <Globe2 className="w-2.5 h-2.5 text-emerald-400" />
+                            <span>festival-summer.com</span>
+                          </div>
+                          <div className="w-8" />
+                        </div>
+
+                        {/* Omnibox / URL Bar */}
+                        <div className="rounded-md bg-black/60 border border-white/10 px-2 py-1 flex items-center gap-1.5 text-[9.5px] font-mono">
+                          <Lock className="w-2.5 h-2.5 text-emerald-400 shrink-0" />
+                          <span className="text-white/70 truncate">https://my-qr-sandy.vercel.app/id/summer-festival</span>
+                          <span className="ml-auto text-[8.5px] text-emerald-400 font-semibold bg-emerald-500/10 px-1 py-0.2 rounded shrink-0">
+                            307
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Desktop Web Body: Instant Destination Rendering */}
+                      <div className="my-auto rounded-lg bg-white/[0.03] border border-white/10 p-2.5 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-0.5">
+                            <span className="text-[8.5px] font-mono uppercase tracking-wider text-emerald-400 font-semibold block">
+                              Desktop Ingress Detected
+                            </span>
+                            <h4 className="text-[12px] font-bold text-white truncate">
+                              Summer Festival &apos;26 Desktop Hub
+                            </h4>
+                          </div>
+                          <span className="text-[9px] font-mono text-white/60 bg-white/5 px-1.5 py-0.5 rounded border border-white/10">
+                            7.4ms
+                          </span>
+                        </div>
+
+                        <p className="text-[10.5px] text-white/65 leading-relaxed line-clamp-2">
+                          Passersby scanning from a laptop bypass mobile app stores to land on the interactive widescreen portal.
+                        </p>
+
+                        <div className="pt-1.5 border-t border-white/10 flex items-center justify-between">
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                            <span className="text-[9.5px] font-mono text-emerald-300">Widescreen 4K Stream</span>
+                          </div>
+                          <div className="p-1 rounded-sm bg-white">
+                            <QRCodeSVG
+                              value="https://festival-summer.com/lineup-desktop"
+                              size={34}
+                              level="M"
+                              fgColor="#11140F"
+                              includeMargin={false}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Bottom Window Status */}
+                      <div className="pt-1 border-t border-white/10 flex items-center justify-between text-[9px] font-mono text-white/40">
+                        <span>Edge: US-East (IAD)</span>
+                        <span>HTTP/2 307 Direct</span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Desktop Web Body: Instant Destination Rendering */}
-                  <div className="my-auto rounded-xl bg-white/[0.03] border border-white/10 p-3.5 space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <span className="text-[9.5px] font-mono uppercase tracking-wider text-emerald-400 font-semibold">
-                          Desktop Ingress Detected
-                        </span>
-                        <h4 className="text-[13.5px] font-bold text-white">
-                          Summer Festival &apos;26 Desktop Hub
-                        </h4>
-                      </div>
-                      <span className="text-[10px] font-mono text-white/60 bg-white/5 px-2 py-0.5 rounded border border-white/10">
-                        7.4ms
-                      </span>
-                    </div>
-
-                    <p className="text-[11.5px] text-white/65 leading-relaxed">
-                      Passersby scanning from a laptop or desktop bypass mobile app stores and land directly on your interactive widescreen portal.
-                    </p>
-
-                    <div className="pt-2 border-t border-white/10 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                        <span className="text-[10.5px] font-mono text-emerald-300">Widescreen 4K Stream Online</span>
-                      </div>
-                      <div className="p-1 rounded-md bg-white">
-                        <QRCodeSVG
-                          value="https://festival-summer.com/lineup-desktop"
-                          size={40}
-                          level="M"
-                          fgColor="#11140F"
-                          includeMargin={false}
-                        />
-                      </div>
-                    </div>
+                  {/* MacBook Aluminum Base / Deck with Iconic Center Thumb Recess */}
+                  <div className="w-[330px] sm:w-[368px] h-3.5 bg-gradient-to-b from-[#2A2D35] via-[#22252B] to-[#181A1F] rounded-b-xl border-b border-x border-white/20 shadow-2xl relative flex items-start justify-center">
+                    <div className="w-14 sm:w-16 h-1 bg-[#0E1014] rounded-b mx-auto shadow-inner border-b border-white/10" />
                   </div>
-
-                  {/* Bottom Window Status */}
-                  <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[10px] font-mono text-white/40">
-                    <span>Edge: US-East (IAD)</span>
-                    <span>HTTP/2 307 Direct</span>
-                  </div>
+                  {/* Under-MacBook Desk Shadow */}
+                  <div className="w-[280px] sm:w-[320px] h-2 bg-black/80 blur-md rounded-full -mt-0.5" />
                 </div>
               )}
             </div>
@@ -644,293 +662,293 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
         </div>
       </section>
 
-      {/* 3. Apple-Style Bento Grid: Pro Architecture (Rectangles & Squares across Mobile, Tablet & Desktop) */}
-      <section className="py-20 md:py-32 px-5 md:px-8 max-w-[1280px] mx-auto border-t border-white/10">
-        <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/80 text-[11.5px] font-mono tracking-wider uppercase">
+      {/* 3. Apple-Style Bento Grid: Pro Architecture (Compact Rectangles & Squares across Mobile, Tablet & Desktop) */}
+      <section className="py-12 md:py-16 px-5 md:px-8 max-w-[1280px] mx-auto border-t border-white/10">
+        <div className="text-center max-w-2xl mx-auto space-y-3 mb-8 sm:mb-10">
+          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/80 text-[11px] font-mono tracking-wider uppercase">
             <Cpu className="w-3.5 h-3.5 text-emerald-400" />
             Core Infrastructure Bento
           </div>
           <h2
-            className="text-[2.2rem] sm:text-[3rem] font-bold tracking-tight text-white leading-tight"
+            className="text-[1.8rem] sm:text-[2.3rem] font-bold tracking-tight text-white leading-tight"
             style={{ fontFamily: 'var(--font-display)' }}
           >
             Built like high-performance hardware.
           </h2>
-          <p className="text-[15px] sm:text-[17px] text-white/60">
+          <p className="text-[14px] sm:text-[15px] text-white/60">
             Every layer from database pooling to vector math is tuned for zero-failure physical deployments.
           </p>
         </div>
 
-        {/* Asymmetrical Bento Grid: Harmonious rectangles and squares */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+        {/* Compact Asymmetrical Bento Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-3.5">
           {/* Bento Item 1: Wide Rectangle (2 Cols) — Sub-10ms 307 Direct Redirect */}
-          <div className="md:col-span-2 lg:col-span-2 rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.01] p-7 sm:p-8 flex flex-col justify-between space-y-6 hover:border-white/20 transition-all">
-            <div className="space-y-4">
+          <div className="md:col-span-2 lg:col-span-2 rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.01] p-4 sm:p-5 flex flex-col justify-between space-y-3 hover:border-white/20 transition-all">
+            <div className="space-y-2.5">
               <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-                  <Zap className="w-5 h-5" />
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                  <Zap className="w-4 h-4" />
                 </div>
-                <span className="text-[11px] font-mono uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                   Edge Architecture
                 </span>
               </div>
 
               <div>
-                <h3 className="text-xl font-bold text-white tracking-tight">
+                <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
                   Sub-10ms 307 Direct Redirect
                 </h3>
-                <p className="mt-1 text-[13.5px] text-white/60 leading-relaxed max-w-[65ch]">
+                <p className="mt-0.5 text-[12px] sm:text-[12.5px] text-white/60 leading-relaxed max-w-[65ch]">
                   Zero intermediary splash screens. Zero tracking ads. The edge server returns a clean HTTP 307 temporary redirect directly into the visitor’s browser with sub-millisecond DNS dispatch.
                 </p>
               </div>
 
-              {/* Interactive Edge Pipeline Schematic */}
-              <div className="rounded-2xl border border-white/10 bg-black/40 p-4 font-mono text-[11.5px] space-y-3">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-white/80">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+              {/* Compact Edge Pipeline Schematic */}
+              <div className="rounded-xl border border-white/10 bg-black/40 px-3 py-2 font-mono text-[10.5px] space-y-1.5">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 text-white/80">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
                     <span className="text-white/40">Physical Camera</span>
                     <span className="text-white">→ Ingress</span>
                   </div>
-                  <div className="flex items-center gap-2 text-emerald-300">
+                  <div className="flex items-center gap-1.5 text-emerald-300 text-[10px]">
                     <span>Edge Hop: 7.2ms</span>
                     <span className="text-white/30">•</span>
                     <span>99.99% Edge Cache HIT</span>
                   </div>
                 </div>
-                <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                <div className="w-full bg-white/5 h-1 rounded-full overflow-hidden">
                   <div className="bg-gradient-to-r from-emerald-500 to-teal-300 h-full w-full animate-pulse" />
                 </div>
               </div>
             </div>
 
-            <div className="pt-4 border-t border-white/5 flex items-baseline justify-between font-mono">
-              <span className="text-3xl font-bold text-white tracking-tight">
+            <div className="pt-2 border-t border-white/5 flex items-baseline justify-between font-mono">
+              <span className="text-xl sm:text-2xl font-bold text-white tracking-tight">
                 &lt;10ms
               </span>
-              <span className="text-[11.5px] text-white/40 uppercase">
+              <span className="text-[10px] text-white/40 uppercase">
                 Zero-interstitial edge handoff
               </span>
             </div>
           </div>
 
-          {/* Bento Item 2: Square (1 Col) — Native Device OS Branching */}
-          <div className="col-span-1 lg:col-span-1 aspect-square md:aspect-auto lg:aspect-square rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.05] to-white/[0.01] p-7 sm:p-8 flex flex-col justify-between hover:border-white/20 transition-all">
-            <div className="space-y-3">
+          {/* Bento Item 2: Compact Card (1 Col) — Native Device OS Branching */}
+          <div className="col-span-1 lg:col-span-1 rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.05] to-white/[0.01] p-4 sm:p-5 flex flex-col justify-between space-y-3 hover:border-white/20 transition-all">
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
-                  <Smartphone className="w-5 h-5" />
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+                  <Smartphone className="w-4 h-4" />
                 </div>
-                <span className="text-[10.5px] font-mono uppercase tracking-wider text-white/40">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-white/40">
                   Device Sensing
                 </span>
               </div>
 
               <div>
-                <h3 className="text-lg font-bold text-white tracking-tight">
+                <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
                   Native OS Branching
                 </h3>
-                <p className="mt-1 text-[13px] text-white/60 leading-relaxed">
+                <p className="mt-0.5 text-[12px] text-white/60 leading-relaxed">
                   Differentiates iOS, Android, and Desktop user-agents at the wire level.
                 </p>
               </div>
 
               {/* Compact OS Badges */}
-              <div className="space-y-1.5 pt-1 font-mono text-[11px]">
-                <div className="flex items-center justify-between px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-white/70">
+              <div className="space-y-1 pt-0.5 font-mono text-[10.5px]">
+                <div className="flex items-center justify-between px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-white/70">
                   <span>Apple iOS</span>
                   <span className="text-emerald-400">App Store</span>
                 </div>
-                <div className="flex items-center justify-between px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-white/70">
+                <div className="flex items-center justify-between px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-white/70">
                   <span>Android</span>
                   <span className="text-emerald-400">Google Play</span>
                 </div>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-white/5 flex items-baseline justify-between font-mono">
-              <span className="text-2xl font-bold text-white tracking-tight">
+            <div className="pt-2 border-t border-white/5 flex items-baseline justify-between font-mono">
+              <span className="text-xl sm:text-2xl font-bold text-white tracking-tight">
                 100%
               </span>
-              <span className="text-[11px] text-white/40 uppercase">
+              <span className="text-[10px] text-white/40 uppercase">
                 Device Accuracy
               </span>
             </div>
           </div>
 
-          {/* Bento Item 3: Square (1 Col) — 300 DPI Sub-Pixel Vector Engine */}
-          <div className="col-span-1 lg:col-span-1 aspect-square md:aspect-auto lg:aspect-square rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.05] to-white/[0.01] p-7 sm:p-8 flex flex-col justify-between hover:border-white/20 transition-all">
-            <div className="space-y-3">
+          {/* Bento Item 3: Compact Card (1 Col) — 300 DPI Sub-Pixel Vector Engine */}
+          <div className="col-span-1 lg:col-span-1 rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.05] to-white/[0.01] p-4 sm:p-5 flex flex-col justify-between space-y-3 hover:border-white/20 transition-all">
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
-                  <Printer className="w-5 h-5" />
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+                  <Printer className="w-4 h-4" />
                 </div>
-                <span className="text-[10.5px] font-mono uppercase tracking-wider text-white/40">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-white/40">
                   Print Physics
                 </span>
               </div>
 
               <div>
-                <h3 className="text-lg font-bold text-white tracking-tight">
+                <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
                   300 DPI Vector Math
                 </h3>
-                <p className="mt-1 text-[13px] text-white/60 leading-relaxed">
+                <p className="mt-0.5 text-[12px] text-white/60 leading-relaxed">
                   Sub-pixel precision SVG with mandatory 10% quiet-zone buffers.
                 </p>
               </div>
 
               {/* CMYK & SVG Badge */}
-              <div className="p-2.5 rounded-xl bg-black/40 border border-white/10 font-mono text-[11px] space-y-1">
+              <div className="p-2 rounded-lg bg-black/40 border border-white/10 font-mono text-[10px] space-y-0.5">
                 <div className="flex items-center justify-between text-white/70">
                   <span>Vector XML</span>
                   <span className="text-purple-300">Clean &lt;path&gt;</span>
                 </div>
-                <div className="flex items-center justify-between text-white/40 text-[10px]">
+                <div className="flex items-center justify-between text-white/40 text-[9.5px]">
                   <span>CMYK Proofing</span>
                   <span>1024×1024 PNG</span>
                 </div>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-white/5 flex items-baseline justify-between font-mono">
-              <span className="text-2xl font-bold text-white tracking-tight">
+            <div className="pt-2 border-t border-white/5 flex items-baseline justify-between font-mono">
+              <span className="text-xl sm:text-2xl font-bold text-white tracking-tight">
                 300 DPI
               </span>
-              <span className="text-[11px] text-white/40 uppercase">
+              <span className="text-[10px] text-white/40 uppercase">
                 Industrial Print
               </span>
             </div>
           </div>
 
           {/* Bento Item 4: Wide Rectangle (2 Cols) — Time & Day-of-Week Dayparting */}
-          <div className="md:col-span-2 lg:col-span-2 rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.01] p-7 sm:p-8 flex flex-col justify-between space-y-6 hover:border-white/20 transition-all">
-            <div className="space-y-4">
+          <div className="md:col-span-2 lg:col-span-2 rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.01] p-4 sm:p-5 flex flex-col justify-between space-y-3 hover:border-white/20 transition-all">
+            <div className="space-y-2.5">
               <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
-                  <Clock className="w-5 h-5" />
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                  <Clock className="w-4 h-4" />
                 </div>
-                <span className="text-[11px] font-mono uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
                   Temporal Dayparting
                 </span>
               </div>
 
               <div>
-                <h3 className="text-xl font-bold text-white tracking-tight">
+                <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
                   Time &amp; Day-of-Week Dayparting
                 </h3>
-                <p className="mt-1 text-[13.5px] text-white/60 leading-relaxed max-w-[65ch]">
+                <p className="mt-0.5 text-[12px] sm:text-[12.5px] text-white/60 leading-relaxed max-w-[65ch]">
                   Swap physical QR targets continuously without human intervention. Breakfast menus at dawn, cocktail cards in the afternoon, and live music passes at midnight.
                 </p>
               </div>
 
               {/* Visual 24-Hour Timeline Scrubber */}
-              <div className="rounded-2xl border border-white/10 bg-black/40 p-4 font-mono text-[11px] space-y-2">
-                <div className="flex items-center justify-between text-white/50 text-[10.5px]">
+              <div className="rounded-xl border border-white/10 bg-black/40 px-3 py-2 font-mono text-[10px] space-y-1.5">
+                <div className="flex items-center justify-between text-white/50 text-[9.5px]">
                   <span>08:00 BREAKFAST</span>
                   <span>12:00 LUNCH</span>
                   <span className="text-amber-300 font-bold">17:00 HAPPY HOUR</span>
                   <span>20:00 TASTING</span>
                 </div>
-                <div className="grid grid-cols-4 gap-1.5 h-2">
+                <div className="grid grid-cols-4 gap-1 h-1.5">
                   <div className="bg-white/20 rounded-full" />
                   <div className="bg-white/20 rounded-full" />
-                  <div className="bg-amber-400 rounded-full shadow-[0_0_8px_#fbbf24]" />
+                  <div className="bg-amber-400 rounded-full shadow-[0_0_6px_#fbbf24]" />
                   <div className="bg-white/20 rounded-full" />
                 </div>
               </div>
             </div>
 
-            <div className="pt-4 border-t border-white/5 flex items-baseline justify-between font-mono">
-              <span className="text-3xl font-bold text-white tracking-tight">
+            <div className="pt-2 border-t border-white/5 flex items-baseline justify-between font-mono">
+              <span className="text-xl sm:text-2xl font-bold text-white tracking-tight">
                 24/7
               </span>
-              <span className="text-[11.5px] text-white/40 uppercase">
+              <span className="text-[10px] text-white/40 uppercase">
                 Autonomous schedule swaps
               </span>
             </div>
           </div>
 
           {/* Bento Item 5: Wide Rectangle (2 Cols) — Branded Custom Domain Prefix */}
-          <div className="md:col-span-2 lg:col-span-2 rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.01] p-7 sm:p-8 flex flex-col justify-between space-y-6 hover:border-white/20 transition-all">
-            <div className="space-y-4">
+          <div className="md:col-span-2 lg:col-span-2 rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.01] p-4 sm:p-5 flex flex-col justify-between space-y-3 hover:border-white/20 transition-all">
+            <div className="space-y-2.5">
               <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400">
-                  <Globe2 className="w-5 h-5" />
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400">
+                  <Globe2 className="w-4 h-4" />
                 </div>
-                <span className="text-[11px] font-mono uppercase tracking-wider text-teal-400 bg-teal-500/10 px-2.5 py-0.5 rounded-full border border-teal-500/20">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded-full border border-teal-500/20">
                   Enterprise Whitelabel
                 </span>
               </div>
 
               <div>
-                <h3 className="text-xl font-bold text-white tracking-tight">
+                <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
                   Branded Custom Domain Prefix
                 </h3>
-                <p className="mt-1 text-[13.5px] text-white/60 leading-relaxed max-w-[65ch]">
+                <p className="mt-0.5 text-[12px] sm:text-[12.5px] text-white/60 leading-relaxed max-w-[65ch]">
                   Serve dynamic links under your own verified corporate domain (e.g. qr.yourbrand.com/promo). Eliminates generic third-party URLs to elevate physical scan trust.
                 </p>
               </div>
 
               {/* Realistic Domain Bar */}
-              <div className="rounded-xl border border-white/10 bg-black/40 px-3.5 py-2 flex items-center gap-2 font-mono text-[12px]">
-                <Lock className="w-3.5 h-3.5 text-teal-400" />
+              <div className="rounded-lg border border-white/10 bg-black/40 px-2.5 py-1.5 flex items-center gap-2 font-mono text-[11px]">
+                <Lock className="w-3 h-3 text-teal-400" />
                 <span className="text-teal-300 font-semibold">https://qr.acme-corp.com</span>
                 <span className="text-white/40">/summer-promo</span>
-                <span className="ml-auto text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                <span className="ml-auto text-[9.5px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                   TLS 1.3 Certified
                 </span>
               </div>
             </div>
 
-            <div className="pt-4 border-t border-white/5 flex items-baseline justify-between font-mono">
-              <span className="text-3xl font-bold text-white tracking-tight">
+            <div className="pt-2 border-t border-white/5 flex items-baseline justify-between font-mono">
+              <span className="text-xl sm:text-2xl font-bold text-white tracking-tight">
                 0%
               </span>
-              <span className="text-[11.5px] text-white/40 uppercase">
+              <span className="text-[10px] text-white/40 uppercase">
                 Third-party vendor branding
               </span>
             </div>
           </div>
 
-          {/* Bento Item 6: Square (1 Col) — Cookieless Edge Telemetry */}
-          <div className="col-span-1 lg:col-span-1 aspect-square md:aspect-auto lg:aspect-square rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.05] to-white/[0.01] p-7 sm:p-8 flex flex-col justify-between hover:border-white/20 transition-all">
-            <div className="space-y-3">
+          {/* Bento Item 6: Compact Card (1 Col) — Cookieless Edge Telemetry */}
+          <div className="col-span-1 lg:col-span-1 rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.05] to-white/[0.01] p-4 sm:p-5 flex flex-col justify-between space-y-3 hover:border-white/20 transition-all">
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-                  <ShieldCheck className="w-5 h-5" />
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                  <ShieldCheck className="w-4 h-4" />
                 </div>
-                <span className="text-[10.5px] font-mono uppercase tracking-wider text-white/40">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-white/40">
                   Privacy Core
                 </span>
               </div>
 
               <div>
-                <h3 className="text-lg font-bold text-white tracking-tight">
+                <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
                   Zero-Cookie Privacy
                 </h3>
-                <p className="mt-1 text-[13px] text-white/60 leading-relaxed">
+                <p className="mt-0.5 text-[12px] text-white/60 leading-relaxed">
                   Anonymized diurnal metrics with cryptographic daily rotating salts.
                 </p>
               </div>
 
               {/* Privacy Compliance Badges */}
-              <div className="p-2.5 rounded-xl bg-black/40 border border-white/10 font-mono text-[11px] space-y-1">
+              <div className="p-2 rounded-lg bg-black/40 border border-white/10 font-mono text-[10px] space-y-0.5">
                 <div className="flex items-center justify-between text-emerald-400">
                   <span>GDPR / CCPA</span>
                   <span>100% Compliant</span>
                 </div>
-                <div className="text-[10px] text-white/40">
+                <div className="text-[9.5px] text-white/40">
                   No tracking cookies stored
                 </div>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-white/5 flex items-baseline justify-between font-mono">
-              <span className="text-2xl font-bold text-white tracking-tight">
+            <div className="pt-2 border-t border-white/5 flex items-baseline justify-between font-mono">
+              <span className="text-xl sm:text-2xl font-bold text-white tracking-tight">
                 GDPR
               </span>
-              <span className="text-[11px] text-white/40 uppercase">
+              <span className="text-[10px] text-white/40 uppercase">
                 Cookieless Standard
               </span>
             </div>
