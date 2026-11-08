@@ -27,7 +27,7 @@ export type CampaignAnalystOutput = z.infer<typeof campaignAnalystSchema>;
 
 export const prompt: PromptDefinition<AggregatedStatsBlob, CampaignAnalystOutput> = {
   version: "v1",
-  model: "gpt-4o-mini",
+  model: "gemini-3.5-flash",
   temperature: 0.3,
   cacheTtlSeconds: 1800, // 30 minutes cache per user stats blob
   system: `You are the Principal Growth & Marketing Analyst for DynamicQR.

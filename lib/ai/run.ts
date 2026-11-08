@@ -126,8 +126,8 @@ export async function runAI<T>(opts: {
     ? promptDef.buildUserPrompt(opts.input)
     : String(opts.input);
 
-  // Generous server execution window (120s ceiling for serverless boundaries, never cutting off legitimate inference)
-  const AI_TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS || 120000);
+  // Snappy execution window (15s ceiling: never leave a user or UI waiting 2 minutes for slow upstream inference)
+  const AI_TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS || 15000);
   let isFallback = false;
 
   try {
@@ -167,7 +167,7 @@ export async function runAI<T>(opts: {
       isSuccess = true;
     } catch (primaryErr: any) {
       // If primary is Gemini, do NOT failover to OpenAI (user has zero credits on OpenAI)
-      // GeminiProvider already handled internal multi-model retries (flash-lite -> 3.5 -> 3.8)
+      // GeminiProvider already handled internal multi-model retries (3.5 -> flash-lite -> 3.8)
       console.warn(`[runAI] Provider '${provider.name}' inference failed: ${primaryErr.message}`);
       throw primaryErr;
     }
@@ -179,7 +179,8 @@ export async function runAI<T>(opts: {
     // Check for defined deterministic fallback
     if (promptDef?.fallback) {
       resultData = promptDef.fallback(opts.input) as T;
-      isSuccess = true;
+      isSuccess = false; // Live upstream AI did not succeed; fallback rescued the user's request
+      errorMsg = `FALLBACK_RESCUED: ${err.message}`;
     } else {
       let validErrUserId: string | null = null;
       if (opts.userId) {
@@ -215,6 +216,9 @@ export async function runAI<T>(opts: {
       console.warn(`[runAI] Schema validation failed for ${opts.promptKey}:`, parseRes.error);
       if (promptDef.fallback) {
         resultData = promptDef.fallback(opts.input) as T;
+        isFallback = true;
+        isSuccess = false;
+        errorMsg = `FALLBACK_RESCUED: Schema validation failed: ${parseRes.error.message}`;
       }
     } else {
       resultData = parseRes.data;
@@ -237,7 +241,7 @@ export async function runAI<T>(opts: {
         userId: validUserId,
         feature: opts.feature,
         promptKey: opts.promptKey,
-        model: promptDef?.model || "gemini-3.8-flash",
+        model: isFallback ? `${promptDef?.model || "gemini-3.5-flash"} (fallback)` : (promptDef?.model || "gemini-3.5-flash"),
         inputTokens: usage.promptTokens,
         outputTokens: usage.completionTokens,
         costUsd: usage.costUsd,

@@ -35,10 +35,24 @@ interface AiInvocationsTableProps {
 export default function AiInvocationsTable({ invocations }: AiInvocationsTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [featureFilter, setFeatureFilter] = useState('ALL');
-  const [statusFilter, setStatusFilter] = useState<'ALL' | 'OK' | 'FAIL'>('ALL');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'OK' | 'FALLBACK' | 'FAIL'>('ALL');
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedInvocation, setSelectedInvocation] = useState<InvocationItem | null>(null);
+
+  // Helper to determine exact invocation status
+  const getStatusType = (inv: InvocationItem): 'OK' | 'FALLBACK' | 'FAIL' => {
+    if (inv.error?.includes('FALLBACK') || inv.model?.includes('(fallback)')) {
+      return 'FALLBACK';
+    }
+    if (inv.success && !inv.error) {
+      return 'OK';
+    }
+    if (inv.success && inv.error) {
+      return 'FALLBACK';
+    }
+    return 'FAIL';
+  };
 
   // Extract unique feature names for the filter dropdown
   const uniqueFeatures = useMemo(() => {
@@ -51,8 +65,10 @@ export default function AiInvocationsTable({ invocations }: AiInvocationsTablePr
   const filteredInvocations = useMemo(() => {
     return invocations.filter((inv) => {
       // Status filter
-      if (statusFilter === 'OK' && !inv.success) return false;
-      if (statusFilter === 'FAIL' && inv.success) return false;
+      if (statusFilter !== 'ALL') {
+        const type = getStatusType(inv);
+        if (statusFilter !== type) return false;
+      }
 
       // Feature filter
       if (featureFilter !== 'ALL' && inv.feature !== featureFilter) return false;
@@ -146,7 +162,8 @@ export default function AiInvocationsTable({ invocations }: AiInvocationsTablePr
             className="px-2.5 py-1.5 rounded-xl border border-[#11140F]/15 text-[12px] bg-slate-50/50 text-[#11140F] outline-none cursor-pointer"
           >
             <option value="ALL">All Status</option>
-            <option value="OK">OK Only</option>
+            <option value="OK">Live OK Only</option>
+            <option value="FALLBACK">Fallback Rescued</option>
             <option value="FAIL">Errors Only</option>
           </select>
 
@@ -214,12 +231,22 @@ export default function AiInvocationsTable({ invocations }: AiInvocationsTablePr
                     {inv.latencyMs}ms
                   </td>
                   <td className="py-2 px-3 whitespace-nowrap">
-                    {inv.success ? (
+                    {getStatusType(inv) === 'OK' && (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10.5px] font-semibold">
                         <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                         OK
                       </span>
-                    ) : (
+                    )}
+                    {getStatusType(inv) === 'FALLBACK' && (
+                      <span
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200 text-[10.5px] font-semibold"
+                        title={inv.error || 'Smart Deterministic Fallback'}
+                      >
+                        <Sparkles className="w-3 h-3 text-amber-600" />
+                        FALLBACK
+                      </span>
+                    )}
+                    {getStatusType(inv) === 'FAIL' && (
                       <span
                         className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-100 text-red-800 text-[10.5px] font-semibold"
                         title={inv.error || ''}
@@ -304,11 +331,18 @@ export default function AiInvocationsTable({ invocations }: AiInvocationsTablePr
               <div>
                 <h3 className="text-[15px] font-bold text-slate-900 flex items-center gap-2">
                   <span>Invocation Telemetry</span>
-                  {selectedInvocation.success ? (
+                  {getStatusType(selectedInvocation) === 'OK' && (
                     <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10.5px] font-semibold">
-                      SUCCESS
+                      LIVE INFERENCE SUCCESS
                     </span>
-                  ) : (
+                  )}
+                  {getStatusType(selectedInvocation) === 'FALLBACK' && (
+                    <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 text-[10.5px] font-semibold flex items-center gap-1">
+                      <Sparkles className="w-3 h-3 text-amber-600" />
+                      FALLBACK RESCUED
+                    </span>
+                  )}
+                  {getStatusType(selectedInvocation) === 'FAIL' && (
                     <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-800 text-[10.5px] font-semibold">
                       FAILED
                     </span>
@@ -326,6 +360,18 @@ export default function AiInvocationsTable({ invocations }: AiInvocationsTablePr
                 ✕
               </button>
             </div>
+
+            {getStatusType(selectedInvocation) === 'FALLBACK' && (
+              <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200 text-amber-900 text-[12px] space-y-1">
+                <span className="font-semibold block flex items-center gap-1.5 text-amber-950">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-700" />
+                  Deterministic Engine Protection Active
+                </span>
+                <p className="text-amber-800/80 text-[11.5px] leading-relaxed">
+                  Live upstream model timed out or was temporarily queued. The smart deterministic fallback engine stepped in instantly, fulfilling the request so user experience had zero downtime.
+                </p>
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-3 text-[12.5px]">
               <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">

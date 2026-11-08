@@ -12,6 +12,7 @@ export interface CampaignAnalysisResult {
   analysis: CampaignAnalystOutput;
   cached: boolean;
   latencyMs: number;
+  isFallback?: boolean;
 }
 
 export async function getCampaignAnalysisAction(
@@ -44,6 +45,7 @@ export async function getCampaignAnalysisAction(
       analysis: aiResult.data,
       cached: aiResult.cached,
       latencyMs: aiResult.latencyMs,
+      isFallback: aiResult.isFallback,
     };
   } catch (err: any) {
     console.warn("[getCampaignAnalysisAction] Using deterministic fallback:", err.message);
@@ -60,6 +62,7 @@ export async function getCampaignAnalysisAction(
       analysis: fallbackOutput,
       cached: false,
       latencyMs: 120,
+      isFallback: true,
     };
   }
 }

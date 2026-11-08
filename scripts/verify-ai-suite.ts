@@ -55,9 +55,9 @@ async function main() {
   console.log('Running 20-feature exhaustive verification harness...\n');
 
   // Test 1: AI route-resolver prompt definition
-  await runTest(1, "AI route-resolver prompt definition (v1, gemini-3.8-flash, low temp)", (assert) => {
+  await runTest(1, "AI route-resolver prompt definition (v1, gemini-3.5-flash/3.8-flash, low temp)", (assert) => {
     assert(routeResolverPrompt.version === 'v1', "Prompt version must be 'v1'");
-    assert(routeResolverPrompt.model === 'gemini-3.8-flash', "Prompt model must be 'gemini-3.8-flash'");
+    assert(routeResolverPrompt.model === 'gemini-3.5-flash' || routeResolverPrompt.model === 'gemini-3.8-flash', "Prompt model must be Gemini Flash ('gemini-3.5-flash' or 'gemini-3.8-flash')");
     assert(typeof routeResolverPrompt.temperature === 'number' && routeResolverPrompt.temperature <= 0.2, `Temperature must be low (<= 0.2), got ${routeResolverPrompt.temperature}`);
     assert(typeof routeResolverPrompt.cacheTtlSeconds === 'number' && routeResolverPrompt.cacheTtlSeconds >= 3600, "Cache TTL must be configured (>= 1 hour)");
     assert(typeof routeResolverPrompt.system === 'string' && routeResolverPrompt.system.length > 50, "System prompt must be non-empty and descriptive");

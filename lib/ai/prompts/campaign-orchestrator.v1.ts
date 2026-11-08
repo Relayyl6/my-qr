@@ -38,7 +38,7 @@ function slugify(text: string): string {
 
 export const prompt: PromptDefinition<CampaignOrchestratorInput, CampaignOrchestratorOutput> = {
   version: "v1",
-  model: "gpt-4o-mini",
+  model: "gemini-3.5-flash",
   temperature: 0.2,
   cacheTtlSeconds: 86400,
   system: `You are the Lead Marketing Operations Orchestrator for DynamicQR.

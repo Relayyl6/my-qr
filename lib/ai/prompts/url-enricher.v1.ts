@@ -41,7 +41,7 @@ function cleanSlug(text: string): string {
 
 export const prompt: PromptDefinition<UrlEnricherInput, UrlEnricherOutput> = {
   version: "v1",
-  model: "gpt-4o-mini",
+  model: "gemini-3.5-flash",
   temperature: 0.2,
   cacheTtlSeconds: 86400, // Cache identical URLs for 24h
   system: `You are an elite marketing strategist and metadata analyst for DynamicQR.

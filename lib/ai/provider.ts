@@ -222,10 +222,10 @@ export class GeminiProvider implements AIProvider {
     });
   }
 
-  // Active models available on Google Gemini API
+  // Active models available on Google Gemini API (prioritizing ultra-low-latency 3.5-flash)
   private getCandidateModels(requestedModel?: string): string[] {
     const primary = this.resolveModel(requestedModel);
-    const candidates = [primary, "gemini-3.8-flash", "gemini-3.5-flash", "gemini-flash-lite-latest"];
+    const candidates = [primary, "gemini-3.5-flash", "gemini-flash-lite-latest", "gemini-3.8-flash"];
     return Array.from(new Set(candidates));
   }
 
@@ -255,7 +255,7 @@ export class GeminiProvider implements AIProvider {
           schema: opts.schema,
           temperature: opts.temperature ?? 0.2,
           maxTokens: opts.maxTokens,
-          maxRetries: 1,
+          maxRetries: 0,
         });
 
         const usage = result.usage as any;
@@ -282,16 +282,15 @@ export class GeminiProvider implements AIProvider {
   }
 
   private resolveModel(model?: string): string {
-    if (!model) return "gemini-3.8-flash";
+    if (!model) return "gemini-3.5-flash";
     const m = model.toLowerCase();
-    if (m.startsWith("gpt-") || m.startsWith("claude-")) {
-      return "gemini-3.8-flash";
+    if (m.startsWith("gpt-") || m.startsWith("claude-") || m.includes("mini") || m.includes("4o")) {
+      return "gemini-3.5-flash";
     }
     if (m.includes("3.5")) return "gemini-3.5-flash";
-    if (m.includes("3.8")) return "gemini-3.8-flash";
     if (m.includes("flash-lite") || m.includes("lite")) return "gemini-flash-lite-latest";
-    if (m.includes("flash")) return "gemini-3.8-flash";
-    return model;
+    if (m.includes("flash") || m.includes("3.8") || m.includes("2.0") || m.includes("2.5")) return "gemini-3.5-flash";
+    return "gemini-3.5-flash";
   }
 
   async generateText(opts: {
