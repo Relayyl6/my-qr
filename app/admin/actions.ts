@@ -204,3 +204,9 @@ async function logAdminAction(adminEmail: string, action: string, details?: stri
     console.warn('[logAdminAction] Failed to log audit:', e);
   }
 }
+
+export async function adminGetTelemetryAction(timeframe: '24h' | '7d' | '30d' | 'all' = '7d') {
+  await verifyAdmin();
+  const { getAdminTelemetry } = await import('@/lib/analytics/adminTelemetry');
+  return getAdminTelemetry(timeframe);
+}

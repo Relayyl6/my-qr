@@ -44,6 +44,7 @@ export async function signUp(prevState: AuthState, formData: FormData): Promise<
         email,
         password: hashedPassword,
         name: name || null,
+        tier: 'free',
       },
     });
 

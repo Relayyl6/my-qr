@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter, Playfair_Display } from 'next/font/google';
+import { Suspense } from 'react';
+import SiteVisitorTracker from '@/components/SiteVisitorTracker';
 import './globals.css';
 
 const inter = Inter({ 
@@ -29,6 +31,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="scroll-smooth">
       <body className={`${inter.variable} ${playfair.variable} font-sans bg-[#F7F7F5] min-h-screen text-gray-900`}>
+        <Suspense fallback={null}>
+          <SiteVisitorTracker />
+        </Suspense>
         <main>{children}</main>
       </body>
     </html>

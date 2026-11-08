@@ -13,7 +13,7 @@ model User {
   email         String         @unique
   password      String
   name          String?
-  tier                 String         @default("pro") // 'free' | 'pro' | 'plus' | 'ultra'
+  tier                 String         @default("free") // 'free' | 'pro' | 'plus' | 'ultra'
   stripeCustomerId     String?        @unique
   stripeSubscriptionId String?
   createdAt            DateTime       @default(now())
@@ -161,3 +161,26 @@ model CustomDomain {
   @@index([domain])
   @@index([userId])
 }
+
+model SiteVisit {
+  id           String   @id @default(cuid())
+  path         String
+  referrer     String?
+  userAgent    String?
+  device       String?  // 'ios' | 'android' | 'desktop' | 'tablet'
+  browser      String?  // 'safari' | 'chrome' | 'firefox' | 'edge' | 'other'
+  os           String?  // 'ios' | 'macos' | 'windows' | 'android' | 'linux' | 'other'
+  country      String?
+  city         String?
+  ipHash       String?
+  utmSource    String?
+  utmMedium    String?
+  utmCampaign  String?
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([path, createdAt])
+  @@index([device, createdAt])
+  @@index([country, createdAt])
+}
+

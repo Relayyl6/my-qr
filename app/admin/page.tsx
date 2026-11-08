@@ -130,11 +130,18 @@ export default async function AdminDashboardPage() {
 
           <div className="flex items-center gap-3">
             <Link
+              href="/admin/analytics"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#11140F] text-white text-[12.5px] font-medium hover:bg-[#2A2E25] transition-colors shadow-xs"
+            >
+              <Activity className="w-3.5 h-3.5 text-emerald-400" />
+              Full Telemetry & Analytics Hub &rarr;
+            </Link>
+            <Link
               href="/admin/ai-usage"
               className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-[#11140F]/15 text-[#11140F] text-[12.5px] font-medium hover:bg-[#EEF0EA] transition-colors shadow-xs"
             >
               <Sparkles className="w-3.5 h-3.5 text-purple-600" />
-              AI Observability & Costs &rarr;
+              AI Costs &rarr;
             </Link>
           </div>
         </div>
@@ -201,6 +208,28 @@ export default async function AdminDashboardPage() {
               Served via 307 edge redirects
             </p>
           </div>
+        </div>
+
+        {/* Industry-Grade Analytics Hub Banner */}
+        <div className="rounded-2xl border border-[#11140F]/15 bg-gradient-to-r from-[#11140F] to-[#20261D] text-white p-6 shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[11px] font-mono uppercase tracking-wider">
+              <Activity className="w-3 h-3" />
+              Live Platform Telemetry
+            </div>
+            <h3 className="text-lg font-bold text-white">
+              Industry-Grade Traffic & Visitor Analytics Hub
+            </h3>
+            <p className="text-[13px] text-white/70 max-w-[65ch]">
+              Inspect comprehensive site visit counts, unique visitor estimation, mobile vs desktop breakdown, diurnal hourly scan heatmaps, UTM attribution, and export raw CSV telemetry.
+            </p>
+          </div>
+          <Link
+            href="/admin/analytics"
+            className="rounded-xl bg-white text-[#11140F] px-4 py-2.5 text-[13px] font-semibold hover:bg-[#EEF0EA] transition-colors shrink-0 flex items-center gap-2 shadow-xs"
+          >
+            Launch Full Analytics Hub &rarr;
+          </Link>
         </div>
 
         {/* Sovereignty Governance Panel */}
