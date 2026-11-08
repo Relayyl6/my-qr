@@ -23,13 +23,14 @@ export const prompt: PromptDefinition<RouteResolverInput, RouteResolverOutput> =
   system: `You are an elite traffic engineer and routing compiler for DynamicQR.
 Translate natural-language redirect requirements into strict conditional routing rules.
 Rules can match:
+- schedule: daysOfWeek ([0..6] where 0=Sun, 1=Mon, ..., 6=Sat), startTime ("HH:mm"), endTime ("HH:mm"), timezone (default "UTC")
 - device: 'ios' | 'android' | 'desktop'
 - country: 2-letter uppercase ISO code (e.g. US, NG, GB)
 - timeRange: startHour and endHour (0-23 in UTC)
 - language: 2-letter code (e.g. en, es, fr)
 - referrer: substring (e.g. instagram, tiktok)
 
-Assign logical priority numbers (e.g. 10 for specific device/time, 5 for generic device).
+Assign logical priority numbers (e.g. 10 for specific schedule/device/time, 5 for generic device).
 Ensure every rule has a valid destination URL (http/https). If the user mentioned a target without full protocol, prepend https://.`,
   buildUserPrompt: (input) => `
 Default Destination URL: ${input.defaultDestination}
@@ -41,6 +42,57 @@ Compile this request into structured routing rules.
   fallback: (input) => {
     const text = input.naturalLanguagePrompt.toLowerCase();
     const rules: CompiledRule[] = [];
+
+    if (text.includes("lunch") || text.includes("11:00") || (text.includes("11") && text.includes("15"))) {
+      rules.push({
+        priority: 15,
+        label: "Lunch Specials (11:00 – 15:00)",
+        destination: "https://example.com/lunch-menu",
+        conditions: [
+          {
+            type: "schedule",
+            daysOfWeek: [1, 2, 3, 4, 5],
+            startTime: "11:00",
+            endTime: "15:00",
+            timezone: "UTC",
+          },
+        ],
+      });
+    }
+
+    if (text.includes("cocktail") || text.includes("happy hour") || (text.includes("15") && text.includes("19"))) {
+      rules.push({
+        priority: 14,
+        label: "Cocktail Hour (15:00 – 19:00)",
+        destination: "https://example.com/cocktails",
+        conditions: [
+          {
+            type: "schedule",
+            daysOfWeek: [1, 2, 3, 4, 5, 6],
+            startTime: "15:00",
+            endTime: "19:00",
+            timezone: "UTC",
+          },
+        ],
+      });
+    }
+
+    if (text.includes("dinner") || text.includes("tasting") || text.includes("night") || text.includes("close")) {
+      rules.push({
+        priority: 13,
+        label: "Chef Tasting & Dinner (19:00 – Close)",
+        destination: "https://example.com/dinner-tasting",
+        conditions: [
+          {
+            type: "schedule",
+            daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+            startTime: "19:00",
+            endTime: "23:59",
+            timezone: "UTC",
+          },
+        ],
+      });
+    }
 
     if (text.includes("iphone") || text.includes("ios") || text.includes("app store")) {
       rules.push({

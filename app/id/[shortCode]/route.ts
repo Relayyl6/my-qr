@@ -22,6 +22,9 @@ export async function GET(
   const link = await prisma.qrLink.findUnique({
     where: { shortCode },
     include: {
+      user: {
+        select: { tier: true },
+      },
       routingRules: {
         orderBy: { priority: 'desc' },
       },
@@ -59,8 +62,17 @@ export async function GET(
   const referrer = request.headers.get('referer') || null;
   const acceptLanguage = request.headers.get('accept-language') || null;
 
+  // Enforce tier entitlement: Autonomous Ingress schedule switching is unlocked for all tiers except Free
+  const userTier = (link.user?.tier || 'free').toLowerCase();
+  const activeRoutingRules = userTier === 'free'
+    ? link.routingRules.filter((r) => {
+        const conds = Array.isArray(r.conditions) ? r.conditions : [];
+        return !conds.some((c: any) => c.type === 'schedule');
+      })
+    : link.routingRules;
+
   // 3. Evaluate conditional rules (Smart Destination Router)
-  const evaluation = evaluateRules(link.routingRules, link.destinationUrl, {
+  const evaluation = evaluateRules(activeRoutingRules, link.destinationUrl, {
     userAgent,
     country,
     referrer,

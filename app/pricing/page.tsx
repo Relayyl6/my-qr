@@ -2,6 +2,7 @@ import { getCurrentUser } from '@/lib/auth';
 import Link from 'next/link';
 import { ArrowLeft, ShieldCheck, Sparkles } from 'lucide-react';
 import PricingTable from '@/components/PricingTable';
+import ComprehensiveFeatureMatrix from '@/components/ComprehensiveFeatureMatrix';
 
 export const dynamic = 'force-dynamic';
 
@@ -78,6 +79,23 @@ export default async function PricingPage() {
               No long-term contracts. Your active printed QR codes will never break even if you downgrade — they seamlessly remain live on your permanent short links.
             </p>
           </div>
+        </div>
+
+        {/* Master 100+ Feature Matrix Comparison */}
+        <div className="pt-6 space-y-6">
+          <div className="text-center max-w-xl mx-auto space-y-2">
+            <h2
+              className="text-2xl sm:text-3xl font-bold tracking-tight text-[#11140F]"
+              style={{ fontFamily: 'var(--font-display)' }}
+            >
+              Complete 100+ Capability Matrix
+            </h2>
+            <p className="text-[14px] text-[#11140F]/65">
+              Deep-dive into every routing algorithm, security mechanism, marketing pixel, and print standard.
+            </p>
+          </div>
+
+          <ComprehensiveFeatureMatrix />
         </div>
 
         {/* FAQ Section */}

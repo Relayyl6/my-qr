@@ -85,6 +85,17 @@ export async function saveRoutingRulesAction(
     throw new Error("Link not found or access denied.");
   }
 
+  // Tier Guard: Autonomous Ingress time & day scheduling is only available on Pro, Plus, and Ultra
+  const userTier = (user.tier || "free").toLowerCase();
+  const hasScheduleRules = rules.some((r) =>
+    (r.conditions as any[]).some((c) => c.type === "schedule")
+  );
+  if (hasScheduleRules && userTier === "free") {
+    throw new Error(
+      "Autonomous Ingress scheduling by time and day of week is an industry-grade feature available on Pro, Plus, and Ultra plans. Please upgrade your plan to deploy scheduled destinations."
+    );
+  }
+
   // Atomically replace routing rules
   await prisma.$transaction([
     prisma.routingRule.deleteMany({

@@ -233,8 +233,8 @@ export default function AdminAnalyticsDashboard({ initialData }: Props) {
             No activity recorded yet in this window.
           </div>
         ) : (
-          <div className="space-y-2">
-            <div className="grid grid-cols-7 sm:grid-cols-14 md:grid-cols-30 gap-1.5 items-end h-40 pt-4">
+          <div className="w-full overflow-x-auto pb-2 scrollbar-thin">
+            <div className="flex items-end gap-1.5 sm:gap-2 h-44 pt-6 min-w-full w-max sm:w-full">
               {data.dailyTrends.map((day) => {
                 const maxVal = Math.max(
                   ...data.dailyTrends.map((d) => Math.max(d.visits, d.scans)),
@@ -244,9 +244,9 @@ export default function AdminAnalyticsDashboard({ initialData }: Props) {
                 const scanHeight = Math.max(4, Math.round((day.scans / maxVal) * 100));
 
                 return (
-                  <div key={day.date} className="flex-1 flex flex-col items-center gap-1 group relative">
+                  <div key={day.date} className="flex-1 min-w-[22px] max-w-[48px] flex flex-col items-center justify-end h-full gap-1.5 group relative">
                     {/* Tooltip */}
-                    <div className="absolute -top-12 z-20 hidden group-hover:flex flex-col items-center bg-[#11140F] text-white text-[10px] py-1 px-2 rounded shadow-lg pointer-events-none whitespace-nowrap">
+                    <div className="absolute -top-12 z-30 hidden group-hover:flex flex-col items-center bg-[#11140F] text-white text-[10px] py-1 px-2 rounded shadow-lg pointer-events-none whitespace-nowrap">
                       <span className="font-bold">{day.date}</span>
                       <span>{day.visits} visits • {day.scans} scans</span>
                     </div>
@@ -261,7 +261,7 @@ export default function AdminAnalyticsDashboard({ initialData }: Props) {
                         style={{ height: `${scanHeight}%` }}
                       />
                     </div>
-                    <span className="text-[9px] text-[#11140F]/40 truncate w-full text-center">
+                    <span className="text-[9px] font-mono text-[#11140F]/45 truncate w-full text-center">
                       {day.date.slice(5)}
                     </span>
                   </div>
@@ -287,7 +287,7 @@ export default function AdminAnalyticsDashboard({ initialData }: Props) {
           <span className="text-[11.5px] font-mono text-[#11140F]/50">24h Diurnal Heatmap</span>
         </div>
 
-        <div className="grid grid-cols-6 sm:grid-cols-12 md:grid-cols-24 gap-1.5 pt-2">
+        <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-12 gap-1.5 pt-2" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(40px, 1fr))' }}>
           {data.hourlyDistribution.map((h) => {
             const maxActivity = Math.max(
               ...data.hourlyDistribution.map((item) => item.scans + item.visits),

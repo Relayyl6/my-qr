@@ -202,7 +202,11 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
             <ul className="space-y-3 text-[13px] text-[#11140F]/85">
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span><strong>AI Smart Routing</strong> (iOS & Geo)</span>
+                <span><strong>Autonomous Ingress Matrix</strong> (Time-of-day & day-of-week scheduled switching)</span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
+                <span><strong>AI Smart Routing</strong> (iOS vs Android & Geo-IP country)</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
@@ -210,19 +214,15 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span><strong>CSV Scan History</strong> download</span>
+                <span><strong>CSV Scan History</strong> raw telemetry export</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span>Vector SVG export for printing</span>
+                <span>Vector SVG export for professional print shops</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span>Weekly email scan digests</span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span>5 Prompt-to-Page mobile sites</span>
+                <span>5 Prompt-to-Page AI mobile showcases</span>
               </li>
             </ul>
           </div>
@@ -305,19 +305,27 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span><strong>Full-Page Posters</strong> (A4 & Letter size kits)</span>
+                <span><strong>Campaign UTM Auto-Tagging</strong> & Parameter Builder</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span><strong>AI QR Art Studio</strong> (Stylized icons)</span>
+                <span><strong>PIN Passcode Protection</strong> & Scan Expiration Caps</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span>25 Mobile Landing Pages with custom buttons</span>
+                <span><strong>Retargeting Pixels</strong> (Meta, Google Analytics 4, TikTok)</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span>Bulk CSV link creator (up to 500)</span>
+                <span><strong>AI QR Art Studio</strong> (Stylized diffusion icons)</span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
+                <span>25 Mobile Landing Pages with custom action buttons</span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
+                <span>Bulk CSV link creator (up to 500 links)</span>
               </li>
             </ul>
           </div>
@@ -392,23 +400,31 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
             <ul className="space-y-3 text-[13px] text-[#11140F]/85">
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span><strong>Unlimited</strong> Branded Custom Domains</span>
+                <span><strong>Unlimited</strong> Active Links, Scans & Custom Domains</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span><strong>Unlimited</strong> Mobile Landing Pages</span>
+                <span><strong>Sub-15ms Edge Redirects</strong> & Multi-Region DB</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span>Full AI automation orchestration</span>
+                <span><strong>Autonomous Ingress Multi-Timezone Sync</strong></span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span>120 calls/min API burst throughput</span>
+                <span><strong>Custom Social Preview Cloaking</strong> (OpenGraph Meta & OG Image)</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span>Dedicated priority SLA & support</span>
+                <span><strong>Raw Telemetry & Diurnal Heatmaps</strong> with CSV export</span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
+                <span><strong>REST API Access & Webhooks</strong> triggered on scan</span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
+                <span><strong>Dedicated 99.99% Enterprise SLA</strong> & Account Lead</span>
               </li>
             </ul>
           </div>

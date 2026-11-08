@@ -26,10 +26,19 @@ export const referrerConditionSchema = z.object({
   contains: z.string().describe("Substring to match in HTTP referrer (e.g. instagram, twitter)"),
 });
 
+export const scheduleConditionSchema = z.object({
+  type: z.literal("schedule"),
+  daysOfWeek: z.array(z.number().min(0).max(6)).default([0, 1, 2, 3, 4, 5, 6]).describe("Days of week: 0=Sun, 1=Mon, ..., 6=Sat"),
+  startTime: z.string().describe("Start time in HH:mm 24h format (e.g. 11:00)"),
+  endTime: z.string().describe("End time in HH:mm 24h format (e.g. 15:00)"),
+  timezone: z.string().default("UTC").describe("IANA Timezone, e.g. UTC, America/New_York, Europe/London, Africa/Lagos"),
+});
+
 export const ruleConditionSchema = z.discriminatedUnion("type", [
   deviceConditionSchema,
   countryConditionSchema,
   timeRangeConditionSchema,
+  scheduleConditionSchema,
   languageConditionSchema,
   referrerConditionSchema,
 ]);

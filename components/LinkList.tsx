@@ -7,7 +7,7 @@ import DeleteConfirmModal from './DeleteConfirmModal';
 import AiRoutingComposer from './AiRoutingComposer';
 import QrArtStudio from './QrArtStudio';
 import LandingPageEditor from './LandingPageEditor';
-import { Sparkles, Compass, Palette, Smartphone, Activity, CheckCircle2, AlertTriangle, Download, ExternalLink } from 'lucide-react';
+import { Sparkles, Compass, Palette, Smartphone, Activity, CheckCircle2, AlertTriangle, Download, ExternalLink, Clock } from 'lucide-react';
 import { revertLandingPageAction } from '@/lib/ai/features/landing-page-builder';
 
 interface QrLink {
@@ -56,7 +56,7 @@ export default function LinkList({
   const [revertingId, setRevertingId] = useState<string | null>(null);
 
   // AI Feature Modals state
-  const [activeRouterLink, setActiveRouterLink] = useState<QrLink | null>(null);
+  const [activeRouterLink, setActiveRouterLink] = useState<{ link: QrLink; tab: 'schedule' | 'ai' | 'rules' } | null>(null);
   const [activeArtLink, setActiveArtLink] = useState<QrLink | null>(null);
   const [activePageLink, setActivePageLink] = useState<QrLink | null>(null);
 
@@ -370,22 +370,34 @@ export default function LinkList({
                       <div className="pt-2 flex items-center gap-1.5 flex-wrap">
                         <button
                           type="button"
-                          onClick={() => setActiveRouterLink(link)}
+                          onClick={() => setActiveRouterLink({ link, tab: 'schedule' })}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-medium transition-colors cursor-pointer ${
+                            link.routingRules?.some((r) => (r.conditions as any[]).some((c) => c.type === 'schedule'))
+                              ? 'border-emerald-500 bg-emerald-100/90 hover:bg-emerald-200/90 text-emerald-950 font-semibold shadow-xs'
+                              : 'border-emerald-600/30 bg-emerald-50/60 hover:bg-emerald-100/80 text-emerald-900'
+                          }`}
+                        >
+                          <Clock className="w-3 h-3 text-emerald-700 shrink-0" />
+                          <span>Schedule Matrix</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setActiveRouterLink({ link, tab: 'ai' })}
                           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-medium transition-colors cursor-pointer ${
                             link.routingRules && link.routingRules.length > 0
-                              ? 'border-emerald-500 bg-emerald-100/90 hover:bg-emerald-200/90 text-emerald-950 font-semibold shadow-xs'
-                              : 'border-emerald-500/20 bg-emerald-50/60 hover:bg-emerald-100/80 text-emerald-800'
+                              ? 'border-[#11140F]/30 bg-slate-100/90 hover:bg-slate-200/90 text-slate-900 font-semibold shadow-xs'
+                              : 'border-[#11140F]/15 bg-white hover:bg-slate-50 text-[#11140F]/80'
                           }`}
                         >
                           {link.routingRules && link.routingRules.length > 0 ? (
                             <>
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse shrink-0" />
-                              <Compass className="w-3 h-3 text-emerald-800 shrink-0" />
+                              <Compass className="w-3 h-3 text-slate-800 shrink-0" />
                               <span>Smart Router ({link.routingRules.length})</span>
                             </>
                           ) : (
                             <>
-                              <Compass className="w-3 h-3 text-emerald-600 shrink-0" />
+                              <Compass className="w-3 h-3 text-[#11140F]/60 shrink-0" />
                               <span>Smart Router</span>
                             </>
                           )}
@@ -446,9 +458,11 @@ export default function LinkList({
       {activeRouterLink && (
         <div className="fixed inset-0 z-50 bg-[#11140F]/40 backdrop-blur-xs flex items-center justify-center p-4">
           <AiRoutingComposer
-            linkId={activeRouterLink.id}
-            shortCode={activeRouterLink.shortCode}
-            defaultDestination={activeRouterLink.destinationUrl}
+            linkId={activeRouterLink.link.id}
+            shortCode={activeRouterLink.link.shortCode}
+            defaultDestination={activeRouterLink.link.destinationUrl}
+            userTier={userTier}
+            initialTab={activeRouterLink.tab}
             onClose={() => setActiveRouterLink(null)}
           />
         </div>
