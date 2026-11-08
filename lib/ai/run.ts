@@ -9,6 +9,7 @@ export interface AIResult<T> {
   cached: boolean;
   latencyMs: number;
   isFallback?: boolean;
+  modelUsed?: string;
 }
 
 export async function runAI<T>(opts: {
@@ -129,6 +130,7 @@ export async function runAI<T>(opts: {
   // Snappy execution window (15s ceiling: never leave a user or UI waiting 2 minutes for slow upstream inference)
   const AI_TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS || 15000);
   let isFallback = false;
+  let resolvedModelUsed: string | undefined;
 
   try {
     let timer: NodeJS.Timeout | undefined;
@@ -145,6 +147,7 @@ export async function runAI<T>(opts: {
           system,
           prompt: userPrompt,
           model: promptDef.model,
+          feature: opts.feature,
           temperature: promptDef.temperature,
         });
       } else {
@@ -152,9 +155,10 @@ export async function runAI<T>(opts: {
           system,
           prompt: userPrompt,
           model: promptDef?.model,
+          feature: opts.feature,
           temperature: promptDef?.temperature,
         });
-        return { data: textRes.text as unknown as T, usage: textRes.usage };
+        return { data: textRes.text as unknown as T, usage: textRes.usage, modelUsed: textRes.modelUsed };
       }
     };
 
@@ -164,10 +168,11 @@ export async function runAI<T>(opts: {
       });
       resultData = res.data;
       usage = res.usage;
+      resolvedModelUsed = res.modelUsed;
       isSuccess = true;
     } catch (primaryErr: any) {
       // If primary is Gemini, do NOT failover to OpenAI (user has zero credits on OpenAI)
-      // GeminiProvider already handled internal multi-model retries (3.5 -> flash-lite -> 3.8)
+      // GeminiProvider already handled internal multi-model retries (3.6 -> 3.5 -> flash-lite -> etc)
       console.warn(`[runAI] Provider '${provider.name}' inference failed: ${primaryErr.message}`);
       throw primaryErr;
     }
@@ -193,7 +198,7 @@ export async function runAI<T>(opts: {
           userId: validErrUserId,
           feature: opts.feature,
           promptKey: opts.promptKey,
-          model: promptDef?.model || "unknown",
+          model: promptDef?.model || "gemini-3.6-flash",
           inputTokens: 0,
           outputTokens: 0,
           costUsd: 0,
@@ -236,12 +241,15 @@ export async function runAI<T>(opts: {
       if (user) validUserId = user.id;
     }
 
+    const effectiveModel = resolvedModelUsed || promptDef?.model || "gemini-3.6-flash";
+    const finalModelLabel = isFallback ? `${effectiveModel} (fallback)` : effectiveModel;
+
     await prisma.aiInvocation.create({
       data: {
         userId: validUserId,
         feature: opts.feature,
         promptKey: opts.promptKey,
-        model: isFallback ? `${promptDef?.model || "gemini-3.5-flash"} (fallback)` : (promptDef?.model || "gemini-3.5-flash"),
+        model: finalModelLabel,
         inputTokens: usage.promptTokens,
         outputTokens: usage.completionTokens,
         costUsd: usage.costUsd,
@@ -295,5 +303,6 @@ export async function runAI<T>(opts: {
     cached: false,
     latencyMs,
     isFallback,
+    modelUsed: resolvedModelUsed,
   };
 }
