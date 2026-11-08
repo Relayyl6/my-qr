@@ -136,7 +136,7 @@ export default function AdminUserRow({ user, isSelf }: { user: UserRecord; isSel
             <option value="free">FREE (5 links)</option>
             <option value="pro">PRO ($5/mo)</option>
             <option value="plus">PLUS ($12/mo)</option>
-            <option value="ultra">ULTRA ($29/mo)</option>
+            <option value="ultra">ULTRA ($20/mo)</option>
             <option value="enterprise">ENTERPRISE (Sovereign Unlimited)</option>
           </select>
         </td>

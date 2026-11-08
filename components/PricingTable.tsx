@@ -366,13 +366,13 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
             <div>
               <div className="flex items-baseline gap-1">
                 <span className="text-4xl font-extrabold tracking-tight text-[#11140F]">
-                  ${interval === 'year' ? '24' : '29'}
+                  ${interval === 'year' ? '16' : '20'}
                 </span>
                 <span className="text-[13px] text-[#11140F]/50">/month</span>
               </div>
               {interval === 'year' && (
                 <div className="mt-1 text-[11px] font-medium text-[#2F6B4F]">
-                  Billed annually ($290/yr)
+                  Billed annually ($200/yr)
                 </div>
               )}
             </div>

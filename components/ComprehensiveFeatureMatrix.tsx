@@ -1074,37 +1074,37 @@ export default function ComprehensiveFeatureMatrix() {
 
   return (
     <div className="space-y-6">
-      {/* Competitive Benchmark Callout against Bitly & TinyURL */}
-      <div className="rounded-3xl border border-[#11140F]/15 bg-gradient-to-br from-[#11140F] via-[#1A2216] to-[#0D150B] p-6 sm:p-8 text-white shadow-xl space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-[11px] font-mono uppercase tracking-wider">
-            <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-            Competitive Intelligence
+      {/* Competitive Benchmark: Refined, authentic, human SaaS comparison */}
+      <div className="rounded-2xl border border-[#11140F]/10 bg-white p-6 sm:p-7 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#11140F]/8 pb-3">
+          <div className="inline-flex items-center gap-2 text-[12px] font-mono uppercase tracking-wider text-[#11140F]/70 font-semibold">
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            Market Benchmark
           </div>
-          <span className="text-[12px] text-white/50 font-mono">102 Distinct Features Across 8 Dedicated Domains</span>
+          <span className="text-[12px] text-[#11140F]/45 font-mono">102 Distinct Capabilities &middot; 8 Core Domains</span>
         </div>
 
-        <div className="space-y-2">
-          <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-white" style={{ fontFamily: 'var(--font-display)' }}>
-            Why DynamicQR defeats legacy shorteners like Bitly and TinyURL.
+        <div className="space-y-1.5">
+          <h3 className="text-lg sm:text-xl font-bold tracking-tight text-[#11140F]" style={{ fontFamily: 'var(--font-display)' }}>
+            Architected for physical media &middot; not just Twitter bio links.
           </h3>
-          <p className="text-[13.5px] text-white/70 max-w-3xl leading-relaxed">
-            Legacy tools like Bitly charge <strong>$35/month</strong> just to connect 1 custom domain, and TinyURL lacks dynamic AI routing and print-ready physical kits. DynamicQR gives you <strong>Autonomous Ingress time & day scheduling</strong>, <strong>Prompt-to-Page AI mobile showcases</strong>, and <strong>sub-15ms edge routing</strong> starting at just $5/month.
+          <p className="text-[13.5px] text-[#11140F]/65 max-w-3xl leading-relaxed">
+            Legacy shorteners were built in 2008 for text links on desktop. If you print a QR code on packaging, flyers, or tabletop stands, you need scheduled time routing, native device switching, and 300 DPI vector exports &mdash; without paying <strong>$35/month</strong> just to connect a single domain.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-          <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 space-y-1">
-            <span className="text-[11px] uppercase tracking-wider text-white/50 font-mono">Bitly Growth ($35/mo)</span>
-            <p className="text-[12.5px] text-white/85 font-medium">10 custom links/mo &middot; No scheduled time routing &middot; Basic PNGs</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+          <div className="p-3.5 rounded-xl bg-[#F7F7F5] border border-[#11140F]/8 space-y-1">
+            <span className="text-[11px] uppercase tracking-wider text-[#11140F]/50 font-mono font-medium">Bitly Growth ($35/mo)</span>
+            <p className="text-[12.5px] text-[#11140F]/80">10 custom links/mo &middot; No scheduled time routing &middot; Basic PNGs &middot; $35/mo for 1 domain</p>
           </div>
-          <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 space-y-1">
-            <span className="text-[11px] uppercase tracking-wider text-white/50 font-mono">TinyURL Pro ($12.99/mo)</span>
-            <p className="text-[12.5px] text-white/85 font-medium">Static redirect only &middot; No mobile landing pages &middot; No AI art</p>
+          <div className="p-3.5 rounded-xl bg-[#F7F7F5] border border-[#11140F]/8 space-y-1">
+            <span className="text-[11px] uppercase tracking-wider text-[#11140F]/50 font-mono font-medium">TinyURL Pro ($12.99/mo)</span>
+            <p className="text-[12.5px] text-[#11140F]/80">Static redirect only &middot; No mobile landing pages &middot; No device sensing &middot; No vector kits</p>
           </div>
-          <div className="p-3.5 rounded-2xl bg-emerald-950/60 border border-emerald-500/40 space-y-1 ring-1 ring-emerald-500/30">
-            <span className="text-[11px] uppercase tracking-wider text-emerald-300 font-mono font-bold">DynamicQR Pro ($5/mo)</span>
-            <p className="text-[12.5px] text-white font-medium">Autonomous Ingress &middot; 50 links &middot; 300 DPI kits &middot; Fast Edge</p>
+          <div className="p-3.5 rounded-xl bg-emerald-50/80 border border-emerald-500/30 space-y-1 ring-1 ring-emerald-500/20">
+            <span className="text-[11px] uppercase tracking-wider text-emerald-800 font-mono font-bold">DynamicQR Pro ($5/mo)</span>
+            <p className="text-[12.5px] text-[#11140F] font-medium">Autonomous Ingress &middot; 50 links &middot; 300 DPI kits &middot; Fast Edge &middot; Verified Domains</p>
           </div>
         </div>
       </div>
@@ -1196,7 +1196,7 @@ export default function ComprehensiveFeatureMatrix() {
                 </th>
                 <th className="py-3.5 px-4 text-center text-[12.5px] font-bold text-purple-900 uppercase tracking-wider w-40 bg-purple-50/50">
                   Ultra
-                  <span className="block text-[11px] font-normal text-purple-800/70 font-mono lowercase">$29/mo &middot; all</span>
+                  <span className="block text-[11px] font-normal text-purple-800/70 font-mono lowercase">$20/mo &middot; all</span>
                 </th>
               </tr>
             </thead>

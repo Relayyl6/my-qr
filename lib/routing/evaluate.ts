@@ -22,7 +22,8 @@ export function evaluateCondition(
   switch (condition.type) {
     case "device": {
       const dev = detectDevice(ctx.userAgent);
-      return dev === condition.value;
+      const target = (condition as any).value || (condition as any).device;
+      return dev === target;
     }
     case "country": {
       if (!ctx.country) return false;

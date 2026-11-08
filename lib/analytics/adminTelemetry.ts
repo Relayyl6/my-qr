@@ -398,7 +398,7 @@ export async function getAdminTelemetry(
 
   // Unit Economics
   const paidUsersCount = proUsersCount + plusUsersCount + ultraUsersCount;
-  const mrr = proUsersCount * 5 + plusUsersCount * 12 + ultraUsersCount * 29;
+  const mrr = proUsersCount * 5 + plusUsersCount * 12 + ultraUsersCount * 20;
   const arr = mrr * 12;
   const arpu = paidUsersCount > 0 ? Math.round((mrr / paidUsersCount) * 100) / 100 : 0;
   

@@ -41,8 +41,8 @@ export const PLANS: Record<string, PlanDetails> = {
   ultra: {
     id: "ultra",
     name: "Ultra",
-    monthlyPrice: 29,
-    yearlyPrice: 290, // ~$24/mo billed yearly ($290/yr)
+    monthlyPrice: 20,
+    yearlyPrice: 200, // ~$16/mo billed yearly ($200/yr)
     monthlyAiBudget: 50.0,
     maxLinks: 999999,
     priceIdMonthly: process.env.STRIPE_PRICE_ULTRA_MONTHLY,

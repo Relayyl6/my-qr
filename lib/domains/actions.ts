@@ -15,7 +15,7 @@ export type DomainActionState = {
   domain?: any;
 };
 
-// Custom domains are available on Plus ($29), Ultra ($79), and Admin accounts
+// Custom domains are available on Plus ($12), Ultra ($20), and Admin accounts
 const ALLOWED_TIERS = ['plus', 'ultra'];
 
 export async function addCustomDomain(prevState: DomainActionState, formData: FormData): Promise<DomainActionState> {

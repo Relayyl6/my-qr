@@ -105,7 +105,7 @@ export default async function AdminDashboardPage() {
   ]);
 
   // Calculate MRR & ARR Run Rate
-  const mrr = proUsersCount * 5 + plusUsersCount * 12 + ultraUsersCount * 29;
+  const mrr = proUsersCount * 5 + plusUsersCount * 12 + ultraUsersCount * 20;
   const arr = mrr * 12;
 
   return (

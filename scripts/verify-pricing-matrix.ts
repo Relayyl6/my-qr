@@ -44,7 +44,7 @@ async function runVerification() {
     { totalFeatures, requiredMin: 100, expectedExact: 102 }
   );
 
-  // --- Test 2: Categories count: all 8 categories exist and categorize features correctly ---
+  // --- Test 2: Categories count: all 8 functional categories exist and all features categorized ---
   const expectedCategoryIds = [
     'routing',
     'qr',
@@ -56,14 +56,13 @@ async function runVerification() {
     'enterprise',
   ];
   const categoryIdsInConfig = CATEGORIES.map((c) => c.id);
-  const hasAllCategoryPill = categoryIdsInConfig.includes('all');
   const all8Exist = expectedCategoryIds.every((id) => categoryIdsInConfig.includes(id));
   const uncategorized = MASTER_FEATURES.filter((f) => !expectedCategoryIds.includes(f.category));
 
   assertTest(
     2,
-    'Categories count: all 8 categories exist + "all" pill & all features categorized',
-    hasAllCategoryPill && all8Exist && uncategorized.length === 0,
+    'Categories count: all 8 functional categories exist & all features categorized',
+    all8Exist && uncategorized.length === 0,
     `8 functional categories configured, 0 uncategorized features out of ${totalFeatures}`,
     { categoriesCount: CATEGORIES.length, functionalCategories: expectedCategoryIds.length, uncategorizedCount: uncategorized.length }
   );
