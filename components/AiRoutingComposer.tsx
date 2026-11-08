@@ -269,24 +269,68 @@ export default function AiRoutingComposer({
     }
   };
 
-  const handleCompile = async () => {
-    if (!promptText.trim()) return;
+  function formatFriendlyTime(t: string): string {
+    if (!t) return '';
+    if (t === '23:59' || t === '24:00') return 'Close';
+    const [hStr, mStr] = t.split(':');
+    let h = parseInt(hStr || '0', 10);
+    const m = mStr || '00';
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12;
+    if (h === 0) h = 12;
+    return `${h}:${m} ${ampm}`;
+  }
+
+  const handleCompile = async (customPrompt?: string, keepOnScheduleTab?: boolean) => {
+    const textToRun = (customPrompt || promptText).trim();
+    if (!textToRun) return;
     setLoading(true);
     setStatusMessage(null);
 
     try {
-      const res = await compileRulesAction(promptText, defaultDestination);
+      const res = await compileRulesAction(textToRun, defaultDestination);
       setCompiledRules(res.output.rules);
       setExplanation(res.output.explanation);
-      setActiveTab('rules');
+
+      const hasScheduleRule = res.output.rules.some((r) =>
+        (r.conditions as any[]).some((c) => c.type === 'schedule')
+      );
+
+      if (keepOnScheduleTab || (activeTab === 'schedule' && hasScheduleRule)) {
+        setActiveTab('schedule');
+        setStatusMessage(`✨ Configured ${res.output.rules.length} rule(s) matching your description! Click 'Deploy Matrix' to make them live.`);
+      } else {
+        setActiveTab('rules');
+        setStatusMessage(`✨ Synthesized ${res.output.rules.length} rule(s) from your prompt.`);
+      }
     } catch (err: any) {
-      // Heuristic fallback
-      const text = promptText.toLowerCase();
+      // Robust Heuristic fallback with everyday & slang phrases
+      const text = textToRun.toLowerCase();
       const rules: CompiledRule[] = [];
-      if (text.includes('lunch') || text.includes('11:00') || (text.includes('11') && text.includes('15'))) {
+
+      // Breakfast / Morning
+      if (text.includes('breakfast') || text.includes('morning') || text.includes('8:00') || text.includes('9:00') || text.includes('08:00')) {
+        rules.push({
+          priority: 16,
+          label: 'Morning Breakfast & Coffee',
+          destination: 'https://example.com/breakfast-menu',
+          conditions: [
+            {
+              type: 'schedule',
+              daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+              startTime: '08:00',
+              endTime: '12:00',
+              timezone: newSlotTimezone,
+            },
+          ],
+        });
+      }
+
+      // Lunch / Afternoon
+      if (text.includes('lunch') || text.includes('afternoon') || text.includes('11:00') || (text.includes('11') && text.includes('15'))) {
         rules.push({
           priority: 15,
-          label: 'Lunch Specials (11:00 – 15:00)',
+          label: 'Lunch Specials',
           destination: 'https://example.com/lunch-menu',
           conditions: [
             {
@@ -294,15 +338,17 @@ export default function AiRoutingComposer({
               daysOfWeek: [1, 2, 3, 4, 5],
               startTime: '11:00',
               endTime: '15:00',
-              timezone: 'UTC',
+              timezone: newSlotTimezone,
             },
           ],
         });
       }
-      if (text.includes('cocktail') || text.includes('15:00') || (text.includes('15') && text.includes('19'))) {
+
+      // Cocktail / Happy Hour
+      if (text.includes('cocktail') || text.includes('happy hour') || (text.includes('15') && text.includes('19'))) {
         rules.push({
           priority: 14,
-          label: 'Cocktail Hour (15:00 – 19:00)',
+          label: 'Cocktail Hour',
           destination: 'https://example.com/cocktails-specials',
           conditions: [
             {
@@ -310,11 +356,68 @@ export default function AiRoutingComposer({
               daysOfWeek: [1, 2, 3, 4, 5, 6],
               startTime: '15:00',
               endTime: '19:00',
-              timezone: 'UTC',
+              timezone: newSlotTimezone,
             },
           ],
         });
       }
+
+      // Dinner / Evening / Night
+      if (text.includes('dinner') || text.includes('tasting') || text.includes('night') || text.includes('close') || text.includes('evening')) {
+        rules.push({
+          priority: 13,
+          label: 'Dinner & Tasting Menu',
+          destination: 'https://example.com/dinner-tasting',
+          conditions: [
+            {
+              type: 'schedule',
+              daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+              startTime: '19:00',
+              endTime: '23:59',
+              timezone: newSlotTimezone,
+            },
+          ],
+        });
+      }
+
+      // Weekdays
+      if (text.includes('weekday') || text.includes('work day') || text.includes('monday to friday')) {
+        rules.push({
+          priority: 12,
+          label: 'Weekday Operations (Mon–Fri)',
+          destination: defaultDestination,
+          conditions: [
+            {
+              type: 'schedule',
+              daysOfWeek: [1, 2, 3, 4, 5],
+              startTime: '09:00',
+              endTime: '18:00',
+              timezone: newSlotTimezone,
+            },
+          ],
+        });
+      }
+
+      // Weekends
+      if (text.includes('weekend') || text.includes('saturday') || text.includes('sunday')) {
+        const isWhatsApp = text.includes('whatsapp') || text.includes('chat');
+        rules.push({
+          priority: 12,
+          label: isWhatsApp ? 'Weekend VIP WhatsApp Support' : 'Weekend Special Showcase',
+          destination: isWhatsApp ? 'https://wa.me' : 'https://instagram.com',
+          conditions: [
+            {
+              type: 'schedule',
+              daysOfWeek: [0, 6],
+              startTime: '00:00',
+              endTime: '23:59',
+              timezone: newSlotTimezone,
+            },
+          ],
+        });
+      }
+
+      // iPhone
       if (text.includes('iphone') || text.includes('ios') || text.includes('apple')) {
         rules.push({
           priority: 10,
@@ -323,6 +426,8 @@ export default function AiRoutingComposer({
           conditions: [{ type: 'device', value: 'ios' }],
         });
       }
+
+      // Android
       if (text.includes('android') || text.includes('play') || text.includes('google')) {
         rules.push({
           priority: 9,
@@ -331,6 +436,7 @@ export default function AiRoutingComposer({
           conditions: [{ type: 'device', value: 'android' }],
         });
       }
+
       if (rules.length === 0) {
         rules.push({
           priority: 10,
@@ -339,9 +445,20 @@ export default function AiRoutingComposer({
           conditions: [{ type: 'device', value: 'ios' }],
         });
       }
+
       setCompiledRules(rules);
-      setExplanation(`Synthesized ${rules.length} conditional routing rules tailored to your instructions.`);
-      setActiveTab('rules');
+      setExplanation(`Synthesized ${rules.length} conditional routing rules tailored to your simple instructions.`);
+
+      const hasScheduleRule = rules.some((r) =>
+        (r.conditions as any[]).some((c) => c.type === 'schedule')
+      );
+
+      if (keepOnScheduleTab || (activeTab === 'schedule' && hasScheduleRule)) {
+        setActiveTab('schedule');
+        setStatusMessage(`✨ Set up ${rules.length} schedule slot(s) for you! Click 'Deploy Matrix' to activate.`);
+      } else {
+        setActiveTab('rules');
+      }
     } finally {
       setLoading(false);
     }
@@ -645,6 +762,90 @@ export default function AiRoutingComposer({
               </div>
             )}
 
+            {/* Smart AI Natural Language Assistant (Plain Words Input Pane) */}
+            <div className="rounded-2xl border border-purple-200/90 bg-gradient-to-br from-purple-50/90 via-white to-emerald-50/50 p-4 sm:p-5 shadow-xs space-y-3">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-xs">
+                    <Sparkles className="w-4 h-4 animate-pulse" />
+                  </div>
+                  <div>
+                    <h4 className="text-[13.5px] font-bold text-[#11140F] flex items-center gap-2">
+                      <span>Smart AI Schedule Assistant</span>
+                      <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 border border-purple-200">
+                        Plain English • Slang • Everyday Words
+                      </span>
+                    </h4>
+                    <p className="text-[11.5px] text-[#11140F]/65 mt-0.5">
+                      Don&apos;t worry about technical jargon or time math. Just describe what you want in simple words, and AI will configure your schedule automatically.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative">
+                <textarea
+                  value={promptText}
+                  onChange={(e) => setPromptText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                      e.preventDefault();
+                      handleCompile(undefined, true);
+                    }
+                  }}
+                  placeholder='e.g. "Morning breakfast menu, afternoon lunch specials, and night tasting dinner" or "Weekdays go to company website, weekends send them to my WhatsApp"'
+                  rows={2}
+                  className="w-full rounded-xl border border-purple-200/90 bg-white p-3 pr-36 text-[13px] text-[#11140F] placeholder:text-[#11140F]/40 outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-500/10 transition-all resize-none shadow-xs"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleCompile(undefined, true)}
+                  disabled={loading || !promptText.trim()}
+                  className="absolute right-2 bottom-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#11140F] text-white text-[12px] font-semibold hover:bg-[#2A2E25] transition-all disabled:opacity-40 cursor-pointer shadow-xs"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Configuring…</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-3.5 h-3.5 text-purple-300" />
+                      <span>Auto-Set with AI</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Quick 1-Click Everyday Phrases */}
+              <div className="space-y-1.5">
+                <span className="text-[10.5px] font-semibold text-[#11140F]/50 uppercase tracking-wider block">
+                  Or Click Any Everyday Example to Instantly Set Up:
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    { label: '🍳 Breakfast (8-12), Lunch (12-5) & Dinner (5-11)', prompt: 'Between 08:00 and 12:00 show breakfast, between 12:00 and 17:00 show lunch, and from 17:00 to 23:59 show dinner' },
+                    { label: '💼 Weekdays Website & Weekends WhatsApp', prompt: 'On weekdays Monday to Friday route to our website, and on weekends Saturday and Sunday route to WhatsApp' },
+                    { label: '📱 iPhone to App Store & Android to Play Store', prompt: 'Send iPhone and iPad users to the Apple App Store, and Android users to the Google Play Store' },
+                    { label: '🛍️ Daytime Catalog & Evening 20% Flash Deal', prompt: 'From 09:00 to 18:00 show our daytime store catalog, and after 18:00 show our 20% evening flash discount' },
+                    { label: '🌙 Nightlife VIP & Afternoon Earlybird', prompt: 'Afternoon 14:00 to 19:00 early bird event tickets, and 19:00 to 04:00 late night VIP table reservations' },
+                  ].map((chip, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        setPromptText(chip.prompt);
+                        handleCompile(chip.prompt, true);
+                      }}
+                      className="text-[11px] font-medium px-2.5 py-1 rounded-lg bg-white border border-[#11140F]/10 hover:border-purple-400 hover:bg-purple-50/50 text-[#11140F]/80 transition-all cursor-pointer shadow-xs"
+                    >
+                      {chip.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
             {/* Apple / Titanium Matrix Showcase Card (matching user screenshot) */}
             <div className="rounded-2xl border border-[#11140F]/15 bg-[#0C0F0A] p-4 sm:p-5 text-white shadow-xl space-y-3">
               <div className="flex items-center justify-between">
@@ -697,7 +898,10 @@ export default function AiRoutingComposer({
                           <div className="min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className="font-mono text-[13px] font-semibold text-emerald-300">
-                                {cond?.startTime} – {cond?.endTime}
+                                {formatFriendlyTime(cond?.startTime)} – {formatFriendlyTime(cond?.endTime)}
+                              </span>
+                              <span className="text-[11px] text-white/40 font-mono">
+                                ({cond?.startTime} – {cond?.endTime})
                               </span>
                               <span className="text-white/40 font-mono text-[12px]">&rarr;</span>
                               <span className="font-semibold text-[13px] text-white truncate">
@@ -713,7 +917,7 @@ export default function AiRoutingComposer({
                             <div className="flex items-center gap-2 text-[11px] text-white/50 mt-0.5 truncate">
                               <span>Days: {daysLabel}</span>
                               <span>&middot;</span>
-                              <span className="font-mono truncate">{rule.destination}</span>
+                              <span className="font-mono truncate text-emerald-400/90">{rule.destination}</span>
                             </div>
                           </div>
                         </div>
@@ -976,22 +1180,25 @@ export default function AiRoutingComposer({
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[12.5px] font-semibold text-[#11140F]/70">
-                Natural-Language Routing Instructions:
+              <label className="text-[12.5px] font-semibold text-[#11140F]/80 flex items-center justify-between">
+                <span>Describe your routing in everyday words:</span>
+                <span className="text-[10.5px] text-purple-700 font-medium bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200">
+                  Simple English, Slang & Shorthand Supported
+                </span>
               </label>
               <textarea
                 rows={3}
                 value={promptText}
                 onChange={(e) => setPromptText(e.target.value)}
-                placeholder="e.g. Route iOS visitors to App Store, Android to Google Play. Between 11:00 and 15:00 on weekdays send to https://example.com/lunch-menu."
-                className="w-full rounded-xl border border-[#11140F]/15 bg-[#11140F]/[0.02] p-3 text-[13px] text-[#11140F] placeholder:text-[#11140F]/30 outline-none focus:border-[#11140F] transition-colors resize-none"
+                placeholder='e.g. "Morning time breakfast, afternoon lunch, night dinner" or "Weekdays go to company website, weekends send them to my WhatsApp" or "iPhone to App Store, Android to Play Store"'
+                className="w-full rounded-xl border border-[#11140F]/15 bg-[#11140F]/[0.02] p-3 text-[13px] text-[#11140F] placeholder:text-[#11140F]/35 outline-none focus:border-purple-600 focus:bg-white transition-all resize-none shadow-xs"
               />
             </div>
 
             <div className="flex justify-end">
               <button
                 type="button"
-                onClick={handleCompile}
+                onClick={() => handleCompile()}
                 disabled={loading || !promptText.trim()}
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#11140F] text-white text-[12.5px] font-semibold hover:bg-[#2A2E25] transition-colors disabled:opacity-50 cursor-pointer shadow-sm"
               >

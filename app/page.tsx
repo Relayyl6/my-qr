@@ -37,42 +37,65 @@ function QrMark({ className = 'w-6 h-6', fill = '#11140F' }: { className?: strin
 
 export default async function Home() {
   const user = await getCurrentUser();
-
-  // Security: Only the owner's admin account can claim the original legacy links!
   const adminEmail = (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();
-  if (user && user.email.toLowerCase() === adminEmail) {
-    await prisma.qrLink.updateMany({
-      where: { userId: null },
-      data: { userId: user.id },
-    });
-  }
-
-  const links = user
-    ? await prisma.qrLink.findMany({
-        where: { userId: user.id },
-        include: { landingPage: true, customDomain: true, routingRules: true },
-        orderBy: { createdAt: 'desc' },
-      })
-    : [];
-
-  const customDomains = user
-    ? await prisma.customDomain.findMany({
-        where: { userId: user.id },
-        orderBy: { createdAt: 'desc' },
-      })
-    : [];
-
-  let announcementBanner: string | null = null;
-  try {
-    const sysRecord = await prisma.aiCache.findUnique({
-      where: { key: 'system_sovereignty_config' },
-    });
-    if (sysRecord && (sysRecord.value as any)?.announcementBanner) {
-      announcementBanner = (sysRecord.value as any).announcementBanner;
-    }
-  } catch (e) {}
-
   const isAdmin = !!(user && user.email.toLowerCase() === adminEmail);
+
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const daysUntilReset = Math.max(1, Math.ceil((nextMonth.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+
+  let links: any[] = [];
+  let customDomains: any[] = [];
+  let announcementBanner: string | null = null;
+  let monthlyScansCount = 0;
+  let aiCredit: any = null;
+
+  try {
+    // Security: Only the owner's admin account can claim the original legacy links!
+    if (user && user.email.toLowerCase() === adminEmail) {
+      await prisma.qrLink.updateMany({
+        where: { userId: null },
+        data: { userId: user.id },
+      });
+    }
+
+    if (user) {
+      const [fetchedLinks, fetchedDomains, scanCount, creditRecord, sysRecord] = await Promise.all([
+        prisma.qrLink.findMany({
+          where: { userId: user.id },
+          include: { landingPage: true, customDomain: true, routingRules: true },
+          orderBy: { createdAt: 'desc' },
+        }),
+        prisma.customDomain.findMany({
+          where: { userId: user.id },
+          orderBy: { createdAt: 'desc' },
+        }),
+        prisma.scan.count({
+          where: {
+            qrLink: { userId: user.id },
+            scannedAt: { gte: startOfMonth },
+          },
+        }),
+        prisma.aiCredit.findUnique({
+          where: { userId: user.id },
+        }),
+        prisma.aiCache.findUnique({
+          where: { key: 'system_sovereignty_config' },
+        }).catch(() => null),
+      ]);
+
+      links = fetchedLinks;
+      customDomains = fetchedDomains;
+      monthlyScansCount = scanCount;
+      aiCredit = creditRecord;
+      if (sysRecord && (sysRecord.value as any)?.announcementBanner) {
+        announcementBanner = (sysRecord.value as any).announcementBanner;
+      }
+    }
+  } catch (err) {
+    console.error('Safe SSR Fallback in Home page:', err);
+  }
 
   // Plan capacity & usage calculations
   const tier = (user?.tier || 'free').toLowerCase();
@@ -88,26 +111,6 @@ export default async function Home() {
     plus: 250000,
     ultra: 999999,
   };
-
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-  const daysUntilReset = Math.max(1, Math.ceil((nextMonth.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
-
-  const monthlyScansCount = user
-    ? await prisma.scan.count({
-        where: {
-          qrLink: { userId: user.id },
-          scannedAt: { gte: startOfMonth },
-        },
-      })
-    : 0;
-
-  const aiCredit = user
-    ? await prisma.aiCredit.findUnique({
-        where: { userId: user.id },
-      })
-    : null;
 
   const activeLinksCount = links.filter((l) => !l.isArchived).length;
   const maxLinks = isAdmin ? 999999 : (linkLimits[tier] ?? 5);

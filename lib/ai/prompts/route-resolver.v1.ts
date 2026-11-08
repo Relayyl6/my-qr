@@ -30,8 +30,27 @@ Rules can match:
 - language: 2-letter code (e.g. en, es, fr)
 - referrer: substring (e.g. instagram, tiktok)
 
-Assign logical priority numbers (e.g. 10 for specific schedule/device/time, 5 for generic device).
-Ensure every rule has a valid destination URL (http/https). If the user mentioned a target without full protocol, prepend https://.`,
+Special Focus on Non-Technical & Everyday Language:
+- Users frequently speak in informal, everyday, simple, or broken English, Nigerian Pidgin, shorthand, or casual speech.
+- Examples:
+  * "morning breakfast, night dinner"
+  * "weekdays go website, weekend whatsapp"
+  * "from 9 to 5 store catalog, after 6 flash deal"
+  * "make morning go my menu, night time make e go whatsapp"
+  * "iphone people app store, android play store"
+- Graciously interpret their intention:
+  * "morning" or "breakfast": 08:00 - 12:00
+  * "afternoon" or "lunch": 12:00 - 17:00
+  * "cocktails" or "happy hour": 15:00 - 19:00
+  * "evening" or "dinner" or "night": 19:00 - 23:59
+  * "weekdays" or "work days" or "monday to friday": daysOfWeek [1, 2, 3, 4, 5]
+  * "weekends" or "saturday and sunday": daysOfWeek [0, 6]
+  * "sundays": daysOfWeek [0]
+  * "whatsapp": if phone number provided (e.g. 080... or +234...), format as https://wa.me/NUMBER, otherwise https://wa.me
+  * "instagram": https://instagram.com
+- Assign logical priority numbers (e.g. 15-20 for schedule slots, 10 for device rules).
+- Ensure every rule has a valid destination URL (http/https). If user omitted URL for a slot, generate a clean, sensible destination URL (e.g. default-destination/breakfast or https://example.com/breakfast-menu).
+- Write a warm, friendly, plain-English explanation summarizing what rules were created so anyone can understand!`,
   buildUserPrompt: (input) => `
 Default Destination URL: ${input.defaultDestination}
 User Routing Request: "${input.naturalLanguagePrompt}"
@@ -43,7 +62,26 @@ Compile this request into structured routing rules.
     const text = input.naturalLanguagePrompt.toLowerCase();
     const rules: CompiledRule[] = [];
 
-    if (text.includes("lunch") || text.includes("11:00") || (text.includes("11") && text.includes("15"))) {
+    // 1. Breakfast / Morning Schedule Slot
+    if (text.includes("breakfast") || text.includes("morning") || text.includes("8:00") || text.includes("9:00") || text.includes("08:00")) {
+      rules.push({
+        priority: 16,
+        label: "Morning Breakfast & Coffee (08:00 – 12:00)",
+        destination: "https://example.com/breakfast-menu",
+        conditions: [
+          {
+            type: "schedule",
+            daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+            startTime: "08:00",
+            endTime: "12:00",
+            timezone: "UTC",
+          },
+        ],
+      });
+    }
+
+    // 2. Lunch / Afternoon Schedule Slot
+    if (text.includes("lunch") || text.includes("afternoon") || text.includes("11:00") || (text.includes("11") && text.includes("15"))) {
       rules.push({
         priority: 15,
         label: "Lunch Specials (11:00 – 15:00)",
@@ -60,6 +98,7 @@ Compile this request into structured routing rules.
       });
     }
 
+    // 3. Cocktail Hour / Evening Social
     if (text.includes("cocktail") || text.includes("happy hour") || (text.includes("15") && text.includes("19"))) {
       rules.push({
         priority: 14,
@@ -77,7 +116,8 @@ Compile this request into structured routing rules.
       });
     }
 
-    if (text.includes("dinner") || text.includes("tasting") || text.includes("night") || text.includes("close")) {
+    // 4. Dinner / Night / Tasting Slot
+    if (text.includes("dinner") || text.includes("tasting") || text.includes("night") || text.includes("close") || text.includes("evening")) {
       rules.push({
         priority: 13,
         label: "Chef Tasting & Dinner (19:00 – Close)",
@@ -94,7 +134,44 @@ Compile this request into structured routing rules.
       });
     }
 
-    if (text.includes("iphone") || text.includes("ios") || text.includes("app store")) {
+    // 5. Weekday vs Weekend Routing
+    if (text.includes("weekday") || text.includes("work day") || text.includes("monday to friday")) {
+      rules.push({
+        priority: 12,
+        label: "Weekday Operations (Mon–Fri)",
+        destination: input.defaultDestination,
+        conditions: [
+          {
+            type: "schedule",
+            daysOfWeek: [1, 2, 3, 4, 5],
+            startTime: "09:00",
+            endTime: "18:00",
+            timezone: "UTC",
+          },
+        ],
+      });
+    }
+
+    if (text.includes("weekend") || text.includes("saturday") || text.includes("sunday")) {
+      const isWhatsApp = text.includes("whatsapp") || text.includes("wa.me") || text.includes("chat");
+      rules.push({
+        priority: 12,
+        label: isWhatsApp ? "Weekend VIP WhatsApp Support" : "Weekend Special Event",
+        destination: isWhatsApp ? "https://wa.me" : "https://instagram.com",
+        conditions: [
+          {
+            type: "schedule",
+            daysOfWeek: [0, 6],
+            startTime: "00:00",
+            endTime: "23:59",
+            timezone: "UTC",
+          },
+        ],
+      });
+    }
+
+    // 6. Device Routing: Apple iPhone / iOS
+    if (text.includes("iphone") || text.includes("ios") || text.includes("app store") || text.includes("apple")) {
       rules.push({
         priority: 10,
         label: "iOS / iPhone Visitors",
@@ -103,7 +180,8 @@ Compile this request into structured routing rules.
       });
     }
 
-    if (text.includes("android") || text.includes("google play") || text.includes("play store")) {
+    // 7. Device Routing: Android / Play Store
+    if (text.includes("android") || text.includes("google play") || text.includes("play store") || text.includes("samsung")) {
       rules.push({
         priority: 10,
         label: "Android Visitors",
@@ -116,9 +194,9 @@ Compile this request into structured routing rules.
       rules,
       explanation:
         rules.length > 0
-          ? `Generated ${rules.length} platform-specific redirect rule(s) based on your intent.`
-          : "Standard default routing maintained. You can configure rules manually or provide specific destinations.",
-      confidence: rules.length > 0 ? 0.9 : 0.6,
+          ? `✨ Perfectly understood! Generated ${rules.length} simple schedule & routing rule(s) matching your request.`
+          : "Standard default routing maintained. You can describe your schedule in simple words or choose an industry preset.",
+      confidence: rules.length > 0 ? 0.95 : 0.6,
     };
   },
 };

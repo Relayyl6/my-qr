@@ -30,6 +30,7 @@ interface Props {
 export default function AdminAnalyticsDashboard({ initialData }: Props) {
   const [data, setData] = useState<TelemetryMetrics>(initialData);
   const [timeframe, setTimeframe] = useState<'24h' | '7d' | '30d' | 'all'>(initialData.timeframe);
+  const [hoveredTrend, setHoveredTrend] = useState<{ date: string; visits: number; scans: number } | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const handleTimeframeChange = (tf: '24h' | '7d' | '30d' | 'all') => {
@@ -204,28 +205,42 @@ export default function AdminAnalyticsDashboard({ initialData }: Props) {
         </div>
       </div>
 
-      {/* Traffic & Scan Volume Timeline (Daily Trends) */}
-      <div className="rounded-2xl border border-[#11140F]/10 bg-white p-6 shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      {/* Traffic & Scan Volume Timeline (Daily & Hourly Trends) */}
+      <div className="rounded-2xl border border-[#11140F]/10 bg-white p-6 shadow-xs space-y-4 overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h3 className="font-semibold text-[15px] text-[#11140F] flex items-center gap-2">
               <Activity className="w-4 h-4 text-emerald-600" />
               Traffic & Scan Velocity Timeline
             </h3>
             <p className="text-[12px] text-[#11140F]/55">
-              Daily volume trend of website visitors vs physical QR code edge redirects
+              {timeframe === '24h'
+                ? 'Hourly velocity distribution across the day (00:00 – 23:00 UTC)'
+                : `${timeframe === '7d' ? '7-Day' : timeframe === '30d' ? '30-Day' : 'All-Time'} volume trend of website visitors vs physical QR code edge redirects`}
             </p>
           </div>
-          <div className="flex items-center gap-4 text-[11.5px] font-medium">
-            <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-              Website Visits
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-              QR Code Scans
-            </span>
-          </div>
+
+          {/* Interactive Inspection Pill or Legend */}
+          {hoveredTrend ? (
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#11140F] text-white text-[11px] font-mono shadow-xs">
+              <span className="text-emerald-400 font-bold">{hoveredTrend.date}</span>
+              <span className="text-white/30">|</span>
+              <span className="text-blue-300 font-medium">{hoveredTrend.visits} visits</span>
+              <span className="text-white/30">•</span>
+              <span className="text-emerald-300 font-medium">{hoveredTrend.scans} scans</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-4 text-[11.5px] font-medium">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                Website Visits
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                QR Code Scans
+              </span>
+            </div>
+          )}
         </div>
 
         {data.dailyTrends.length === 0 ? (
@@ -233,40 +248,74 @@ export default function AdminAnalyticsDashboard({ initialData }: Props) {
             No activity recorded yet in this window.
           </div>
         ) : (
-          <div className="w-full overflow-x-auto pb-2 scrollbar-thin">
-            <div className="flex items-end gap-1.5 sm:gap-2 h-44 pt-6 min-w-full w-max sm:w-full">
-              {data.dailyTrends.map((day) => {
-                const maxVal = Math.max(
-                  ...data.dailyTrends.map((d) => Math.max(d.visits, d.scans)),
-                  1
-                );
-                const visitHeight = Math.max(4, Math.round((day.visits / maxVal) * 100));
-                const scanHeight = Math.max(4, Math.round((day.scans / maxVal) * 100));
+          <div className="w-full">
+            {data.dailyTrends.length > 24 && (
+              <div className="flex items-center justify-between text-[11px] text-[#11140F]/40 font-mono mb-1 px-1">
+                <span>{data.dailyTrends[0]?.date}</span>
+                <span>&larr; Drag / Scroll horizontally to explore timeline &rarr;</span>
+                <span>{data.dailyTrends[data.dailyTrends.length - 1]?.date}</span>
+              </div>
+            )}
 
-                return (
-                  <div key={day.date} className="flex-1 min-w-[22px] max-w-[48px] flex flex-col items-center justify-end h-full gap-1.5 group relative">
-                    {/* Tooltip */}
-                    <div className="absolute -top-12 z-30 hidden group-hover:flex flex-col items-center bg-[#11140F] text-white text-[10px] py-1 px-2 rounded shadow-lg pointer-events-none whitespace-nowrap">
-                      <span className="font-bold">{day.date}</span>
-                      <span>{day.visits} visits • {day.scans} scans</span>
-                    </div>
+            <div className="w-full overflow-x-auto overflow-y-hidden pb-3 pt-1 scrollbar-thin">
+              <div
+                className="flex flex-nowrap items-end h-52 pt-14 pb-1 min-w-full justify-between gap-1 sm:gap-2"
+                style={{
+                  minWidth: data.dailyTrends.length > 30 ? `${data.dailyTrends.length * 28}px` : '100%',
+                  width: '100%',
+                }}
+              >
+                {data.dailyTrends.map((day) => {
+                  const maxVal = Math.max(
+                    ...data.dailyTrends.map((d) => Math.max(d.visits, d.scans)),
+                    1
+                  );
+                  const visitHeight = Math.max(4, Math.round((day.visits / maxVal) * 100));
+                  const scanHeight = Math.max(4, Math.round((day.scans / maxVal) * 100));
 
-                    <div className="w-full flex gap-0.5 items-end h-28">
-                      <div
-                        className="w-1/2 bg-blue-400 rounded-t transition-all group-hover:bg-blue-600"
-                        style={{ height: `${visitHeight}%` }}
-                      />
-                      <div
-                        className="w-1/2 bg-emerald-400 rounded-t transition-all group-hover:bg-emerald-600"
-                        style={{ height: `${scanHeight}%` }}
-                      />
+                  return (
+                    <div
+                      key={day.date}
+                      onMouseEnter={() => setHoveredTrend(day)}
+                      onMouseLeave={() => setHoveredTrend(null)}
+                      className={`flex flex-col items-center justify-end h-full group relative cursor-pointer ${
+                        data.dailyTrends.length > 30 ? 'shrink-0' : 'flex-1'
+                      }`}
+                      style={{
+                        minWidth: data.dailyTrends.length > 30 ? '24px' : 'auto',
+                      }}
+                    >
+                      {/* Floating Tooltip inside generous top headroom (pt-14) - Completely immune to overflow clipping */}
+                      <div className="absolute top-1 z-30 opacity-0 group-hover:opacity-100 transition-all duration-150 pointer-events-none flex flex-col items-center">
+                        <div className="bg-[#11140F] text-white text-[10px] py-1 px-2.5 rounded-lg shadow-xl whitespace-nowrap text-center border border-white/10">
+                          <span className="font-bold block text-white/95">{day.date}</span>
+                          <span className="text-blue-300 font-mono">{day.visits} visits</span>
+                          <span className="text-white/40 mx-1">•</span>
+                          <span className="text-emerald-300 font-mono">{day.scans} scans</span>
+                        </div>
+                        <div className="w-1.5 h-1.5 bg-[#11140F] rotate-45 -mt-1 border-r border-b border-white/10" />
+                      </div>
+
+                      {/* Bar Container - Proportional and centered across full width */}
+                      <div className="w-full max-w-[44px] flex gap-1 items-end h-32 px-0.5">
+                        <div
+                          className="w-1/2 bg-blue-500 rounded-t-sm transition-all group-hover:bg-blue-600 group-hover:brightness-110"
+                          style={{ height: `${visitHeight}%` }}
+                        />
+                        <div
+                          className="w-1/2 bg-emerald-500 rounded-t-sm transition-all group-hover:bg-emerald-600 group-hover:brightness-110"
+                          style={{ height: `${scanHeight}%` }}
+                        />
+                      </div>
+
+                      {/* Date / Time Label */}
+                      <span className="text-[10px] font-mono text-[#11140F]/50 truncate w-full text-center mt-2 group-hover:text-[#11140F] group-hover:font-semibold transition-colors">
+                        {day.date.length > 5 && day.date.includes('-') ? day.date.slice(5) : day.date}
+                      </span>
                     </div>
-                    <span className="text-[9px] font-mono text-[#11140F]/45 truncate w-full text-center">
-                      {day.date.slice(5)}
-                    </span>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           </div>
         )}

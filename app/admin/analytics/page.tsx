@@ -16,7 +16,41 @@ export default async function AdminAnalyticsPage() {
     redirect('/');
   }
 
-  const initialTelemetry = await getAdminTelemetry('7d');
+  let initialTelemetry;
+  try {
+    initialTelemetry = await getAdminTelemetry('7d');
+  } catch (err) {
+    console.error('Failed to retrieve initial telemetry:', err);
+    initialTelemetry = {
+      timeframe: '7d' as const,
+      totalPageViews: 0,
+      uniqueVisitors: 0,
+      totalScans: 0,
+      totalUsers: 0,
+      freeUsersCount: 0,
+      paidUsersCount: 0,
+      proUsersCount: 0,
+      plusUsersCount: 0,
+      ultraUsersCount: 0,
+      activeLinksCount: 0,
+      mrr: 0,
+      arr: 0,
+      arpu: 0,
+      conversionRateVisitorsToSignups: 0,
+      conversionRateFreeToPaid: 0,
+      devices: [],
+      operatingSystems: [],
+      browsers: [],
+      referrers: [],
+      utmCampaigns: [],
+      topPaths: [],
+      topLinks: [],
+      topCountries: [],
+      topCities: [],
+      hourlyDistribution: Array.from({ length: 24 }, (_, i) => ({ hour: i, visits: 0, scans: 0 })),
+      dailyTrends: [],
+    };
+  }
 
   return (
     <div className="min-h-screen bg-[#F7F8F5] text-[#11140F] p-4 sm:p-8">
