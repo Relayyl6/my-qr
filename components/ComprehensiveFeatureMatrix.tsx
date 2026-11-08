@@ -18,7 +18,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 
-interface FeatureItem {
+export interface FeatureItem {
   name: string;
   category: string;
   description: string;
@@ -29,7 +29,7 @@ interface FeatureItem {
   isBespoke?: boolean;
 }
 
-const CATEGORIES = [
+export const CATEGORIES = [
   { id: 'all', label: 'All Capabilities (102)', icon: Layers },
   { id: 'routing', label: 'Autonomous Ingress & Routing (13)', icon: Clock },
   { id: 'qr', label: 'QR Engine & Formats (14)', icon: Zap },
@@ -41,7 +41,7 @@ const CATEGORIES = [
   { id: 'enterprise', label: 'Enterprise, API & SLA (12)', icon: Server },
 ];
 
-const MASTER_FEATURES: FeatureItem[] = [
+export const MASTER_FEATURES: FeatureItem[] = [
   // 1. AUTONOMOUS INGRESS & SMART ROUTING (13 features)
   {
     name: 'Autonomous Ingress Matrix (Time-of-day scheduled routing)',

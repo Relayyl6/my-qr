@@ -38,7 +38,7 @@ interface Props {
 type TemplateType = 'table-tent' | 'window-sign' | 'card-badge' | 'full-poster';
 type CenterLogoType = 'none' | 'star' | 'utensils' | 'wifi' | 'coffee' | 'bag';
 
-const COLOR_PALETTES = [
+export const COLOR_PALETTES = [
   { name: 'Classic Ink', hex: '#11140F' },
   { name: 'Forest Green', hex: '#2F6B4F' },
   { name: 'Navy Blue', hex: '#1E3A8A' },

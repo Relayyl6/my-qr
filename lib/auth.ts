@@ -47,10 +47,14 @@ export async function destroySession(): Promise<void> {
 }
 
 export async function getSessionUserId(): Promise<string | null> {
-  const cookieStore = cookies();
-  const token = cookieStore.get(COOKIE_NAME)?.value;
-  if (!token) return null;
-  return verify(token);
+  try {
+    const cookieStore = cookies();
+    const token = cookieStore.get(COOKIE_NAME)?.value;
+    if (!token) return null;
+    return verify(token);
+  } catch {
+    return null;
+  }
 }
 
 export async function getCurrentUser() {

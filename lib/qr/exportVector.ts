@@ -1,7 +1,44 @@
+import QRCode from "qrcode";
+
 /**
  * Vector SVG QR Code generator and exporter
  * Generates standards-compliant SVG with clean path tags for Figma, Illustrator & laser cutters.
  */
+
+export async function generateCleanVectorSvg(
+  url: string,
+  options: {
+    margin?: number;
+    errorCorrectionLevel?: "L" | "M" | "Q" | "H";
+    fgColor?: string;
+    bgColor?: string;
+    title?: string;
+  } = {}
+): Promise<string> {
+  const {
+    margin = 2,
+    errorCorrectionLevel = "H",
+    fgColor = "#11140F",
+    bgColor = "#FFFFFF",
+    title,
+  } = options;
+
+  let svg = await QRCode.toString(url, {
+    type: "svg",
+    errorCorrectionLevel,
+    margin,
+    color: {
+      dark: fgColor,
+      light: bgColor,
+    },
+  });
+
+  if (title && !svg.includes("<title>")) {
+    svg = svg.replace(/<svg([^>]*)>/, `<svg$1><title>${title}</title>`);
+  }
+
+  return svg;
+}
 
 export function downloadSvgFile(filename: string, svgContent: string) {
   const blob = new Blob([svgContent], { type: "image/svg+xml;charset=utf-8" });

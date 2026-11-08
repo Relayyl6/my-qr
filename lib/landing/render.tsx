@@ -29,6 +29,20 @@ export function normalizeLandingUrl(url?: string | null, fallbackUrl?: string | 
     return "#";
   }
   const trimmed = url.trim();
+  const lower = trimmed.toLowerCase();
+
+  // Guard against dangerous script execution schemes (prevent XSS / javascript: URIs)
+  if (
+    lower.startsWith("javascript:") ||
+    lower.startsWith("data:") ||
+    lower.startsWith("vbscript:")
+  ) {
+    if (fallbackUrl && fallbackUrl.trim() !== "" && fallbackUrl.trim() !== "#") {
+      return normalizeLandingUrl(fallbackUrl);
+    }
+    return "#";
+  }
+
   if (
     trimmed.startsWith("http://") ||
     trimmed.startsWith("https://") ||

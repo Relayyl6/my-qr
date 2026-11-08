@@ -34,6 +34,47 @@ const PRESET_BATCHES = [
   },
 ];
 
+export function parseBulkImportLines(rawText: string): { destinationUrl: string; label?: string }[] {
+  const lines = rawText
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean);
+
+  return lines.map((line) => {
+    const parts = line.split(',');
+    const destinationUrl = parts[0].trim();
+    const label = parts[1] ? parts[1].trim() : undefined;
+    return { destinationUrl, label };
+  });
+}
+
+export function createLocalFallback(items: { destinationUrl: string; label?: string }[]) {
+  return {
+    totalItemsProcessed: items.length,
+    summary: `Clustered ${items.length} destination assets into a unified marketing campaign using the High-Speed Engine.`,
+    campaigns: [
+      {
+        campaignName: 'Bulk Marketing Ingestion',
+        category: 'Promotional & Social',
+        suggestedStrategy: 'High-speed 307 edge redirects with real-time analytics tracking.',
+        items: items.map((it, idx) => {
+          let slug = `asset-${idx + 1}`;
+          try {
+            const u = new URL(it.destinationUrl);
+            slug = u.hostname.replace('www.', '').split('.')[0] || slug;
+          } catch {}
+          return {
+            destinationUrl: it.destinationUrl,
+            label: it.label || `Asset #${idx + 1}`,
+            shortCode: `${slug}-${Math.floor(100 + Math.random() * 900)}`,
+            tags: ['bulk-import', 'auto-routed'],
+          };
+        }),
+      },
+    ],
+  };
+}
+
 export default function BulkImportWizard({
   onImportComplete,
   onClose,
@@ -44,46 +85,7 @@ export default function BulkImportWizard({
   const [orchestrated, setOrchestrated] = useState<CampaignOrchestratorOutput | null>(null);
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
 
-  const getParsedItems = () => {
-    const lines = rawText
-      .split('\n')
-      .map((l) => l.trim())
-      .filter(Boolean);
-
-    return lines.map((line) => {
-      const parts = line.split(',');
-      const destinationUrl = parts[0].trim();
-      const label = parts[1] ? parts[1].trim() : undefined;
-      return { destinationUrl, label };
-    });
-  };
-
-  const createLocalFallback = (items: { destinationUrl: string; label?: string }[]) => {
-    return {
-      totalItemsProcessed: items.length,
-      summary: `Clustered ${items.length} destination assets into a unified marketing campaign using the High-Speed Engine.`,
-      campaigns: [
-        {
-          campaignName: 'Bulk Marketing Ingestion',
-          category: 'Promotional & Social',
-          suggestedStrategy: 'High-speed 307 edge redirects with real-time analytics tracking.',
-          items: items.map((it, idx) => {
-            let slug = `asset-${idx + 1}`;
-            try {
-              const u = new URL(it.destinationUrl);
-              slug = u.hostname.replace('www.', '').split('.')[0] || slug;
-            } catch {}
-            return {
-              destinationUrl: it.destinationUrl,
-              label: it.label || `Asset #${idx + 1}`,
-              shortCode: `${slug}-${Math.floor(100 + Math.random() * 900)}`,
-              tags: ['bulk-import', 'auto-routed'],
-            };
-          }),
-        },
-      ],
-    };
-  };
+  const getParsedItems = () => parseBulkImportLines(rawText);
 
   const [orchestratedMeta, setOrchestratedMeta] = useState<{ isFallback?: boolean; latencyMs?: number } | null>(null);
 

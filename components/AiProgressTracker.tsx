@@ -3,19 +3,19 @@
 import { useState, useEffect } from 'react';
 import { Sparkles, CheckCircle2, Loader2, Zap, ShieldCheck, Clock } from 'lucide-react';
 
-interface Stage {
+export interface Stage {
   label: string;
   detail: string;
 }
 
-interface AiProgressTrackerProps {
+export interface AiProgressTrackerProps {
   title?: string;
   subtitle?: string;
   stages?: Stage[];
   onForceComplete?: () => void;
 }
 
-const DEFAULT_STAGES: Stage[] = [
+export const DEFAULT_STAGES: Stage[] = [
   { label: 'Ingesting & Validating Payload', detail: 'Sanitizing syntax, endpoints & URL structures' },
   { label: 'Dispatching Neural Intent Processing', detail: 'Evaluating contextual semantics & device profiles' },
   { label: 'Synthesizing Structured Output', detail: 'Generating deterministic rules, slugs & assets' },

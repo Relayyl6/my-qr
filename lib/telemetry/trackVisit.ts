@@ -65,6 +65,18 @@ export function parseUserAgent(ua: string) {
   return { device, browser, os };
 }
 
+export function hashIp(ip: string, date: Date | string = new Date()): string {
+  const dateStr = typeof date === 'string'
+    ? (date.includes('T') ? date.split('T')[0] : date)
+    : date.toISOString().slice(0, 10);
+  const secret = process.env.AUTH_SECRET || 'qr-salt';
+  return crypto
+    .createHash('sha256')
+    .update(`${ip}-${dateStr}-${secret}`)
+    .digest('hex')
+    .slice(0, 16);
+}
+
 export async function recordSiteVisit(payload: VisitPayload): Promise<void> {
   try {
     const ua = payload.userAgent || '';
@@ -80,10 +92,8 @@ export async function recordSiteVisit(payload: VisitPayload): Promise<void> {
 
     const { device, browser, os } = parseUserAgent(ua);
 
-    // 1-way non-reversible hash of IP for unique count without privacy violations
-    const ipHash = payload.ip
-      ? crypto.createHash('sha256').update(payload.ip + (process.env.AUTH_SECRET || 'qr-salt')).digest('hex').slice(0, 16)
-      : null;
+    // GDPR/CCPA 1-way non-reversible hash of IP with daily rotating salt
+    const ipHash = payload.ip ? hashIp(payload.ip) : null;
 
     // Clean paths
     const cleanPath = (payload.path || '/').split('?')[0].slice(0, 200);

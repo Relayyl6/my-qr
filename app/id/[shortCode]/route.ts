@@ -46,11 +46,16 @@ export async function GET(
   const isLandingPage = link.type === 'landing-page' && Boolean(link.landingPage?.published);
 
   // 2. Ignore camera background prefetch and preview requests
+  const purpose = request.headers.get('purpose')?.toLowerCase().trim();
+  const secPurpose = request.headers.get('sec-purpose')?.toLowerCase().trim();
+  const xPurpose = request.headers.get('x-purpose')?.toLowerCase().trim();
+  const xMoz = request.headers.get('x-moz')?.toLowerCase().trim();
+
   const isPrefetch =
-    request.headers.get('purpose') === 'prefetch' ||
-    request.headers.get('sec-purpose') === 'prefetch' ||
-    request.headers.get('x-purpose') === 'preview' ||
-    request.headers.get('x-moz') === 'prefetch';
+    purpose === 'prefetch' ||
+    secPurpose === 'prefetch' ||
+    xPurpose === 'preview' ||
+    xMoz === 'prefetch';
 
   // Extract contextual headers for condition evaluation
   const userAgent = request.headers.get('user-agent') || '';
