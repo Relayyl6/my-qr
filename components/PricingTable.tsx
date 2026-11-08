@@ -202,27 +202,23 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
             <ul className="space-y-3 text-[13px] text-[#11140F]/85">
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span><strong>Autonomous Ingress Matrix</strong> (Time-of-day & day-of-week scheduled switching)</span>
+                <span><strong>Autonomous Ingress Matrix</strong> (Time-of-day scheduled switching)</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span><strong>AI Smart Routing</strong> (iOS vs Android & Geo-IP country)</span>
+                <span><strong>AI Device Routing</strong> (iOS vs Android & desktop traffic splitting)</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span><strong>Configurable Print Studio</strong> (Hide footers & slugs, color themes)</span>
+                <span><strong>300 DPI High-Res PNG</strong> print-ready raster exports</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span><strong>CSV Scan History</strong> raw telemetry export</span>
+                <span><strong>Configurable Print Studio</strong> (Slugs, vanity words & color presets)</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span>Vector SVG export for professional print shops</span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span>5 Prompt-to-Page AI mobile showcases</span>
+                <span><strong>Real-time Diurnal Heatmap</strong> (Last 24 hours peak scanner analysis)</span>
               </li>
             </ul>
           </div>
@@ -297,11 +293,15 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
             <ul className="space-y-3 text-[13px] text-[#11140F]/85">
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span><strong>Custom Branded Domains</strong> (`qr.brand.com`)</span>
+                <span><strong>Custom Branded Domain</strong> (1 domain with auto Let&apos;s Encrypt SSL)</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
                 <span><strong>100% White-Label Prints</strong> (Zero watermarks, custom logos)</span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
+                <span><strong>Geo-IP Country Routing</strong> & All-Timezone Clock Alignment</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
@@ -317,15 +317,11 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span><strong>AI QR Art Studio</strong> (Stylized diffusion icons)</span>
+                <span><strong>Vector SVG Print Export</strong> & Table Tent Acrylic Kit</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span>25 Mobile Landing Pages with custom action buttons</span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span>Bulk CSV link creator (up to 500 links)</span>
+                <span>3 Prompt-to-Page AI mobile showcase pages</span>
               </li>
             </ul>
           </div>
@@ -404,27 +400,31 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span><strong>Sub-15ms Edge Redirects</strong> & Multi-Region DB</span>
+                <span><strong>AI QR Art Studio</strong> (Diffusion-style icons & neural scannability)</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span><strong>Autonomous Ingress Multi-Timezone Sync</strong></span>
+                <span><strong>100% Full White-Labeling</strong> (Zero DynamicQR footprint)</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span><strong>Custom Social Preview Cloaking</strong> (OpenGraph Meta & OG Image)</span>
+                <span><strong>Programmatic REST API & Scan Webhooks</strong> (120+ req/min)</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span><strong>Raw Telemetry & Diurnal Heatmaps</strong> with CSV export</span>
+                <span><strong>Autonomous Ingress Multi-Timezone & Regional Matrix</strong></span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span><strong>REST API Access & Webhooks</strong> triggered on scan</span>
+                <span><strong>Google Tag Manager (GTM) Container Support</strong></span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
-                <span><strong>Dedicated 99.99% Enterprise SLA</strong> & Account Lead</span>
+                <span><strong>Team Workspaces & Multi-Seat RBAC Governance</strong></span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <Check className="w-4 h-4 text-[#2F6B4F] shrink-0" />
+                <span><strong>Dedicated 99.99% Enterprise SLA</strong> & Priority 1h Slack Lead</span>
               </li>
             </ul>
           </div>

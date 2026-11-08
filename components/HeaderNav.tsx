@@ -60,9 +60,17 @@ export default function HeaderNav({
     }
   };
 
+  const isDark = activeTab === 'overview';
+
   return (
     <>
-      <header className="sticky top-0 left-0 right-0 z-50 w-full border-b border-[#11140F]/10 bg-[#EEF0EA]/95 backdrop-blur-md shadow-2xs">
+      <header
+        className={`sticky top-0 left-0 right-0 z-50 w-full transition-colors duration-200 backdrop-blur-md ${
+          isDark
+            ? 'bg-[#11140F]/95 border-b border-white/10 text-white shadow-md'
+            : 'bg-[#EEF0EA]/95 border-b border-[#11140F]/10 text-[#11140F] shadow-2xs'
+        }`}
+      >
         {/* System Broadcast Announcement */}
         {announcementBanner && (
           <div className="bg-gradient-to-r from-emerald-800 via-teal-800 to-[#11140F] text-white px-4 py-1.5 text-[12px] font-medium text-center flex items-center justify-center gap-2 shadow-xs shrink-0">
@@ -88,23 +96,41 @@ export default function HeaderNav({
                 }}
                 className="flex items-center gap-2.5 group cursor-pointer"
               >
-                <div className="w-8 h-8 rounded-xl bg-[#11140F] flex items-center justify-center text-white shadow-xs group-hover:bg-[#2A2E25] transition-colors">
+                <div
+                  className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors shadow-xs ${
+                    isDark
+                      ? 'bg-white/10 text-white group-hover:bg-white/20'
+                      : 'bg-[#11140F] text-white group-hover:bg-[#2A2E25]'
+                  }`}
+                >
                   <QrMark className="w-4.5 h-4.5" fill="#FFFFFF" />
                 </div>
-                <span className="font-bold tracking-tight text-[16.5px] sm:text-[18px] text-[#11140F]">
+                <span
+                  className={`font-bold tracking-tight text-[16.5px] sm:text-[18px] transition-colors ${
+                    isDark ? 'text-white' : 'text-[#11140F]'
+                  }`}
+                >
                   DynamicQR
                 </span>
               </a>
             </div>
 
             {/* Center: Unified Segmented View Tabs (Desktop & Tablet) */}
-            <div className="hidden sm:flex items-center p-1 bg-white/90 rounded-2xl border border-[#11140F]/10 shadow-2xs">
+            <div
+              className={`hidden sm:flex items-center p-1 rounded-2xl border transition-colors ${
+                isDark
+                  ? 'bg-white/[0.08] border-white/15 shadow-2xs'
+                  : 'bg-white/90 border-[#11140F]/10 shadow-2xs'
+              }`}
+            >
               <button
                 type="button"
                 onClick={() => handleTabClick('workspace')}
                 className={`px-3.5 sm:px-4 py-1.5 rounded-xl text-[12.5px] sm:text-[13px] font-semibold flex items-center gap-2 transition-all cursor-pointer ${
                   activeTab === 'workspace'
                     ? 'bg-[#11140F] text-white shadow-xs'
+                    : isDark
+                    ? 'text-white/70 hover:text-white hover:bg-white/10'
                     : 'text-[#11140F]/65 hover:text-[#11140F] hover:bg-[#EEF0EA]'
                 }`}
               >
@@ -113,7 +139,7 @@ export default function HeaderNav({
                 {user && (
                   <span
                     className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                      activeTab === 'workspace' ? 'bg-emerald-400' : 'bg-emerald-600'
+                      activeTab === 'workspace' ? 'bg-emerald-400' : 'bg-emerald-500'
                     }`}
                   />
                 )}
@@ -124,7 +150,11 @@ export default function HeaderNav({
                 onClick={() => handleTabClick('overview')}
                 className={`px-3.5 sm:px-4 py-1.5 rounded-xl text-[12.5px] sm:text-[13px] font-semibold flex items-center gap-2 transition-all cursor-pointer ${
                   activeTab === 'overview'
-                    ? 'bg-[#11140F] text-white shadow-xs'
+                    ? isDark
+                      ? 'bg-white text-[#11140F] shadow-xs font-bold'
+                      : 'bg-[#11140F] text-white shadow-xs'
+                    : isDark
+                    ? 'text-white/70 hover:text-white hover:bg-white/10'
                     : 'text-[#11140F]/65 hover:text-[#11140F] hover:bg-[#EEF0EA]'
                 }`}
               >
@@ -134,7 +164,11 @@ export default function HeaderNav({
 
               <Link
                 href="/pricing"
-                className="px-3 sm:px-3.5 py-1.5 rounded-xl text-[12.5px] sm:text-[13px] font-semibold text-[#2F6B4F] hover:bg-[#2F6B4F]/10 transition-colors flex items-center gap-1.5"
+                className={`px-3 sm:px-3.5 py-1.5 rounded-xl text-[12.5px] sm:text-[13px] font-semibold transition-colors flex items-center gap-1.5 ${
+                  isDark
+                    ? 'text-emerald-300 hover:bg-emerald-400/10'
+                    : 'text-[#2F6B4F] hover:bg-[#2F6B4F]/10'
+                }`}
               >
                 <CreditCard className="w-3.5 h-3.5 shrink-0" />
                 <span>Pricing</span>
@@ -158,17 +192,29 @@ export default function HeaderNav({
                 <div className="flex items-center gap-2">
                   <Link
                     href="/pricing"
-                    className="rounded-full bg-[#2F6B4F]/10 text-[#2F6B4F] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider hover:bg-[#2F6B4F]/20 transition-colors border border-[#2F6B4F]/20"
+                    className={`rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider transition-colors border ${
+                      isDark
+                        ? 'bg-purple-500/20 text-purple-300 border-purple-500/30 hover:bg-purple-500/30'
+                        : 'bg-[#2F6B4F]/10 text-[#2F6B4F] border-[#2F6B4F]/20 hover:bg-[#2F6B4F]/20'
+                    }`}
                     title="Click to view plan limits or upgrade"
                   >
                     {user.tier || 'free'}
                   </Link>
-                  <span className="hidden lg:inline-block text-[12.5px] text-[#11140F]/70 font-medium max-w-[130px] truncate">
+                  <span
+                    className={`hidden lg:inline-block text-[12.5px] font-medium max-w-[130px] truncate ${
+                      isDark ? 'text-white/80' : 'text-[#11140F]/70'
+                    }`}
+                  >
                     {user.name || user.email.split('@')[0]}
                   </span>
                   <button
                     onClick={() => signOut()}
-                    className="rounded-full border border-[#11140F]/15 bg-white px-3 sm:px-3.5 py-1.5 text-[12px] sm:text-[13px] font-medium text-[#11140F]/80 hover:bg-white/80 transition-colors shadow-2xs cursor-pointer"
+                    className={`rounded-full px-3 sm:px-3.5 py-1.5 text-[12px] sm:text-[13px] font-medium transition-colors shadow-2xs cursor-pointer ${
+                      isDark
+                        ? 'border border-white/20 bg-white/10 text-white hover:bg-white/20'
+                        : 'border border-[#11140F]/15 bg-white text-[#11140F]/80 hover:bg-white/80'
+                    }`}
                   >
                     Log out
                   </button>
@@ -177,13 +223,21 @@ export default function HeaderNav({
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => openAuth('login')}
-                    className="rounded-full bg-[#11140F] text-[#EEF0EA] px-3.5 sm:px-4 py-1.5 sm:py-2 text-[12px] sm:text-[13px] font-medium hover:bg-[#2A2E25] transition-colors shadow-2xs cursor-pointer"
+                    className={`rounded-full px-3.5 sm:px-4 py-1.5 sm:py-2 text-[12px] sm:text-[13px] font-medium transition-colors shadow-2xs cursor-pointer ${
+                      isDark
+                        ? 'bg-white text-[#11140F] hover:bg-white/90 font-semibold'
+                        : 'bg-[#11140F] text-[#EEF0EA] hover:bg-[#2A2E25]'
+                    }`}
                   >
                     Log in
                   </button>
                   <button
                     onClick={() => openAuth('signup')}
-                    className="hidden xs:inline-block rounded-full border border-[#11140F]/15 bg-white px-3.5 py-1.5 text-[12px] sm:text-[13px] font-medium text-[#11140F] hover:bg-white/80 transition-colors shadow-2xs cursor-pointer"
+                    className={`hidden xs:inline-block rounded-full px-3.5 py-1.5 text-[12px] sm:text-[13px] font-medium transition-colors shadow-2xs cursor-pointer ${
+                      isDark
+                        ? 'border border-white/20 bg-white/10 text-white hover:bg-white/20'
+                        : 'border border-[#11140F]/15 bg-white text-[#11140F] hover:bg-white/80'
+                    }`}
                   >
                     Sign up
                   </button>
@@ -194,13 +248,21 @@ export default function HeaderNav({
 
           {/* Mobile Bottom Tab Bar (< sm screens) */}
           <div className="sm:hidden pb-2.5 pt-0.5">
-            <div className="grid grid-cols-3 p-1 bg-white/95 rounded-2xl border border-[#11140F]/10 shadow-xs gap-1">
+            <div
+              className={`grid grid-cols-3 p-1 rounded-2xl border shadow-xs gap-1 ${
+                isDark
+                  ? 'bg-[#1A2216]/95 border-white/15'
+                  : 'bg-white/95 border-[#11140F]/10'
+              }`}
+            >
               <button
                 type="button"
                 onClick={() => handleTabClick('workspace')}
                 className={`py-1.5 rounded-xl text-[12px] font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                   activeTab === 'workspace'
                     ? 'bg-[#11140F] text-white shadow-xs'
+                    : isDark
+                    ? 'text-white/70 hover:text-white'
                     : 'text-[#11140F]/65 hover:text-[#11140F]'
                 }`}
               >
@@ -213,7 +275,11 @@ export default function HeaderNav({
                 onClick={() => handleTabClick('overview')}
                 className={`py-1.5 rounded-xl text-[12px] font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                   activeTab === 'overview'
-                    ? 'bg-[#11140F] text-white shadow-xs'
+                    ? isDark
+                      ? 'bg-white text-[#11140F] shadow-xs font-bold'
+                      : 'bg-[#11140F] text-white shadow-xs'
+                    : isDark
+                    ? 'text-white/70 hover:text-white'
                     : 'text-[#11140F]/65 hover:text-[#11140F]'
                 }`}
               >
@@ -223,7 +289,11 @@ export default function HeaderNav({
 
               <Link
                 href="/pricing"
-                className="py-1.5 rounded-xl text-[12px] font-semibold text-[#2F6B4F] flex items-center justify-center gap-1.5 hover:bg-[#2F6B4F]/10 transition-colors"
+                className={`py-1.5 rounded-xl text-[12px] font-semibold flex items-center justify-center gap-1.5 transition-colors ${
+                  isDark
+                    ? 'text-emerald-300 hover:bg-emerald-400/10'
+                    : 'text-[#2F6B4F] hover:bg-[#2F6B4F]/10'
+                }`}
               >
                 <CreditCard className="w-3.5 h-3.5 shrink-0" />
                 <span>Pricing</span>

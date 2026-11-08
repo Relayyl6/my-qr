@@ -14,8 +14,6 @@ import {
   BarChart3,
   Bot,
   Server,
-  Layers,
-  ChevronRight,
 } from 'lucide-react';
 
 export interface FeatureItem {
@@ -30,7 +28,6 @@ export interface FeatureItem {
 }
 
 export const CATEGORIES = [
-  { id: 'all', label: 'All Capabilities (102)', icon: Layers },
   { id: 'routing', label: 'Autonomous Ingress & Routing (13)', icon: Clock },
   { id: 'qr', label: 'QR Engine & Formats (14)', icon: Zap },
   { id: 'marketing', label: 'Marketing, UTM & Pixels (14)', icon: Share2 },
@@ -48,9 +45,9 @@ export const MASTER_FEATURES: FeatureItem[] = [
     category: 'routing',
     description: 'Switch destination URLs automatically by time window (e.g. Lunch 11:00-15:00, Dinner 19:00-Close)',
     free: false,
-    pro: 'Full Matrix',
-    plus: 'Full Matrix',
-    ultra: 'Multi-Timezone Sync',
+    pro: '2 Time Slots',
+    plus: '5 Time Slots',
+    ultra: 'Unlimited Matrix',
     isBespoke: true,
   },
   {
@@ -58,9 +55,9 @@ export const MASTER_FEATURES: FeatureItem[] = [
     category: 'routing',
     description: 'Target specific days (Mon-Fri Weekdays vs Sat-Sun Weekends vs custom recurring days)',
     free: false,
-    pro: true,
-    plus: true,
-    ultra: true,
+    pro: 'Weekdays / Weekends',
+    plus: 'Custom Recurring Days',
+    ultra: 'Multi-Calendar & Holidays',
     isBespoke: true,
   },
   {
@@ -68,9 +65,9 @@ export const MASTER_FEATURES: FeatureItem[] = [
     category: 'routing',
     description: 'Evaluate schedules against UTC, US/Eastern, Europe, Africa, Asia, or scanner local timezone',
     free: false,
-    pro: 'Local Timezone',
+    pro: false,
     plus: 'All Timezones',
-    ultra: 'Per-Branch Timezones',
+    ultra: 'Per-Branch Global Sync',
     isBespoke: true,
   },
   {
@@ -105,9 +102,9 @@ export const MASTER_FEATURES: FeatureItem[] = [
     category: 'routing',
     description: 'Direct visitors based on 2-letter ISO country code (e.g. US, GB, CA, NG, DE)',
     free: false,
-    pro: true,
-    plus: true,
-    ultra: true,
+    pro: false,
+    plus: 'Top 20 Countries',
+    ultra: '240+ Global Nations',
   },
   {
     name: 'City & Regional Routing',
@@ -115,15 +112,16 @@ export const MASTER_FEATURES: FeatureItem[] = [
     description: 'Route users to their nearest local city store or branch location',
     free: false,
     pro: false,
-    plus: true,
+    plus: false,
     ultra: true,
+    isBespoke: true,
   },
   {
     name: 'Language & Locale Routing',
     category: 'routing',
     description: 'Match browser Accept-Language headers to serve English, Spanish, French, or German targets',
     free: false,
-    pro: true,
+    pro: false,
     plus: true,
     ultra: true,
   },
@@ -132,7 +130,7 @@ export const MASTER_FEATURES: FeatureItem[] = [
     category: 'routing',
     description: 'Detect scans arriving from TikTok, Instagram, Twitter/X, or search engines',
     free: false,
-    pro: true,
+    pro: false,
     plus: true,
     ultra: true,
   },
@@ -141,9 +139,9 @@ export const MASTER_FEATURES: FeatureItem[] = [
     category: 'routing',
     description: 'Deterministic top-to-bottom priority evaluation with custom integer weights',
     free: false,
-    pro: true,
-    plus: true,
-    ultra: true,
+    pro: 'Up to 3 Rules',
+    plus: 'Up to 10 Rules',
+    ultra: 'Unlimited Waterfall',
   },
   {
     name: 'Guaranteed Fallback Destination URL',
@@ -159,9 +157,9 @@ export const MASTER_FEATURES: FeatureItem[] = [
     category: 'routing',
     description: 'Compiled routing matrices evaluated in sub-2ms on edge compute',
     free: false,
-    pro: true,
-    plus: true,
-    ultra: true,
+    pro: false,
+    plus: 'Sub-15ms',
+    ultra: 'Sub-2ms Dedicated Cache',
   },
 
   // 2. QR ENGINE & FORMATS (14 features)
@@ -187,19 +185,19 @@ export const MASTER_FEATURES: FeatureItem[] = [
     name: '300 DPI High-Resolution PNG Downloads',
     category: 'qr',
     description: 'Print-grade raster graphics with zero blurring or pixelation on physical flyers',
-    free: true,
-    pro: true,
-    plus: true,
-    ultra: true,
+    free: 'Standard PNG (150 DPI)',
+    pro: '300 DPI High-Res',
+    plus: '300 DPI High-Res',
+    ultra: '600 DPI Commercial Ultra-Res',
   },
   {
     name: 'Vector SVG Lossless Print Export',
     category: 'qr',
     description: 'Infinitely scalable vector formats for billboards, vinyl wraps, and print shops',
     free: false,
-    pro: true,
-    plus: true,
-    ultra: true,
+    pro: false,
+    plus: 'Standard Vector SVG',
+    ultra: 'Lossless CMYK Vector SVG/EPS',
   },
   {
     name: 'Offset Print PDF Templates (A4 & Letter)',
@@ -207,17 +205,17 @@ export const MASTER_FEATURES: FeatureItem[] = [
     description: 'Ready-to-print full-page sheets with alignment guides and crop marks',
     free: false,
     pro: false,
-    plus: true,
-    ultra: true,
+    plus: 'Standard PDF',
+    ultra: 'Commercial Die-Cut Bleed Guides',
   },
   {
     name: 'Table Tent Acrylic Sign Kits (4x6", 5x7")',
     category: 'qr',
     description: 'Pre-formatted vertical table displays designed for restaurant and bar tables',
     free: false,
-    pro: true,
-    plus: true,
-    ultra: true,
+    pro: false,
+    plus: 'Standard Templates',
+    ultra: 'Full Custom Die-Cuts',
   },
   {
     name: 'Square Instagram / Poster Aspect Ratio (1080x1350)',
@@ -233,27 +231,28 @@ export const MASTER_FEATURES: FeatureItem[] = [
     category: 'qr',
     description: 'Accurate commercial printer color rendering without muddy conversion artifacts',
     free: false,
-    pro: true,
-    plus: true,
+    pro: false,
+    plus: false,
     ultra: true,
+    isBespoke: true,
   },
   {
     name: 'Configurable Error Correction Levels (L, M, Q, H)',
     category: 'qr',
     description: 'Up to 30% damage recovery for scannability even when stained, scratched, or folded',
     free: 'Medium (15%)',
-    pro: 'High (25%)',
-    plus: 'Ultra (30%)',
+    pro: 'Medium (15%)',
+    plus: 'High (25%)',
     ultra: 'Ultra (30%)',
   },
   {
     name: 'Custom Quiet Zone Buffer Padding',
     category: 'qr',
     description: 'Guaranteed 10% perimeter buffer ensuring camera lenses lock onto the matrix instantly',
-    free: true,
-    pro: true,
-    plus: true,
-    ultra: true,
+    free: 'Fixed 10%',
+    pro: 'Fixed 10%',
+    plus: 'Configurable 5-15%',
+    ultra: 'Sub-Pixel Micro Tuning',
   },
   {
     name: 'Custom Center Brand Logo Embed',
@@ -261,15 +260,15 @@ export const MASTER_FEATURES: FeatureItem[] = [
     description: 'Embed your company logo in the center of the QR matrix with auto-calculated error budget',
     free: false,
     pro: false,
-    plus: true,
-    ultra: true,
+    plus: '1 Logo Upload',
+    ultra: 'Unlimited Vector SVG Logos',
   },
   {
     name: 'Hide Link Slugs & Footers on Print',
     category: 'qr',
     description: 'Toggle off URLs and technical details on physical table tents for cleaner aesthetics',
     free: false,
-    pro: true,
+    pro: false,
     plus: true,
     ultra: true,
   },
@@ -278,9 +277,9 @@ export const MASTER_FEATURES: FeatureItem[] = [
     category: 'qr',
     description: 'Customize QR dark modules and background colors while maintaining scannability',
     free: false,
-    pro: true,
-    plus: true,
-    ultra: true,
+    pro: '3 Preset Themes',
+    plus: 'Custom Hex Palettes',
+    ultra: 'Pantone & Gradient Matching',
   },
   {
     name: 'Bulk QR Code ZIP Batch Download',
@@ -288,8 +287,9 @@ export const MASTER_FEATURES: FeatureItem[] = [
     description: 'Download up to 500 numbered and labeled QR PNG/SVG files in a single zip archive',
     free: false,
     pro: false,
-    plus: 'Up to 500',
-    ultra: 'Unlimited',
+    plus: false,
+    ultra: 'Unlimited ZIP Batches',
+    isBespoke: true,
   },
 
   // 3. MARKETING, RETARGETING & ATTRIBUTION (14 features)
@@ -298,9 +298,9 @@ export const MASTER_FEATURES: FeatureItem[] = [
     category: 'marketing',
     description: 'Interactive UTM generator for source, medium, campaign, term, and content tags',
     free: false,
-    pro: 'Basic UTM',
+    pro: 'Manual UTMs',
     plus: 'Auto-Tagging',
-    ultra: 'Dynamic UTM Matrix',
+    ultra: 'Dynamic Multi-Variable Matrix',
     isBespoke: true,
   },
   {
@@ -319,8 +319,8 @@ export const MASTER_FEATURES: FeatureItem[] = [
     description: 'Inject your Meta Pixel ID to build custom audiences from physical QR flyer scans',
     free: false,
     pro: false,
-    plus: true,
-    ultra: true,
+    plus: '1 Pixel',
+    ultra: 'Unlimited Multi-Pixel + Server CAPI',
   },
   {
     name: 'Google Analytics 4 (GA4) Measurement ID',
@@ -328,8 +328,8 @@ export const MASTER_FEATURES: FeatureItem[] = [
     description: 'Fire real-time Google Analytics events before redirecting to external landing pages',
     free: false,
     pro: false,
-    plus: true,
-    ultra: true,
+    plus: '1 Stream',
+    ultra: 'Multi-Property Streams',
   },
   {
     name: 'Google Tag Manager (GTM) Container Support',
@@ -337,8 +337,9 @@ export const MASTER_FEATURES: FeatureItem[] = [
     description: 'Deploy full GTM web containers on your custom mobile landing pages',
     free: false,
     pro: false,
-    plus: true,
+    plus: false,
     ultra: true,
+    isBespoke: true,
   },
   {
     name: 'TikTok Advertising Pixel Retargeting',
@@ -346,8 +347,8 @@ export const MASTER_FEATURES: FeatureItem[] = [
     description: 'Build retargeting pools for TikTok ad campaigns from in-store physical scans',
     free: false,
     pro: false,
-    plus: true,
-    ultra: true,
+    plus: '1 Pixel',
+    ultra: 'Multi-Pixel Retargeting',
   },
   {
     name: 'LinkedIn Insight Tag Attribution',
@@ -357,6 +358,7 @@ export const MASTER_FEATURES: FeatureItem[] = [
     pro: false,
     plus: false,
     ultra: true,
+    isBespoke: true,
   },
   {
     name: 'Custom OpenGraph Social Preview Title',
@@ -391,26 +393,27 @@ export const MASTER_FEATURES: FeatureItem[] = [
     description: 'Keep your branded short domain visible in browser address bars',
     free: false,
     pro: false,
-    plus: true,
+    plus: false,
     ultra: true,
+    isBespoke: true,
   },
   {
     name: 'Native Mobile App Deep Linking',
     category: 'marketing',
     description: 'Open native app URI schemes (e.g. spotify://, instagram://, custom app URL schemes)',
     free: false,
-    pro: true,
-    plus: true,
-    ultra: true,
+    pro: 'Basic Universal Links',
+    plus: 'Custom App Schemes',
+    ultra: 'Fallback App Install Handshake',
   },
   {
     name: 'Cross-Channel Campaign Attribution Tags',
     category: 'marketing',
     description: 'Group QR links by marketing campaign, flyer drop, or geographic region',
     free: false,
-    pro: true,
-    plus: true,
-    ultra: true,
+    pro: 'Up to 5 Tags',
+    plus: 'Unlimited Tags',
+    ultra: 'Multi-Workspace Channel Groups',
   },
   {
     name: 'Dynamic QR Recycling (Zero Reprinting)',
@@ -429,8 +432,8 @@ export const MASTER_FEATURES: FeatureItem[] = [
     description: 'Require scanners to enter a 4-digit PIN or password before unlocking content',
     free: false,
     pro: false,
-    plus: true,
-    ultra: true,
+    plus: 'Single PIN',
+    ultra: 'Multi-User & Expiring PINs',
     isBespoke: true,
   },
   {
@@ -439,8 +442,9 @@ export const MASTER_FEATURES: FeatureItem[] = [
     description: 'High-polish, mobile-optimized keypad with brute-force rate-limiting',
     free: false,
     pro: false,
-    plus: true,
+    plus: false,
     ultra: true,
+    isBespoke: true,
   },
   {
     name: 'Scan Count Expiration Budget Caps',
@@ -448,8 +452,8 @@ export const MASTER_FEATURES: FeatureItem[] = [
     description: 'Automatically expire link after X total scans (e.g. first 200 coupon claimers only)',
     free: false,
     pro: false,
-    plus: true,
-    ultra: true,
+    plus: 'Up to 250 Scans',
+    ultra: 'Unlimited Precise Burn Limits',
     isBespoke: true,
   },
   {
@@ -458,8 +462,8 @@ export const MASTER_FEATURES: FeatureItem[] = [
     description: 'Deactivate campaign link automatically at midnight or specified timestamp',
     free: false,
     pro: false,
-    plus: true,
-    ultra: true,
+    plus: '7-Day Limit',
+    ultra: 'Precision Minute Scheduling',
   },
   {
     name: 'Expired Link Fallback Destination',
@@ -467,8 +471,9 @@ export const MASTER_FEATURES: FeatureItem[] = [
     description: 'Gracefully route late visitors to "Promotion Ended" or alternative sales page',
     free: false,
     pro: false,
-    plus: true,
+    plus: false,
     ultra: true,
+    isBespoke: true,
   },
   {
     name: 'One-Click Link Pause & Archive',
@@ -483,10 +488,10 @@ export const MASTER_FEATURES: FeatureItem[] = [
     name: 'Bot & Camera Crawler Filtering',
     category: 'security',
     description: 'Suppress scanner count inflation from search engine indexing bots and spiders',
-    free: true,
-    pro: true,
-    plus: true,
-    ultra: true,
+    free: 'Basic Filtering',
+    pro: 'Standard Defense',
+    plus: 'Enhanced Heuristics',
+    ultra: 'Real-Time ML Bot Defense',
   },
   {
     name: 'Camera Preview Prefetch Suppression',
@@ -512,8 +517,8 @@ export const MASTER_FEATURES: FeatureItem[] = [
     description: 'Automatic HTTPS TLS provisioning and 90-day renewal for all custom domains',
     free: false,
     pro: false,
-    plus: true,
-    ultra: true,
+    plus: '1 Domain SSL',
+    ultra: 'Wildcard & Apex Domain SSL',
   },
   {
     name: 'End-to-End DNSSEC Domain Verification',
@@ -542,7 +547,7 @@ export const MASTER_FEATURES: FeatureItem[] = [
     free: false,
     pro: false,
     plus: '1 Custom Domain',
-    ultra: 'Unlimited Domains',
+    ultra: 'Unlimited Custom Domains',
     isBespoke: true,
   },
   {
@@ -560,8 +565,9 @@ export const MASTER_FEATURES: FeatureItem[] = [
     description: 'Zero third-party footprint — full brand immersion from camera scan to landing page',
     free: false,
     pro: false,
-    plus: true,
+    plus: false,
     ultra: true,
+    isBespoke: true,
   },
   {
     name: 'Custom Domain Root Redirect (/)',
@@ -569,8 +575,9 @@ export const MASTER_FEATURES: FeatureItem[] = [
     description: 'Choose where visitors land if they visit your naked domain root (e.g. your home site)',
     free: false,
     pro: false,
-    plus: true,
+    plus: false,
     ultra: true,
+    isBespoke: true,
   },
   {
     name: 'Custom 404 Not Found Fallback Destination',
@@ -578,8 +585,9 @@ export const MASTER_FEATURES: FeatureItem[] = [
     description: 'Redirect mistyped shortcodes to your main store or dedicated support page',
     free: false,
     pro: false,
-    plus: true,
+    plus: false,
     ultra: true,
+    isBespoke: true,
   },
   {
     name: 'Custom Favicon on Branded Redirects',
@@ -587,8 +595,9 @@ export const MASTER_FEATURES: FeatureItem[] = [
     description: 'Display your company favicon during browser transit and landing showcase pages',
     free: false,
     pro: false,
-    plus: true,
+    plus: false,
     ultra: true,
+    isBespoke: true,
   },
   {
     name: 'Instant DNS Verification Health Sentinel',
@@ -616,6 +625,7 @@ export const MASTER_FEATURES: FeatureItem[] = [
     pro: false,
     plus: false,
     ultra: true,
+    isBespoke: true,
   },
   {
     name: 'Automated SSL Renewal Pipeline',
@@ -632,8 +642,8 @@ export const MASTER_FEATURES: FeatureItem[] = [
     description: 'Support any sub-domain structure (menu.brand.com, go.brand.com, scan.brand.com)',
     free: false,
     pro: false,
-    plus: true,
-    ultra: true,
+    plus: '1 Subdomain',
+    ultra: 'Unlimited Subdomains',
   },
   {
     name: 'Agency White-Label Client Portal',
@@ -643,6 +653,7 @@ export const MASTER_FEATURES: FeatureItem[] = [
     pro: false,
     plus: false,
     ultra: true,
+    isBespoke: true,
   },
 
   // 6. ANALYTICS, TELEMETRY & INTELLIGENCE (13 features)
@@ -660,7 +671,7 @@ export const MASTER_FEATURES: FeatureItem[] = [
     category: 'analytics',
     description: 'Distinguish between repeat visitors and first-time unique individuals',
     free: false,
-    pro: true,
+    pro: false,
     plus: true,
     ultra: true,
   },
@@ -669,9 +680,9 @@ export const MASTER_FEATURES: FeatureItem[] = [
     category: 'analytics',
     description: 'Hour-by-hour distribution revealing when your physical signs are most scanned',
     free: false,
-    pro: true,
-    plus: true,
-    ultra: true,
+    pro: 'Last 24 Hours Only',
+    plus: 'Last 7 Days',
+    ultra: 'Real-Time + Infinite Historical',
     isBespoke: true,
   },
   {
@@ -688,7 +699,7 @@ export const MASTER_FEATURES: FeatureItem[] = [
     category: 'analytics',
     description: 'Granular OS versioning for tech marketing and mobile app optimization',
     free: false,
-    pro: true,
+    pro: false,
     plus: true,
     ultra: true,
   },
@@ -697,7 +708,7 @@ export const MASTER_FEATURES: FeatureItem[] = [
     category: 'analytics',
     description: 'Breakdown of Safari, Chrome, Edge, and in-app camera webview browsers',
     free: false,
-    pro: true,
+    pro: false,
     plus: true,
     ultra: true,
   },
@@ -706,7 +717,7 @@ export const MASTER_FEATURES: FeatureItem[] = [
     category: 'analytics',
     description: 'Identify if visitors scanned via camera app or followed shared web links',
     free: false,
-    pro: true,
+    pro: false,
     plus: true,
     ultra: true,
   },
@@ -714,55 +725,56 @@ export const MASTER_FEATURES: FeatureItem[] = [
     name: 'Top Performing QR Links Leaderboard',
     category: 'analytics',
     description: 'Rank physical locations (e.g. Table 4 vs Table 12 vs Street Poster)',
-    free: true,
-    pro: true,
-    plus: true,
-    ultra: true,
+    free: 'Top 3',
+    pro: 'Top 10',
+    plus: 'Top 50',
+    ultra: 'Unlimited Full Workspace',
   },
   {
     name: 'Geographic Country & City Telemetry',
     category: 'analytics',
     description: 'View which cities and nations generate the most foot traffic engagement',
     free: false,
-    pro: true,
-    plus: true,
-    ultra: true,
+    pro: 'Country Only',
+    plus: 'Country + Top Cities',
+    ultra: 'Real-Time City & ISP Geo-Drilldown',
   },
   {
     name: '1-Click Raw CSV Telemetry Export',
     category: 'analytics',
     description: 'Download complete timestamped scan records for analysis in Excel or Python',
     free: false,
-    pro: true,
-    plus: true,
-    ultra: true,
+    pro: false,
+    plus: '1,000 Rows/mo',
+    ultra: 'Uncapped CSV & Real-Time JSON',
   },
   {
     name: 'Weekly Automated Scan Digest Email',
     category: 'analytics',
     description: 'Automated executive summary sent to your inbox every Monday morning',
     free: false,
-    pro: true,
+    pro: false,
     plus: true,
     ultra: true,
   },
   {
-    name: 'Conversion Rate Telemetry (Scans &rarr; Signups)',
+    name: 'Conversion Rate Telemetry (Scans → Signups)',
     category: 'analytics',
     description: 'Track downstream conversion efficiency from physical flyer scans into customers',
     free: false,
-    pro: true,
-    plus: true,
+    pro: false,
+    plus: false,
     ultra: true,
+    isBespoke: true,
   },
   {
     name: 'Historical Data Retention',
     category: 'analytics',
     description: 'How long scan logs and visitor telemetry are preserved in the database',
     free: '7 Days',
-    pro: '90 Days',
-    plus: '1 Year',
-    ultra: 'Unlimited / Forever',
+    pro: '30 Days',
+    plus: '90 Days',
+    ultra: 'Unlimited Forever',
   },
 
   // 7. AI CREATIVE SUITE & MOBILE SHOWCASES (12 features)
@@ -771,9 +783,9 @@ export const MASTER_FEATURES: FeatureItem[] = [
     category: 'ai',
     description: 'Convert plain English instructions into strict redirect rules with neural AI',
     free: false,
-    pro: true,
-    plus: true,
-    ultra: true,
+    pro: 'Basic Prompts',
+    plus: 'Full AI Compiler',
+    ultra: 'Frontier Multi-Model Cascade',
     isBespoke: true,
   },
   {
@@ -790,9 +802,9 @@ export const MASTER_FEATURES: FeatureItem[] = [
     category: 'ai',
     description: 'Generate stunning single-page mobile websites from a brief in 10 seconds',
     free: false,
-    pro: '5 Showcases',
-    plus: '25 Showcases',
-    ultra: 'Unlimited',
+    pro: false,
+    plus: '3 Showcases',
+    ultra: 'Unlimited Showcases',
     isBespoke: true,
   },
   {
@@ -800,18 +812,18 @@ export const MASTER_FEATURES: FeatureItem[] = [
     category: 'ai',
     description: 'Restaurant menus, link-in-bio portals, product drops, and booking buttons',
     free: false,
-    pro: true,
-    plus: true,
-    ultra: true,
+    pro: false,
+    plus: 'Standard Templates',
+    ultra: 'Full Custom Menus & Booking',
   },
   {
     name: 'Custom Call-to-Action Action Buttons',
     category: 'ai',
     description: 'Direct customers from your mobile showcase to order, call, map, or pay',
     free: false,
-    pro: true,
-    plus: true,
-    ultra: true,
+    pro: false,
+    plus: 'Single CTA',
+    ultra: 'Multi-CTA Action Dock',
   },
   {
     name: 'AI QR Art Studio (Diffusion-Style Icons)',
@@ -819,7 +831,7 @@ export const MASTER_FEATURES: FeatureItem[] = [
     description: 'Transform boring QR matrices into photorealistic artistic masterpieces',
     free: false,
     pro: false,
-    plus: true,
+    plus: false,
     ultra: true,
     isBespoke: true,
   },
@@ -829,8 +841,9 @@ export const MASTER_FEATURES: FeatureItem[] = [
     description: 'Automated neural verification ensuring stylized QR codes scan reliably on all phone cameras',
     free: false,
     pro: false,
-    plus: true,
+    plus: false,
     ultra: true,
+    isBespoke: true,
   },
   {
     name: 'AI Campaign Orchestrator',
@@ -838,8 +851,9 @@ export const MASTER_FEATURES: FeatureItem[] = [
     description: 'Generate UTMs, tags, and marketing schedules across multi-link batches',
     free: false,
     pro: false,
-    plus: true,
+    plus: false,
     ultra: true,
+    isBespoke: true,
   },
   {
     name: 'Bulk URL AI Classifier & Parser',
@@ -847,8 +861,9 @@ export const MASTER_FEATURES: FeatureItem[] = [
     description: 'Paste up to 500 URLs; AI extracts titles, tags, and generates shortcodes in seconds',
     free: false,
     pro: false,
-    plus: true,
+    plus: false,
     ultra: true,
+    isBespoke: true,
   },
   {
     name: 'Neural Response Cache Engine',
@@ -864,9 +879,10 @@ export const MASTER_FEATURES: FeatureItem[] = [
     category: 'ai',
     description: 'AI detects target website color schemes and applies them to mobile pages',
     free: false,
-    pro: true,
-    plus: true,
+    pro: false,
+    plus: false,
     ultra: true,
+    isBespoke: true,
   },
   {
     name: 'Instant 1-Click Revert to Direct URL',
@@ -885,7 +901,7 @@ export const MASTER_FEATURES: FeatureItem[] = [
     description: 'Create, update, and manage QR links, routing rules, and metrics via API',
     free: false,
     pro: false,
-    plus: '60 req/min',
+    plus: false,
     ultra: '120+ req/min Burst',
     isBespoke: true,
   },
@@ -907,6 +923,7 @@ export const MASTER_FEATURES: FeatureItem[] = [
     pro: false,
     plus: false,
     ultra: true,
+    isBespoke: true,
   },
   {
     name: 'Active Link Quota',
@@ -950,8 +967,9 @@ export const MASTER_FEATURES: FeatureItem[] = [
     description: 'Add team members with role-based access controls (Admin, Editor, Viewer)',
     free: false,
     pro: false,
-    plus: '3 Seats',
-    ultra: 'Unlimited Seats',
+    plus: false,
+    ultra: 'Unlimited Seats & Roles',
+    isBespoke: true,
   },
   {
     name: 'Priority Neural AI Compute Queue',
@@ -959,8 +977,9 @@ export const MASTER_FEATURES: FeatureItem[] = [
     description: 'Bypasses standard queue for sub-second AI landing page and art generation',
     free: false,
     pro: false,
-    plus: true,
-    ultra: true,
+    plus: false,
+    ultra: 'Dedicated Priority Queue',
+    isBespoke: true,
   },
   {
     name: '99.99% Edge Routing Uptime SLA',
@@ -968,7 +987,7 @@ export const MASTER_FEATURES: FeatureItem[] = [
     description: 'Guaranteed high availability backed by serverless global Neon edge infrastructure',
     free: 'Best-Effort',
     pro: 'Standard SLA',
-    plus: '99.9% SLA',
+    plus: '99.5% SLA',
     ultra: '99.99% Enterprise SLA',
   },
   {
@@ -985,19 +1004,23 @@ export const MASTER_FEATURES: FeatureItem[] = [
     category: 'enterprise',
     description: 'Direct access to senior engineers for domain setup, API integrations, and SLA',
     free: 'Community',
-    pro: 'Email (24h)',
-    plus: 'Priority (4h)',
+    pro: 'Email (48h)',
+    plus: 'Priority Email (24h)',
     ultra: 'Dedicated Slack/Lead (1h)',
   },
 ];
 
 export default function ComprehensiveFeatureMatrix() {
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('routing');
   const [searchQuery, setSearchQuery] = useState('');
+
+  const activeCategoryObj =
+    CATEGORIES.find((c) => c.id === selectedCategory) || CATEGORIES[0];
+  const ActiveIcon = activeCategoryObj.icon;
 
   const filteredFeatures = useMemo(() => {
     return MASTER_FEATURES.filter((f) => {
-      const matchesCategory = selectedCategory === 'all' || f.category === selectedCategory;
+      const matchesCategory = f.category === selectedCategory;
       const matchesSearch =
         searchQuery.trim() === '' ||
         f.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -1011,13 +1034,15 @@ export default function ComprehensiveFeatureMatrix() {
       if (val) {
         return (
           <div className="flex items-center justify-center">
-            <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
-              plan === 'ultra'
-                ? 'bg-purple-100 text-purple-900'
-                : plan === 'plus'
-                ? 'bg-blue-100 text-blue-900'
-                : 'bg-emerald-100 text-emerald-900'
-            }`}>
+            <div
+              className={`w-5 h-5 rounded-full flex items-center justify-center ${
+                plan === 'ultra'
+                  ? 'bg-purple-100 text-purple-900 ring-1 ring-purple-300'
+                  : plan === 'plus'
+                  ? 'bg-blue-100 text-blue-900'
+                  : 'bg-emerald-100 text-emerald-900'
+              }`}
+            >
               <Check className="w-3.5 h-3.5 stroke-[2.5]" />
             </div>
           </div>
@@ -1031,22 +1056,24 @@ export default function ComprehensiveFeatureMatrix() {
     }
 
     return (
-      <span className={`text-[12px] font-semibold font-mono ${
-        plan === 'ultra'
-          ? 'text-purple-950 font-bold'
-          : plan === 'plus'
-          ? 'text-blue-950'
-          : plan === 'pro'
-          ? 'text-emerald-950'
-          : 'text-slate-800'
-      }`}>
+      <span
+        className={`text-[12px] font-semibold font-mono ${
+          plan === 'ultra'
+            ? 'text-purple-950 font-bold'
+            : plan === 'plus'
+            ? 'text-blue-950'
+            : plan === 'pro'
+            ? 'text-emerald-950'
+            : 'text-slate-800'
+        }`}
+      >
         {val}
       </span>
     );
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Competitive Benchmark Callout against Bitly & TinyURL */}
       <div className="rounded-3xl border border-[#11140F]/15 bg-gradient-to-br from-[#11140F] via-[#1A2216] to-[#0D150B] p-6 sm:p-8 text-white shadow-xl space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -1054,7 +1081,7 @@ export default function ComprehensiveFeatureMatrix() {
             <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
             Competitive Intelligence
           </div>
-          <span className="text-[12px] text-white/50 font-mono">102 Distinct Enterprise Features</span>
+          <span className="text-[12px] text-white/50 font-mono">102 Distinct Features Across 8 Dedicated Domains</span>
         </div>
 
         <div className="space-y-2">
@@ -1077,33 +1104,15 @@ export default function ComprehensiveFeatureMatrix() {
           </div>
           <div className="p-3.5 rounded-2xl bg-emerald-950/60 border border-emerald-500/40 space-y-1 ring-1 ring-emerald-500/30">
             <span className="text-[11px] uppercase tracking-wider text-emerald-300 font-mono font-bold">DynamicQR Pro ($5/mo)</span>
-            <p className="text-[12.5px] text-white font-medium">Autonomous Ingress &middot; 50 links &middot; 300 DPI kits &middot; AI Builder</p>
+            <p className="text-[12.5px] text-white font-medium">Autonomous Ingress &middot; 50 links &middot; 300 DPI kits &middot; Fast Edge</p>
           </div>
         </div>
       </div>
 
-      {/* Interactive Controls: Search & Category Filter Pills */}
+      {/* Interactive Controls: Category Filter Tabs & Focused Search */}
       <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          {/* Search Box */}
-          <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 text-[#11140F]/40 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search 102 capabilities (e.g. scheduling, utm, pixel, domains, api, pin)..."
-              className="w-full rounded-2xl border border-[#11140F]/15 bg-white pl-10 pr-4 py-2.5 text-[13px] text-[#11140F] placeholder:text-[#11140F]/40 outline-none focus:border-[#11140F] transition-all shadow-xs"
-            />
-          </div>
-
-          <div className="text-[12px] font-mono text-[#11140F]/60 text-right">
-            Showing <strong>{filteredFeatures.length}</strong> of 102 features
-          </div>
-        </div>
-
-        {/* Category Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-thin">
+        {/* Category Pills (Tabs Only, No All-102 View) */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 scrollbar-thin">
           {CATEGORIES.map((cat) => {
             const Icon = cat.icon;
             const isSelected = selectedCategory === cat.id;
@@ -1111,10 +1120,13 @@ export default function ComprehensiveFeatureMatrix() {
               <button
                 key={cat.id}
                 type="button"
-                onClick={() => setSelectedCategory(cat.id)}
+                onClick={() => {
+                  setSelectedCategory(cat.id);
+                  setSearchQuery('');
+                }}
                 className={`px-3 py-1.5 rounded-xl text-[12px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${
                   isSelected
-                    ? 'bg-[#11140F] text-white shadow-xs font-semibold'
+                    ? 'bg-[#11140F] text-white shadow-xs font-semibold ring-2 ring-[#11140F]/15'
                     : 'bg-white text-[#11140F]/70 border border-[#11140F]/10 hover:border-[#11140F]/30 hover:bg-[#EEF0EA]/50'
                 }`}
               >
@@ -1124,30 +1136,65 @@ export default function ComprehensiveFeatureMatrix() {
             );
           })}
         </div>
+
+        {/* Category Description Banner + Search Bar */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-[#11140F]/10 shadow-2xs">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-[#2F6B4F]/10 text-[#2F6B4F] flex items-center justify-center shrink-0">
+              <ActiveIcon className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-[13.5px] font-bold text-[#11140F]">
+                {activeCategoryObj.label}
+              </h4>
+              <p className="text-[11.5px] text-[#11140F]/55">
+                Click any domain tab above to inspect capabilities without page overload.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* Search Box inside Active Category */}
+            <div className="relative w-full sm:w-64">
+              <Search className="w-3.5 h-3.5 text-[#11140F]/40 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Filter this category..."
+                className="w-full rounded-xl border border-[#11140F]/15 bg-[#F7F8F5] pl-9 pr-3 py-1.5 text-[12.5px] text-[#11140F] placeholder:text-[#11140F]/40 outline-none focus:border-[#11140F] focus:bg-white transition-all"
+              />
+            </div>
+
+            <div className="text-[11.5px] font-mono text-[#11140F]/60 whitespace-nowrap shrink-0">
+              <strong>{filteredFeatures.length}</strong> features
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Main 100+ Feature Matrix Table */}
+      {/* Main Feature Matrix Table for Active Category */}
       <div className="rounded-3xl border border-[#11140F]/15 bg-white shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left">
             <thead>
               <tr className="border-b border-[#11140F]/10 bg-[#F7F8F5] sticky top-16 z-20">
-                <th className="py-4 px-5 text-[13px] font-bold text-[#11140F] uppercase tracking-wider min-w-[280px]">
+                <th className="py-3.5 px-5 text-[12.5px] font-bold text-[#11140F] uppercase tracking-wider min-w-[280px]">
                   Feature & Capability
                 </th>
-                <th className="py-4 px-4 text-center text-[13px] font-bold text-[#11140F] uppercase tracking-wider w-28">
+                <th className="py-3.5 px-4 text-center text-[12.5px] font-bold text-[#11140F] uppercase tracking-wider w-28">
                   Free
                   <span className="block text-[11px] font-normal text-[#11140F]/50 font-mono lowercase">$0</span>
                 </th>
-                <th className="py-4 px-4 text-center text-[13px] font-bold text-[#2F6B4F] uppercase tracking-wider w-36 bg-[#2F6B4F]/5">
+                <th className="py-3.5 px-4 text-center text-[12.5px] font-bold text-[#2F6B4F] uppercase tracking-wider w-36 bg-[#2F6B4F]/5">
                   Pro
                   <span className="block text-[11px] font-normal text-[#2F6B4F]/70 font-mono lowercase">$5/mo</span>
                 </th>
-                <th className="py-4 px-4 text-center text-[13px] font-bold text-blue-900 uppercase tracking-wider w-36 bg-blue-50/50">
+                <th className="py-3.5 px-4 text-center text-[12.5px] font-bold text-blue-900 uppercase tracking-wider w-36 bg-blue-50/50">
                   Plus
                   <span className="block text-[11px] font-normal text-blue-800/70 font-mono lowercase">$12/mo</span>
                 </th>
-                <th className="py-4 px-4 text-center text-[13px] font-bold text-purple-900 uppercase tracking-wider w-40 bg-purple-50/50">
+                <th className="py-3.5 px-4 text-center text-[12.5px] font-bold text-purple-900 uppercase tracking-wider w-40 bg-purple-50/50">
                   Ultra
                   <span className="block text-[11px] font-normal text-purple-800/70 font-mono lowercase">$29/mo &middot; all</span>
                 </th>
@@ -1158,14 +1205,14 @@ export default function ComprehensiveFeatureMatrix() {
                 <tr
                   key={idx}
                   className={`hover:bg-[#11140F]/[0.015] transition-colors ${
-                    f.isBespoke ? 'bg-amber-50/30' : ''
+                    f.isBespoke ? 'bg-amber-50/20' : ''
                   }`}
                 >
                   <td className="py-3 px-5">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-[#11140F]">{f.name}</span>
                       {f.isBespoke && (
-                        <span className="px-1.5 py-0.2 rounded text-[9.5px] font-mono font-bold bg-amber-500/15 text-amber-900 uppercase">
+                        <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-amber-500/15 text-amber-900 uppercase">
                           Bespoke
                         </span>
                       )}
@@ -1186,6 +1233,14 @@ export default function ComprehensiveFeatureMatrix() {
                   </td>
                 </tr>
               ))}
+
+              {filteredFeatures.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="py-8 text-center text-[#11140F]/45 text-[13px]">
+                    No capabilities found in this category matching &ldquo;{searchQuery}&rdquo;.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
