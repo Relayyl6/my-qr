@@ -429,11 +429,11 @@ export class GeminiProvider implements AIProvider {
 
 /**
  * Factory getAIProvider()
- * Reads AI_PROVIDER=gemini|openai|anthropic|neon.
- * Defaults to Gemini whenever GEMINI_API_KEY is present to avoid zero-credit OpenAI failures.
+ * Accepts dynamic admin sovereignty override (gemini | openai | neon | anthropic)
+ * or falls back to AI_PROVIDER env var. Defaults to Gemini whenever GEMINI_API_KEY is present.
  */
-export function getAIProvider(): AIProvider {
-  const providerName = (process.env.AI_PROVIDER || "").toLowerCase();
+export function getAIProvider(overrideMode?: string): AIProvider {
+  const providerName = (overrideMode || process.env.AI_PROVIDER || "").toLowerCase();
   if (providerName === "openai") {
     return new OpenAIProvider();
   }

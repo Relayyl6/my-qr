@@ -10,6 +10,7 @@ import BrandedDomainsManager from '@/components/BrandedDomainsManager';
 import PlanUsageMeter from '@/components/PlanUsageMeter';
 import HomeTabs from '@/components/HomeTabs';
 import AppleProductTour from '@/components/AppleProductTour';
+import MaintenanceScreen from '@/components/MaintenanceScreen';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -48,10 +49,22 @@ export default async function Home() {
   let links: any[] = [];
   let customDomains: any[] = [];
   let announcementBanner: string | null = null;
+  let isMaintenanceActive = false;
   let monthlyScansCount = 0;
   let aiCredit: any = null;
 
   try {
+    // 1. Authoritative System Sovereignty Config (Available to all visitors)
+    const sysRecord = await prisma.aiCache.findUnique({
+      where: { key: 'system_sovereignty_config' },
+    }).catch(() => null);
+
+    if (sysRecord && sysRecord.value) {
+      const val = sysRecord.value as any;
+      if (val.announcementBanner) announcementBanner = val.announcementBanner;
+      if (val.maintenanceMode) isMaintenanceActive = true;
+    }
+
     // Security: Only the owner's admin account can claim the original legacy links!
     if (user && user.email.toLowerCase() === adminEmail) {
       await prisma.qrLink.updateMany({
@@ -61,7 +74,7 @@ export default async function Home() {
     }
 
     if (user) {
-      const [fetchedLinks, fetchedDomains, scanCount, creditRecord, sysRecord] = await Promise.all([
+      const [fetchedLinks, fetchedDomains, scanCount, creditRecord] = await Promise.all([
         prisma.qrLink.findMany({
           where: { userId: user.id },
           include: { landingPage: true, customDomain: true, routingRules: true },
@@ -80,22 +93,26 @@ export default async function Home() {
         prisma.aiCredit.findUnique({
           where: { userId: user.id },
         }),
-        prisma.aiCache.findUnique({
-          where: { key: 'system_sovereignty_config' },
-        }).catch(() => null),
       ]);
 
       links = fetchedLinks;
       customDomains = fetchedDomains;
       monthlyScansCount = scanCount;
       aiCredit = creditRecord;
-      if (sysRecord && (sysRecord.value as any)?.announcementBanner) {
-        announcementBanner = (sysRecord.value as any).announcementBanner;
-      }
     }
   } catch (err) {
     console.error('Safe SSR Fallback in Home page:', err);
   }
+
+  // Emergency Maintenance Bypass: Non-admin visitors see informational maintenance page
+  if (isMaintenanceActive && !isAdmin) {
+    return <MaintenanceScreen />;
+  }
+
+  // If super-admin is browsing while maintenance mode is active, show persistent sovereign warning
+  const effectiveAnnouncement = isMaintenanceActive && isAdmin
+    ? "⚠️ EMERGENCY MAINTENANCE BYPASS ACTIVE — Public access is temporarily paused. Physical QR codes continue redirecting at full speed."
+    : announcementBanner;
 
   // Plan capacity & usage calculations
   const tier = (user?.tier || 'free').toLowerCase();
@@ -209,7 +226,7 @@ export default async function Home() {
         isAdmin={isAdmin}
         overviewContent={overviewContent}
         workspaceContent={workspaceContent}
-        announcementBanner={announcementBanner}
+        announcementBanner={effectiveAnnouncement}
       />
 
       <footer className="max-w-[1200px] mx-auto px-5 md:px-8 py-10 flex flex-col sm:flex-row items-center justify-between gap-4 text-[13px] text-[#11140F]/55 border-t border-[#11140F]/10">

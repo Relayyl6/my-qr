@@ -59,7 +59,8 @@ Compile this request into structured routing rules.
 `,
   schema: routeResolverOutputSchema,
   fallback: (input) => {
-    const text = input.naturalLanguagePrompt.toLowerCase();
+    const text = (input?.naturalLanguagePrompt || (input as any)?.prompt || "").toLowerCase();
+    const defaultDest = input?.defaultDestination || (input as any)?.defaultUrl || "https://example.com";
     const rules: CompiledRule[] = [];
 
     // 1. Breakfast / Morning Schedule Slot

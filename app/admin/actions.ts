@@ -63,6 +63,7 @@ export async function adminSaveSystemConfig(config: Partial<SystemSovereigntyCon
   await logAdminAction(admin.email, 'Updated System Sovereignty Configuration', JSON.stringify(config));
   revalidatePath('/admin');
   revalidatePath('/');
+  revalidatePath('/pricing');
   return { success: true, config: updated };
 }
 

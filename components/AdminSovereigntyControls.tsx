@@ -121,9 +121,9 @@ export default function AdminSovereigntyControls({
 
             <div className="grid grid-cols-2 gap-2 pt-1">
               {[
+                { id: 'gemini', label: 'Gemini Frontier Cascade', desc: 'Argon / 3.8 / 3.6 Flash' },
                 { id: 'neon', label: 'Neon AI Gateway', desc: 'Managed proxy' },
                 { id: 'openai', label: 'OpenAI Direct', desc: 'Direct GPT-4o' },
-                { id: 'gemini', label: 'Gemini 2.0 Flash', desc: 'High-speed' },
                 { id: 'heuristic_offline', label: 'Offline Heuristic', desc: '0s latency fallback' },
               ].map((opt) => (
                 <button

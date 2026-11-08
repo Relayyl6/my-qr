@@ -1,8 +1,10 @@
 import { getCurrentUser } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { ArrowLeft, ShieldCheck, Sparkles } from 'lucide-react';
 import PricingTable from '@/components/PricingTable';
 import ComprehensiveFeatureMatrix from '@/components/ComprehensiveFeatureMatrix';
+import MaintenanceScreen from '@/components/MaintenanceScreen';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,6 +27,23 @@ function QrMark({ className = 'w-6 h-6', fill = '#11140F' }: { className?: strin
 
 export default async function PricingPage() {
   const user = await getCurrentUser();
+  const adminEmail = (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();
+  const isAdmin = !!(user && user.email.toLowerCase() === adminEmail);
+
+  let isMaintenanceActive = false;
+  try {
+    const sysRecord = await prisma.aiCache.findUnique({
+      where: { key: 'system_sovereignty_config' },
+    }).catch(() => null);
+    if (sysRecord && (sysRecord.value as any)?.maintenanceMode) {
+      isMaintenanceActive = true;
+    }
+  } catch (err) {}
+
+  if (isMaintenanceActive && !isAdmin) {
+    return <MaintenanceScreen />;
+  }
+
   const currentTier = user?.tier || 'free';
 
   return (

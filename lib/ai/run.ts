@@ -110,8 +110,51 @@ export async function runAI<T>(opts: {
     }
   }
 
-  // 5. Provider call & fallback resolution with strict 4.5s timeout guarantee
-  const provider = getAIProvider();
+  // 5. Sovereign Admin Gateway Override & Provider Resolution
+  let dynamicGatewayMode: string | undefined;
+  try {
+    const sysRecord = await prisma.aiCache.findUnique({
+      where: { key: 'system_sovereignty_config' },
+    });
+    if (sysRecord && sysRecord.value) {
+      const parsedVal = typeof sysRecord.value === 'string' ? JSON.parse(sysRecord.value) : sysRecord.value;
+      dynamicGatewayMode = (parsedVal as any)?.aiGatewayMode;
+    }
+  } catch (e: any) {
+    console.warn('[runAI] Failed to read sovereignty config:', e?.message || e);
+  }
+
+  // Offline Heuristic Bypass: If super-admin set gateway to heuristic_offline, execute smart deterministic engine
+  if (dynamicGatewayMode === 'heuristic_offline' && promptDef?.fallback) {
+    const offlineResult = promptDef.fallback(opts.input) as T;
+    const latencyMs = Date.now() - startTime;
+
+    await prisma.aiInvocation.create({
+      data: {
+        userId: opts.userId || null,
+        feature: opts.feature,
+        promptKey: opts.promptKey,
+        model: 'offline-heuristic-engine',
+        inputTokens: 0,
+        outputTokens: 0,
+        costUsd: 0,
+        latencyMs,
+        success: true,
+        error: null,
+      },
+    }).catch(console.error);
+
+    return {
+      data: offlineResult,
+      usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0, costUsd: 0 },
+      cached: false,
+      latencyMs,
+      isFallback: true,
+      modelUsed: 'offline-heuristic-engine',
+    };
+  }
+
+  const provider = getAIProvider(dynamicGatewayMode);
   let resultData: T;
   let usage: AIUsage = {
     promptTokens: 0,
