@@ -146,7 +146,7 @@ export default async function Home() {
           </p>
         </div>
 
-        {user && <WorkspaceHeaderActions />}
+        {user && <WorkspaceHeaderActions isAdmin={isAdmin} />}
       </div>
 
       {user ? (
