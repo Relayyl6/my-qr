@@ -12,7 +12,7 @@ interface HomeTabsProps {
     tier?: string;
   } | null;
   isAdmin?: boolean;
-  overviewContent: React.ReactNode | ((props: { onOpenWorkspace: () => void }) => React.ReactNode);
+  overviewContent: React.ReactNode;
   workspaceContent: React.ReactNode;
   announcementBanner?: string | null;
 }
@@ -77,15 +77,7 @@ export default function HomeTabs({
       {/* Tab 2: Marketing Overview & Tour */}
       {activeTab === 'overview' && (
         <div id="overview" className="flex-1">
-          {typeof overviewContent === 'function'
-            ? overviewContent({
-                onOpenWorkspace: () => {
-                  setActiveTab('workspace');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                  window.history.replaceState(null, '', '#workspace');
-                },
-              })
-            : overviewContent}
+          {overviewContent}
 
           {/* Bottom Banner prompting user to enter Workspace */}
           <div className="bg-[#11140F] text-white py-12 px-4 sm:px-6 border-t border-white/10">

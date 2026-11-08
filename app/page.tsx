@@ -125,8 +125,8 @@ export default async function Home() {
     ? 5
     : 0.5;
 
-  const overviewContent = ({ onOpenWorkspace }: { onOpenWorkspace: () => void }) => (
-    <AppleProductTour onOpenWorkspace={onOpenWorkspace} />
+  const overviewContent = (
+    <AppleProductTour />
   );
 
   const workspaceContent = (

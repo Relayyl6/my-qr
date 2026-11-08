@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 
 interface Props {
-  onOpenWorkspace: () => void;
+  onOpenWorkspace?: () => void;
 }
 
 type IndustryTab = 'hospitality' | 'packaging' | 'events' | 'retail';
@@ -199,6 +199,15 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
   const [activeTab, setActiveTab] = useState<IndustryTab>('hospitality');
   const [simulatedDevice, setSimulatedDevice] = useState<'ios' | 'android' | 'desktop'>('ios');
 
+  const handleOpenWorkspace = () => {
+    if (onOpenWorkspace) {
+      onOpenWorkspace();
+    } else if (typeof window !== 'undefined') {
+      window.location.hash = '#workspace';
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    }
+  };
+
   const currentIndustry = INDUSTRIES[activeTab];
 
   return (
@@ -232,7 +241,7 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
 
           <div className="pt-4 flex flex-wrap items-center justify-center gap-4">
             <button
-              onClick={onOpenWorkspace}
+              onClick={handleOpenWorkspace}
               className="rounded-2xl bg-white px-7 py-3.5 text-[15px] font-semibold text-[#11140F] hover:bg-[#EEF0EA] transition-all duration-200 flex items-center gap-2 shadow-lg shadow-white/10 cursor-pointer"
             >
               Open Your Workspace
@@ -597,7 +606,7 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
 
         <div className="pt-4 flex flex-wrap items-center justify-center gap-4">
           <button
-            onClick={onOpenWorkspace}
+            onClick={handleOpenWorkspace}
             className="rounded-2xl bg-white px-8 py-4 text-[15px] font-semibold text-[#11140F] hover:bg-[#EEF0EA] transition-all duration-200 shadow-xl shadow-white/10 flex items-center gap-2 cursor-pointer"
           >
             Launch Your Workspace &rarr;
