@@ -11,6 +11,7 @@ import PlanUsageMeter from '@/components/PlanUsageMeter';
 import HomeTabs from '@/components/HomeTabs';
 import AppleProductTour from '@/components/AppleProductTour';
 import MaintenanceScreen from '@/components/MaintenanceScreen';
+import { TIER_CONFIGS } from '@/lib/ai/flags';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -133,17 +134,10 @@ export default async function Home() {
   const maxLinks = isAdmin ? 999999 : (linkLimits[tier] ?? 5);
   const maxScans = isAdmin ? 999999 : (scanLimits[tier] ?? 1000);
   const aiUsedUsd = aiCredit?.usedThisMonth ? Number(aiCredit.usedThisMonth) : 0;
+  // Always derive aiLimitUsd from the user's current tier (DB value goes stale on plan downgrade)
   const aiLimitUsd = isAdmin
     ? 999.0
-    : aiCredit?.monthlyLimitUsd
-    ? Number(aiCredit.monthlyLimitUsd)
-    : tier === 'ultra'
-    ? 50
-    : tier === 'plus'
-    ? 15
-    : tier === 'pro'
-    ? 5
-    : 0.5;
+    : (TIER_CONFIGS[tier as string]?.monthlyLimitUsd ?? TIER_CONFIGS.free.monthlyLimitUsd);
 
   const overviewContent = (
     <AppleProductTour />
