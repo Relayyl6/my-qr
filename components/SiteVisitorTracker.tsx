@@ -62,7 +62,7 @@ export default function SiteVisitorTracker() {
     }
   };
 
-  // Attempt client-side GPS/Wi-Fi triangulation and direct client IP lookup to defeat mobile carrier proxy misrouting
+  // Attempt client-side GPS/Wi-Fi triangulation and user-gesture location prompt
   const attemptPrecisionTriangulation = (sid: string) => {
     if (geoTriangulated.current || typeof navigator === 'undefined') return;
 
@@ -81,66 +81,41 @@ export default function SiteVisitorTracker() {
       }).catch(() => {});
     };
 
-    // Client-side direct network geolocation (bypasses serverless cloud proxies)
-    const runClientNetworkGeo = () => {
-      fetch('https://get.geojs.io/v1/ip/geo.json', { signal: AbortSignal.timeout(4000) })
-        .then((r) => r.json())
-        .then((g) => {
-          if (g && (g.city || g.region || g.latitude)) {
-            const lat = parseFloat(g.latitude) || null;
-            const lng = parseFloat(g.longitude) || null;
-            fetch('/api/telemetry/visit', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                type: 'client_geo',
-                sessionId: sid,
-                clientCity: g.city || null,
-                clientRegion: g.region || null,
-                clientCountry: g.country_code || g.country || null,
-                clientLat: lat,
-                clientLng: lng,
-                clientIsp: g.organization_name || null,
-              }),
-            }).catch(() => {});
+    const requestPosition = () => {
+      if (!navigator.geolocation || geoTriangulated.current) return;
+      navigator.geolocation.getCurrentPosition(onGeoSuccess, () => {}, {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 120000,
+      });
+    };
+
+    // 1. If permission is already granted, query immediately
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions
+        .query({ name: 'geolocation' as PermissionName })
+        .then((status) => {
+          if (status.state === 'granted') {
+            requestPosition();
           }
         })
         .catch(() => {});
+    }
+
+    // 2. Attach a one-time user gesture trigger (click/touch/keydown).
+    // In Chromium and Microsoft Edge (especially in Incognito mode),
+    // calling getCurrentPosition inside a user gesture guarantees that the permission prompt
+    // is NOT suppressed by the browser's permission quieting engine!
+    const onUserInteraction = () => {
+      document.removeEventListener('click', onUserInteraction);
+      document.removeEventListener('touchstart', onUserInteraction);
+      document.removeEventListener('keydown', onUserInteraction);
+      requestPosition();
     };
 
-    if (navigator.geolocation) {
-      if (navigator.permissions && navigator.permissions.query) {
-        navigator.permissions
-          .query({ name: 'geolocation' as PermissionName })
-          .then((status) => {
-            if (status.state === 'granted') {
-              navigator.geolocation.getCurrentPosition(onGeoSuccess, runClientNetworkGeo, {
-                enableHighAccuracy: true,
-                timeout: 8000,
-                maximumAge: 300000,
-              });
-            } else if (status.state === 'prompt') {
-              // Gracefully prompt for high-precision triangulation
-              navigator.geolocation.getCurrentPosition(onGeoSuccess, runClientNetworkGeo, {
-                enableHighAccuracy: true,
-                timeout: 8000,
-                maximumAge: 300000,
-              });
-            } else {
-              runClientNetworkGeo();
-            }
-          })
-          .catch(runClientNetworkGeo);
-      } else {
-        navigator.geolocation.getCurrentPosition(onGeoSuccess, runClientNetworkGeo, {
-          enableHighAccuracy: true,
-          timeout: 8000,
-          maximumAge: 300000,
-        });
-      }
-    } else {
-      runClientNetworkGeo();
-    }
+    document.addEventListener('click', onUserInteraction, { once: true, passive: true });
+    document.addEventListener('touchstart', onUserInteraction, { once: true, passive: true });
+    document.addEventListener('keydown', onUserInteraction, { once: true, passive: true });
   };
 
   // Start rrweb recording with full DOM capture and automatic snapshots
