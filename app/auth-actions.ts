@@ -126,6 +126,59 @@ export async function deactivateSelfAccount(confirmationText: string): Promise<{
   }
 }
 
+export async function reactivateSelfAccount(): Promise<{ success?: boolean; error?: string }> {
+  const { getCurrentUser } = await import('@/lib/auth');
+  const user = await getCurrentUser();
+  if (!user) {
+    return { error: 'You must be signed in to reactivate your account.' };
+  }
+
+  try {
+    const { reactivateAccount } = await import('@/lib/user/deleteAccount');
+    await reactivateAccount(user.id);
+    revalidatePath('/');
+    return { success: true };
+  } catch (err: any) {
+    console.error('[reactivateSelfAccount Error]:', err);
+    return { error: err.message || 'Failed to reactivate account.' };
+  }
+}
+
+export async function reactivateAccountByCredentials(
+  emailInput: string,
+  passwordInput: string
+): Promise<{ success?: boolean; error?: string }> {
+  const email = emailInput?.trim().toLowerCase();
+  if (!email || !passwordInput) {
+    return { error: 'Please enter both email and password.' };
+  }
+
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      return { error: 'Account not found with this email.' };
+    }
+
+    const isValid = await verifyPassword(passwordInput, user.password);
+    if (!isValid) {
+      return { error: 'Incorrect password.' };
+    }
+
+    if (!user.isDeactivated) {
+      return { error: 'Account is already active.' };
+    }
+
+    const { reactivateAccount } = await import('@/lib/user/deleteAccount');
+    await reactivateAccount(user.id);
+    await createSession(user.id);
+    revalidatePath('/');
+    return { success: true };
+  } catch (err: any) {
+    console.error('[reactivateAccountByCredentials Error]:', err);
+    return { error: err.message || 'Failed to reactivate account.' };
+  }
+}
+
 export async function deleteSelfAccount(confirmationText: string): Promise<{ success?: boolean; error?: string }> {
   if (confirmationText.trim().toUpperCase() !== 'DELETE') {
     return { error: 'Please type "DELETE" exactly to confirm permanent account deletion.' };

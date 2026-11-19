@@ -16,6 +16,8 @@ model User {
   tier                 String         @default("free") // 'free' | 'pro' | 'plus' | 'ultra'
   stripeCustomerId     String?        @unique
   stripeSubscriptionId String?
+  isDeactivated        Boolean        @default(false)
+  deactivatedAt        DateTime?
   createdAt            DateTime       @default(now())
   updatedAt            DateTime       @updatedAt
   
@@ -41,6 +43,8 @@ model QrLink {
 
   userId         String?
   user           User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deactivatedUserId String?
+  originalLabel     String?
 
   customDomainId String?
   customDomain   CustomDomain?  @relation(fields: [customDomainId], references: [id], onDelete: SetNull)
@@ -52,6 +56,7 @@ model QrLink {
 
   @@index([shortCode])
   @@index([userId])
+  @@index([deactivatedUserId])
   @@index([customDomainId])
 }
 

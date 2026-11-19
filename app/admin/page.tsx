@@ -70,6 +70,8 @@ export default async function AdminDashboardPage() {
         tier: true,
         createdAt: true,
         stripeCustomerId: true,
+        isDeactivated: true,
+        deactivatedAt: true,
         _count: {
           select: { links: true },
         },

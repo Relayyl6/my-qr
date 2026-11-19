@@ -25,11 +25,13 @@ async function cancelStripeSubscriptions(stripeCustomerId?: string | null) {
 
 /**
  * 1. DEACTIVATE ACCOUNT (Soft Deactivation / Anonymization):
- * - Decouples user QR links by setting `userId: null`
- * - Archives links with inactive fallback destination
+ * - Decouples user QR links: sets `userId: null`, tags `deactivatedUserId: user.id`
+ * - Saves `originalLabel` so it can be cleanly restored upon reactivation
+ * - Archives links (`isArchived: true`) so scans route gracefully to `/inactive`
  * - Decouples AI invocations (`userId: null`)
- * - Deletes user credentials & PII, custom domains, and AI credits
- * - PRESERVES Scan history and platform metrics for edge performance benchmarks
+ * - PRESERVES all historical Scan telemetry and platform edge health benchmarks
+ * - Marks `User.isDeactivated = true` with `deactivatedAt = now()`
+ * - Cancels active Stripe billing
  */
 export async function deactivateAccountPreservingMetrics(userId: string): Promise<{
   deletedEmail: string;
@@ -41,7 +43,7 @@ export async function deactivateAccountPreservingMetrics(userId: string): Promis
   });
 
   if (!user) {
-    throw new Error('User account not found or already deactivated.');
+    throw new Error('User account not found.');
   }
 
   // Cancel Stripe billing
@@ -50,36 +52,23 @@ export async function deactivateAccountPreservingMetrics(userId: string): Promis
   // Find user links
   const userLinks = await prisma.qrLink.findMany({
     where: { userId },
-    select: { id: true },
+    select: { id: true, label: true },
   });
-  const linkIds = userLinks.map((l) => l.id);
 
-  if (linkIds.length > 0) {
-    // Purge user's custom artworks & landing pages
-    await prisma.qrArtwork.deleteMany({
-      where: { qrLinkId: { in: linkIds } },
-    });
-    await prisma.landingPage.deleteMany({
-      where: { qrLinkId: { in: linkIds } },
-    });
-    await prisma.routingRule.deleteMany({
-      where: { qrLinkId: { in: linkIds } },
-    });
-
-    // Decouple links: userId set to null, archived, metrics preserved
-    await prisma.qrLink.updateMany({
-      where: { id: { in: linkIds } },
+  for (const l of userLinks) {
+    await prisma.qrLink.update({
+      where: { id: l.id },
       data: {
         userId: null,
-        customDomainId: null,
+        deactivatedUserId: userId,
+        originalLabel: l.label,
         isArchived: true,
         label: '[Deactivated Account]',
-        destinationUrl: 'https://my-qr-sandy.vercel.app/inactive',
       },
     });
   }
 
-  // Delete domains and credits
+  // Delete custom domains and AI credit consumption balance
   await prisma.customDomain.deleteMany({ where: { userId } });
   await prisma.aiCredit.deleteMany({ where: { userId } });
 
@@ -89,23 +78,106 @@ export async function deactivateAccountPreservingMetrics(userId: string): Promis
     data: { userId: null },
   });
 
-  // Delete user credentials
-  await prisma.user.delete({ where: { id: userId } });
+  // Mark user as deactivated (retains user account for self-service or admin reactivation)
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      isDeactivated: true,
+      deactivatedAt: new Date(),
+    },
+  });
 
   return {
     deletedEmail: user.email,
-    linksAnonymized: linkIds.length,
+    linksAnonymized: userLinks.length,
   };
 }
 
 /**
- * Backward compatibility alias for deactivateAccountPreservingMetrics
+ * Backward compatibility alias
  */
 export const purgeUserDataPreservingMetrics = deactivateAccountPreservingMetrics;
 
 /**
- * 2. DELETE ACCOUNT & WIPE EVERYTHING (Nuclear Deletion):
- * - Literally wipes EVERY SINGLE THING associated with the user:
+ * 2. REACTIVATE ACCOUNT:
+ * - Restores `User.isDeactivated = false` and clears `deactivatedAt`
+ * - Restores all QR links tagged with `deactivatedUserId == userId`:
+ *   - Re-attaches `userId = userId`
+ *   - Clears `deactivatedUserId = null`
+ *   - Unarchives `isArchived = false` (links immediately resume active traffic!)
+ *   - Restores original label from `originalLabel`
+ * - Re-initializes baseline AI credit allowance
+ */
+export async function reactivateAccount(userId: string): Promise<{
+  reactivatedEmail: string;
+  linksRestored: number;
+}> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, email: true, tier: true, isDeactivated: true },
+  });
+
+  if (!user) {
+    throw new Error('User account not found.');
+  }
+
+  // Find all links decoupled during deactivation
+  const deactivatedLinks = await prisma.qrLink.findMany({
+    where: { deactivatedUserId: userId },
+    select: { id: true, originalLabel: true, label: true },
+  });
+
+  for (const l of deactivatedLinks) {
+    await prisma.qrLink.update({
+      where: { id: l.id },
+      data: {
+        userId,
+        deactivatedUserId: null,
+        isArchived: false,
+        label: l.originalLabel || (l.label === '[Deactivated Account]' ? 'Restored QR Link' : l.label),
+        originalLabel: null,
+      },
+    });
+  }
+
+  // Restore User active state
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      isDeactivated: false,
+      deactivatedAt: null,
+    },
+  });
+
+  // Re-create baseline AI credit if missing
+  const existingCredit = await prisma.aiCredit.findUnique({ where: { userId } });
+  if (!existingCredit) {
+    const defaultLimits: Record<string, number> = {
+      free: 0.5,
+      pro: 5.0,
+      plus: 15.0,
+      ultra: 50.0,
+    };
+    const monthlyLimitUsd = defaultLimits[user.tier] || 0.5;
+    await prisma.aiCredit.create({
+      data: {
+        userId,
+        monthlyLimitUsd,
+        usedThisMonth: 0,
+        resetAt: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1),
+      },
+    });
+  }
+
+  return {
+    reactivatedEmail: user.email,
+    linksRestored: deactivatedLinks.length,
+  };
+}
+
+/**
+ * 3. DELETE ACCOUNT & WIPE EVERYTHING (Nuclear Deletion):
+ * - Permanently wipes EVERY SINGLE THING associated with the user:
  * - Deletes ALL Scan records belonging to user's QR links
  * - Deletes ALL RoutingRules, QrArtworks, and LandingPages
  * - Deletes ALL QrLinks permanently (not kept as null!)
@@ -133,9 +205,11 @@ export async function wipeUserAccountCompletely(userId: string): Promise<{
   // Cancel Stripe billing
   await cancelStripeSubscriptions(user.stripeCustomerId);
 
-  // Find all QR links owned by this user
+  // Find all QR links owned or deactivated by this user
   const userLinks = await prisma.qrLink.findMany({
-    where: { userId },
+    where: {
+      OR: [{ userId }, { deactivatedUserId: userId }],
+    },
     select: { id: true },
   });
   const linkIds = userLinks.map((l) => l.id);

@@ -7,6 +7,7 @@ import {
   adminSetUserAiLimit,
   adminInspectUserLinks,
   adminDeactivateUserAccount,
+  adminReactivateUserAccount,
   adminPurgeUserAccount,
 } from '@/app/admin/actions';
 import {
@@ -21,6 +22,7 @@ import {
   Layers,
   Trash2,
   PowerOff,
+  RotateCcw,
 } from 'lucide-react';
 
 interface UserRecord {
@@ -30,6 +32,8 @@ interface UserRecord {
   tier: string;
   createdAt: Date;
   stripeCustomerId: string | null;
+  isDeactivated?: boolean;
+  deactivatedAt?: Date | null;
   _count: {
     links: number;
   };
@@ -106,6 +110,26 @@ export default function AdminUserRow({ user, isSelf }: { user: UserRecord; isSel
     }
   };
 
+  const handleReactivateUser = async () => {
+    const confirmed = window.confirm(
+      `Reactivate account for ${user.email}?\n\nThis will restore active status and re-attach all decoupled QR links (restoring userId and unarchiving them).`
+    );
+    if (!confirmed) return;
+
+    setLoading(true);
+    setStatusMsg(null);
+    try {
+      await adminReactivateUserAccount(user.id);
+      setStatusMsg('Account reactivated');
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (err: any) {
+      setStatusMsg(err.message || 'Failed to reactivate');
+      setLoading(false);
+    }
+  };
+
   const handlePurgeUser = async () => {
     const confirmed = window.confirm(
       `DANGER: Permanently wipe account and ALL data for ${user.email}?\n\nThis will completely delete ALL QR codes, ALL scan history, ALL rules, domains, and the user. Nothing will be retained as null. EVERY SINGLE THING will be wiped.`
@@ -150,6 +174,11 @@ export default function AdminUserRow({ user, isSelf }: { user: UserRecord; isSel
             {isSelf && (
               <span className="rounded-full bg-emerald-100 text-emerald-800 px-2 py-0.5 text-[10.5px] font-mono font-semibold">
                 YOU (SUPER ADMIN)
+              </span>
+            )}
+            {user.isDeactivated && (
+              <span className="rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-[10.5px] font-mono font-semibold">
+                DEACTIVATED
               </span>
             )}
           </div>
@@ -244,15 +273,27 @@ export default function AdminUserRow({ user, isSelf }: { user: UserRecord; isSel
 
             {!isSelf && (
               <div className="flex items-center gap-1">
-                <button
-                  onClick={handleDeactivateUser}
-                  disabled={loading}
-                  title="Deactivate Account: Sets userId to null, archives links, preserves platform metrics"
-                  className="rounded-lg border border-amber-200 bg-amber-50 px-2 py-1 text-[11px] font-medium text-amber-800 hover:bg-amber-100 transition-all flex items-center gap-1 cursor-pointer"
-                >
-                  <PowerOff className="w-3 h-3 text-amber-600" />
-                  Deactivate
-                </button>
+                {user.isDeactivated ? (
+                  <button
+                    onClick={handleReactivateUser}
+                    disabled={loading}
+                    title="Reactivate Account: Restores active status and reconnects all QR destinations"
+                    className="rounded-lg border border-emerald-300 bg-emerald-50 px-2 py-1 text-[11px] font-medium text-emerald-800 hover:bg-emerald-100 transition-all flex items-center gap-1 cursor-pointer"
+                  >
+                    <RotateCcw className="w-3 h-3 text-emerald-600" />
+                    Reactivate
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleDeactivateUser}
+                    disabled={loading}
+                    title="Deactivate Account: Sets userId to null, archives links, preserves platform metrics"
+                    className="rounded-lg border border-amber-200 bg-amber-50 px-2 py-1 text-[11px] font-medium text-amber-800 hover:bg-amber-100 transition-all flex items-center gap-1 cursor-pointer"
+                  >
+                    <PowerOff className="w-3 h-3 text-amber-600" />
+                    Deactivate
+                  </button>
+                )}
                 <button
                   onClick={handlePurgeUser}
                   disabled={loading}

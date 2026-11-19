@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { deactivateSelfAccount, deleteSelfAccount } from '@/app/auth-actions';
+import { deactivateSelfAccount, reactivateSelfAccount, deleteSelfAccount } from '@/app/auth-actions';
 import {
   User,
   Shield,
@@ -11,6 +11,7 @@ import {
   Loader2,
   CheckCircle2,
   PowerOff,
+  RotateCcw,
 } from 'lucide-react';
 
 interface Props {
@@ -19,6 +20,7 @@ interface Props {
     email: string;
     name: string | null;
     tier?: string;
+    isDeactivated?: boolean;
   };
   onClose: () => void;
 }
@@ -49,6 +51,26 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
         setTimeout(() => {
           window.location.href = '/';
         }, 1500);
+      }
+    } catch {
+      setError('An unexpected error occurred. Please try again.');
+      setLoading(false);
+    }
+  };
+
+  const handleReactivate = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await reactivateSelfAccount();
+      if (res.error) {
+        setError(res.error);
+        setLoading(false);
+      } else {
+        setSuccessMsg('Account successfully reactivated! Restoring all your QR links...');
+        setTimeout(() => {
+          window.location.reload();
+        }, 1200);
       }
     } catch {
       setError('An unexpected error occurred. Please try again.');
@@ -179,6 +201,37 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
                 </div>
               ) : (
                 <>
+                  {user.isDeactivated && (
+                    <div className="p-4 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-950 space-y-2.5">
+                      <div className="flex items-center gap-2 text-emerald-900 font-semibold text-[13px]">
+                        <RotateCcw className="w-4 h-4 shrink-0 text-emerald-700" />
+                        <span>Account is Currently Deactivated</span>
+                      </div>
+                      <p className="text-[12px] leading-relaxed text-emerald-900/80">
+                        Your account was previously deactivated and your QR links are currently archived and paused.
+                        Click below to immediately reactivate your account and restore all your QR links.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleReactivate}
+                        disabled={loading}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-700 text-white text-[12.5px] font-medium hover:bg-emerald-800 disabled:opacity-40 transition-colors shadow-xs cursor-pointer"
+                      >
+                        {loading ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            <span>Reactivating...</span>
+                          </>
+                        ) : (
+                          <>
+                            <RotateCcw className="w-3.5 h-3.5" />
+                            <span>Reactivate Account Now</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
+
                   {/* Selector between Deactivate and Delete */}
                   <div className="grid grid-cols-2 gap-2 p-1 bg-[#F7F8F5] rounded-xl border border-[#11140F]/10">
                     <button

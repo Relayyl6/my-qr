@@ -63,7 +63,7 @@ export async function getCurrentUser() {
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, email: true, name: true, tier: true, stripeCustomerId: true },
+      select: { id: true, email: true, name: true, tier: true, stripeCustomerId: true, isDeactivated: true },
     });
     if (user) {
       const adminEmail = (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();

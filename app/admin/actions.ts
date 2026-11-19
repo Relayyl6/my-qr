@@ -231,6 +231,21 @@ export async function adminDeactivateUserAccount(targetUserId: string) {
   return { success: true, ...result };
 }
 
+export async function adminReactivateUserAccount(targetUserId: string) {
+  const admin = await verifyAdmin();
+  const { reactivateAccount } = await import('@/lib/user/deleteAccount');
+  const result = await reactivateAccount(targetUserId);
+
+  await logAdminAction(
+    admin.email,
+    `Reactivated user account for ${result.reactivatedEmail}`,
+    `Restored active status and re-attached ${result.linksRestored} QR destinations`
+  );
+
+  revalidatePath('/admin');
+  return { success: true, ...result };
+}
+
 export async function adminPurgeUserAccount(targetUserId: string) {
   const admin = await verifyAdmin();
   if (admin.id === targetUserId) {
