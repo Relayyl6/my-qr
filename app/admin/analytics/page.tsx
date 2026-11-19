@@ -1,7 +1,7 @@
 import { getCurrentUser } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Shield, Sparkles, Activity } from 'lucide-react';
+import { ArrowLeft, Shield, Sparkles, Activity, Video } from 'lucide-react';
 import { getAdminTelemetry } from '@/lib/analytics/adminTelemetry';
 import AdminAnalyticsDashboard from '@/components/AdminAnalyticsDashboard';
 
@@ -33,6 +33,8 @@ export default async function AdminAnalyticsPage() {
       plusUsersCount: 0,
       ultraUsersCount: 0,
       activeLinksCount: 0,
+      totalSessions: 0,
+      sessionsWithReplaysCount: 0,
       mrr: 0,
       arr: 0,
       arpu: 0,
@@ -44,6 +46,14 @@ export default async function AdminAnalyticsPage() {
       referrers: [],
       utmCampaigns: [],
       topPaths: [],
+      entryPages: [],
+      triangulatedLocations: [],
+      entryMetrics: {
+        screenResolutions: [],
+        languages: [],
+        timezones: [],
+        networks: [],
+      },
       topLinks: [],
       topCountries: [],
       topCities: [],
@@ -73,6 +83,13 @@ export default async function AdminAnalyticsPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            <Link
+              href="/admin/sessions"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-[#11140F]/15 text-[#11140F] text-[12.5px] font-medium hover:bg-[#EEF0EA] transition-colors shadow-xs"
+            >
+              <Video className="w-3.5 h-3.5 text-rose-600" />
+              Visitor Video Replays &rarr;
+            </Link>
             <Link
               href="/admin/ai-usage"
               className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-[#11140F]/15 text-[#11140F] text-[12.5px] font-medium hover:bg-[#EEF0EA] transition-colors shadow-xs"

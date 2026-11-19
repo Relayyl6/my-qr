@@ -18,6 +18,7 @@ import {
   Globe,
   Flame,
   ExternalLink,
+  Video,
 } from 'lucide-react';
 import AdminUserRow from '@/components/AdminUserRow';
 import AdminDomainRow from '@/components/AdminDomainRow';
@@ -135,6 +136,13 @@ export default async function AdminDashboardPage() {
             >
               <Activity className="w-3.5 h-3.5 text-emerald-400" />
               Full Telemetry & Analytics Hub &rarr;
+            </Link>
+            <Link
+              href="/admin/sessions"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-[#11140F]/15 text-[#11140F] text-[12.5px] font-medium hover:bg-[#EEF0EA] transition-colors shadow-xs"
+            >
+              <Video className="w-3.5 h-3.5 text-rose-600" />
+              Session Replay →
             </Link>
             <Link
               href="/admin/ai-usage"

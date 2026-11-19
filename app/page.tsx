@@ -234,7 +234,13 @@ export default async function Home() {
           <a href="/privacy" className="hover:text-[#11140F] transition-colors">Privacy</a>
           <a href="/refund" className="hover:text-[#11140F] transition-colors">Refund Policy</a>
         </div>
-        <p className="text-[12px] text-[#11140F]/45">One code, printed once. Routed as long as it needs to be.</p>
+        <div className="flex flex-col items-center sm:items-end gap-1">
+          <p className="text-[12px] text-[#11140F]/45">One code, printed once. Routed as long as it needs to be.</p>
+          <p className="text-[11px] text-[#11140F]/35 max-w-[340px] text-center sm:text-right">
+            🔒 By using this site, you consent to anonymised session telemetry — including page visits, device type, approximate location, and interaction recordings — used solely for platform improvement. Passwords are never captured. See our{' '}
+            <a href="/privacy" className="underline underline-offset-2 hover:text-[#11140F]/60 transition-colors">Privacy Policy</a>.
+          </p>
+        </div>
       </footer>
     </div>
   );

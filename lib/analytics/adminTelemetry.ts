@@ -1,5 +1,29 @@
 import { prisma } from '@/lib/prisma';
 
+export interface EntryPageMetric {
+  path: string;
+  entryCount: number;
+  percentage: number;
+  uniqueVisitors: number;
+}
+
+export interface TriangulatedLocation {
+  city: string;
+  region: string | null;
+  country: string | null;
+  lat: number | null;
+  lng: number | null;
+  isp: string | null;
+  count: number;
+}
+
+export interface EntryTechnicalMetrics {
+  screenResolutions: { resolution: string; count: number; percentage: number }[];
+  languages: { language: string; count: number; percentage: number }[];
+  timezones: { timezone: string; count: number; percentage: number }[];
+  networks: { isp: string; count: number; percentage: number }[];
+}
+
 export interface TelemetryMetrics {
   timeframe: '24h' | '7d' | '30d' | 'all';
   // High-level KPIs
@@ -13,6 +37,8 @@ export interface TelemetryMetrics {
   plusUsersCount: number;
   ultraUsersCount: number;
   activeLinksCount: number;
+  totalSessions: number;
+  sessionsWithReplaysCount: number;
   
   // Financial Unit Economics
   mrr: number;
@@ -32,6 +58,15 @@ export interface TelemetryMetrics {
 
   // Top Visited Paths
   topPaths: { path: string; count: number }[];
+
+  // Entry Per Page Intelligence
+  entryPages: EntryPageMetric[];
+
+  // Precision Geolocation Triangulation
+  triangulatedLocations: TriangulatedLocation[];
+
+  // High-Value Technical Entry Metrics
+  entryMetrics: EntryTechnicalMetrics;
 
   // Top Scanned Links
   topLinks: {
@@ -81,6 +116,7 @@ export async function getAdminTelemetry(
     activeLinksCount,
     topLinksRaw,
     signupsInPeriod,
+    sessions,
   ] = await Promise.all([
     prisma.siteVisit.count({
       where: { createdAt: { gte: since } },
@@ -95,11 +131,19 @@ export async function getAdminTelemetry(
         browser: true,
         os: true,
         country: true,
+        region: true,
         city: true,
+        lat: true,
+        lng: true,
+        timezone: true,
+        isp: true,
         ipHash: true,
         utmSource: true,
         utmMedium: true,
         utmCampaign: true,
+        screenWidth: true,
+        screenHeight: true,
+        language: true,
         createdAt: true,
       },
       orderBy: { createdAt: 'desc' },
@@ -138,6 +182,29 @@ export async function getAdminTelemetry(
     }),
     prisma.user.count({
       where: { createdAt: { gte: since } },
+    }),
+    prisma.visitorSession.findMany({
+      where: { createdAt: { gte: since } },
+      select: {
+        id: true,
+        entryPath: true,
+        ipHash: true,
+        city: true,
+        region: true,
+        country: true,
+        lat: true,
+        lng: true,
+        isp: true,
+        timezone: true,
+        screenWidth: true,
+        screenHeight: true,
+        language: true,
+        duration: true,
+        pageCount: true,
+        _count: { select: { events: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 5000,
     }),
   ]);
 
@@ -248,7 +315,7 @@ export async function getAdminTelemetry(
   });
   const utmCampaigns = Object.values(utmMap).sort((a, b) => b.count - a.count).slice(0, 6);
 
-  // Top Paths
+  // Top Paths (total views per path)
   const pathCounts: Record<string, number> = {};
   allVisits.forEach((v) => {
     pathCounts[v.path] = (pathCounts[v.path] || 0) + 1;
@@ -257,6 +324,142 @@ export async function getAdminTelemetry(
     .map(([path, count]) => ({ path, count }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 8);
+
+  // 1. Entry Per Page Metrics (Which paths do visitors enter through?)
+  const entryPathMap: Record<string, { entryCount: number; uniqueIps: Set<string> }> = {};
+
+  if (sessions.length > 0) {
+    sessions.forEach((s) => {
+      const ep = s.entryPath || '/';
+      if (!entryPathMap[ep]) entryPathMap[ep] = { entryCount: 0, uniqueIps: new Set() };
+      entryPathMap[ep].entryCount += 1;
+      if (s.ipHash) entryPathMap[ep].uniqueIps.add(s.ipHash);
+    });
+  } else {
+    // Fallback: estimate from all visits
+    allVisits.forEach((v) => {
+      const ep = v.path || '/';
+      if (!entryPathMap[ep]) entryPathMap[ep] = { entryCount: 0, uniqueIps: new Set() };
+      entryPathMap[ep].entryCount += 1;
+      if (v.ipHash) entryPathMap[ep].uniqueIps.add(v.ipHash);
+    });
+  }
+
+  const totalEntries = Object.values(entryPathMap).reduce((acc, curr) => acc + curr.entryCount, 0) || 1;
+  const entryPages: EntryPageMetric[] = Object.entries(entryPathMap)
+    .map(([path, info]) => ({
+      path,
+      entryCount: info.entryCount,
+      percentage: Math.round((info.entryCount / totalEntries) * 100),
+      uniqueVisitors: Math.max(info.uniqueIps.size, 1),
+    }))
+    .sort((a, b) => b.entryCount - a.entryCount)
+    .slice(0, 8);
+
+  // 2. Precision Geolocation Triangulation
+  const locationMap: Record<string, {
+    city: string;
+    region: string | null;
+    country: string | null;
+    lat: number | null;
+    lng: number | null;
+    isp: string | null;
+    count: number;
+  }> = {};
+
+  // Combine from sessions and visits
+  const geoRecords = sessions.length > 0
+    ? sessions
+    : allVisits.map((v) => ({
+        city: v.city,
+        region: v.region,
+        country: v.country,
+        lat: v.lat,
+        lng: v.lng,
+        isp: v.isp,
+      }));
+
+  geoRecords.forEach((item) => {
+    if (item.city || item.country || (item.lat && item.lng)) {
+      const cityLabel = item.city || (item.lat ? `Coords ${item.lat.toFixed(2)}, ${item.lng?.toFixed(2)}` : 'Unknown City');
+      const key = `${cityLabel}_${item.region || ''}_${item.country || ''}`;
+      if (!locationMap[key]) {
+        locationMap[key] = {
+          city: cityLabel,
+          region: item.region,
+          country: item.country,
+          lat: item.lat,
+          lng: item.lng,
+          isp: item.isp,
+          count: 0,
+        };
+      }
+      locationMap[key].count += 1;
+    }
+  });
+
+  const triangulatedLocations: TriangulatedLocation[] = Object.values(locationMap)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 8);
+
+  // 3. High-Value Technical Entry Metrics
+  const resCounts: Record<string, number> = {};
+  const langCounts: Record<string, number> = {};
+  const tzCounts: Record<string, number> = {};
+  const ispCounts: Record<string, number> = {};
+
+  const techRecords = sessions.length > 0 ? sessions : allVisits;
+  techRecords.forEach((item) => {
+    if (item.screenWidth && item.screenHeight) {
+      const res = `${item.screenWidth}×${item.screenHeight}`;
+      resCounts[res] = (resCounts[res] || 0) + 1;
+    }
+    if (item.language) {
+      const lang = item.language.slice(0, 5);
+      langCounts[lang] = (langCounts[lang] || 0) + 1;
+    }
+    if (item.timezone) {
+      tzCounts[item.timezone] = (tzCounts[item.timezone] || 0) + 1;
+    }
+    if (item.isp) {
+      const cleanIsp = item.isp.replace(/^AS\d+\s+/, '').slice(0, 30);
+      ispCounts[cleanIsp] = (ispCounts[cleanIsp] || 0) + 1;
+    }
+  });
+
+  const totalRes = Object.values(resCounts).reduce((a, b) => a + b, 0) || 1;
+  const screenResolutions = Object.entries(resCounts)
+    .map(([resolution, count]) => ({ resolution, count, percentage: Math.round((count / totalRes) * 100) }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+
+  const totalLang = Object.values(langCounts).reduce((a, b) => a + b, 0) || 1;
+  const languages = Object.entries(langCounts)
+    .map(([language, count]) => ({ language, count, percentage: Math.round((count / totalLang) * 100) }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+
+  const totalTz = Object.values(tzCounts).reduce((a, b) => a + b, 0) || 1;
+  const timezones = Object.entries(tzCounts)
+    .map(([timezone, count]) => ({ timezone, count, percentage: Math.round((count / totalTz) * 100) }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+
+  const totalIsp = Object.values(ispCounts).reduce((a, b) => a + b, 0) || 1;
+  const networks = Object.entries(ispCounts)
+    .map(([isp, count]) => ({ isp, count, percentage: Math.round((count / totalIsp) * 100) }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+
+  const entryMetrics: EntryTechnicalMetrics = {
+    screenResolutions,
+    languages,
+    timezones,
+    networks,
+  };
+
+  const totalSessions = sessions.length;
+  const sessionsWithReplaysCount = sessions.filter((s) => s._count.events > 0).length;
 
   // Top Scanned Links
   const topLinks = topLinksRaw.map((l) => ({
@@ -322,11 +525,10 @@ export async function getAdminTelemetry(
     scans: data.scans,
   }));
 
-  // Velocity Trends Timeline (stretches across 24h, 7d, 30d, or All-Time)
+  // Velocity Trends Timeline
   let dailyTrends: { date: string; visits: number; scans: number; signups: number }[] = [];
 
   if (timeframe === '24h') {
-    // 24 Hourly Buckets (00:00 - 23:00 UTC) stretching across the full card width
     const hourlyTrendsMap: Record<string, { visits: number; scans: number; signups: number }> = {};
     for (let h = 0; h < 24; h++) {
       const hourKey = `${h.toString().padStart(2, '0')}:00`;
@@ -352,14 +554,12 @@ export async function getAdminTelemetry(
       signups: counts.signups,
     }));
   } else {
-    // Determine days span based on timeframe
     let daysCount = 7;
     if (timeframe === '7d') {
       daysCount = 7;
     } else if (timeframe === '30d') {
       daysCount = 30;
     } else if (timeframe === 'all') {
-      // Find earliest record across all visits and scans
       const allTimestamps = [
         ...allVisits.map((v) => new Date(v.createdAt).getTime()),
         ...allScans.map((s) => new Date(s.scannedAt).getTime()),
@@ -419,6 +619,8 @@ export async function getAdminTelemetry(
     plusUsersCount,
     ultraUsersCount,
     activeLinksCount,
+    totalSessions,
+    sessionsWithReplaysCount,
     mrr,
     arr,
     arpu,
@@ -430,6 +632,9 @@ export async function getAdminTelemetry(
     referrers,
     utmCampaigns,
     topPaths,
+    entryPages,
+    triangulatedLocations,
+    entryMetrics,
     topLinks,
     topCountries,
     topCities,

@@ -60,12 +60,27 @@ export default function PrivacyPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-xl font-semibold">4. Your Rights (GDPR & CCPA)</h2>
+          <h2 className="text-xl font-semibold">4. Session Replay & Ingress Telemetry</h2>
           <p>
-            You have the right to request deletion of your account and all associated QR links, routing rules, and scan logs at any time. To exercise this right, contact <a href="mailto:oseghaleleonard39@gmail.com" className="underline font-medium">oseghaleleonard39@gmail.com</a>.
+            When browsing the DynamicQR web application, anonymised entry metrics and user interaction events (such as clicks, scrolling, page navigations, viewport resolution, device language, approximate triangulated location, and network carrier) may be recorded for performance diagnostics, UX optimization, and security audits.
+          </p>
+          <p className="text-[14px] text-[#11140F]/80">
+            <strong>Password & Sensitive Field Masking:</strong> All password fields, authentication tokens, and sensitive inputs are masked at the DOM level using strict non-reversible masking prior to event capture. Passwords are never recorded or viewable in session replay audits.
+          </p>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="text-xl font-semibold">5. Your Rights (GDPR & CCPA)</h2>
+          <p>
+            You have the right to request deletion of your account and all associated QR links, routing rules, session data, and scan logs at any time. To exercise this right, contact <a href="mailto:oseghaleleonard39@gmail.com" className="underline font-medium">oseghaleleonard39@gmail.com</a>.
           </p>
         </section>
       </main>
+
+      <footer className="border-t border-[#11140F]/10 py-8 max-w-[900px] mx-auto px-5 text-center text-[12px] text-[#11140F]/40 space-y-2">
+        <p>🔒 By using this site, you consent to anonymised session telemetry and precision entry logging. Passwords are never captured.</p>
+        <p>&copy; {new Date().getFullYear()} DynamicQR • All rights reserved.</p>
+      </footer>
     </div>
   );
 }

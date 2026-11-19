@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import Link from 'next/link';
 import { TelemetryMetrics } from '@/lib/analytics/adminTelemetry';
 import { adminGetTelemetryAction } from '@/app/admin/actions';
 import {
@@ -21,6 +22,11 @@ import {
   ArrowUpRight,
   Filter,
   RefreshCw,
+  Video,
+  MapPin,
+  Crosshair,
+  ExternalLink,
+  Wifi,
 } from 'lucide-react';
 
 interface Props {
@@ -54,11 +60,23 @@ export default function AdminAnalyticsDashboard({ initialData }: Props) {
     rows.push(['KPI', 'Unique Visitors', data.uniqueVisitors, '-'].join(','));
     rows.push(['KPI', 'Total QR Scans', data.totalScans, '-'].join(','));
     rows.push(['KPI', 'Total Registered Users', data.totalUsers, '-'].join(','));
+    rows.push(['KPI', 'Total Visitor Sessions', data.totalSessions ?? 0, '-'].join(','));
+    rows.push(['KPI', 'Sessions with Replays', data.sessionsWithReplaysCount ?? 0, '-'].join(','));
     rows.push(['KPI', 'Free Tier Users', data.freeUsersCount, '-'].join(','));
     rows.push(['KPI', 'Paid Tier Users', data.paidUsersCount, '-'].join(','));
     rows.push(['KPI', 'Estimated MRR ($)', data.mrr, '-'].join(','));
     rows.push(['KPI', 'Estimated ARR ($)', data.arr, '-'].join(','));
     rows.push(['KPI', 'Visitor-to-Signup Conversion', `${data.conversionRateVisitorsToSignups}%`, '-'].join(','));
+
+    // Entry Pages
+    (data.entryPages || []).forEach((ep) => {
+      rows.push(['Entry Page', `"${ep.path}"`, ep.entryCount, `${ep.percentage}%`].join(','));
+    });
+
+    // Triangulated Geo
+    (data.triangulatedLocations || []).forEach((tl) => {
+      rows.push(['Triangulated Geo', `"${tl.city}, ${tl.region || ''} (${tl.country || ''})"`, tl.count, `"${tl.isp || ''}"`].join(','));
+    });
 
     // Devices
     data.devices.forEach((d) => {
@@ -89,9 +107,12 @@ export default function AdminAnalyticsDashboard({ initialData }: Props) {
     document.body.removeChild(link);
   };
 
+  const totalPageViews = data.totalPageViews || 0;
+  const maxTrend = Math.max(...data.dailyTrends.map((t) => Math.max(t.visits, t.scans)), 1);
+
   return (
     <div className="space-y-8">
-      {/* Control Bar: Timeframe Filters & CSV Export */}
+      {/* Control Bar: Timeframe Filters & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white border border-[#11140F]/10 shadow-xs">
         <div className="flex items-center gap-2">
           <Filter className="w-4 h-4 text-[#11140F]/50 shrink-0" />
@@ -118,31 +139,46 @@ export default function AdminAnalyticsDashboard({ initialData }: Props) {
               </button>
             ))}
           </div>
-          {isPending && <RefreshCw className="w-4 h-4 text-[#11140F]/40 animate-spin ml-2" />}
+          {isPending && (
+            <RefreshCw className="w-4 h-4 text-emerald-600 animate-spin ml-1" />
+          )}
         </div>
 
         <div className="flex items-center gap-3">
+          <Link
+            href="/admin/sessions"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-[12.5px] font-medium hover:bg-rose-100 transition-colors shadow-xs"
+          >
+            <Video className="w-4 h-4 text-rose-600" />
+            <span>Replay Video Audits</span>
+            {(data.sessionsWithReplaysCount ?? 0) > 0 && (
+              <span className="px-1.5 py-0.5 rounded-full bg-rose-600 text-white text-[10.5px] font-bold">
+                {data.sessionsWithReplaysCount}
+              </span>
+            )}
+          </Link>
+
           <button
             onClick={handleExportCsv}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-[#11140F]/15 text-[#11140F] text-[12.5px] font-medium hover:bg-[#EEF0EA] transition-colors shadow-xs"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-[#11140F]/15 text-[#11140F] text-[12.5px] font-medium hover:bg-[#EEF0EA] transition-colors shadow-xs"
           >
-            <Download className="w-3.5 h-3.5 text-emerald-700" />
-            Export Telemetry (.CSV)
+            <Download className="w-4 h-4 text-[#11140F]/70" />
+            <span>Export Raw CSV</span>
           </button>
         </div>
       </div>
 
-      {/* Topline KPI Matrix */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
+      {/* KPI Headline Metrics Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
         <div className="rounded-2xl border border-[#11140F]/10 bg-white p-4 shadow-xs space-y-1">
           <div className="flex items-center justify-between text-[11px] font-bold text-[#11140F]/50 uppercase tracking-wider">
-            <span>Site Visits</span>
+            <span>Total Views</span>
             <Eye className="w-3.5 h-3.5 text-blue-600" />
           </div>
           <p className="text-2xl sm:text-3xl font-bold text-[#11140F] tracking-tight">
-            {data.totalPageViews.toLocaleString()}
+            {totalPageViews.toLocaleString()}
           </p>
-          <p className="text-[11px] text-[#11140F]/50">Total page loads</p>
+          <p className="text-[11px] text-[#11140F]/50">All page impressions</p>
         </div>
 
         <div className="rounded-2xl border border-[#11140F]/10 bg-white p-4 shadow-xs space-y-1">
@@ -158,26 +194,26 @@ export default function AdminAnalyticsDashboard({ initialData }: Props) {
 
         <div className="rounded-2xl border border-[#11140F]/10 bg-white p-4 shadow-xs space-y-1">
           <div className="flex items-center justify-between text-[11px] font-bold text-[#11140F]/50 uppercase tracking-wider">
+            <span>Total Sessions</span>
+            <Compass className="w-3.5 h-3.5 text-emerald-600" />
+          </div>
+          <p className="text-2xl sm:text-3xl font-bold text-[#11140F] tracking-tight">
+            {(data.totalSessions ?? 0).toLocaleString()}
+          </p>
+          <p className="text-[11px] text-[#11140F]/50">
+            {data.sessionsWithReplaysCount ?? 0} with full audit replay
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-[#11140F]/10 bg-white p-4 shadow-xs space-y-1">
+          <div className="flex items-center justify-between text-[11px] font-bold text-[#11140F]/50 uppercase tracking-wider">
             <span>QR Scans</span>
-            <QrCode className="w-3.5 h-3.5 text-emerald-600" />
+            <QrCode className="w-3.5 h-3.5 text-purple-600" />
           </div>
           <p className="text-2xl sm:text-3xl font-bold text-[#11140F] tracking-tight">
             {data.totalScans.toLocaleString()}
           </p>
           <p className="text-[11px] text-[#11140F]/50">307 Edge redirects</p>
-        </div>
-
-        <div className="rounded-2xl border border-[#11140F]/10 bg-white p-4 shadow-xs space-y-1">
-          <div className="flex items-center justify-between text-[11px] font-bold text-[#11140F]/50 uppercase tracking-wider">
-            <span>Total Accounts</span>
-            <Layers className="w-3.5 h-3.5 text-purple-600" />
-          </div>
-          <p className="text-2xl sm:text-3xl font-bold text-[#11140F] tracking-tight">
-            {data.totalUsers}
-          </p>
-          <p className="text-[11px] text-[#11140F]/50">
-            {data.freeUsersCount} Free • {data.paidUsersCount} Paid
-          </p>
         </div>
 
         <div className="rounded-2xl border border-[#11140F]/10 bg-white p-4 shadow-xs space-y-1">
@@ -220,7 +256,6 @@ export default function AdminAnalyticsDashboard({ initialData }: Props) {
             </p>
           </div>
 
-          {/* Interactive Inspection Pill or Legend */}
           {hoveredTrend ? (
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#11140F] text-white text-[11px] font-mono shadow-xs">
               <span className="text-emerald-400 font-bold">{hoveredTrend.date}</span>
@@ -248,249 +283,375 @@ export default function AdminAnalyticsDashboard({ initialData }: Props) {
             No activity recorded yet in this window.
           </div>
         ) : (
-          <div className="w-full">
-            {data.dailyTrends.length > 24 && (
-              <div className="flex items-center justify-between text-[11px] text-[#11140F]/40 font-mono mb-1 px-1">
-                <span>{data.dailyTrends[0]?.date}</span>
-                <span>&larr; Drag / Scroll horizontally to explore timeline &rarr;</span>
-                <span>{data.dailyTrends[data.dailyTrends.length - 1]?.date}</span>
-              </div>
-            )}
+          <div className="h-44 flex items-end gap-1 sm:gap-2 pt-6">
+            {data.dailyTrends.map((t, idx) => {
+              const visitHeight = Math.max(Math.round((t.visits / maxTrend) * 100), t.visits > 0 ? 8 : 2);
+              const scanHeight = Math.max(Math.round((t.scans / maxTrend) * 100), t.scans > 0 ? 8 : 2);
 
-            <div className="w-full overflow-x-auto overflow-y-hidden pb-3 pt-1 scrollbar-thin">
-              <div
-                className="flex flex-nowrap items-end h-52 pt-14 pb-1 min-w-full justify-between gap-1 sm:gap-2"
-                style={{
-                  minWidth: data.dailyTrends.length > 30 ? `${data.dailyTrends.length * 28}px` : '100%',
-                  width: '100%',
-                }}
-              >
-                {data.dailyTrends.map((day) => {
-                  const maxVal = Math.max(
-                    ...data.dailyTrends.map((d) => Math.max(d.visits, d.scans)),
-                    1
-                  );
-                  const visitHeight = Math.max(4, Math.round((day.visits / maxVal) * 100));
-                  const scanHeight = Math.max(4, Math.round((day.scans / maxVal) * 100));
-
-                  return (
+              return (
+                <div
+                  key={idx}
+                  onMouseEnter={() => setHoveredTrend(t)}
+                  onMouseLeave={() => setHoveredTrend(null)}
+                  className="flex-1 flex flex-col items-center h-full justify-end group cursor-pointer"
+                >
+                  <div className="w-full flex items-end justify-center gap-0.5 sm:gap-1 h-32">
                     <div
-                      key={day.date}
-                      onMouseEnter={() => setHoveredTrend(day)}
-                      onMouseLeave={() => setHoveredTrend(null)}
-                      className={`flex flex-col items-center justify-end h-full group relative cursor-pointer ${
-                        data.dailyTrends.length > 30 ? 'shrink-0' : 'flex-1'
-                      }`}
-                      style={{
-                        minWidth: data.dailyTrends.length > 30 ? '24px' : 'auto',
-                      }}
-                    >
-                      {/* Floating Tooltip inside generous top headroom (pt-14) - Completely immune to overflow clipping */}
-                      <div className="absolute top-1 z-30 opacity-0 group-hover:opacity-100 transition-all duration-150 pointer-events-none flex flex-col items-center">
-                        <div className="bg-[#11140F] text-white text-[10px] py-1 px-2.5 rounded-lg shadow-xl whitespace-nowrap text-center border border-white/10">
-                          <span className="font-bold block text-white/95">{day.date}</span>
-                          <span className="text-blue-300 font-mono">{day.visits} visits</span>
-                          <span className="text-white/40 mx-1">•</span>
-                          <span className="text-emerald-300 font-mono">{day.scans} scans</span>
-                        </div>
-                        <div className="w-1.5 h-1.5 bg-[#11140F] rotate-45 -mt-1 border-r border-b border-white/10" />
-                      </div>
-
-                      {/* Bar Container - Proportional and centered across full width */}
-                      <div className="w-full max-w-[44px] flex gap-1 items-end h-32 px-0.5">
-                        <div
-                          className="w-1/2 bg-blue-500 rounded-t-sm transition-all group-hover:bg-blue-600 group-hover:brightness-110"
-                          style={{ height: `${visitHeight}%` }}
-                        />
-                        <div
-                          className="w-1/2 bg-emerald-500 rounded-t-sm transition-all group-hover:bg-emerald-600 group-hover:brightness-110"
-                          style={{ height: `${scanHeight}%` }}
-                        />
-                      </div>
-
-                      {/* Date / Time Label */}
-                      <span className="text-[10px] font-mono text-[#11140F]/50 truncate w-full text-center mt-2 group-hover:text-[#11140F] group-hover:font-semibold transition-colors">
-                        {day.date.length > 5 && day.date.includes('-') ? day.date.slice(5) : day.date}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+                      style={{ height: `${visitHeight}%` }}
+                      className="w-1/2 max-w-[14px] bg-blue-500/80 rounded-t group-hover:bg-blue-600 transition-all"
+                    />
+                    <div
+                      style={{ height: `${scanHeight}%` }}
+                      className="w-1/2 max-w-[14px] bg-emerald-500/80 rounded-t group-hover:bg-emerald-600 transition-all"
+                    />
+                  </div>
+                  <span className="text-[10px] text-[#11140F]/40 font-mono mt-2 truncate w-full text-center">
+                    {timeframe === '24h' ? t.date : t.date.slice(5)}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
 
-      {/* Hourly Scan Activity Heatmap (00:00 - 23:00 UTC) */}
-      <div className="rounded-2xl border border-[#11140F]/10 bg-white p-6 shadow-xs space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="font-semibold text-[15px] text-[#11140F] flex items-center gap-2">
-              <Clock className="w-4 h-4 text-purple-600" />
-              Peak Scan Hours Heatmap (00:00 – 23:00 UTC)
-            </h3>
-            <p className="text-[12px] text-[#11140F]/55">
-              Hourly distribution showing when physical flyers, menus, and posters are most actively engaged
-            </p>
-          </div>
-          <span className="text-[11.5px] font-mono text-[#11140F]/50">24h Diurnal Heatmap</span>
-        </div>
-
-        <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-12 gap-1.5 pt-2" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(40px, 1fr))' }}>
-          {data.hourlyDistribution.map((h) => {
-            const maxActivity = Math.max(
-              ...data.hourlyDistribution.map((item) => item.scans + item.visits),
-              1
-            );
-            const totalActivity = h.scans + h.visits;
-            const intensity = totalActivity / maxActivity;
-
-            return (
-              <div
-                key={h.hour}
-                className="flex flex-col items-center p-2 rounded-xl border border-[#11140F]/5 bg-[#11140F]/[0.02] text-center space-y-1 group relative"
-              >
-                {/* Tooltip */}
-                <div className="absolute -top-10 z-20 hidden group-hover:flex bg-[#11140F] text-white text-[10px] py-1 px-2 rounded shadow-lg pointer-events-none whitespace-nowrap">
-                  {h.scans} scans, {h.visits} visits
-                </div>
-
-                <span className="text-[10px] font-mono font-semibold text-[#11140F]/60">
-                  {String(h.hour).padStart(2, '0')}:00
-                </span>
-                <div
-                  className="w-full h-8 rounded-lg flex items-center justify-center font-mono text-[11px] font-bold transition-all"
-                  style={{
-                    backgroundColor:
-                      totalActivity === 0
-                        ? '#F7F8F5'
-                        : intensity > 0.6
-                        ? '#059669'
-                        : intensity > 0.3
-                        ? '#34D399'
-                        : '#A7F3D0',
-                    color: intensity > 0.6 ? '#FFFFFF' : '#064E3B',
-                  }}
-                >
-                  {totalActivity}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* 2-Column Telemetry: Devices & Browsers + Referrers & Acquisition */}
+      {/* 2-Column: Entry Per Page Intelligence & Precision Location Triangulation */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Hardware & Platform Breakdown */}
-        <div className="rounded-2xl border border-[#11140F]/10 bg-white p-6 shadow-xs space-y-5">
+        {/* Entry Per Page Intelligence */}
+        <div className="rounded-2xl border border-[#11140F]/10 bg-white p-6 shadow-xs space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-[15px] text-[#11140F] flex items-center gap-2">
-              <Smartphone className="w-4 h-4 text-emerald-600" />
-              Hardware & Platform Telemetry
-            </h3>
-            <span className="text-[11.5px] font-mono text-[#11140F]/50">Client User-Agents</span>
-          </div>
-
-          <div className="space-y-4">
-            {data.devices.map((dev) => (
-              <div key={dev.name} className="space-y-1.5">
-                <div className="flex items-center justify-between text-[13px]">
-                  <span className="font-medium text-[#11140F]">{dev.name}</span>
-                  <span className="font-mono text-[12px] text-[#11140F]/60">
-                    {dev.count.toLocaleString()} ({dev.percentage}%)
-                  </span>
-                </div>
-                <div className="w-full h-2 rounded-full bg-[#11140F]/5 overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-emerald-600 transition-all duration-500"
-                    style={{ width: `${dev.percentage}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Operating Systems & Browsers Mini-Grid */}
-          <div className="pt-4 border-t border-[#11140F]/10 grid grid-cols-2 gap-4 text-[12px]">
             <div>
-              <span className="font-semibold text-[#11140F]/70 block mb-2 uppercase text-[11px] tracking-wider">
-                Operating Systems
-              </span>
-              <ul className="space-y-1.5">
-                {data.operatingSystems.map((os) => (
-                  <li key={os.name} className="flex items-center justify-between font-mono">
-                    <span className="text-[#11140F]/70">{os.name}</span>
-                    <span className="font-bold text-[#11140F]">{os.count} ({os.percentage}%)</span>
-                  </li>
-                ))}
-              </ul>
+              <h3 className="font-semibold text-[15px] text-[#11140F] flex items-center gap-2">
+                <Compass className="w-4 h-4 text-blue-600" />
+                Entry Per Page (Landing Ingress)
+              </h3>
+              <p className="text-[12px] text-[#11140F]/55">
+                Exact first pages visitors land on when entering the site
+              </p>
             </div>
-
-            <div>
-              <span className="font-semibold text-[#11140F]/70 block mb-2 uppercase text-[11px] tracking-wider">
-                Browsers
-              </span>
-              <ul className="space-y-1.5">
-                {data.browsers.map((b) => (
-                  <li key={b.name} className="flex items-center justify-between font-mono">
-                    <span className="text-[#11140F]/70">{b.name}</span>
-                    <span className="font-bold text-[#11140F]">{b.count} ({b.percentage}%)</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        {/* Traffic Sources & Referrers */}
-        <div className="rounded-2xl border border-[#11140F]/10 bg-white p-6 shadow-xs space-y-5">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-[15px] text-[#11140F] flex items-center gap-2">
-              <Compass className="w-4 h-4 text-blue-600" />
-              Traffic Sources & Inbound Attribution
-            </h3>
-            <span className="text-[11.5px] font-mono text-[#11140F]/50">Referrer Channels</span>
+            <span className="text-[11.5px] font-mono text-[#11140F]/50">First Touch</span>
           </div>
 
           <div className="space-y-3">
-            {data.referrers.length === 0 ? (
+            {!data.entryPages || data.entryPages.length === 0 ? (
               <p className="text-[13px] text-[#11140F]/45 py-6 text-center">
-                No inbound referrers logged yet in this timeframe.
+                Pending visitor session entry data.
               </p>
             ) : (
-              data.referrers.map((ref) => (
-                <div
-                  key={ref.source}
-                  className="p-3 rounded-xl border border-[#11140F]/10 bg-[#11140F]/[0.015] flex items-center justify-between"
-                >
-                  <span className="font-medium text-[13px] text-[#11140F] truncate">
-                    {ref.source}
-                  </span>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="font-mono text-[12px] font-bold text-[#11140F]">
-                      {ref.count.toLocaleString()}
-                    </span>
-                    <span className="font-mono text-[11px] text-[#11140F]/50">
-                      ({ref.percentage}%)
-                    </span>
+              data.entryPages.map((ep) => (
+                <div key={ep.path} className="space-y-1">
+                  <div className="flex items-center justify-between text-[13px]">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono font-medium text-blue-900 bg-blue-50 px-2 py-0.5 rounded">
+                        {ep.path}
+                      </span>
+                      <span className="text-[11px] text-[#11140F]/45">
+                        ({ep.uniqueVisitors} unique)
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 font-mono">
+                      <span className="font-bold text-[#11140F]">{ep.entryCount} entries</span>
+                      <span className="text-[11px] text-[#11140F]/40">({ep.percentage}%)</span>
+                    </div>
+                  </div>
+                  <div className="w-full bg-[#11140F]/5 rounded-full h-1.5 overflow-hidden">
+                    <div
+                      className="bg-blue-600 h-1.5 rounded-full transition-all"
+                      style={{ width: `${Math.max(ep.percentage, 4)}%` }}
+                    />
                   </div>
                 </div>
               ))
             )}
           </div>
+        </div>
 
-          {/* UTM Attribution Matrix */}
+        {/* Precision Geolocation Triangulation Matrix */}
+        <div className="rounded-2xl border border-[#11140F]/10 bg-white p-6 shadow-xs space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold text-[15px] text-[#11140F] flex items-center gap-2">
+                <Crosshair className="w-4 h-4 text-emerald-600" />
+                Precision Location Triangulation
+              </h3>
+              <p className="text-[12px] text-[#11140F]/55">
+                Sub-city coordinates & carrier ISP (bypasses generic regional carrier proxy bias)
+              </p>
+            </div>
+            <span className="text-[11.5px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold">
+              GPS & Multi-IP
+            </span>
+          </div>
+
+          <div className="space-y-2.5">
+            {!data.triangulatedLocations || data.triangulatedLocations.length === 0 ? (
+              <p className="text-[13px] text-[#11140F]/45 py-6 text-center">
+                Pending triangulated ingress telemetry.
+              </p>
+            ) : (
+              data.triangulatedLocations.map((loc, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center justify-between p-2.5 rounded-xl border border-[#11140F]/10 bg-[#11140F]/[0.015] text-[12.5px]"
+                >
+                  <div className="space-y-0.5 truncate pr-2">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      <span className="font-semibold text-[#11140F] truncate">
+                        {loc.city}{loc.region ? `, ${loc.region}` : ''}
+                      </span>
+                      {loc.country && (
+                        <span className="text-[11px] font-mono font-bold text-[#11140F]/50">
+                          [{loc.country}]
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 text-[11px] text-[#11140F]/50 pl-5">
+                      {loc.isp && <span className="truncate">ISP: {loc.isp}</span>}
+                      {loc.lat !== null && loc.lng !== null && (
+                        <a
+                          href={`https://maps.google.com/?q=${loc.lat},${loc.lng}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline inline-flex items-center gap-0.5 font-mono"
+                        >
+                          Pinpoint ({loc.lat.toFixed(2)}, {loc.lng.toFixed(2)}) ↗
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                  <span className="font-mono font-bold text-[#11140F] shrink-0">
+                    {loc.count} sessions
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* High-Value Technical Entry Metrics Grid */}
+      <div className="rounded-2xl border border-[#11140F]/10 bg-white p-6 shadow-xs space-y-4">
+        <div>
+          <h3 className="font-semibold text-[15px] text-[#11140F] flex items-center gap-2">
+            <Monitor className="w-4 h-4 text-purple-600" />
+            High-Value Technical Ingress Metrics
+          </h3>
+          <p className="text-[12px] text-[#11140F]/55">
+            Client viewports, device timezones, language preferences, and network providers
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Screen Resolutions */}
+          <div className="p-3.5 rounded-xl border border-[#11140F]/10 bg-[#11140F]/[0.015] space-y-2">
+            <span className="font-semibold text-[#11140F]/70 text-[11px] uppercase tracking-wider block">
+              Screen Viewports
+            </span>
+            {(!data.entryMetrics?.screenResolutions || data.entryMetrics.screenResolutions.length === 0) ? (
+              <p className="text-[11.5px] text-[#11140F]/40">Collecting...</p>
+            ) : (
+              <ul className="space-y-1 text-[12px] font-mono">
+                {data.entryMetrics.screenResolutions.map((r) => (
+                  <li key={r.resolution} className="flex justify-between items-center">
+                    <span>{r.resolution}</span>
+                    <span className="font-bold text-[#11140F]">{r.percentage}%</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* Timezones */}
+          <div className="p-3.5 rounded-xl border border-[#11140F]/10 bg-[#11140F]/[0.015] space-y-2">
+            <span className="font-semibold text-[#11140F]/70 text-[11px] uppercase tracking-wider block">
+              Device Timezones
+            </span>
+            {(!data.entryMetrics?.timezones || data.entryMetrics.timezones.length === 0) ? (
+              <p className="text-[11.5px] text-[#11140F]/40">Collecting...</p>
+            ) : (
+              <ul className="space-y-1 text-[12px] font-mono">
+                {data.entryMetrics.timezones.map((tz) => (
+                  <li key={tz.timezone} className="flex justify-between items-center">
+                    <span className="truncate max-w-[130px]">{tz.timezone}</span>
+                    <span className="font-bold text-[#11140F]">{tz.count}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* Client Languages */}
+          <div className="p-3.5 rounded-xl border border-[#11140F]/10 bg-[#11140F]/[0.015] space-y-2">
+            <span className="font-semibold text-[#11140F]/70 text-[11px] uppercase tracking-wider block">
+              Client Languages
+            </span>
+            {(!data.entryMetrics?.languages || data.entryMetrics.languages.length === 0) ? (
+              <p className="text-[11.5px] text-[#11140F]/40">Collecting...</p>
+            ) : (
+              <ul className="space-y-1 text-[12px] font-mono">
+                {data.entryMetrics.languages.map((l) => (
+                  <li key={l.language} className="flex justify-between items-center">
+                    <span>{l.language}</span>
+                    <span className="font-bold text-[#11140F]">{l.percentage}%</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* Network Providers */}
+          <div className="p-3.5 rounded-xl border border-[#11140F]/10 bg-[#11140F]/[0.015] space-y-2">
+            <span className="font-semibold text-[#11140F]/70 text-[11px] uppercase tracking-wider block">
+              Network Carriers
+            </span>
+            {(!data.entryMetrics?.networks || data.entryMetrics.networks.length === 0) ? (
+              <p className="text-[11.5px] text-[#11140F]/40">Collecting...</p>
+            ) : (
+              <ul className="space-y-1 text-[12px] font-mono">
+                {data.entryMetrics.networks.map((net) => (
+                  <li key={net.isp} className="flex justify-between items-center">
+                    <span className="truncate max-w-[120px]">{net.isp}</span>
+                    <span className="font-bold text-[#11140F]">{net.count}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Hardware & User-Agent Distribution */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Device Breakdown */}
+        <div className="rounded-2xl border border-[#11140F]/10 bg-white p-5 shadow-xs space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="font-semibold text-[14px] text-[#11140F] flex items-center gap-2">
+              <Smartphone className="w-4 h-4 text-emerald-600" />
+              Device Hardware
+            </h4>
+            <span className="text-[11px] font-mono text-[#11140F]/45">Platform Share</span>
+          </div>
+
+          <div className="space-y-2">
+            {data.devices.map((d) => (
+              <div key={d.name} className="space-y-1">
+                <div className="flex items-center justify-between text-[12.5px]">
+                  <span className="text-[#11140F]/70">{d.name}</span>
+                  <span className="font-mono font-bold text-[#11140F]">
+                    {d.count} ({d.percentage}%)
+                  </span>
+                </div>
+                <div className="w-full bg-[#11140F]/5 rounded-full h-1.5 overflow-hidden">
+                  <div
+                    className="bg-emerald-600 h-1.5 rounded-full"
+                    style={{ width: `${Math.max(d.percentage, 2)}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Operating Systems */}
+        <div className="rounded-2xl border border-[#11140F]/10 bg-white p-5 shadow-xs space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="font-semibold text-[14px] text-[#11140F] flex items-center gap-2">
+              <Layers className="w-4 h-4 text-blue-600" />
+              Operating Systems
+            </h4>
+            <span className="text-[11px] font-mono text-[#11140F]/45">Top 5</span>
+          </div>
+
+          <div className="space-y-2">
+            {data.operatingSystems.map((os) => (
+              <div key={os.name} className="space-y-1">
+                <div className="flex items-center justify-between text-[12.5px]">
+                  <span className="text-[#11140F]/70 font-mono text-[12px]">{os.name}</span>
+                  <span className="font-mono font-bold text-[#11140F]">
+                    {os.count} ({os.percentage}%)
+                  </span>
+                </div>
+                <div className="w-full bg-[#11140F]/5 rounded-full h-1.5 overflow-hidden">
+                  <div
+                    className="bg-blue-600 h-1.5 rounded-full"
+                    style={{ width: `${Math.max(os.percentage, 2)}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Browsers */}
+        <div className="rounded-2xl border border-[#11140F]/10 bg-white p-5 shadow-xs space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="font-semibold text-[14px] text-[#11140F] flex items-center gap-2">
+              <Compass className="w-4 h-4 text-purple-600" />
+              Client Browsers
+            </h4>
+            <span className="text-[11px] font-mono text-[#11140F]/45">Top 5</span>
+          </div>
+
+          <div className="space-y-2">
+            {data.browsers.map((b) => (
+              <div key={b.name} className="space-y-1">
+                <div className="flex items-center justify-between text-[12.5px]">
+                  <span className="text-[#11140F]/70">{b.name}</span>
+                  <span className="font-mono font-bold text-[#11140F]">
+                    {b.count} ({b.percentage}%)
+                  </span>
+                </div>
+                <div className="w-full bg-[#11140F]/5 rounded-full h-1.5 overflow-hidden">
+                  <div
+                    className="bg-purple-600 h-1.5 rounded-full"
+                    style={{ width: `${Math.max(b.percentage, 2)}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Referrers & Attribution */}
+      <div className="rounded-2xl border border-[#11140F]/10 bg-white p-6 shadow-xs space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-[15px] text-[#11140F] flex items-center gap-2">
+            <ArrowUpRight className="w-4 h-4 text-amber-600" />
+            Inbound Traffic Sources & Campaign Attribution
+          </h3>
+          <span className="text-[11.5px] font-mono text-[#11140F]/50">Acquisition Channels</span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <span className="font-semibold text-[#11140F]/70 block mb-2 uppercase text-[11px] tracking-wider">
+              Top Referring Domains
+            </span>
+            {data.referrers.map((ref) => (
+              <div
+                key={ref.source}
+                className="flex items-center justify-between p-2 rounded-lg bg-[#11140F]/[0.02] text-[12.5px]"
+              >
+                <span className="truncate max-w-xs">{ref.source}</span>
+                <span className="font-mono font-bold text-[#11140F]">
+                  {ref.count} ({ref.percentage}%)
+                </span>
+              </div>
+            ))}
+          </div>
+
           {data.utmCampaigns.length > 0 && (
-            <div className="pt-4 border-t border-[#11140F]/10 space-y-2">
-              <span className="font-semibold text-[#11140F]/70 block uppercase text-[11px] tracking-wider">
+            <div className="space-y-2">
+              <span className="font-semibold text-[#11140F]/70 block mb-2 uppercase text-[11px] tracking-wider">
                 Active UTM Campaigns
               </span>
               <div className="space-y-1.5">
-                {data.utmCampaigns.map((utm, idx) => (
+                {data.utmCampaigns.map((utm, i) => (
                   <div
-                    key={idx}
-                    className="flex items-center justify-between text-[11.5px] font-mono p-2 rounded-lg bg-[#EEF0EA]/50"
+                    key={i}
+                    className="flex items-center justify-between p-2 rounded-lg bg-[#11140F]/[0.02] text-[12.5px] font-mono"
                   >
                     <span className="truncate">
                       <strong>{utm.source}</strong> / {utm.medium} &bull; {utm.campaign}
@@ -501,93 +662,6 @@ export default function AdminAnalyticsDashboard({ initialData }: Props) {
               </div>
             </div>
           )}
-        </div>
-      </div>
-
-      {/* 2-Column: Top Visited Paths & Geographic Distribution */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top Visited Routes */}
-        <div className="rounded-2xl border border-[#11140F]/10 bg-white p-6 shadow-xs space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-[15px] text-[#11140F] flex items-center gap-2">
-              <Monitor className="w-4 h-4 text-indigo-600" />
-              Top Visited Application Routes
-            </h3>
-            <span className="text-[11.5px] font-mono text-[#11140F]/50">Page Impressions</span>
-          </div>
-
-          <div className="space-y-2">
-            {data.topPaths.length === 0 ? (
-              <p className="text-[13px] text-[#11140F]/45 py-6 text-center">
-                No route hits recorded yet.
-              </p>
-            ) : (
-              data.topPaths.map((p) => (
-                <div
-                  key={p.path}
-                  className="flex items-center justify-between p-2.5 rounded-xl border border-[#11140F]/10 bg-[#11140F]/[0.015] text-[13px]"
-                >
-                  <span className="font-mono text-emerald-800 font-medium truncate">
-                    {p.path}
-                  </span>
-                  <span className="font-mono font-bold text-[#11140F] shrink-0">
-                    {p.count.toLocaleString()} visits
-                  </span>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* Geographic Distribution */}
-        <div className="rounded-2xl border border-[#11140F]/10 bg-white p-6 shadow-xs space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-[15px] text-[#11140F] flex items-center gap-2">
-              <Globe className="w-4 h-4 text-emerald-600" />
-              Global Geographic Footprint
-            </h3>
-            <span className="text-[11.5px] font-mono text-[#11140F]/50">Edge Ingress Points</span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <span className="font-semibold text-[#11140F]/70 block mb-2 uppercase text-[11px] tracking-wider">
-                Top Countries
-              </span>
-              {data.topCountries.length === 0 ? (
-                <p className="text-[12px] text-[#11140F]/45">Pending traffic data.</p>
-              ) : (
-                <ul className="space-y-1.5 text-[12.5px]">
-                  {data.topCountries.map((c) => (
-                    <li key={c.country} className="flex items-center justify-between font-mono">
-                      <span>{c.country}</span>
-                      <span className="font-bold text-[#11140F]">
-                        {c.count} ({c.percentage}%)
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-
-            <div>
-              <span className="font-semibold text-[#11140F]/70 block mb-2 uppercase text-[11px] tracking-wider">
-                Top Ingress Cities
-              </span>
-              {data.topCities.length === 0 ? (
-                <p className="text-[12px] text-[#11140F]/45">Pending traffic data.</p>
-              ) : (
-                <ul className="space-y-1.5 text-[12.5px]">
-                  {data.topCities.map((ct) => (
-                    <li key={ct.city} className="flex items-center justify-between font-mono">
-                      <span className="truncate">{ct.city}</span>
-                      <span className="font-bold text-[#11140F] shrink-0">{ct.count}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
         </div>
       </div>
 

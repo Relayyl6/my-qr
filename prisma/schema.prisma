@@ -164,6 +164,7 @@ model CustomDomain {
 
 model SiteVisit {
   id           String   @id @default(cuid())
+  sessionId    String?  // links to VisitorSession
   path         String
   referrer     String?
   userAgent    String?
@@ -171,16 +172,74 @@ model SiteVisit {
   browser      String?  // 'safari' | 'chrome' | 'firefox' | 'edge' | 'other'
   os           String?  // 'ios' | 'macos' | 'windows' | 'android' | 'linux' | 'other'
   country      String?
+  region       String?  // state / province (more precise than city alone)
   city         String?
+  lat          Float?   // latitude from IP geolocation
+  lng          Float?   // longitude from IP geolocation
+  timezone     String?
+  isp          String?  // ISP / org name
   ipHash       String?
   utmSource    String?
   utmMedium    String?
   utmCampaign  String?
+  screenWidth  Int?
+  screenHeight Int?
+  language     String?
   createdAt    DateTime @default(now())
 
   @@index([createdAt])
   @@index([path, createdAt])
   @@index([device, createdAt])
   @@index([country, createdAt])
+  @@index([sessionId])
+}
+
+// One logical visitor session across multiple page views
+model VisitorSession {
+  id           String   @id @default(cuid())
+  ipHash       String?
+  country      String?
+  region       String?
+  city         String?
+  lat          Float?
+  lng          Float?
+  timezone     String?
+  isp          String?
+  device       String?
+  browser      String?
+  os           String?
+  userAgent    String?
+  screenWidth  Int?
+  screenHeight Int?
+  language     String?
+  referrer     String?
+  utmSource    String?
+  utmMedium    String?
+  utmCampaign  String?
+  entryPath    String?  // first page visited
+  duration     Int?     // session duration in seconds
+  pageCount    Int      @default(1)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  events       SessionEvent[]
+
+  @@index([createdAt])
+  @@index([ipHash])
+  @@index([country])
+}
+
+// rrweb-style DOM event recording for session replay
+model SessionEvent {
+  id        String         @id @default(cuid())
+  sessionId String
+  session   VisitorSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  type      Int            // rrweb event type enum
+  data      Json           // rrweb event payload (password fields masked)
+  timestamp BigInt         // millisecond unix timestamp
+  createdAt DateTime       @default(now())
+
+  @@index([sessionId, timestamp])
+  @@index([createdAt])
 }
 
