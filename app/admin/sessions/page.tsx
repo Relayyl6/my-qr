@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { ArrowLeft, Video, Globe, Monitor, Smartphone, Clock, Eye } from 'lucide-react';
 import { prisma } from '@/lib/prisma';
 import SessionReplayClient from '@/components/SessionReplayClient';
-import SessionLocationBadge from '@/components/SessionLocationBadge';
 
 export const dynamic = 'force-dynamic';
 
@@ -113,15 +112,21 @@ export default async function AdminSessionsPage() {
                 <div className="flex items-start gap-4">
                   <div className="text-2xl">{deviceIcon(s.device)}</div>
                   <div>
-                    <SessionLocationBadge
-                      sessionId={s.id}
-                      city={s.city}
-                      region={s.region}
-                      country={s.country}
-                      lat={s.lat}
-                      lng={s.lng}
-                      isp={s.isp}
-                    />
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-semibold text-[14px]">
+                        {s.city || 'Unknown City'}{s.region ? `, ${s.region}` : ''}{s.country ? ` · ${s.country}` : ''}
+                      </span>
+                      {s.lat && s.lng && (
+                        <a
+                          href={`https://maps.google.com/?q=${s.lat},${s.lng}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[11px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors font-mono inline-flex items-center gap-1"
+                        >
+                          {s.lat.toFixed(4)}, {s.lng.toFixed(4)} ↗
+                        </a>
+                      )}
+                    </div>
                     <div className="text-[12px] text-[#11140F]/50 mt-0.5 flex flex-wrap gap-3">
                       {s.isp && <span>🌐 {s.isp.replace(/^AS\d+ /, '')}</span>}
                       {s.timezone && <span>⏱ {s.timezone}</span>}

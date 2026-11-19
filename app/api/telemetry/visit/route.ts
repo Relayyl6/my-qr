@@ -5,7 +5,6 @@ import {
   upsertVisitorSession,
   reverseGeocodeCoords,
   updateSessionPrecisionGeo,
-  updateSessionClientGeo,
   isBot,
   GeoData,
   EdgeGeoHeaders,
@@ -32,24 +31,6 @@ export async function POST(req: NextRequest) {
     if (body.type === 'geo_update' && sessionId && clientLat !== null && clientLng !== null) {
       updateSessionPrecisionGeo(sessionId, clientLat, clientLng).catch(() => {});
       return NextResponse.json({ ok: true, triangulated: true });
-    }
-
-    // Check for client-side direct network geolocation (bypasses serverless proxy hops)
-    if (body.type === 'client_geo' && sessionId) {
-      const clientCity = typeof body.clientCity === 'string' ? body.clientCity : null;
-      const clientRegion = typeof body.clientRegion === 'string' ? body.clientRegion : null;
-      const clientCountry = typeof body.clientCountry === 'string' ? body.clientCountry : null;
-      const clientIsp = typeof body.clientIsp === 'string' ? body.clientIsp : null;
-
-      updateSessionClientGeo(sessionId, {
-        city: clientCity,
-        region: clientRegion,
-        country: clientCountry,
-        lat: clientLat,
-        lng: clientLng,
-        isp: clientIsp,
-      }).catch(() => {});
-      return NextResponse.json({ ok: true, client_geo: true });
     }
 
     const path = typeof body.path === 'string' ? body.path : '/';
