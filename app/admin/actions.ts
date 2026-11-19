@@ -212,19 +212,38 @@ export async function adminGetTelemetryAction(timeframe: '24h' | '7d' | '30d' | 
   return getAdminTelemetry(timeframe);
 }
 
+export async function adminDeactivateUserAccount(targetUserId: string) {
+  const admin = await verifyAdmin();
+  if (admin.id === targetUserId) {
+    throw new Error('Cannot deactivate your own Super-Admin account.');
+  }
+
+  const { deactivateAccountPreservingMetrics } = await import('@/lib/user/deleteAccount');
+  const result = await deactivateAccountPreservingMetrics(targetUserId);
+
+  await logAdminAction(
+    admin.email,
+    `Deactivated user account for ${result.deletedEmail}`,
+    `Soft deactivation: decoupled ${result.linksAnonymized} links (userId: null) and preserved platform telemetry`
+  );
+
+  revalidatePath('/admin');
+  return { success: true, ...result };
+}
+
 export async function adminPurgeUserAccount(targetUserId: string) {
   const admin = await verifyAdmin();
   if (admin.id === targetUserId) {
     throw new Error('Cannot purge your own Super-Admin account.');
   }
 
-  const { purgeUserDataPreservingMetrics } = await import('@/lib/user/deleteAccount');
-  const result = await purgeUserDataPreservingMetrics(targetUserId);
+  const { wipeUserAccountCompletely } = await import('@/lib/user/deleteAccount');
+  const result = await wipeUserAccountCompletely(targetUserId);
 
   await logAdminAction(
     admin.email,
-    `Purged user data for ${result.deletedEmail}`,
-    `GDPR erasure: anonymized ${result.linksAnonymized} links, preserved platform scan telemetry`
+    `Completely wiped user account and all data for ${result.deletedEmail}`,
+    `Hard wipe: permanently deleted ${result.linksWiped} links and ${result.scansWiped} scans`
   );
 
   revalidatePath('/admin');

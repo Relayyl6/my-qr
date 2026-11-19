@@ -6,6 +6,7 @@ import {
   adminResetAiCredit,
   adminSetUserAiLimit,
   adminInspectUserLinks,
+  adminDeactivateUserAccount,
   adminPurgeUserAccount,
 } from '@/app/admin/actions';
 import {
@@ -19,6 +20,7 @@ import {
   QrCode,
   Layers,
   Trash2,
+  PowerOff,
 } from 'lucide-react';
 
 interface UserRecord {
@@ -84,9 +86,29 @@ export default function AdminUserRow({ user, isSelf }: { user: UserRecord; isSel
     }
   };
 
+  const handleDeactivateUser = async () => {
+    const confirmed = window.confirm(
+      `Deactivate account for ${user.email}?\n\nThis decouples all QR links (setting userId to null), archives them, and preserves platform scan metrics.`
+    );
+    if (!confirmed) return;
+
+    setLoading(true);
+    setStatusMsg(null);
+    try {
+      await adminDeactivateUserAccount(user.id);
+      setStatusMsg('Account deactivated');
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (err: any) {
+      setStatusMsg(err.message || 'Failed to deactivate');
+      setLoading(false);
+    }
+  };
+
   const handlePurgeUser = async () => {
     const confirmed = window.confirm(
-      `Permanently purge account for ${user.email}?\n\nThis completely erases all personal data, domains, and artworks under GDPR Article 17, while preserving anonymous platform metrics.`
+      `DANGER: Permanently wipe account and ALL data for ${user.email}?\n\nThis will completely delete ALL QR codes, ALL scan history, ALL rules, domains, and the user. Nothing will be retained as null. EVERY SINGLE THING will be wiped.`
     );
     if (!confirmed) return;
 
@@ -94,12 +116,12 @@ export default function AdminUserRow({ user, isSelf }: { user: UserRecord; isSel
     setStatusMsg(null);
     try {
       await adminPurgeUserAccount(user.id);
-      setStatusMsg('Account purged');
+      setStatusMsg('Account wiped completely');
       setTimeout(() => {
         window.location.reload();
       }, 1000);
     } catch (err: any) {
-      setStatusMsg(err.message || 'Failed to purge');
+      setStatusMsg(err.message || 'Failed to wipe');
       setLoading(false);
     }
   };
@@ -221,15 +243,26 @@ export default function AdminUserRow({ user, isSelf }: { user: UserRecord; isSel
             </button>
 
             {!isSelf && (
-              <button
-                onClick={handlePurgeUser}
-                disabled={loading}
-                title="Sovereign GDPR Purge: Erase personal data, preserve metrics"
-                className="rounded-lg border border-rose-200 bg-rose-50 px-2 py-1 text-[11px] font-medium text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition-all flex items-center gap-1 cursor-pointer"
-              >
-                <Trash2 className="w-3 h-3 text-rose-600" />
-                Purge
-              </button>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={handleDeactivateUser}
+                  disabled={loading}
+                  title="Deactivate Account: Sets userId to null, archives links, preserves platform metrics"
+                  className="rounded-lg border border-amber-200 bg-amber-50 px-2 py-1 text-[11px] font-medium text-amber-800 hover:bg-amber-100 transition-all flex items-center gap-1 cursor-pointer"
+                >
+                  <PowerOff className="w-3 h-3 text-amber-600" />
+                  Deactivate
+                </button>
+                <button
+                  onClick={handlePurgeUser}
+                  disabled={loading}
+                  title="Wipe Everything: Permanently deletes user, links, scans, and all data"
+                  className="rounded-lg border border-rose-200 bg-rose-50 px-2 py-1 text-[11px] font-medium text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition-all flex items-center gap-1 cursor-pointer"
+                >
+                  <Trash2 className="w-3 h-3 text-rose-600" />
+                  Wipe All
+                </button>
+              </div>
             )}
           </div>
         </td>

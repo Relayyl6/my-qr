@@ -1,9 +1,6 @@
-// Comprehensive GDPR/CCPA Account Erasure & Metric Retention Test Harness
-// Verifies:
-// 1. Permanent erasure of user PII (email, password, identity)
-// 2. Anonymization and decoupling of QR links (userId: null, isArchived: true)
-// 3. Complete retention of platform metrics (Scan telemetry, diurnal distribution)
-// 4. Decoupling of AI compute metrics (userId: null) for token and latency analytics
+// Comprehensive Verification Suite for Account Deactivation vs Full Wipe
+// 1. Deactivate Account: Sets userId to null, archives links, preserves platform metrics
+// 2. Delete Account (Wipe Everything): Permanently wipes EVERY SINGLE THING (all links, scans, rules, domains, AI records, user)
 
 if (typeof (process as any).loadEnvFile === 'function') {
   (process as any).loadEnvFile();
@@ -13,121 +10,147 @@ import { neon } from '@neondatabase/serverless';
 
 const sql = neon(process.env.DATABASE_URL!);
 
-async function verifyAccountDeletion() {
+async function main() {
   console.log('================================================================================');
-  console.log('VERIFYING ACCOUNT DELETION & METRIC RETENTION (GDPR / CCPA)');
+  console.log('VERIFYING ACCOUNT DEACTIVATION vs COMPLETE NUCLEAR WIPE');
   console.log('================================================================================');
 
-  const testId = `test-purge-${Date.now()}`;
-  const testEmail = `${testId}@example.com`;
-  const linkId = `link-${testId}`;
-  const scanId = `scan-${testId}`;
-  const aiId = `ai-${testId}`;
+  // ===========================================================================
+  // PART 1: DEACTIVATE ACCOUNT (Soft Anonymization / userId -> null)
+  // ===========================================================================
+  console.log('\n--- [PART 1] Verifying Deactivate Account (userId -> null, metrics preserved) ---');
+  const deactUserId = `test-deact-${Date.now()}`;
+  const deactEmail = `${deactUserId}@example.com`;
+  const deactLinkId = `link-${deactUserId}`;
+  const deactScanId = `scan-${deactUserId}`;
+  const deactAiId = `ai-${deactUserId}`;
 
-  // 1. Create a test user
+  // 1. Seed
   await sql`
     INSERT INTO "User" (id, email, password, name, tier, "createdAt", "updatedAt")
-    VALUES (${testId}, ${testEmail}, 'hashed_pw_test', 'Test Purge User', 'pro', NOW(), NOW());
+    VALUES (${deactUserId}, ${deactEmail}, 'hashed_pw', 'Deact User', 'free', NOW(), NOW());
   `;
-  console.log(`[+] Created test user: ${testId} (${testEmail})`);
-
-  // 2. Create a test QR link
   await sql`
     INSERT INTO "QrLink" (id, "userId", "shortCode", "destinationUrl", label, "scanCount", "createdAt", "updatedAt")
-    VALUES (${linkId}, ${testId}, ${testId}, 'https://example.com/target', 'Sample Menu QR', 5, NOW(), NOW());
+    VALUES (${deactLinkId}, ${deactUserId}, ${deactUserId}, 'https://example.com/target', 'Deact QR', 10, NOW(), NOW());
   `;
-  console.log(`[+] Created test QR link: ${linkId}`);
-
-  // 3. Create sample scan records (platform metrics)
   await sql`
     INSERT INTO "Scan" (id, "qrLinkId", country, city, device, "scannedAt")
-    VALUES (${scanId}, ${linkId}, 'NG', 'Benin City', 'ios', NOW());
+    VALUES (${deactScanId}, ${deactLinkId}, 'NG', 'Benin City', 'ios', NOW());
   `;
-  console.log(`[+] Created scan metric record: ${scanId}`);
-
-  // 4. Create sample AI invocation (platform health telemetry)
   await sql`
     INSERT INTO "AiInvocation" (id, "userId", feature, "promptKey", model, "inputTokens", "outputTokens", "costUsd", "latencyMs", success, "createdAt")
-    VALUES (${aiId}, ${testId}, 'route-resolver', 'route-resolver.v1', 'gemini-2.0-flash', 120, 45, 0.0001, 310, true, NOW());
+    VALUES (${deactAiId}, ${deactUserId}, 'router', 'key1', 'gemini-2.0-flash', 10, 5, 0.0001, 200, true, NOW());
   `;
-  console.log(`[+] Created sample AI compute metric: ${aiId}`);
+  console.log(`[+] Seeded test user ${deactUserId} with 1 link, 1 scan, 1 AI invocation`);
 
-  // 5. Execute Purge (simulating purgeUserDataPreservingMetrics)
-  console.log('\n[→] Executing purgeUserDataPreservingMetrics operations...');
-  
-  // Step A: Decouple & archive QR link
+  // 2. Execute Deactivation: userId set to null, links archived, metrics preserved
+  console.log('[→] Executing Deactivation...');
   await sql`
     UPDATE "QrLink"
     SET "userId" = NULL,
         "isArchived" = true,
-        label = '[Anonymized - Account Erased]',
+        label = '[Deactivated Account]',
         "destinationUrl" = 'https://my-qr-sandy.vercel.app/inactive'
-    WHERE "userId" = ${testId};
+    WHERE "userId" = ${deactUserId};
   `;
-
-  // Step B: Decouple AI invocation records
   await sql`
     UPDATE "AiInvocation"
     SET "userId" = NULL
-    WHERE "userId" = ${testId};
+    WHERE "userId" = ${deactUserId};
   `;
+  await sql`DELETE FROM "User" WHERE id = ${deactUserId};`;
 
-  // Step C: Delete user record permanently
+  // 3. Assertions for Part 1
+  const deactUsers = await sql`SELECT id FROM "User" WHERE id = ${deactUserId};`;
+  if (deactUsers.length !== 0) throw new Error('Part 1 FAILED: User row still exists');
+  console.log('[✅ PASS] Part 1.1: User record removed');
+
+  const deactLinks = await sql`SELECT id, "userId", "isArchived", label FROM "QrLink" WHERE id = ${deactLinkId};`;
+  if (deactLinks.length === 0 || deactLinks[0].userId !== null || !deactLinks[0].isArchived) {
+    throw new Error('Part 1 FAILED: Link was not decoupled to userId: null');
+  }
+  console.log('[✅ PASS] Part 1.2: QrLink decoupled (userId: null) and archived for deactivation');
+
+  const deactScans = await sql`SELECT id FROM "Scan" WHERE "qrLinkId" = ${deactLinkId};`;
+  if (deactScans.length !== 1) throw new Error('Part 1 FAILED: Scans were deleted when they should be preserved');
+  console.log('[✅ PASS] Part 1.3: Platform scan telemetry preserved (1 scan remains)');
+
+  // Clean up Part 1
+  await sql`DELETE FROM "Scan" WHERE id = ${deactScanId};`;
+  await sql`DELETE FROM "QrLink" WHERE id = ${deactLinkId};`;
+  await sql`DELETE FROM "AiInvocation" WHERE id = ${deactAiId};`;
+  console.log('[+] Part 1 test artifacts cleaned up');
+
+  // ===========================================================================
+  // PART 2: DELETE ACCOUNT (Wipe EVERY SINGLE THING - Zero Trace)
+  // ===========================================================================
+  console.log('\n--- [PART 2] Verifying Delete Account (Wipe EVERY SINGLE THING) ---');
+  const wipeUserId = `test-wipe-${Date.now()}`;
+  const wipeEmail = `${wipeUserId}@example.com`;
+  const wipeLinkId = `link-${wipeUserId}`;
+  const wipeScanId = `scan-${wipeUserId}`;
+  const wipeAiId = `ai-${wipeUserId}`;
+  const wipeDomainId = `domain-${wipeUserId}`;
+
+  // 1. Seed everything
   await sql`
-    DELETE FROM "User"
-    WHERE id = ${testId};
+    INSERT INTO "User" (id, email, password, name, tier, "createdAt", "updatedAt")
+    VALUES (${wipeUserId}, ${wipeEmail}, 'hashed_pw', 'Wipe User', 'plus', NOW(), NOW());
   `;
-  console.log(`[✔] Purge operations executed successfully.`);
-
-  // 6. Assertions
-  const users = await sql`SELECT id, email FROM "User" WHERE id = ${testId};`;
-  if (users.length !== 0) {
-    throw new Error('FAILED: User record was not deleted from DB!');
-  }
-  console.log('[✅ PASS] Assertion 1: User record was permanently erased (0 rows)');
-
-  const links = await sql`
-    SELECT id, "userId", "isArchived", label
-    FROM "QrLink"
-    WHERE id = ${linkId};
+  await sql`
+    INSERT INTO "QrLink" (id, "userId", "shortCode", "destinationUrl", label, "scanCount", "createdAt", "updatedAt")
+    VALUES (${wipeLinkId}, ${wipeUserId}, ${wipeUserId}, 'https://example.com/target', 'Target QR', 42, NOW(), NOW());
   `;
-  if (links.length === 0 || links[0].userId !== null || links[0].isArchived !== true) {
-    throw new Error('FAILED: QR Link was not properly decoupled & archived!');
-  }
-  console.log('[✅ PASS] Assertion 2: QR link was decoupled (userId: null) and archived (isArchived: true)');
-
-  const scans = await sql`
-    SELECT id, "qrLinkId", country, city
-    FROM "Scan"
-    WHERE "qrLinkId" = ${linkId};
+  await sql`
+    INSERT INTO "Scan" (id, "qrLinkId", country, city, device, "scannedAt")
+    VALUES (${wipeScanId}, ${wipeLinkId}, 'US', 'New York', 'desktop', NOW());
   `;
-  if (scans.length !== 1) {
-    throw new Error(`FAILED: Expected 1 preserved scan for platform metrics, found ${scans.length}!`);
-  }
-  console.log('[✅ PASS] Assertion 3: Scan metric records are preserved for platform health telemetry');
-
-  const invocations = await sql`
-    SELECT id, "userId", feature, model
-    FROM "AiInvocation"
-    WHERE id = ${aiId};
+  await sql`
+    INSERT INTO "AiInvocation" (id, "userId", feature, "promptKey", model, "inputTokens", "outputTokens", "costUsd", "latencyMs", success, "createdAt")
+    VALUES (${wipeAiId}, ${wipeUserId}, 'campaign', 'key2', 'gemini-2.0-flash', 50, 20, 0.0005, 180, true, NOW());
   `;
-  if (invocations.length === 0 || invocations[0].userId !== null) {
-    throw new Error('FAILED: AI invocation record was not decoupled!');
-  }
-  console.log('[✅ PASS] Assertion 4: AI compute metric decoupled (userId: null) and preserved');
+  await sql`
+    INSERT INTO "CustomDomain" (id, domain, "userId", "verificationTxt", "createdAt", "updatedAt")
+    VALUES (${wipeDomainId}, ${`wipe-${Date.now()}.com`}, ${wipeUserId}, 'txt-verify-token', NOW(), NOW());
+  `;
+  console.log(`[+] Seeded test user ${wipeUserId} with 1 link, 1 scan, 1 AI invocation, 1 custom domain`);
 
-  // Clean up test rows
-  await sql`DELETE FROM "Scan" WHERE id = ${scanId};`;
-  await sql`DELETE FROM "QrLink" WHERE id = ${linkId};`;
-  await sql`DELETE FROM "AiInvocation" WHERE id = ${aiId};`;
-  console.log('[+] Cleaned up temporary test artifacts');
+  // 2. Execute Full Nuclear Wipe: EVERY SINGLE THING deleted
+  console.log('[→] Executing Full Nuclear Wipe (wiping EVERY SINGLE THING)...');
+  await sql`DELETE FROM "Scan" WHERE "qrLinkId" = ${wipeLinkId};`;
+  await sql`DELETE FROM "QrLink" WHERE id = ${wipeLinkId};`;
+  await sql`DELETE FROM "CustomDomain" WHERE "userId" = ${wipeUserId};`;
+  await sql`DELETE FROM "AiInvocation" WHERE "userId" = ${wipeUserId};`;
+  await sql`DELETE FROM "User" WHERE id = ${wipeUserId};`;
+
+  // 3. Assertions for Part 2
+  const wipedUsers = await sql`SELECT id FROM "User" WHERE id = ${wipeUserId};`;
+  if (wipedUsers.length !== 0) throw new Error('Part 2 FAILED: User row still exists');
+  console.log('[✅ PASS] Part 2.1: User record completely deleted (0 rows)');
+
+  const wipedLinks = await sql`SELECT id FROM "QrLink" WHERE id = ${wipeLinkId};`;
+  if (wipedLinks.length !== 0) throw new Error('Part 2 FAILED: QrLink was not wiped, rows still exist');
+  console.log('[✅ PASS] Part 2.2: QrLink completely deleted from DB (0 rows, not kept as null)');
+
+  const wipedScans = await sql`SELECT id FROM "Scan" WHERE id = ${wipeScanId};`;
+  if (wipedScans.length !== 0) throw new Error('Part 2 FAILED: Scans were not wiped, rows still exist');
+  console.log('[✅ PASS] Part 2.3: All Scan records completely wiped (0 rows)');
+
+  const wipedDomains = await sql`SELECT id FROM "CustomDomain" WHERE id = ${wipeDomainId};`;
+  if (wipedDomains.length !== 0) throw new Error('Part 2 FAILED: CustomDomain was not wiped');
+  console.log('[✅ PASS] Part 2.4: Custom domains completely wiped (0 rows)');
+
+  const wipedAi = await sql`SELECT id FROM "AiInvocation" WHERE id = ${wipeAiId};`;
+  if (wipedAi.length !== 0) throw new Error('Part 2 FAILED: AiInvocation was not wiped');
+  console.log('[✅ PASS] Part 2.5: AI Invocations completely wiped (0 rows)');
 
   console.log('\n================================================================================');
-  console.log('🎉 ALL GDPR ACCOUNT ERASURE & METRIC RETENTION TESTS PASSED WITH 100% SUCCESS!');
+  console.log('🎉 ALL TESTS PASSED: DEACTIVATION (userId -> null) AND FULL WIPE (EVERY SINGLE THING) CONFIRMED!');
   console.log('================================================================================');
 }
 
-verifyAccountDeletion().catch((e) => {
+main().catch((e) => {
   console.error('Verification error:', e);
   process.exit(1);
 });

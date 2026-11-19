@@ -374,26 +374,28 @@ async function testAdminSessionsPageGuard() {
 // Test 9: Self-Service Account Deletion Double Confirmation Check
 // -----------------------------------------------------------------------------
 async function testDeleteSelfAccountConfirmationGuard() {
-  console.log('\n[Test 9] Testing deleteSelfAccount Server Action Confirmation Validation...');
+  console.log('\n[Test 9] Testing deleteSelfAccount & deactivateSelfAccount Confirmation Validation...');
 
-  const { deleteSelfAccount } = await import('../app/auth-actions');
+  const { deleteSelfAccount, deactivateSelfAccount } = await import('../app/auth-actions');
 
-  // Attempt 1: Wrong confirmation word (e.g. "cancel" or "yes")
+  // Attempt 1: Wrong confirmation word for delete
   const badAttempt = await deleteSelfAccount('yes');
-  console.log('   -> Rejected with wrong confirmation:', badAttempt);
+  console.log('   -> Rejected delete with wrong confirmation:', badAttempt);
   assert(badAttempt.error !== undefined, 'Must reject confirmation text that is not "DELETE"');
   assert(badAttempt.error?.includes('DELETE') ?? false, 'Error message must remind user to type DELETE');
 
-  // Attempt 2: Empty string
-  const emptyAttempt = await deleteSelfAccount('');
-  assert(emptyAttempt.error !== undefined, 'Must reject empty confirmation');
+  // Attempt 2: Wrong confirmation word for deactivate
+  const badDeact = await deactivateSelfAccount('no');
+  console.log('   -> Rejected deactivate with wrong confirmation:', badDeact);
+  assert(badDeact.error !== undefined, 'Must reject confirmation text that is not "DEACTIVATE"');
+  assert(badDeact.error?.includes('DEACTIVATE') ?? false, 'Error message must remind user to type DEACTIVATE');
 
   results.push({
     id: 9,
-    name: 'Account Deletion Safety Guard (Strict Confirmation)',
+    name: 'Account Deactivation & Deletion Safety Guards (Strict Confirmation)',
     passed: true,
-    details: 'deleteSelfAccount strictly validates that the user enters "DELETE" before executing erasure.',
-    metrics: { badAttemptError: badAttempt.error },
+    details: 'deleteSelfAccount strictly validates "DELETE" for nuclear wipe, and deactivateSelfAccount strictly validates "DEACTIVATE" for soft decoupling.',
+    metrics: { badDeleteError: badAttempt.error, badDeactError: badDeact.error },
   });
 }
 

@@ -98,6 +98,34 @@ export async function signOut(): Promise<void> {
   revalidatePath('/');
 }
 
+export async function deactivateSelfAccount(confirmationText: string): Promise<{ success?: boolean; error?: string }> {
+  if (confirmationText.trim().toUpperCase() !== 'DEACTIVATE') {
+    return { error: 'Please type "DEACTIVATE" exactly to confirm account deactivation.' };
+  }
+
+  const { getCurrentUser } = await import('@/lib/auth');
+  const user = await getCurrentUser();
+  if (!user) {
+    return { error: 'You must be signed in to deactivate your account.' };
+  }
+
+  const adminEmail = (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();
+  if (user.email.toLowerCase() === adminEmail) {
+    return { error: 'Super-Admin account cannot be deactivated via self-service.' };
+  }
+
+  try {
+    const { deactivateAccountPreservingMetrics } = await import('@/lib/user/deleteAccount');
+    await deactivateAccountPreservingMetrics(user.id);
+    await destroySession();
+    revalidatePath('/');
+    return { success: true };
+  } catch (err: any) {
+    console.error('[deactivateSelfAccount Error]:', err);
+    return { error: err.message || 'Failed to deactivate account. Please try again.' };
+  }
+}
+
 export async function deleteSelfAccount(confirmationText: string): Promise<{ success?: boolean; error?: string }> {
   if (confirmationText.trim().toUpperCase() !== 'DELETE') {
     return { error: 'Please type "DELETE" exactly to confirm permanent account deletion.' };
@@ -115,8 +143,8 @@ export async function deleteSelfAccount(confirmationText: string): Promise<{ suc
   }
 
   try {
-    const { purgeUserDataPreservingMetrics } = await import('@/lib/user/deleteAccount');
-    await purgeUserDataPreservingMetrics(user.id);
+    const { wipeUserAccountCompletely } = await import('@/lib/user/deleteAccount');
+    await wipeUserAccountCompletely(user.id);
     await destroySession();
     revalidatePath('/');
     return { success: true };
