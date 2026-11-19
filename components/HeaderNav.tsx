@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { signOut } from '@/app/auth-actions';
 import AuthModal from './AuthModal';
 import Link from 'next/link';
-import { LayoutGrid, Sparkles, CreditCard, Shield } from 'lucide-react';
+import { LayoutGrid, Sparkles, CreditCard, Shield, Settings } from 'lucide-react';
+import AccountSettingsModal from './AccountSettingsModal';
 
 interface Props {
   user: {
@@ -45,6 +46,7 @@ export default function HeaderNav({
 }: Props) {
   const [authOpen, setAuthOpen] = useState(false);
   const [authTab, setAuthTab] = useState<'login' | 'signup'>('login');
+  const [accountModalOpen, setAccountModalOpen] = useState(false);
 
   const openAuth = (tab: 'login' | 'signup') => {
     setAuthTab(tab);
@@ -209,6 +211,18 @@ export default function HeaderNav({
                     {user.name || user.email.split('@')[0]}
                   </span>
                   <button
+                    type="button"
+                    onClick={() => setAccountModalOpen(true)}
+                    className={`rounded-full p-1.5 transition-colors cursor-pointer border ${
+                      isDark
+                        ? 'border-white/15 text-white/70 hover:text-white hover:bg-white/10'
+                        : 'border-[#11140F]/15 text-[#11140F]/70 hover:text-[#11140F] hover:bg-white/80'
+                    }`}
+                    title="Account & Privacy Settings"
+                  >
+                    <Settings className="w-3.5 h-3.5" />
+                  </button>
+                  <button
                     onClick={() => signOut()}
                     className={`rounded-full px-3 sm:px-3.5 py-1.5 text-[12px] sm:text-[13px] font-medium transition-colors shadow-2xs cursor-pointer ${
                       isDark
@@ -308,6 +322,13 @@ export default function HeaderNav({
         onClose={() => setAuthOpen(false)}
         defaultTab={authTab}
       />
+
+      {accountModalOpen && user && (
+        <AccountSettingsModal
+          user={user}
+          onClose={() => setAccountModalOpen(false)}
+        />
+      )}
     </>
   );
 }

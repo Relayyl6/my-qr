@@ -6,6 +6,7 @@ import {
   adminResetAiCredit,
   adminSetUserAiLimit,
   adminInspectUserLinks,
+  adminPurgeUserAccount,
 } from '@/app/admin/actions';
 import {
   Shield,
@@ -17,6 +18,7 @@ import {
   ExternalLink,
   QrCode,
   Layers,
+  Trash2,
 } from 'lucide-react';
 
 interface UserRecord {
@@ -78,6 +80,26 @@ export default function AdminUserRow({ user, isSelf }: { user: UserRecord; isSel
     } catch (err: any) {
       setStatusMsg('Failed');
     } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePurgeUser = async () => {
+    const confirmed = window.confirm(
+      `Permanently purge account for ${user.email}?\n\nThis completely erases all personal data, domains, and artworks under GDPR Article 17, while preserving anonymous platform metrics.`
+    );
+    if (!confirmed) return;
+
+    setLoading(true);
+    setStatusMsg(null);
+    try {
+      await adminPurgeUserAccount(user.id);
+      setStatusMsg('Account purged');
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (err: any) {
+      setStatusMsg(err.message || 'Failed to purge');
       setLoading(false);
     }
   };
@@ -197,6 +219,18 @@ export default function AdminUserRow({ user, isSelf }: { user: UserRecord; isSel
               <DollarSign className="w-3 h-3" />
               $50 Budget
             </button>
+
+            {!isSelf && (
+              <button
+                onClick={handlePurgeUser}
+                disabled={loading}
+                title="Sovereign GDPR Purge: Erase personal data, preserve metrics"
+                className="rounded-lg border border-rose-200 bg-rose-50 px-2 py-1 text-[11px] font-medium text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition-all flex items-center gap-1 cursor-pointer"
+              >
+                <Trash2 className="w-3 h-3 text-rose-600" />
+                Purge
+              </button>
+            )}
           </div>
         </td>
       </tr>

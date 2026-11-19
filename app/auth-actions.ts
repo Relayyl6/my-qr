@@ -97,3 +97,31 @@ export async function signOut(): Promise<void> {
   await destroySession();
   revalidatePath('/');
 }
+
+export async function deleteSelfAccount(confirmationText: string): Promise<{ success?: boolean; error?: string }> {
+  if (confirmationText.trim().toUpperCase() !== 'DELETE') {
+    return { error: 'Please type "DELETE" exactly to confirm permanent account deletion.' };
+  }
+
+  const { getCurrentUser } = await import('@/lib/auth');
+  const user = await getCurrentUser();
+  if (!user) {
+    return { error: 'You must be signed in to delete your account.' };
+  }
+
+  const adminEmail = (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();
+  if (user.email.toLowerCase() === adminEmail) {
+    return { error: 'Super-Admin account cannot be deleted via self-service.' };
+  }
+
+  try {
+    const { purgeUserDataPreservingMetrics } = await import('@/lib/user/deleteAccount');
+    await purgeUserDataPreservingMetrics(user.id);
+    await destroySession();
+    revalidatePath('/');
+    return { success: true };
+  } catch (err: any) {
+    console.error('[deleteSelfAccount Error]:', err);
+    return { error: err.message || 'Failed to delete account. Please try again.' };
+  }
+}

@@ -3,14 +3,22 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import BulkImportWizard from './BulkImportWizard';
-import { Layers, Activity, Shield } from 'lucide-react';
+import AccountSettingsModal from './AccountSettingsModal';
+import { Layers, Activity, Shield, Settings, User } from 'lucide-react';
 
 interface Props {
   isAdmin?: boolean;
+  user?: {
+    id: string;
+    email: string;
+    name: string | null;
+    tier?: string;
+  } | null;
 }
 
-export default function WorkspaceHeaderActions({ isAdmin = false }: Props) {
+export default function WorkspaceHeaderActions({ isAdmin = false, user }: Props) {
   const [showBulkModal, setShowBulkModal] = useState(false);
+  const [showAccountModal, setShowAccountModal] = useState(false);
 
   return (
     <div className="flex items-center gap-2.5 flex-wrap">
@@ -22,6 +30,18 @@ export default function WorkspaceHeaderActions({ isAdmin = false }: Props) {
         <Layers className="w-3.5 h-3.5 text-emerald-600" />
         Bulk Import (AI)
       </button>
+
+      {user && (
+        <button
+          type="button"
+          onClick={() => setShowAccountModal(true)}
+          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-[#11140F]/15 bg-white text-[12.5px] font-medium text-[#11140F]/80 hover:text-[#11140F] hover:bg-[#11140F]/[0.03] transition-colors shadow-2xs cursor-pointer"
+          title="Account Settings & Data Privacy"
+        >
+          <Settings className="w-3.5 h-3.5 text-slate-600" />
+          <span>Account & Privacy</span>
+        </button>
+      )}
 
       {isAdmin && (
         <>
@@ -52,6 +72,13 @@ export default function WorkspaceHeaderActions({ isAdmin = false }: Props) {
             onClose={() => setShowBulkModal(false)}
           />
         </div>
+      )}
+
+      {showAccountModal && user && (
+        <AccountSettingsModal
+          user={user}
+          onClose={() => setShowAccountModal(false)}
+        />
       )}
     </div>
   );

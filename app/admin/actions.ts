@@ -211,3 +211,22 @@ export async function adminGetTelemetryAction(timeframe: '24h' | '7d' | '30d' | 
   const { getAdminTelemetry } = await import('@/lib/analytics/adminTelemetry');
   return getAdminTelemetry(timeframe);
 }
+
+export async function adminPurgeUserAccount(targetUserId: string) {
+  const admin = await verifyAdmin();
+  if (admin.id === targetUserId) {
+    throw new Error('Cannot purge your own Super-Admin account.');
+  }
+
+  const { purgeUserDataPreservingMetrics } = await import('@/lib/user/deleteAccount');
+  const result = await purgeUserDataPreservingMetrics(targetUserId);
+
+  await logAdminAction(
+    admin.email,
+    `Purged user data for ${result.deletedEmail}`,
+    `GDPR erasure: anonymized ${result.linksAnonymized} links, preserved platform scan telemetry`
+  );
+
+  revalidatePath('/admin');
+  return { success: true, ...result };
+}
