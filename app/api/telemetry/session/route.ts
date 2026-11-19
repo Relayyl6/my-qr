@@ -1,44 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { maskSensitiveFields } from '@/lib/telemetry/maskSensitiveFields';
 
 export const dynamic = 'force-dynamic';
-
-// Mask password / sensitive field values in rrweb event data
-function maskSensitiveFields(data: unknown): unknown {
-  if (!data || typeof data !== 'object') return data;
-  if (Array.isArray(data)) return data.map(maskSensitiveFields);
-
-  const obj = data as Record<string, unknown>;
-  const masked: Record<string, unknown> = {};
-
-  for (const [key, val] of Object.entries(obj)) {
-    // rrweb stores input mutations under 'attributes' and 'value'
-    if (
-      key === 'value' &&
-      typeof val === 'string' &&
-      obj['type'] === 'password'
-    ) {
-      masked[key] = '••••••••';
-    } else if (
-      key === 'attributes' &&
-      val &&
-      typeof val === 'object' &&
-      !Array.isArray(val)
-    ) {
-      const attrs = val as Record<string, unknown>;
-      if (attrs['type'] === 'password') {
-        masked[key] = { ...attrs, value: '••••••••' };
-      } else {
-        masked[key] = maskSensitiveFields(val);
-      }
-    } else if (typeof val === 'object' && val !== null) {
-      masked[key] = maskSensitiveFields(val);
-    } else {
-      masked[key] = val;
-    }
-  }
-  return masked;
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -50,10 +14,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: 'missing sessionId or events' }, { status: 400 });
     }
 
-    // Verify session exists (created by /api/telemetry/visit)
-    const session = await prisma.visitorSession.findUnique({ where: { id: sessionId } });
+    // Ensure parent visitor session exists so foreign key constraint is always met
+    let session = await prisma.visitorSession.findUnique({ where: { id: sessionId } });
     if (!session) {
-      // Silently drop — could be a race condition on first load
+      try {
+        session = await prisma.visitorSession.create({
+          data: {
+            id: sessionId,
+            entryPath: '/',
+          },
+        });
+      } catch {
+        // If created concurrently in a race condition, re-read
+        session = await prisma.visitorSession.findUnique({ where: { id: sessionId } });
+      }
+    }
+
+    if (!session) {
       return NextResponse.json({ ok: true, dropped: true });
     }
 
@@ -82,8 +59,8 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ ok: true, stored: events.length });
-  } catch (err) {
+  } catch (err: any) {
     console.error('[SessionEvent] failed:', err);
-    return NextResponse.json({ ok: false }, { status: 500 });
+    return NextResponse.json({ ok: false, error: err?.message }, { status: 500 });
   }
 }
