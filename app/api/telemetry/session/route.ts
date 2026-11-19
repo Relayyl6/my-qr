@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { maskSensitiveFields } from '@/lib/telemetry/maskSensitiveFields';
+import { isBot } from '@/lib/telemetry/trackVisit';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
+    const userAgent = req.headers.get('user-agent') || '';
+    if (isBot(userAgent)) {
+      return NextResponse.json({ ok: true, dropped: 'bot' });
+    }
+
     const body = await req.json().catch(() => ({}));
     const sessionId = typeof body.sessionId === 'string' ? body.sessionId : null;
     const events: unknown[] = Array.isArray(body.events) ? body.events : [];

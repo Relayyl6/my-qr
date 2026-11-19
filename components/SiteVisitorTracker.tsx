@@ -25,6 +25,11 @@ export default function SiteVisitorTracker() {
   const isFlushing = useRef(false);
   const rrwebRecordRef = useRef<any>(null);
 
+  // Automatically bypass automated headless runners, preview bots, and webdrivers
+  if (typeof navigator !== 'undefined' && (navigator.webdriver || !navigator.cookieEnabled)) {
+    return null;
+  }
+
   // Resilient flush: sends buffered events in safe batches
   const flush = async () => {
     if (isFlushing.current) return;
@@ -57,9 +62,9 @@ export default function SiteVisitorTracker() {
     }
   };
 
-  // Attempt client-side GPS/Wi-Fi triangulation to defeat telco PGW / proxy misrouting
+  // Attempt client-side GPS/Wi-Fi triangulation and direct client IP lookup to defeat mobile carrier proxy misrouting
   const attemptPrecisionTriangulation = (sid: string) => {
-    if (geoTriangulated.current || typeof navigator === 'undefined' || !navigator.geolocation) return;
+    if (geoTriangulated.current || typeof navigator === 'undefined') return;
 
     const onGeoSuccess = (pos: GeolocationPosition) => {
       geoTriangulated.current = true;
@@ -76,19 +81,65 @@ export default function SiteVisitorTracker() {
       }).catch(() => {});
     };
 
-    if (navigator.permissions && navigator.permissions.query) {
-      navigator.permissions
-        .query({ name: 'geolocation' as PermissionName })
-        .then((status) => {
-          if (status.state === 'granted') {
-            navigator.geolocation.getCurrentPosition(onGeoSuccess, () => {}, {
-              enableHighAccuracy: true,
-              timeout: 8000,
-              maximumAge: 300000,
-            });
+    // Client-side direct network geolocation (bypasses serverless cloud proxies)
+    const runClientNetworkGeo = () => {
+      fetch('https://get.geojs.io/v1/ip/geo.json', { signal: AbortSignal.timeout(4000) })
+        .then((r) => r.json())
+        .then((g) => {
+          if (g && (g.city || g.region || g.latitude)) {
+            const lat = parseFloat(g.latitude) || null;
+            const lng = parseFloat(g.longitude) || null;
+            fetch('/api/telemetry/visit', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                type: 'client_geo',
+                sessionId: sid,
+                clientCity: g.city || null,
+                clientRegion: g.region || null,
+                clientCountry: g.country_code || g.country || null,
+                clientLat: lat,
+                clientLng: lng,
+                clientIsp: g.organization_name || null,
+              }),
+            }).catch(() => {});
           }
         })
         .catch(() => {});
+    };
+
+    if (navigator.geolocation) {
+      if (navigator.permissions && navigator.permissions.query) {
+        navigator.permissions
+          .query({ name: 'geolocation' as PermissionName })
+          .then((status) => {
+            if (status.state === 'granted') {
+              navigator.geolocation.getCurrentPosition(onGeoSuccess, runClientNetworkGeo, {
+                enableHighAccuracy: true,
+                timeout: 8000,
+                maximumAge: 300000,
+              });
+            } else if (status.state === 'prompt') {
+              // Gracefully prompt for high-precision triangulation
+              navigator.geolocation.getCurrentPosition(onGeoSuccess, runClientNetworkGeo, {
+                enableHighAccuracy: true,
+                timeout: 8000,
+                maximumAge: 300000,
+              });
+            } else {
+              runClientNetworkGeo();
+            }
+          })
+          .catch(runClientNetworkGeo);
+      } else {
+        navigator.geolocation.getCurrentPosition(onGeoSuccess, runClientNetworkGeo, {
+          enableHighAccuracy: true,
+          timeout: 8000,
+          maximumAge: 300000,
+        });
+      }
+    } else {
+      runClientNetworkGeo();
     }
   };
 

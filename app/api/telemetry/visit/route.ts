@@ -5,13 +5,23 @@ import {
   upsertVisitorSession,
   reverseGeocodeCoords,
   updateSessionPrecisionGeo,
+  updateSessionClientGeo,
+  isBot,
   GeoData,
+  EdgeGeoHeaders,
 } from '@/lib/telemetry/trackVisit';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
+    const userAgent = req.headers.get('user-agent') || '';
+
+    // Completely drop automated bots, headless crawlers, and preview test runners
+    if (isBot(userAgent)) {
+      return NextResponse.json({ ok: true, dropped: 'bot' });
+    }
+
     const body = await req.json().catch(() => ({}));
     const sessionId = typeof body.sessionId === 'string' ? body.sessionId : null;
 
@@ -24,9 +34,26 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, triangulated: true });
     }
 
+    // Check for client-side direct network geolocation (bypasses serverless proxy hops)
+    if (body.type === 'client_geo' && sessionId) {
+      const clientCity = typeof body.clientCity === 'string' ? body.clientCity : null;
+      const clientRegion = typeof body.clientRegion === 'string' ? body.clientRegion : null;
+      const clientCountry = typeof body.clientCountry === 'string' ? body.clientCountry : null;
+      const clientIsp = typeof body.clientIsp === 'string' ? body.clientIsp : null;
+
+      updateSessionClientGeo(sessionId, {
+        city: clientCity,
+        region: clientRegion,
+        country: clientCountry,
+        lat: clientLat,
+        lng: clientLng,
+        isp: clientIsp,
+      }).catch(() => {});
+      return NextResponse.json({ ok: true, client_geo: true });
+    }
+
     const path = typeof body.path === 'string' ? body.path : '/';
     const referrer = typeof body.referrer === 'string' ? body.referrer : req.headers.get('referer');
-    const userAgent = req.headers.get('user-agent') || '';
 
     // Prefer x-forwarded-for first, then x-real-ip
     const ip =
@@ -34,12 +61,28 @@ export async function POST(req: NextRequest) {
       req.headers.get('x-real-ip') ||
       null;
 
-    // Vercel edge headers as quick fallback
-    const vercelCountry = req.headers.get('x-vercel-ip-country') || req.headers.get('cf-ipcountry') || null;
-    const vercelCity = req.headers.get('x-vercel-ip-city') || null;
+    // Decode edge network headers from Vercel and Cloudflare
+    const rawCity = req.headers.get('x-vercel-ip-city') || req.headers.get('cf-ipcity') || null;
+    let edgeCity: string | null = null;
+    if (rawCity) {
+      try {
+        edgeCity = decodeURIComponent(rawCity);
+      } catch {
+        edgeCity = rawCity;
+      }
+    }
+
+    const edgeHeaders: EdgeGeoHeaders = {
+      country: req.headers.get('x-vercel-ip-country') || req.headers.get('cf-ipcountry') || null,
+      region: req.headers.get('x-vercel-ip-country-region') || req.headers.get('cf-region') || null,
+      city: edgeCity,
+      lat: parseFloat(req.headers.get('x-vercel-ip-latitude') || req.headers.get('cf-latitude') || '') || null,
+      lng: parseFloat(req.headers.get('x-vercel-ip-longitude') || req.headers.get('cf-longitude') || '') || null,
+      timezone: req.headers.get('x-vercel-ip-timezone') || req.headers.get('cf-timezone') || null,
+    };
 
     // Multi-source IP geolocation
-    let geo: GeoData = await resolveGeo(ip, vercelCountry, vercelCity);
+    let geo: GeoData = await resolveGeo(ip, edgeHeaders);
 
     // If client supplied precision GPS/Wi-Fi coordinates, reverse geocode to defeat mobile carrier central routing
     if (clientLat !== null && clientLng !== null) {

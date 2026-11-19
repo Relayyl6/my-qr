@@ -34,6 +34,26 @@ export interface GeoData {
   source?: 'gps_wifi' | 'ip_triangulated' | 'edge_header';
 }
 
+export interface EdgeGeoHeaders {
+  country?: string | null;
+  region?: string | null;
+  city?: string | null;
+  lat?: number | null;
+  lng?: number | null;
+  timezone?: string | null;
+}
+
+/**
+ * Robust bot and automated crawler detector to prevent crawlers,
+ * headless preview runners, and datacenter scrapers from cluttering analytics.
+ */
+export function isBot(ua?: string | null): boolean {
+  if (!ua) return false;
+  return /bot|crawler|spider|bingbot|googlebot|slurp|duckduckbot|baiduspider|yandexbot|facebookexternalhit|headlesschrome|headless|phantomjs|puppeteer|playwright|selenium|prerender|vercel|lighthouse|postmanruntime|ahrefs|semrush|curl|wget|python|node-fetch/i.test(
+    ua
+  );
+}
+
 /**
  * Reverse geocodes exact coordinates (from client GPS or Wi-Fi triangulation)
  * using BigDataCloud reverse geocode client API (fast, free, no key required).
@@ -66,21 +86,30 @@ export async function reverseGeocodeCoords(
 /**
  * Multi-layer precision IP geolocation.
  * 1. Queries ipinfo.io
- * 2. Fallbacks to ipapi.co
- * 3. Fallbacks to Vercel edge headers
+ * 2. Fallbacks to freeipapi.com
+ * 3. Fallbacks to ipapi.co
+ * 4. Fallbacks to Vercel/Cloudflare edge network headers
  */
 export async function resolveGeo(
   ip: string | null,
-  vercelCountry?: string | null,
-  vercelCity?: string | null
+  edgeInput?: EdgeGeoHeaders | string | null,
+  vercelCityLegacy?: string | null
 ): Promise<GeoData> {
+  const edge: EdgeGeoHeaders =
+    typeof edgeInput === 'object' && edgeInput !== null
+      ? edgeInput
+      : {
+          country: typeof edgeInput === 'string' ? edgeInput : null,
+          city: vercelCityLegacy || null,
+        };
+
   const fallback: GeoData = {
-    country: vercelCountry || null,
-    region: null,
-    city: vercelCity || null,
-    lat: null,
-    lng: null,
-    timezone: null,
+    country: edge.country || null,
+    region: edge.region || null,
+    city: edge.city || null,
+    lat: edge.lat ?? null,
+    lng: edge.lng ?? null,
+    timezone: edge.timezone || null,
     isp: null,
     source: 'edge_header',
   };
@@ -114,12 +143,12 @@ export async function resolveGeo(
 
       if (data.country || data.city) {
         return {
-          country: data.country || vercelCountry || null,
-          region: data.region || null,
-          city: data.city || vercelCity || null,
-          lat,
-          lng,
-          timezone: data.timezone || null,
+          country: data.country || edge.country || null,
+          region: data.region || edge.region || null,
+          city: data.city || edge.city || null,
+          lat: lat ?? edge.lat ?? null,
+          lng: lng ?? edge.lng ?? null,
+          timezone: data.timezone || edge.timezone || null,
           isp: data.org || null,
           source: 'ip_triangulated',
         };
@@ -129,7 +158,32 @@ export async function resolveGeo(
     // continue to secondary
   }
 
-  // 2. Try ipapi.co fallback
+  // 2. Try freeipapi.com (reliable, high accuracy, free, no key required)
+  try {
+    const resFree = await fetch(`https://freeipapi.com/api/json/${ip}`, {
+      signal: AbortSignal.timeout(2000),
+      headers: { Accept: 'application/json' },
+    });
+    if (resFree.ok) {
+      const d = await resFree.json();
+      if (d && (d.cityName || d.countryCode)) {
+        return {
+          country: d.countryCode || edge.country || null,
+          region: d.regionName || edge.region || null,
+          city: d.cityName || edge.city || null,
+          lat: typeof d.latitude === 'number' ? d.latitude : edge.lat ?? null,
+          lng: typeof d.longitude === 'number' ? d.longitude : edge.lng ?? null,
+          timezone: d.timeZone || edge.timezone || null,
+          isp: null,
+          source: 'ip_triangulated',
+        };
+      }
+    }
+  } catch {
+    // continue to ipapi.co
+  }
+
+  // 3. Try ipapi.co fallback
   try {
     const res2 = await fetch(`https://ipapi.co/${ip}/json/`, {
       signal: AbortSignal.timeout(2000),
@@ -139,12 +193,12 @@ export async function resolveGeo(
       const d = await res2.json();
       if (!d.error) {
         return {
-          country: d.country_code || vercelCountry || null,
-          region: d.region || null,
-          city: d.city || vercelCity || null,
-          lat: typeof d.latitude === 'number' ? d.latitude : null,
-          lng: typeof d.longitude === 'number' ? d.longitude : null,
-          timezone: d.timezone || null,
+          country: d.country_code || edge.country || null,
+          region: d.region || edge.region || null,
+          city: d.city || edge.city || null,
+          lat: typeof d.latitude === 'number' ? d.latitude : edge.lat ?? null,
+          lng: typeof d.longitude === 'number' ? d.longitude : edge.lng ?? null,
+          timezone: d.timezone || edge.timezone || null,
           isp: d.org || null,
           source: 'ip_triangulated',
         };
@@ -223,10 +277,8 @@ export async function recordSiteVisit(payload: VisitPayload): Promise<void> {
   try {
     const ua = payload.userAgent || '';
 
-    // Ignore known bots / crawlers
-    if (
-      /bot|crawler|spider|googlebot|bingbot|slurp|duckduckbot|baiduspider|yandexbot|facebookexternalhit|HeadlessChrome|Prerender/i.test(ua)
-    ) {
+    // Ignore known bots, crawlers, and automated preview test runners
+    if (isBot(ua)) {
       return;
     }
 
@@ -266,14 +318,19 @@ export async function recordSiteVisit(payload: VisitPayload): Promise<void> {
 
 /**
  * Upsert a VisitorSession row for session-level aggregation.
+ * Strictly ignores bots and automated crawlers to keep admin recordings pure.
  */
 export async function upsertVisitorSession(
   sessionId: string,
   payload: VisitPayload,
   geo: GeoData
-): Promise<string> {
+): Promise<string | null> {
   try {
     const ua = payload.userAgent || '';
+    if (isBot(ua)) {
+      return null;
+    }
+
     const { device, browser, os } = parseUserAgent(ua);
     const ipHash = payload.ip ? hashIp(payload.ip) : null;
 
@@ -370,5 +427,52 @@ export async function updateSessionPrecisionGeo(
     });
   } catch (err) {
     console.warn('[Telemetry] updateSessionPrecisionGeo failed:', err);
+  }
+}
+
+/**
+ * Updates session and visits with client-side direct network geolocation
+ * (defeating carrier proxies and serverless cloud edge translation)
+ */
+export async function updateSessionClientGeo(
+  sessionId: string,
+  geo: {
+    city?: string | null;
+    region?: string | null;
+    country?: string | null;
+    lat?: number | null;
+    lng?: number | null;
+    isp?: string | null;
+  }
+): Promise<void> {
+  try {
+    if (!geo.city && !geo.region && !geo.country && !geo.lat && !geo.lng) return;
+
+    await prisma.visitorSession.update({
+      where: { id: sessionId },
+      data: {
+        ...(geo.city && { city: geo.city }),
+        ...(geo.region && { region: geo.region }),
+        ...(geo.country && { country: geo.country }),
+        ...(geo.lat !== null && geo.lat !== undefined && { lat: geo.lat }),
+        ...(geo.lng !== null && geo.lng !== undefined && { lng: geo.lng }),
+        ...(geo.isp && { isp: geo.isp }),
+        updatedAt: new Date(),
+      },
+    });
+
+    await prisma.siteVisit.updateMany({
+      where: { sessionId },
+      data: {
+        ...(geo.city && { city: geo.city }),
+        ...(geo.region && { region: geo.region }),
+        ...(geo.country && { country: geo.country }),
+        ...(geo.lat !== null && geo.lat !== undefined && { lat: geo.lat }),
+        ...(geo.lng !== null && geo.lng !== undefined && { lng: geo.lng }),
+        ...(geo.isp && { isp: geo.isp }),
+      },
+    });
+  } catch (err) {
+    console.warn('[Telemetry] updateSessionClientGeo failed:', err);
   }
 }
