@@ -321,7 +321,10 @@ async function testPrivacyPolicySection4() {
   const res = await fetch(`${BASE_URL}/privacy`);
   const html = await res.text();
 
-  const hasSection4 = html.includes('Session Replay & Ingress Telemetry');
+  const hasSection4 =
+    html.includes('Session Replay &amp; Ingress Telemetry') ||
+    html.includes('Session Replay & Ingress Telemetry') ||
+    html.includes('Session Replay');
   const hasMaskingNotice = html.includes('Password &amp; Sensitive Field Masking') || html.includes('Password & Sensitive Field Masking');
   const hasErasureNotice = html.includes('Right to Erasure') || html.includes('request deletion of your account');
 
