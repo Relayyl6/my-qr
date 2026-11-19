@@ -22,25 +22,38 @@ export default function SiteVisitorTracker() {
   const flushTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const recordingStarted = useRef(false);
   const geoTriangulated = useRef(false);
+  const isFlushing = useRef(false);
+  const rrwebRecordRef = useRef<any>(null);
 
-  // Flush buffered rrweb events to server
+  // Resilient flush: sends buffered events in safe batches
   const flush = async () => {
-    const events = eventBuffer.current.splice(0);
-    if (events.length === 0 || !sessionId.current) return;
+    if (isFlushing.current) return;
+    if (eventBuffer.current.length === 0 || !sessionId.current) return;
+
+    // Send in chunks of up to 150 events so each request is fast and well within server limits
+    const batch = eventBuffer.current.splice(0, 150);
+    isFlushing.current = true;
+
     try {
-      const blob = new Blob(
-        [JSON.stringify({ sessionId: sessionId.current, events })],
-        { type: 'application/json' }
-      );
-      navigator.sendBeacon?.('/api/telemetry/session', blob) ||
-        fetch('/api/telemetry/session', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId: sessionId.current, events }),
-          keepalive: true,
-        }).catch(() => {});
+      const res = await fetch('/api/telemetry/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: sessionId.current, events: batch }),
+      });
+
+      if (!res.ok) {
+        // If HTTP error, restore events to buffer to retry
+        eventBuffer.current.unshift(...batch);
+      }
     } catch {
-      // non-blocking
+      // Restore events to buffer on network failure
+      eventBuffer.current.unshift(...batch);
+    } finally {
+      isFlushing.current = false;
+      // If there are still events in the buffer (e.g. initial full snapshot + moves > 150), flush again
+      if (eventBuffer.current.length > 0) {
+        setTimeout(flush, 250);
+      }
     }
   };
 
@@ -63,7 +76,6 @@ export default function SiteVisitorTracker() {
       }).catch(() => {});
     };
 
-    // If permission API is present, check permission state
     if (navigator.permissions && navigator.permissions.query) {
       navigator.permissions
         .query({ name: 'geolocation' as PermissionName })
@@ -80,17 +92,22 @@ export default function SiteVisitorTracker() {
     }
   };
 
-  // Start rrweb recording once per session
+  // Start rrweb recording with full DOM capture and automatic snapshots
   const startRecording = () => {
     if (recordingStarted.current) return;
     recordingStarted.current = true;
 
     import('rrweb')
       .then(({ record }) => {
+        rrwebRecordRef.current = record;
+
         record({
           emit(event: unknown) {
             eventBuffer.current.push(event);
           },
+          // Periodic checkout ensures player can always reconstruct full DOM
+          checkoutEveryNms: 60 * 1000, // full snapshot every 60s
+          checkoutEveryNth: 200, // or every 200 events
           maskInputOptions: { password: true },
           maskInputFn: (text: string, element: Element | null) => {
             const el = element as HTMLInputElement | null;
@@ -114,20 +131,25 @@ export default function SiteVisitorTracker() {
           },
         });
 
-        flushTimer.current = setInterval(flush, 10_000);
+        // Flush the initial FullSnapshot immediately (600ms) so DOM structure is saved at once!
+        setTimeout(flush, 600);
+
+        // Regular interval flusher every 8 seconds
+        flushTimer.current = setInterval(flush, 8_000);
       })
       .catch(() => {
         // rrweb unavailable — continue without recording
       });
   };
 
-  // Page-level visit beacon on each route change
+  // Page-level visit beacon and route tracking
   useEffect(() => {
     if (!pathname) return;
     const fullPath = searchParams?.toString()
       ? `${pathname}?${searchParams.toString()}`
       : pathname;
     if (lastTrackedPath.current === fullPath) return;
+    const isNavigation = lastTrackedPath.current !== null;
     lastTrackedPath.current = fullPath;
 
     if (pathname.startsWith('/api') || pathname.startsWith('/_next')) return;
@@ -161,33 +183,59 @@ export default function SiteVisitorTracker() {
       timezone: clientTimezone,
     };
 
-    const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
-    if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
-      navigator.sendBeacon('/api/telemetry/visit', blob);
-    } else {
-      fetch('/api/telemetry/visit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        keepalive: true,
-      }).catch(() => {});
-    }
+    // Send visit ingress
+    fetch('/api/telemetry/visit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    }).catch(() => {});
 
     // Attempt precision location triangulation
     attemptPrecisionTriangulation(sessionId.current);
 
-    // Start session recording on first real page hit
-    startRecording();
+    // If already recording and navigating between routes, take a fresh full snapshot for the new page
+    if (isNavigation && rrwebRecordRef.current?.takeFullSnapshot) {
+      try {
+        rrwebRecordRef.current.takeFullSnapshot(true);
+        setTimeout(flush, 600);
+      } catch {
+        // non-blocking
+      }
+    } else {
+      // Start session recording on first page hit
+      startRecording();
+    }
   }, [pathname, searchParams]);
 
-  // Flush on tab hide / close
+  // Flush remaining buffer on tab hide or unload
   useEffect(() => {
+    const handleUnload = () => {
+      if (eventBuffer.current.length === 0 || !sessionId.current) return;
+      const batch = eventBuffer.current.splice(0);
+      const payload = JSON.stringify({ sessionId: sessionId.current, events: batch });
+
+      // Only use sendBeacon if under the 60KB browser quota limit
+      if (typeof navigator !== 'undefined' && navigator.sendBeacon && payload.length < 60_000) {
+        const blob = new Blob([payload], { type: 'application/json' });
+        navigator.sendBeacon('/api/telemetry/session', blob);
+      } else {
+        // Otherwise use standard fetch (keepalive only if under 60KB to prevent browser TypeError)
+        fetch('/api/telemetry/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payload,
+          keepalive: payload.length < 60_000,
+        }).catch(() => {});
+      }
+    };
+
     const handleVisibility = () => {
       if (document.visibilityState === 'hidden') flush();
     };
-    const handleUnload = () => flush();
+
     document.addEventListener('visibilitychange', handleVisibility);
     window.addEventListener('pagehide', handleUnload);
+
     return () => {
       document.removeEventListener('visibilitychange', handleVisibility);
       window.removeEventListener('pagehide', handleUnload);

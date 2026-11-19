@@ -34,14 +34,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, dropped: true });
     }
 
-    // Batch insert events, masking sensitive fields
+    // Batch insert events, masking sensitive fields on incremental inputs
     await prisma.sessionEvent.createMany({
       data: events.map((e: unknown) => {
         const ev = e as { type?: number; data?: unknown; timestamp?: number };
+        const evType = typeof ev.type === 'number' ? ev.type : 0;
+        const sanitizedData =
+          evType === 3
+            ? (maskSensitiveFields(ev.data ?? {}) as object)
+            : ((ev.data ?? {}) as object);
         return {
           sessionId,
-          type: typeof ev.type === 'number' ? ev.type : 0,
-          data: maskSensitiveFields(ev.data ?? {}) as object,
+          type: evType,
+          data: sanitizedData,
           timestamp: BigInt(typeof ev.timestamp === 'number' ? ev.timestamp : Date.now()),
         };
       }),
