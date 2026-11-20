@@ -20,23 +20,6 @@ const display = Space_Grotesk({ subsets: ['latin'], weight: ['500', '700'], vari
 const body = IBM_Plex_Sans({ subsets: ['latin'], weight: ['400', '500', '600'], variable: '--font-body' });
 const mono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500'], variable: '--font-mono' });
 
-function QrMark({ className = 'w-6 h-6', fill = '#11140F' }: { className?: string; fill?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none">
-      <rect x="1" y="1" width="9" height="9" rx="1.5" stroke={fill} strokeWidth="2" />
-      <rect x="4" y="4" width="3" height="3" fill={fill} />
-      <rect x="14" y="1" width="9" height="9" rx="1.5" stroke={fill} strokeWidth="2" />
-      <rect x="17" y="4" width="3" height="3" fill={fill} />
-      <rect x="1" y="14" width="9" height="9" rx="1.5" stroke={fill} strokeWidth="2" />
-      <rect x="4" y="17" width="3" height="3" fill={fill} />
-      <rect x="15" y="15" width="3" height="3" fill={fill} />
-      <rect x="20" y="15" width="3" height="3" fill={fill} />
-      <rect x="15" y="20" width="3" height="3" fill={fill} />
-      <rect x="20" y="20" width="3" height="3" fill={fill} />
-    </svg>
-  );
-}
-
 export default async function Home() {
   const user = await getCurrentUser();
   const adminEmail = (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();
@@ -222,26 +205,6 @@ export default async function Home() {
         workspaceContent={workspaceContent}
         announcementBanner={effectiveAnnouncement}
       />
-
-      <footer className="max-w-[1200px] mx-auto px-5 md:px-8 py-10 flex flex-col sm:flex-row items-center justify-between gap-4 text-[13px] text-[#11140F]/55 border-t border-[#11140F]/10">
-        <div className="flex items-center gap-2">
-          <QrMark className="w-4 h-4" fill="#11140F99" />
-          <span className="font-medium text-[#11140F]">DynamicQR</span>
-        </div>
-        <div className="flex items-center gap-6 flex-wrap text-[12.5px]">
-          <a href="/pricing" className="hover:text-[#11140F] transition-colors">Pricing</a>
-          <a href="/terms" className="hover:text-[#11140F] transition-colors">Terms</a>
-          <a href="/privacy" className="hover:text-[#11140F] transition-colors">Privacy</a>
-          <a href="/refund" className="hover:text-[#11140F] transition-colors">Refund Policy</a>
-        </div>
-        <div className="flex flex-col items-center sm:items-end gap-1">
-          <p className="text-[12px] text-[#11140F]/45">One code, printed once. Routed as long as it needs to be.</p>
-          <p className="text-[11px] text-[#11140F]/35 max-w-[340px] text-center sm:text-right">
-            🔒 By using this site, you consent to anonymised session telemetry — including page visits, device type, approximate location, and interaction recordings — used solely for platform improvement. Passwords are never captured. See our{' '}
-            <a href="/privacy" className="underline underline-offset-2 hover:text-[#11140F]/60 transition-colors">Privacy Policy</a>.
-          </p>
-        </div>
-      </footer>
     </div>
   );
 }

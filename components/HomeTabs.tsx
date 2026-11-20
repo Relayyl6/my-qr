@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import HeaderNav from './HeaderNav';
+import Footer from './Footer';
 import { ChevronRight } from 'lucide-react';
 
 interface HomeTabsProps {
@@ -67,23 +68,24 @@ export default function HomeTabs({
 
       {/* Tab 1: Dedicated Workspace View (Zero scrolling past marketing copy) */}
       {activeTab === 'workspace' && (
-        <section id="workspace" className="flex-1 bg-[#EEF0EA]">
-          <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-12 space-y-8">
+        <section id="workspace" className="flex-1 bg-[#EEF0EA] flex flex-col justify-between">
+          <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-12 space-y-8 w-full">
             {workspaceContent}
           </div>
+          <Footer theme="light" />
         </section>
       )}
 
       {/* Tab 2: Marketing Overview & Tour */}
       {activeTab === 'overview' && (
-        <div id="overview" className="flex-1">
+        <div id="overview" className="flex-1 bg-[#11140F] flex flex-col">
           {overviewContent}
 
           {/* Bottom Banner prompting user to enter Workspace */}
-          <div className="bg-[#11140F] text-white py-12 px-4 sm:px-6 border-t border-white/10">
+          <div className="bg-[#11140F] text-white py-14 px-4 sm:px-6 border-t border-white/10">
             <div className="max-w-[1240px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
               <div>
-                <h3 className="text-xl sm:text-2xl font-bold">
+                <h3 className="text-xl sm:text-2xl font-bold tracking-tight">
                   Ready to manage your dynamic codes?
                 </h3>
                 <p className="text-white/60 text-[14px] mt-1">
@@ -104,6 +106,8 @@ export default function HomeTabs({
               </button>
             </div>
           </div>
+
+          <Footer theme="dark" />
         </div>
       )}
     </div>

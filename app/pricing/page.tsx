@@ -1,6 +1,7 @@
 import { getCurrentUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
+import Footer from '@/components/Footer';
 import { ArrowLeft, ShieldCheck, Sparkles } from 'lucide-react';
 import PricingTable from '@/components/PricingTable';
 import ComprehensiveFeatureMatrix from '@/components/ComprehensiveFeatureMatrix';
@@ -151,20 +152,7 @@ export default async function PricingPage() {
         </div>
       </main>
 
-      <footer className="border-t border-[#11140F]/10 py-10 max-w-[1200px] mx-auto px-5 flex flex-col gap-4 text-[13px] text-[#11140F]/50">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p>&copy; {new Date().getFullYear()} DynamicQR • All rights reserved.</p>
-          <div className="flex items-center gap-6 text-[12.5px]">
-            <Link href="/terms" className="hover:text-[#11140F] transition-colors">Terms</Link>
-            <Link href="/privacy" className="hover:text-[#11140F] transition-colors">Privacy</Link>
-            <Link href="/refund" className="hover:text-[#11140F] transition-colors">Refund Policy</Link>
-          </div>
-        </div>
-        <p className="text-[11px] text-[#11140F]/35 text-center max-w-[520px] mx-auto">
-          🔒 By visiting this site, you consent to anonymised session telemetry — page visits, device type, approximate location, and interaction recordings — used solely for platform improvement. Passwords are never captured. See our{' '}
-          <Link href="/privacy" className="underline underline-offset-2 hover:text-[#11140F]/55">Privacy Policy</Link>.
-        </p>
-      </footer>
+      <Footer theme="light" />
     </div>
   );
 }

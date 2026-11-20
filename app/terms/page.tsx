@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Footer from '@/components/Footer';
 import { ArrowLeft } from 'lucide-react';
 
 export const metadata = {
@@ -75,6 +76,7 @@ export default function TermsPage() {
           </p>
         </section>
       </main>
+      <Footer theme="light" />
     </div>
   );
 }

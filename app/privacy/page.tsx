@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Footer from '@/components/Footer';
 import { ArrowLeft } from 'lucide-react';
 
 export const metadata = {
@@ -77,10 +78,7 @@ export default function PrivacyPage() {
         </section>
       </main>
 
-      <footer className="border-t border-[#11140F]/10 py-8 max-w-[900px] mx-auto px-5 text-center text-[12px] text-[#11140F]/40 space-y-2">
-        <p>🔒 By using this site, you consent to anonymised session telemetry and precision entry logging. Passwords are never captured.</p>
-        <p>&copy; {new Date().getFullYear()} DynamicQR • All rights reserved.</p>
-      </footer>
+      <Footer theme="light" />
     </div>
   );
 }

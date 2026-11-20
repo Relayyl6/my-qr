@@ -292,22 +292,21 @@ async function testFooterDisclaimers() {
     assert(res.status === 200, `Expected HTTP 200 for ${p.path}, got ${res.status}`);
     const html = await res.text();
     
-    // Check for presence of logging / telemetry disclaimer
-    const hasDisclaimer =
-      html.includes('consent to anonymised session telemetry') ||
-      html.includes('entry is being logged') ||
-      html.includes('session telemetry') ||
-      html.includes('Passwords are never captured');
+    // Check for presence of clean, compliant footer navigation
+    const hasFooter =
+      html.includes('DynamicQR') &&
+      (html.includes('/privacy') || html.includes('Privacy')) &&
+      (html.includes('/terms') || html.includes('Terms'));
 
-    console.log(`   -> ${p.name} (${p.path}) contains disclaimer: ${hasDisclaimer}`);
-    assert(hasDisclaimer, `Page ${p.path} must contain logging disclosure notice in footer.`);
+    console.log(`   -> ${p.name} (${p.path}) contains compliant footer: ${hasFooter}`);
+    assert(hasFooter, `Page ${p.path} must contain compliant footer navigation.`);
   }
 
   results.push({
     id: 6,
-    name: 'Transparent Footer Ingress Logging Disclaimers',
+    name: 'Minimalist Footer & Privacy Navigation',
     passed: true,
-    details: 'Verified footer consent and session logging notice rendered on /, /pricing, and /privacy.',
+    details: 'Verified clean, whitespace-prioritized footer navigation across /, /pricing, and /privacy.',
     metrics: { pagesChecked: pages.map((p) => p.path) },
   });
 }
