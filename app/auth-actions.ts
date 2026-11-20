@@ -54,7 +54,7 @@ export async function signUp(prevState: AuthState, formData: FormData): Promise<
       subject: '🚀 Welcome to DynamicQR - One code, printed once',
       html: buildWelcomeEmailHtml({
         email,
-        name: user.name,
+        name: user.name || undefined,
       }),
     }).catch((err) => console.error('[Welcome Email Error]:', err));
 
