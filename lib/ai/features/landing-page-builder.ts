@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { runAI } from "@/lib/ai/run";
+import { assertFeatureAccess } from "@/lib/ai/flags";
 import { LandingPageSpec } from "@/lib/landing/types";
 import "@/lib/ai/prompts/landing-page-builder.v1";
 
@@ -15,6 +16,11 @@ export async function buildLandingPageSpecAction(
   const user = await getCurrentUser();
   if (!user) {
     throw new Error("Authentication required to build AI landing pages.");
+  }
+
+  const access = await assertFeatureAccess(user.id, "landing-page-builder");
+  if (!access.allowed) {
+    throw new Error(access.reason || "Prompt-to-Page AI Mobile Landing Pages require a Pro, Plus, or Ultra subscription.");
   }
 
   const cacheSeed = `${promptText.trim().toLowerCase()}_${destinationUrl || ''}`;
@@ -45,6 +51,11 @@ export async function saveLandingPageAction(
   const user = await getCurrentUser();
   if (!user) {
     throw new Error("Unauthorized.");
+  }
+
+  const access = await assertFeatureAccess(user.id, "landing-page-builder");
+  if (!access.allowed) {
+    throw new Error(access.reason || "Saving AI Mobile Landing Pages requires a Pro, Plus, or Ultra subscription.");
   }
 
   // Ensure link exists and belongs to user

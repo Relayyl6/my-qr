@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import {
   orchestrateBulkImportAction,
   applyOrchestratedCampaignAction,
@@ -15,10 +16,13 @@ import {
   X,
   ArrowRight,
   Zap,
+  Lock,
 } from 'lucide-react';
 import AiProgressTracker from '@/components/AiProgressTracker';
 
 interface BulkImportWizardProps {
+  userTier?: string;
+  isAdmin?: boolean;
   onImportComplete?: () => void;
   onClose?: () => void;
 }
@@ -76,9 +80,72 @@ export function createLocalFallback(items: { destinationUrl: string; label?: str
 }
 
 export default function BulkImportWizard({
+  userTier = 'free',
+  isAdmin = false,
   onImportComplete,
   onClose,
 }: BulkImportWizardProps) {
+  const isEligible = isAdmin || ['pro', 'plus', 'ultra'].includes(userTier.toLowerCase());
+
+  if (!isEligible) {
+    return (
+      <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-[#11140F]/10 space-y-6 animate-in fade-in zoom-in-95 duration-150">
+        <div className="flex items-center justify-between pb-4 border-b border-[#11140F]/10">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+              <Layers className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-[16px] text-[#11140F]">Bulk Link Ingestion (AI)</h3>
+              <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full bg-[#11140F]/5 text-[#11140F]/70 uppercase tracking-wider">
+                Pro & Higher
+              </span>
+            </div>
+          </div>
+          {onClose && (
+            <button onClick={onClose} className="p-1 rounded-lg text-[#11140F]/50 hover:bg-[#11140F]/5 cursor-pointer">
+              <X className="w-5 h-5" />
+            </button>
+          )}
+        </div>
+
+        <div className="space-y-4">
+          <p className="text-[14px] text-[#11140F]/70 leading-relaxed">
+            AI Bulk Link Ingestion automatically clusters CSV/text batches into organized campaigns, generates semantic shortcodes, and deploys high-speed 307 routing rules in bulk.
+          </p>
+          <div className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-4 space-y-2 text-[12.5px] text-emerald-900">
+            <p className="font-semibold">Included on Pro, Plus & Ultra Plans:</p>
+            <ul className="space-y-1 list-disc pl-4 text-emerald-800/80">
+              <li>Up to 50 active links on Pro, 500 on Plus, unlimited on Ultra</li>
+              <li>Batch CSV and plain text paste ingestion</li>
+              <li>AI campaign semantic naming & tag classification</li>
+              <li>Instant 1-click batch generation</li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="pt-2 flex items-center justify-end gap-3">
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="px-4 py-2.5 rounded-xl border border-[#11140F]/15 text-[#11140F] text-[13px] font-medium hover:bg-[#EEF0EA] cursor-pointer"
+            >
+              Close
+            </button>
+          )}
+          <Link
+            href="/pricing"
+            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#11140F] text-white text-[13px] font-semibold hover:bg-[#2A2E25] transition-colors shadow-xs cursor-pointer"
+          >
+            <Lock className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Upgrade to Pro</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   const [rawText, setRawText] = useState(PRESET_BATCHES[0].text);
   const [loading, setLoading] = useState(false);
   const [applying, setApplying] = useState(false);

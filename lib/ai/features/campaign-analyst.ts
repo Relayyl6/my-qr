@@ -2,6 +2,7 @@
 
 import { aggregateUserScans, AggregatedStatsBlob } from "@/lib/analytics/aggregate";
 import { runAI } from "@/lib/ai/run";
+import { assertFeatureAccess } from "@/lib/ai/flags";
 import { CampaignAnalystOutput } from "@/lib/ai/prompts/campaign-analyst.v1";
 import { prompt as campaignAnalystPrompt } from "@/lib/ai/prompts/campaign-analyst.v1";
 import { getCurrentUser } from "@/lib/auth";
@@ -21,6 +22,11 @@ export async function getCampaignAnalysisAction(
   const user = await getCurrentUser();
   if (!user) {
     throw new Error("Authentication required to view AI marketing intelligence.");
+  }
+
+  const access = await assertFeatureAccess(user.id, "campaign-analyst");
+  if (!access.allowed) {
+    throw new Error(access.reason || "AI Campaign Analyst requires a Pro, Plus, or Ultra subscription.");
   }
 
   // 1. Pre-aggregate user's scans
@@ -48,6 +54,9 @@ export async function getCampaignAnalysisAction(
       isFallback: aiResult.isFallback,
     };
   } catch (err: any) {
+    if (err.message?.includes("requires a") || err.message?.includes("subscription") || err.message?.includes("Authentication")) {
+      throw err;
+    }
     console.warn("[getCampaignAnalysisAction] Using deterministic fallback:", err.message);
     const fallbackOutput = campaignAnalystPrompt.fallback
       ? campaignAnalystPrompt.fallback(stats)
@@ -76,6 +85,11 @@ export async function executeAnalystDecisionAction(params: {
   const user = await getCurrentUser();
   if (!user) {
     throw new Error("Authentication required.");
+  }
+
+  const access = await assertFeatureAccess(user.id, "campaign-analyst");
+  if (!access.allowed) {
+    throw new Error(access.reason || "Executing AI Campaign Analyst recommendations requires a Pro, Plus, or Ultra subscription.");
   }
 
   const { actionTitle, actionType, targetShortCode, suggestedValue } = params;

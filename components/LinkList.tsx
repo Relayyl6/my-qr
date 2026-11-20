@@ -405,24 +405,36 @@ export default function LinkList({
                         <button
                           type="button"
                           onClick={() => setActiveArtLink(link)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-purple-500/20 bg-purple-50/60 hover:bg-purple-100/80 text-[11px] font-medium text-purple-800 transition-colors"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-purple-500/20 bg-purple-50/60 hover:bg-purple-100/80 text-[11px] font-medium text-purple-800 transition-colors cursor-pointer"
                         >
                           <Palette className="w-3 h-3 text-purple-600" />
-                          QR Art Studio
+                          <span>QR Art Studio</span>
+                          {!isAdmin && !['plus', 'ultra'].includes(userTier.toLowerCase()) && (
+                            <span className="text-[9.5px] font-mono px-1.5 py-0.2 rounded bg-purple-200/80 text-purple-900 font-semibold uppercase">
+                              Plus
+                            </span>
+                          )}
                         </button>
                         <button
                           type="button"
                           onClick={() => setActivePageLink(link)}
-                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border text-[11px] font-medium transition-colors ${
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-medium transition-colors cursor-pointer ${
                             link.type === 'landing-page' && link.landingPage?.published
                               ? 'border-blue-400 bg-blue-100/80 text-blue-900 font-semibold'
                               : 'border-blue-500/20 bg-blue-50/60 hover:bg-blue-100/80 text-blue-800'
                           }`}
                         >
                           <Smartphone className="w-3 h-3 text-blue-600" />
-                          {link.type === 'landing-page' && link.landingPage?.published
-                            ? 'Edit Mobile Page'
-                            : 'Prompt-to-Page'}
+                          <span>
+                            {link.type === 'landing-page' && link.landingPage?.published
+                              ? 'Edit Mobile Page'
+                              : 'Prompt-to-Page'}
+                          </span>
+                          {!isAdmin && userTier.toLowerCase() === 'free' && (
+                            <span className="text-[9.5px] font-mono px-1.5 py-0.2 rounded bg-blue-200/80 text-blue-900 font-semibold uppercase">
+                              Pro
+                            </span>
+                          )}
                         </button>
                         {isAdmin || ['pro', 'plus', 'ultra'].includes(userTier.toLowerCase()) ? (
                           <a
@@ -476,6 +488,8 @@ export default function LinkList({
             shortCode={activeArtLink.shortCode}
             destinationUrl={activeArtLink.destinationUrl}
             label={activeArtLink.label}
+            userTier={userTier}
+            isAdmin={isAdmin}
             onClose={() => setActiveArtLink(null)}
           />
         </div>
@@ -490,6 +504,8 @@ export default function LinkList({
             destinationUrl={activePageLink.destinationUrl}
             initialSpec={activePageLink.landingPage?.spec}
             isCurrentlyActive={activePageLink.type === 'landing-page' && Boolean(activePageLink.landingPage?.published)}
+            userTier={userTier}
+            isAdmin={isAdmin}
             onSaved={() => {
               window.location.reload();
             }}

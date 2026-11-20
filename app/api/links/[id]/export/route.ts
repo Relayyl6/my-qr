@@ -38,6 +38,15 @@ export async function GET(
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
+  const userTier = (user.tier || 'free').toLowerCase();
+  const isEligible = isAdmin || ['pro', 'plus', 'ultra'].includes(userTier);
+  if (!isEligible) {
+    return NextResponse.json(
+      { error: 'CSV Scan History export requires a Pro, Plus, or Ultra subscription.' },
+      { status: 403 }
+    );
+  }
+
   // Build CSV content
   const headers = ['Scanned At (UTC)', 'Device OS', 'Country', 'City', 'Rule Matched', 'Referrer', 'User Agent'];
   const rows = link.scans.map((s) => [

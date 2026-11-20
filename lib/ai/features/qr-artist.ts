@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { runAI } from "@/lib/ai/run";
+import { assertFeatureAccess } from "@/lib/ai/flags";
 import { QrStyleSpec } from "@/lib/ai/prompts/qr-artist.v1";
 import { prompt as qrArtistPrompt } from "@/lib/ai/prompts/qr-artist.v1";
 import { calculateScannability, ScannabilityResult } from "@/lib/qr/scannability";
@@ -20,6 +21,11 @@ export async function generateQrArtSpecAction(
   const user = await getCurrentUser();
   if (!user) {
     throw new Error("Authentication required for AI Artistic QR generation.");
+  }
+
+  const access = await assertFeatureAccess(user.id, "qr-artist");
+  if (!access.allowed) {
+    throw new Error(access.reason || "QR Art Studio requires a Plus or Ultra subscription.");
   }
 
   try {
@@ -43,6 +49,9 @@ export async function generateQrArtSpecAction(
       latencyMs: aiResult.latencyMs,
     };
   } catch (err: any) {
+    if (err.message?.includes("requires a") || err.message?.includes("subscription") || err.message?.includes("Authentication")) {
+      throw err;
+    }
     console.warn("[generateQrArtSpecAction] Using deterministic fallback:", err.message);
     const fallbackSpec = qrArtistPrompt.fallback
       ? qrArtistPrompt.fallback({ prompt: promptText })

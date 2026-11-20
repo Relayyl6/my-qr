@@ -66,6 +66,8 @@ export default function WorkspaceHeaderActions({ isAdmin = false, user }: Props)
       {showBulkModal && (
         <div className="fixed inset-0 z-50 bg-[#11140F]/40 backdrop-blur-xs flex items-center justify-center p-4">
           <BulkImportWizard
+            userTier={user?.tier || 'free'}
+            isAdmin={isAdmin}
             onImportComplete={() => {
               window.location.reload();
             }}

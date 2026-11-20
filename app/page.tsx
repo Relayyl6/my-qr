@@ -161,8 +161,8 @@ export default async function Home() {
             daysUntilReset={daysUntilReset}
           />
 
-          {/* Feature 3: AI Campaign Analyst Panel */}
-          <CampaignAnalyst />
+          {/* Feature 3: AI Campaign Analyst Panel (Pro, Plus, Ultra) */}
+          <CampaignAnalyst userTier={user.tier || 'free'} isAdmin={isAdmin} />
 
           {/* Feature 4: Custom Branded Domains (Plus & Ultra) */}
           <BrandedDomainsManager

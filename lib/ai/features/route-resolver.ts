@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { runAI } from "@/lib/ai/run";
+import { assertFeatureAccess } from "@/lib/ai/flags";
 import { RouteResolverOutput } from "@/lib/ai/prompts/route-resolver.v1";
 import { prompt as routeResolverPrompt } from "@/lib/ai/prompts/route-resolver.v1";
 import { CompiledRule } from "@/lib/routing/types";
@@ -21,6 +22,11 @@ export async function compileRulesAction(
   const user = await getCurrentUser();
   if (!user) {
     throw new Error("Authentication required to use AI Smart Destination Router.");
+  }
+
+  const access = await assertFeatureAccess(user.id, "route-resolver");
+  if (!access.allowed) {
+    throw new Error(access.reason || "Smart Destination Router requires a Pro, Plus, or Ultra subscription.");
   }
 
   try {
@@ -42,6 +48,9 @@ export async function compileRulesAction(
       isFallback: aiResult.isFallback ?? false,
     };
   } catch (err: any) {
+    if (err.message?.includes("requires a") || err.message?.includes("subscription") || err.message?.includes("Authentication")) {
+      throw err;
+    }
     console.warn("[compileRulesAction] Using deterministic fallback:", err.message);
     const fallbackOutput: RouteResolverOutput = routeResolverPrompt.fallback
       ? routeResolverPrompt.fallback({ naturalLanguagePrompt: promptText, defaultDestination })
@@ -85,14 +94,13 @@ export async function saveRoutingRulesAction(
     throw new Error("Link not found or access denied.");
   }
 
-  // Tier Guard: Autonomous Ingress time & day scheduling is only available on Pro, Plus, and Ultra
+  // Tier Guard: Conditional routing rules are only available on Pro, Plus, and Ultra
   const userTier = (user.tier || "free").toLowerCase();
-  const hasScheduleRules = rules.some((r) =>
-    (r.conditions as any[]).some((c) => c.type === "schedule")
-  );
-  if (hasScheduleRules && userTier === "free") {
+  const adminEmail = (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();
+  const isAdmin = user.email.toLowerCase() === adminEmail;
+  if (!isAdmin && userTier === "free" && rules.length > 0) {
     throw new Error(
-      "Autonomous Ingress scheduling by time and day of week is an industry-grade feature available on Pro, Plus, and Ultra plans. Please upgrade your plan to deploy scheduled destinations."
+      "Smart Conditional Routing (device splitting and schedule rules) is a Pro feature. Please upgrade your plan to deploy routing rules."
     );
   }
 

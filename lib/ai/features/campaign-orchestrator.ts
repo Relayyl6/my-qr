@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { runAI } from "@/lib/ai/run";
+import { assertFeatureAccess } from "@/lib/ai/flags";
 import {
   BulkImportRawItem,
   CampaignOrchestratorOutput,
@@ -15,6 +16,11 @@ export async function orchestrateBulkImportAction(
   const user = await getCurrentUser();
   if (!user) {
     throw new Error("Authentication required for Bulk Campaign Orchestrator.");
+  }
+
+  const access = await assertFeatureAccess(user.id, "campaign-orchestrator");
+  if (!access.allowed) {
+    throw new Error(access.reason || "Bulk Link Ingestion requires a Pro, Plus, or Ultra subscription.");
   }
 
   try {
@@ -32,6 +38,9 @@ export async function orchestrateBulkImportAction(
       isFallback: aiResult.isFallback ?? false,
     };
   } catch (err: any) {
+    if (err.message?.includes("requires a") || err.message?.includes("subscription") || err.message?.includes("Authentication")) {
+      throw err;
+    }
     console.warn("[orchestrateBulkImportAction] Using deterministic fallback:", err.message);
     const fallbackOutput = orchestratorPrompt.fallback
       ? orchestratorPrompt.fallback({ items })
@@ -68,6 +77,30 @@ export async function applyOrchestratedCampaignAction(
   const user = await getCurrentUser();
   if (!user) {
     throw new Error("Unauthorized.");
+  }
+
+  const access = await assertFeatureAccess(user.id, "campaign-orchestrator");
+  if (!access.allowed) {
+    throw new Error(access.reason || "Deploying bulk campaigns requires a Pro, Plus, or Ultra subscription.");
+  }
+
+  // Enforce tier link limits
+  const tier = (user.tier || "free").toLowerCase();
+  const linkLimits: Record<string, number> = { free: 5, pro: 50, plus: 500, ultra: 999999 };
+  const adminEmail = (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();
+  const isAdmin = user.email.toLowerCase() === adminEmail;
+
+  if (!isAdmin) {
+    const maxAllowed = linkLimits[tier] ?? 5;
+    const currentActive = await prisma.qrLink.count({
+      where: { userId: user.id, isArchived: false },
+    });
+    const totalNew = campaigns.reduce((acc, c) => acc + c.items.length, 0);
+    if (currentActive + totalNew > maxAllowed) {
+      throw new Error(
+        `Importing ${totalNew} links would exceed your ${tier.toUpperCase()} plan limit of ${maxAllowed} active links (${currentActive} currently active). Please upgrade your plan or reduce the import count.`
+      );
+    }
   }
 
   let createdCount = 0;

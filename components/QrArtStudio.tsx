@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useId } from 'react';
+import Link from 'next/link';
 import { QRCodeSVG } from 'qrcode.react';
 import QRCode from 'qrcode';
 import { generateQrArtSpecAction, saveQrArtworkAction } from '@/lib/ai/features/qr-artist';
@@ -18,6 +19,8 @@ import {
   Shield,
   Gem,
   Award,
+  Lock,
+  ArrowRight,
 } from 'lucide-react';
 import { downloadSvgFile, extractCleanSvgMarkup } from '@/lib/qr/exportVector';
 import AiProgressTracker from '@/components/AiProgressTracker';
@@ -27,6 +30,8 @@ interface QrArtStudioProps {
   shortCode: string;
   destinationUrl: string;
   label?: string | null;
+  userTier?: string;
+  isAdmin?: boolean;
   onClose?: () => void;
 }
 
@@ -134,8 +139,71 @@ export default function QrArtStudio({
   shortCode,
   destinationUrl,
   label,
+  userTier = 'free',
+  isAdmin = false,
   onClose,
 }: QrArtStudioProps) {
+  const isEligible = isAdmin || ['plus', 'ultra'].includes(userTier.toLowerCase());
+
+  if (!isEligible) {
+    return (
+      <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-[#11140F]/10 space-y-6 animate-in fade-in zoom-in-95 duration-150">
+        <div className="flex items-center justify-between pb-4 border-b border-[#11140F]/10">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center">
+              <Palette className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-[16px] text-[#11140F]">AI QR Art Studio</h3>
+              <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 uppercase tracking-wider">
+                Plus & Ultra Plan
+              </span>
+            </div>
+          </div>
+          {onClose && (
+            <button onClick={onClose} className="p-1 rounded-lg text-[#11140F]/50 hover:bg-[#11140F]/5 cursor-pointer">
+              <X className="w-5 h-5" />
+            </button>
+          )}
+        </div>
+
+        <div className="space-y-4">
+          <p className="text-[14px] text-[#11140F]/70 leading-relaxed">
+            AI QR Art Studio enables you to generate custom branded, high-contrast artistic QR codes with gradient colors, vector SVG exports, and center emblems.
+          </p>
+          <div className="rounded-xl border border-purple-100 bg-purple-50/50 p-4 space-y-2 text-[12.5px] text-purple-900">
+            <p className="font-semibold">Included on Plus & Ultra Plans:</p>
+            <ul className="space-y-1 list-disc pl-4 text-purple-800/80">
+              <li>High-contrast AI artistic styling & gradient fills</li>
+              <li>Scannability safety scoring & automatic contrast validation</li>
+              <li>Vector SVG print exports and 300 DPI downloads</li>
+              <li>Custom branded center emblems</li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="pt-2 flex items-center justify-end gap-3">
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="px-4 py-2.5 rounded-xl border border-[#11140F]/15 text-[#11140F] text-[13px] font-medium hover:bg-[#EEF0EA] cursor-pointer"
+            >
+              Close
+            </button>
+          )}
+          <Link
+            href="/pricing"
+            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#2F6B4F] text-white text-[13px] font-semibold hover:bg-[#25553E] transition-colors shadow-xs cursor-pointer"
+          >
+            <Lock className="w-3.5 h-3.5" />
+            <span>Upgrade to Plus</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   const gradientId = useId().replace(/:/g, '');
   const [selectedPreset, setSelectedPreset] = useState<ArtPreset>(ART_PRESETS[0]);
   const [promptText, setPromptText] = useState(ART_PRESETS[0].prompt);

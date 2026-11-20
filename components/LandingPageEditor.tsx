@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import {
   buildLandingPageSpecAction,
   saveLandingPageAction,
@@ -30,6 +31,8 @@ import {
   ArrowUp,
   ArrowDown,
   Layers,
+  Lock,
+  ArrowRight,
 } from 'lucide-react';
 
 interface LandingPageEditorProps {
@@ -38,6 +41,8 @@ interface LandingPageEditorProps {
   destinationUrl: string;
   initialSpec?: LandingPageSpec | null;
   isCurrentlyActive?: boolean;
+  userTier?: string;
+  isAdmin?: boolean;
   onSaved?: () => void;
   onReverted?: () => void;
   onClose?: () => void;
@@ -49,10 +54,71 @@ export default function LandingPageEditor({
   destinationUrl,
   initialSpec,
   isCurrentlyActive = false,
+  userTier = 'free',
+  isAdmin = false,
   onSaved,
   onReverted,
   onClose,
 }: LandingPageEditorProps) {
+  const isEligible = isAdmin || ['pro', 'plus', 'ultra'].includes(userTier.toLowerCase());
+
+  if (!isEligible) {
+    return (
+      <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-[#11140F]/10 space-y-6 animate-in fade-in zoom-in-95 duration-150">
+        <div className="flex items-center justify-between pb-4 border-b border-[#11140F]/10">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
+              <Smartphone className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-[16px] text-[#11140F]">Prompt-to-Page (AI)</h3>
+              <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 uppercase tracking-wider">
+                Pro & Higher
+              </span>
+            </div>
+          </div>
+          {onClose && (
+            <button onClick={onClose} className="p-1 rounded-lg text-[#11140F]/50 hover:bg-[#11140F]/5 cursor-pointer">
+              <X className="w-5 h-5" />
+            </button>
+          )}
+        </div>
+
+        <div className="space-y-4">
+          <p className="text-[14px] text-[#11140F]/70 leading-relaxed">
+            Prompt-to-Page generates high-converting, mobile-optimized micro landing pages from a simple text description.
+          </p>
+          <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-4 space-y-2 text-[12.5px] text-blue-900">
+            <p className="font-semibold">Included on Pro, Plus & Ultra Plans:</p>
+            <ul className="space-y-1 list-disc pl-4 text-blue-800/80">
+              <li>Instant AI generation of links, hours, menus & showcase cards</li>
+              <li>Responsive live mobile & tablet preview simulator</li>
+              <li>Zero-reprint activation: instantly point physical codes to the page</li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="pt-2 flex items-center justify-end gap-3">
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="px-4 py-2.5 rounded-xl border border-[#11140F]/15 text-[#11140F] text-[13px] font-medium hover:bg-[#EEF0EA] cursor-pointer"
+            >
+              Close
+            </button>
+          )}
+          <Link
+            href="/pricing"
+            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#11140F] text-white text-[13px] font-semibold hover:bg-[#2A2E25] transition-colors shadow-xs cursor-pointer"
+          >
+            <Lock className="w-3.5 h-3.5 text-blue-400" />
+            <span>Upgrade to Pro</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      </div>
+    );
+  }
   const [promptText, setPromptText] = useState(
     'Create an artisanal showcase & links page with our core website, booking specials, opening hours, and Instagram link.'
   );

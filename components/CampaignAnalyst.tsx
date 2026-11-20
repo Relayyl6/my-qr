@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import {
   getCampaignAnalysisAction,
   executeAnalystDecisionAction,
@@ -18,10 +19,16 @@ import {
   CheckCircle,
   Loader2,
   Check,
+  Lock,
 } from 'lucide-react';
 import AiProgressTracker from '@/components/AiProgressTracker';
 
-export default function CampaignAnalyst() {
+interface CampaignAnalystProps {
+  userTier?: string;
+  isAdmin?: boolean;
+}
+
+export default function CampaignAnalyst({ userTier = 'free', isAdmin = false }: CampaignAnalystProps) {
   const [data, setData] = useState<CampaignAnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +36,10 @@ export default function CampaignAnalyst() {
   const [applyingTitle, setApplyingTitle] = useState<string | null>(null);
   const [decisionFeedback, setDecisionFeedback] = useState<string | null>(null);
 
+  const isEligible = isAdmin || ['pro', 'plus', 'ultra'].includes(userTier.toLowerCase());
+
   const fetchInsights = async (force = false) => {
+    if (!isEligible) return;
     setLoading(true);
     setError(null);
     try {
@@ -43,8 +53,10 @@ export default function CampaignAnalyst() {
   };
 
   useEffect(() => {
-    fetchInsights(false);
-  }, []);
+    if (isEligible) {
+      fetchInsights(false);
+    }
+  }, [isEligible]);
 
   const handleApplyAction = async (action: any) => {
     setApplyingTitle(action.title);
@@ -67,6 +79,69 @@ export default function CampaignAnalyst() {
       setApplyingTitle(null);
     }
   };
+
+  if (!isEligible) {
+    return (
+      <div className="rounded-2xl border border-[#11140F]/10 bg-white p-6 sm:p-7 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#11140F]/10">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="font-semibold text-[17px] text-[#11140F]">AI Campaign Analyst</h3>
+                <span className="text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full bg-[#11140F]/5 text-[#11140F]/70 uppercase tracking-wider">
+                  Pro & Higher
+                </span>
+              </div>
+              <p className="text-[13px] text-[#11140F]/60 mt-0.5">
+                Automated scan behavior diagnosis & actionable recommendations
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/pricing"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#11140F] text-white text-[13px] font-medium hover:bg-[#2A2E25] transition-colors shadow-xs self-start sm:self-auto cursor-pointer"
+          >
+            <Lock className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Upgrade to Pro</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+
+        <div className="pt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="rounded-xl border border-[#11140F]/8 bg-[#F7F8F5] p-4 space-y-1.5">
+            <div className="flex items-center gap-2 text-emerald-700 text-[13px] font-medium">
+              <TrendingUp className="w-4 h-4" />
+              <span>Scan Behavior Diagnostics</span>
+            </div>
+            <p className="text-[12px] text-[#11140F]/60 leading-relaxed">
+              Detect device drop-offs, diurnal peak hours, and scanner conversion rates across your campaigns.
+            </p>
+          </div>
+          <div className="rounded-xl border border-[#11140F]/8 bg-[#F7F8F5] p-4 space-y-1.5">
+            <div className="flex items-center gap-2 text-emerald-700 text-[13px] font-medium">
+              <Lightbulb className="w-4 h-4" />
+              <span>1-Click Automated Interventions</span>
+            </div>
+            <p className="text-[12px] text-[#11140F]/60 leading-relaxed">
+              Receive AI-prescribed optimizations and apply them directly to conditional physical media routing.
+            </p>
+          </div>
+          <div className="rounded-xl border border-[#11140F]/8 bg-[#F7F8F5] p-4 space-y-1.5">
+            <div className="flex items-center gap-2 text-emerald-700 text-[13px] font-medium">
+              <Sparkles className="w-4 h-4" />
+              <span>High-ROI Recommendations</span>
+            </div>
+            <p className="text-[12px] text-[#11140F]/60 leading-relaxed">
+              Identify stale flyers, optimize mobile landing pages, and boost physical scan ROI automatically.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (error) {
     return (

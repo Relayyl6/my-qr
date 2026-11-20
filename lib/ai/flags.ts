@@ -141,8 +141,8 @@ export async function assertFeatureAccess(
       return { allowed: true, userTier: "ultra", tierConfig: TIER_CONFIGS.ultra };
     }
 
-    const userTierKey = (user?.tier as string)?.toLowerCase() || "pro";
-    const tierConfig = TIER_CONFIGS[userTierKey] || TIER_CONFIGS.pro;
+    const userTierKey = (user?.tier as string)?.toLowerCase() || "free";
+    const tierConfig = TIER_CONFIGS[userTierKey] || TIER_CONFIGS.free;
     const requiredConfig = TIER_CONFIGS[config.tier] || TIER_CONFIGS.pro;
 
     if (tierConfig.level < requiredConfig.level) {
@@ -157,7 +157,11 @@ export async function assertFeatureAccess(
     return { allowed: true, userTier: userTierKey as UserTier, tierConfig };
   } catch (error) {
     console.error("Error checking feature access:", error);
-    // Allow in dev / fallback to pro
-    return { allowed: true, userTier: "pro", tierConfig: TIER_CONFIGS.pro };
+    return {
+      allowed: false,
+      userTier: "free",
+      tierConfig: TIER_CONFIGS.free,
+      reason: "Error verifying subscription tier.",
+    };
   }
 }
