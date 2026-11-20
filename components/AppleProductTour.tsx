@@ -1,7 +1,29 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition, memo } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+
+const MemoizedQRCode = memo(function MemoizedQRCode({
+  value,
+  size,
+  level = 'M',
+  fgColor = '#11140F',
+}: {
+  value: string;
+  size: number;
+  level?: 'L' | 'M' | 'Q' | 'H';
+  fgColor?: string;
+}) {
+  return (
+    <QRCodeSVG
+      value={value}
+      size={size}
+      level={level}
+      fgColor={fgColor}
+      includeMargin={false}
+    />
+  );
+});
 import {
   Smartphone,
   Sparkles,
@@ -150,6 +172,7 @@ const COMPARISON = [
 export default function AppleProductTour({ onOpenWorkspace }: Props) {
   const [activeTab, setActiveTab] = useState<IndustryTab>('hospitality');
   const [simulatedDevice, setSimulatedDevice] = useState<'ios' | 'android' | 'desktop'>('ios');
+  const [, startTransition] = useTransition();
 
   const handleOpenWorkspace = () => {
     if (onOpenWorkspace) {
@@ -259,12 +282,11 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
                     {/* Camera Viewfinder & Actual Scannable QR Code */}
                     <div className="relative my-auto flex flex-col items-center justify-center p-2">
                       <div className="relative p-2.5 rounded-2xl bg-white shadow-2xl border-2 border-white/90">
-                        <QRCodeSVG
+                        <MemoizedQRCode
                           value="https://apps.apple.com/app/festival-guide/id8921"
                           size={118}
                           level="H"
                           fgColor="#11140F"
-                          includeMargin={false}
                         />
                         {/* Animated Laser Scanning Line */}
                         <div className="absolute inset-x-2 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_8px_#34d399] animate-pulse top-1/2 -translate-y-1/2" />
@@ -334,12 +356,11 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
                     {/* Camera Viewfinder & Actual Scannable QR Code */}
                     <div className="relative my-auto flex flex-col items-center justify-center p-2">
                       <div className="relative p-2.5 rounded-2xl bg-white shadow-2xl border-2 border-white/90">
-                        <QRCodeSVG
+                        <MemoizedQRCode
                           value="https://play.google.com/store/apps/details?id=festival.guide"
                           size={118}
                           level="H"
                           fgColor="#11140F"
-                          includeMargin={false}
                         />
                         {/* Animated Laser Scanning Line */}
                         <div className="absolute inset-x-2 h-0.5 bg-gradient-to-r from-transparent via-teal-400 to-transparent shadow-[0_0_8px_#2dd4bf] animate-pulse top-1/2 -translate-y-1/2" />
@@ -441,12 +462,11 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
                             <span className="text-[9.5px] font-mono text-emerald-300">Widescreen 4K Stream</span>
                           </div>
                           <div className="p-1 rounded-sm bg-white">
-                            <QRCodeSVG
+                            <MemoizedQRCode
                               value="https://festival-summer.com/lineup-desktop"
                               size={34}
                               level="M"
                               fgColor="#11140F"
-                              includeMargin={false}
                             />
                           </div>
                         </div>
@@ -495,7 +515,11 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
                   ].map((dev) => (
                     <button
                       key={dev.id}
-                      onClick={() => setSimulatedDevice(dev.id as any)}
+                      onClick={() => {
+                        startTransition(() => {
+                          setSimulatedDevice(dev.id as any);
+                        });
+                      }}
                       className={`px-3.5 py-1.5 rounded-xl text-[12px] font-medium transition-all ${
                         simulatedDevice === dev.id
                           ? 'bg-emerald-500 text-black font-semibold shadow-xs'
@@ -557,7 +581,11 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
               return (
                 <button
                   key={tabKey}
-                  onClick={() => setActiveTab(tabKey)}
+                  onClick={() => {
+                    startTransition(() => {
+                      setActiveTab(tabKey);
+                    });
+                  }}
                   className={`whitespace-nowrap shrink-0 inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-[12.5px] sm:text-[13px] font-medium transition-all ${
                     isActive
                       ? 'bg-white text-[#11140F] font-semibold shadow-md'
@@ -633,12 +661,11 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
 
               <div className="p-7 rounded-2xl bg-white text-black text-center space-y-4 flex flex-col items-center shadow-xl">
                 <div className="p-3 bg-white rounded-xl border border-black/10 shadow-inner">
-                  <QRCodeSVG
+                  <MemoizedQRCode
                     value={currentIndustry.mockTarget}
                     size={128}
                     level="H"
                     fgColor="#11140F"
-                    includeMargin={false}
                   />
                 </div>
                 <div className="space-y-0.5">

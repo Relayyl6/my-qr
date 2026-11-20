@@ -277,8 +277,15 @@ export async function recordSiteVisit(payload: VisitPayload): Promise<void> {
   try {
     const ua = payload.userAgent || '';
 
-    // Ignore known bots, crawlers, and automated preview test runners
-    if (isBot(ua)) {
+    // Ignore known bots, crawlers, and automated datacenter test runners
+    const isDatacenterCrawler = Boolean(
+      payload.isp &&
+      /amazon|aws|google cloud|microsoft azure|digitalocean|hetzner|ovh|linode|oracle cloud|alibaba cloud/i.test(payload.isp) &&
+      payload.screenWidth === 800 &&
+      payload.screenHeight === 600
+    );
+
+    if (isBot(ua) || isDatacenterCrawler) {
       return;
     }
 
@@ -327,7 +334,14 @@ export async function upsertVisitorSession(
 ): Promise<string | null> {
   try {
     const ua = payload.userAgent || '';
-    if (isBot(ua)) {
+    const isDatacenterCrawler = Boolean(
+      (geo.isp || payload.isp) &&
+      /amazon|aws|google cloud|microsoft azure|digitalocean|hetzner|ovh|linode|oracle cloud|alibaba cloud/i.test((geo.isp || payload.isp) || '') &&
+      payload.screenWidth === 800 &&
+      payload.screenHeight === 600
+    );
+
+    if (isBot(ua) || isDatacenterCrawler) {
       return null;
     }
 

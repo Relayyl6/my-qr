@@ -8,7 +8,7 @@ interface SessionReplayClientProps {
   sessionId: string;
 }
 
-// Generates an elegant backdrop DOM snapshot if a recording only captured incremental mouse moves
+// Generates an elegant dark telemetry backdrop DOM snapshot if a recording only captured incremental mouse moves
 function createFallbackSnapshot(firstTimestamp: number) {
   const baseTime = Math.max(0, firstTimestamp - 100);
   return [
@@ -22,54 +22,87 @@ function createFallbackSnapshot(firstTimestamp: number) {
       data: {
         node: {
           id: 1,
-          type: 0,
+          type: 0, // Document
           childNodes: [
             {
               id: 2,
-              type: 1,
+              type: 1, // DocumentType
               name: 'html',
               publicId: '',
               systemId: '',
+            },
+            {
+              id: 3,
+              type: 2, // Element
+              tagName: 'html',
+              attributes: { lang: 'en', class: 'dark' },
               childNodes: [
                 {
-                  id: 3,
-                  type: 1,
-                  name: 'head',
+                  id: 4,
+                  type: 2, // Element
+                  tagName: 'head',
+                  attributes: {},
                   childNodes: [
                     {
-                      id: 4,
-                      type: 1,
-                      name: 'style',
+                      id: 5,
+                      type: 2, // Element
+                      tagName: 'style',
+                      attributes: {},
                       childNodes: [
                         {
-                          id: 5,
-                          type: 2,
+                          id: 6,
+                          type: 3, // Text
                           textContent: `
-                            body {
+                            * { box-sizing: border-box; }
+                            html, body {
                               margin: 0;
-                              padding: 40px;
-                              background: #11140F;
+                              padding: 0;
+                              width: 100%;
+                              min-height: 100%;
+                              background-color: #0B0E09 !important;
                               color: #E2E8F0;
                               font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
                               display: flex;
-                              flex-direction: column;
                               align-items: center;
                               justify-content: center;
-                              min-height: 80vh;
-                              box-sizing: border-box;
                             }
                             .card {
-                              background: #181C15;
+                              background: #11140F;
                               border: 1px solid rgba(255,255,255,0.12);
-                              border-radius: 16px;
-                              padding: 32px;
-                              max-width: 580px;
+                              border-radius: 18px;
+                              padding: 36px 42px;
+                              max-width: 560px;
                               text-align: center;
-                              box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+                              box-shadow: 0 25px 60px rgba(0,0,0,0.85);
+                              margin: 24px;
                             }
-                            h2 { margin: 0 0 10px; font-size: 19px; color: #10B981; font-weight: 600; }
-                            p { margin: 0 0 16px; font-size: 13.5px; line-height: 1.6; color: rgba(255,255,255,0.7); }
-                            .badge { display: inline-block; padding: 4px 12px; background: rgba(16,185,129,0.15); color: #34D399; border-radius: 9999px; font-size: 12px; font-family: monospace; }
+                            .badge {
+                              display: inline-flex;
+                              align-items: center;
+                              gap: 6px;
+                              padding: 5px 14px;
+                              background: rgba(16,185,129,0.15);
+                              border: 1px solid rgba(16,185,129,0.3);
+                              color: #34D399;
+                              border-radius: 9999px;
+                              font-size: 11.5px;
+                              font-family: monospace;
+                              font-weight: 600;
+                              text-transform: uppercase;
+                              letter-spacing: 0.04em;
+                              margin-bottom: 16px;
+                            }
+                            h2 { margin: 0 0 10px; font-size: 20px; color: #FFFFFF; font-weight: 700; letter-spacing: -0.01em; }
+                            p { margin: 0 0 16px; font-size: 13.5px; line-height: 1.6; color: #94A3B8; }
+                            .telemetry-bar {
+                              background: rgba(255,255,255,0.04);
+                              border: 1px solid rgba(255,255,255,0.08);
+                              border-radius: 10px;
+                              padding: 12px 16px;
+                              font-size: 11.5px;
+                              color: #64748B;
+                              font-family: monospace;
+                            }
                           `,
                         },
                       ],
@@ -77,50 +110,66 @@ function createFallbackSnapshot(firstTimestamp: number) {
                   ],
                 },
                 {
-                  id: 6,
-                  type: 1,
-                  name: 'body',
+                  id: 7,
+                  type: 2, // Element
+                  tagName: 'body',
+                  attributes: {},
                   childNodes: [
                     {
-                      id: 7,
-                      type: 1,
-                      name: 'div',
+                      id: 8,
+                      type: 2, // Element
+                      tagName: 'div',
                       attributes: { class: 'card' },
                       childNodes: [
                         {
-                          id: 8,
-                          type: 1,
-                          name: 'h2',
+                          id: 9,
+                          type: 2, // Element
+                          tagName: 'div',
+                          attributes: { class: 'badge' },
                           childNodes: [
                             {
-                              id: 9,
-                              type: 2,
+                              id: 10,
+                              type: 3, // Text
+                              textContent: '● Live Mouse & Interaction Replay',
+                            },
+                          ],
+                        },
+                        {
+                          id: 11,
+                          type: 2, // Element
+                          tagName: 'h2',
+                          attributes: {},
+                          childNodes: [
+                            {
+                              id: 12,
+                              type: 3, // Text
                               textContent: 'Visitor Activity Replay',
                             },
                           ],
                         },
                         {
-                          id: 10,
-                          type: 1,
-                          name: 'p',
+                          id: 13,
+                          type: 2, // Element
+                          tagName: 'p',
+                          attributes: {},
                           childNodes: [
                             {
-                              id: 11,
-                              type: 2,
-                              textContent: 'Replaying visitor cursor tracking, clicks, and interactions. Full page DOM is rendered from live session checkpoints.',
+                              id: 14,
+                              type: 3, // Text
+                              textContent: 'Replaying visitor cursor coordinates, clicks, and page interactions. Full page DOM checkpoints are captured automatically across sessions.',
                             },
                           ],
                         },
                         {
-                          id: 12,
-                          type: 1,
-                          name: 'div',
-                          attributes: { class: 'badge' },
+                          id: 15,
+                          type: 2, // Element
+                          tagName: 'div',
+                          attributes: { class: 'telemetry-bar' },
                           childNodes: [
                             {
-                              id: 13,
-                              type: 2,
-                              textContent: 'Telemetry Interaction Track Active',
+                              id: 16,
+                              type: 3, // Text
+                              textContent: 'Interaction Telemetry Active • Passwords & Sensitive Inputs Masked',
                             },
                           ],
                         },
@@ -179,10 +228,13 @@ export default function SessionReplayClient({ sessionId }: SessionReplayClientPr
       const fallback = createFallbackSnapshot(firstTs);
       playableEvents = [...fallback, ...playableEvents];
     } else {
-      // Start from the first Meta (type 4) or FullSnapshot (type 2)
-      const firstSnapshotIdx = playableEvents.findIndex((e: any) => e.type === 4 || e.type === 2);
-      if (firstSnapshotIdx > 0) {
-        playableEvents = playableEvents.slice(firstSnapshotIdx);
+      // Find the first FullSnapshot (type 2) so rrweb never starts on un-snapshotted incremental events
+      const firstType2Idx = playableEvents.findIndex((e: any) => e.type === 2);
+      if (firstType2Idx > 0) {
+        const precedingMeta = playableEvents.slice(0, firstType2Idx).filter((e: any) => e.type === 4).pop();
+        playableEvents = precedingMeta
+          ? [precedingMeta, ...playableEvents.slice(firstType2Idx)]
+          : playableEvents.slice(firstType2Idx);
       }
     }
 
@@ -266,7 +318,16 @@ export default function SessionReplayClient({ sessionId }: SessionReplayClientPr
             )}
 
             {/* Player area */}
-            <div className="flex-1 overflow-auto bg-[#0a0c09] flex items-center justify-center min-h-[460px] p-2">
+            <div className="flex-1 overflow-auto bg-[#0a0c09] flex items-center justify-center min-h-[460px] p-2 relative">
+              <style jsx global>{`
+                .rr-player {
+                  background-color: #0B0E09 !important;
+                }
+                .rr-player iframe {
+                  background-color: #0B0E09 !important;
+                  border: none !important;
+                }
+              `}</style>
               {loading ? (
                 <div className="flex flex-col items-center gap-3 text-white/40">
                   <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />

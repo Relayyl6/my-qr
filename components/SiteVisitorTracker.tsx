@@ -25,11 +25,6 @@ export default function SiteVisitorTracker() {
   const isFlushing = useRef(false);
   const rrwebRecordRef = useRef<any>(null);
 
-  // Automatically bypass automated headless runners, preview bots, and webdrivers
-  if (typeof navigator !== 'undefined' && (navigator.webdriver || !navigator.cookieEnabled)) {
-    return null;
-  }
-
   // Resilient flush: sends buffered events in safe batches
   const flush = async () => {
     if (isFlushing.current) return;
@@ -121,6 +116,9 @@ export default function SiteVisitorTracker() {
   // Start rrweb recording with full DOM capture and automatic snapshots
   const startRecording = () => {
     if (recordingStarted.current) return;
+    if (typeof navigator !== 'undefined' && (navigator.webdriver || !navigator.cookieEnabled)) {
+      return;
+    }
     recordingStarted.current = true;
 
     import('rrweb')
@@ -157,8 +155,8 @@ export default function SiteVisitorTracker() {
           },
         });
 
-        // Flush the initial FullSnapshot immediately (600ms) so DOM structure is saved at once!
-        setTimeout(flush, 600);
+        // Flush the initial FullSnapshot quickly (250ms) so DOM structure is saved at once!
+        setTimeout(flush, 250);
 
         // Regular interval flusher every 8 seconds
         flushTimer.current = setInterval(flush, 8_000);
@@ -170,6 +168,9 @@ export default function SiteVisitorTracker() {
 
   // Page-level visit beacon and route tracking
   useEffect(() => {
+    if (typeof navigator !== 'undefined' && (navigator.webdriver || !navigator.cookieEnabled)) {
+      return;
+    }
     if (!pathname) return;
     const fullPath = searchParams?.toString()
       ? `${pathname}?${searchParams.toString()}`
