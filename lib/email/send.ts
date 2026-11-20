@@ -232,6 +232,84 @@ export function buildBroadcastEmailHtml({
 }
 
 /**
+ * Pre-built Designer Templates for Customer Mailing Lists
+ */
+export const PREBUILT_EMAIL_TEMPLATES = {
+  modern_welcome: {
+    name: "Modern Welcome Letter",
+    subject: "Welcome to {{list_name}}!",
+    body: `<h2 style="font-size:22px;color:#11140F;margin:0 0 16px;font-weight:700;">Welcome to {{list_name}}!</h2>
+<p style="color:#374151;font-size:15px;line-height:1.6;margin:0 0 16px;">
+  Hi {{first_name}}, thank you for scanning our QR code and connecting with us. We are delighted to have you as part of our community.
+</p>
+<p style="color:#374151;font-size:15px;line-height:1.6;margin:0 0 24px;">
+  You'll be the first to receive special promotions, secret menu releases, and priority invitations.
+</p>
+<div style="text-align:left;margin:24px 0;">
+  <a href="{{site_url}}" style="display:inline-block;background:#11140F;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 24px;border-radius:8px;">
+    Visit Our Website &rarr;
+  </a>
+</div>`,
+  },
+  promotional_sale: {
+    name: "Flash Sale & Promo Offer",
+    subject: "Exclusive Offer: Save Today at {{list_name}}",
+    body: `<div style="background:#2F6B4F;color:#ffffff;padding:24px;border-radius:10px;text-align:center;margin-bottom:20px;">
+  <div style="font-size:12px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;opacity:0.9;">Limited Time Special</div>
+  <h2 style="font-size:26px;font-weight:800;margin:8px 0;color:#ffffff;">Special Discount Just For You</h2>
+  <div style="font-size:14px;opacity:0.95;">Thank you for being a valued customer!</div>
+</div>
+<p style="color:#374151;font-size:15px;line-height:1.6;margin:0 0 16px;">
+  Hi {{first_name}}, show this email on your next visit or use the discount code below online:
+</p>
+<div style="background:#F7F8F5;border:2px dashed #2F6B4F;border-radius:8px;padding:16px;text-align:center;margin:20px 0;">
+  <span style="font-size:11px;color:#6B7280;text-transform:uppercase;font-weight:600;letter-spacing:1px;display:block;">Discount Code</span>
+  <strong style="font-size:24px;color:#11140F;font-family:monospace;letter-spacing:2px;">VIPGUEST20</strong>
+</div>
+<p style="color:#6B7280;font-size:13px;line-height:1.5;">Valid for one week from send date. Cannot be combined with other discounts.</p>`,
+  },
+  event_invite: {
+    name: "VIP Event Invitation",
+    subject: "You're Invited: Special Gathering at {{list_name}}",
+    body: `<h2 style="font-size:22px;color:#11140F;margin:0 0 12px;font-weight:700;">You're Invited: Exclusive Gathering</h2>
+<p style="color:#374151;font-size:15px;line-height:1.6;margin:0 0 20px;">
+  Hi {{first_name}}, we're hosting an exclusive event for our loyal community members and would love to see you there.
+</p>
+<div style="background:#F7F8F5;border-left:4px solid #2F6B4F;padding:16px 20px;border-radius:0 8px 8px 0;margin:20px 0;">
+  <div style="font-size:14px;font-weight:bold;color:#11140F;margin-bottom:4px;">📅 Date & Time</div>
+  <div style="font-size:14px;color:#4B5563;margin-bottom:12px;">This Friday at 7:00 PM</div>
+  <div style="font-size:14px;font-weight:bold;color:#11140F;margin-bottom:4px;">📍 Location</div>
+  <div style="font-size:14px;color:#4B5563;">Main Venue Hall</div>
+</div>
+<div style="margin:24px 0;">
+  <a href="{{site_url}}" style="display:inline-block;background:#2F6B4F;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 24px;border-radius:8px;">
+    RSVP / Reserve Your Spot &rarr;
+  </a>
+</div>`,
+  },
+  weekly_digest: {
+    name: "Newsletter Digest",
+    subject: "The Latest News & Updates from {{list_name}}",
+    body: `<h2 style="font-size:22px;color:#11140F;margin:0 0 16px;font-weight:700;">What's New at {{list_name}}</h2>
+<p style="color:#374151;font-size:15px;line-height:1.6;margin:0 0 20px;">
+  Hi {{first_name}}, here are this week's highlights and behind-the-scenes updates:
+</p>
+<div style="margin-bottom:16px;">
+  <strong style="color:#11140F;font-size:15px;">✨ 1. New Menu & Product Additions</strong>
+  <p style="color:#4B5563;font-size:14px;line-height:1.5;margin:4px 0 0;">We've added brand new seasonal items curated specifically for this month.</p>
+</div>
+<div style="margin-bottom:16px;">
+  <strong style="color:#11140F;font-size:15px;">🚀 2. Extended Weekend Hours</strong>
+  <p style="color:#4B5563;font-size:14px;line-height:1.5;margin:4px 0 0;">Starting next Saturday, we'll be open late until 11:00 PM.</p>
+</div>
+<div style="margin-bottom:20px;">
+  <strong style="color:#11140F;font-size:15px;">💬 3. Community Feedback</strong>
+  <p style="color:#4B5563;font-size:14px;line-height:1.5;margin:4px 0 0;">We read every note you send us. Reply to this email anytime with suggestions!</p>
+</div>`,
+  },
+};
+
+/**
  * Dispatches double opt-in confirmation email to a new subscriber.
  */
 export async function sendDoubleOptInEmail({

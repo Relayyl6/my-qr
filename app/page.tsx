@@ -7,7 +7,7 @@ import WorkspaceLocked from '@/components/WorkspaceLocked';
 import CampaignAnalyst from '@/components/CampaignAnalyst';
 import WorkspaceHeaderActions from '@/components/WorkspaceHeaderActions';
 import BrandedDomainsManager from '@/components/BrandedDomainsManager';
-import CustomerMailingListManager from '@/components/CustomerMailingListManager';
+import MicroSaasHub from '@/components/MicroSaasHub';
 import PlanUsageMeter from '@/components/PlanUsageMeter';
 import HomeTabs from '@/components/HomeTabs';
 import AppleProductTour from '@/components/AppleProductTour';
@@ -172,8 +172,8 @@ export default async function Home() {
             isAdmin={isAdmin}
           />
 
-          {/* Feature 5: Customer Mailing Lists & Email Campaigns (Free, Pro, Plus, Ultra) */}
-          <CustomerMailingListManager
+          {/* Feature 5: Micro-SaaS Ecosystem Hub (Mailing Lists, vCards, Shortener, Menus, Wi-Fi) */}
+          <MicroSaasHub
             userTier={user.tier || 'free'}
             isAdmin={isAdmin}
           />
