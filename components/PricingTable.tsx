@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, Sparkles, ArrowRight, Loader2, Mail, Layers, Zap, Shield } from 'lucide-react';
+import { Check, Sparkles, ArrowRight, Loader2 } from 'lucide-react';
 
 interface PricingTableProps {
   currentTier: string;
@@ -91,7 +91,7 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
                 )}
               </div>
               <p className="mt-1.5 text-[13px] text-[#11140F]/60 min-h-[38px] leading-snug">
-                Personal starter for permanent links, starter vCards & basic newsletter lists.
+                Personal starter for permanent links, starter vCards & 10-contact customer mailing lists.
               </p>
             </div>
 
@@ -112,11 +112,11 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[#11140F]/60">Mailing List</span>
-                <strong className="text-[#11140F] font-mono">1 list • 500 contacts</strong>
+                <strong className="text-[#11140F] font-mono">1 list • 10 contacts</strong>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[#11140F]/60">Broadcasts</span>
-                <strong className="text-[#11140F] font-mono">2 / mo (Gmail safety)</strong>
+                <strong className="text-[#11140F] font-mono">2 / mo (Gmail)</strong>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[#11140F]/60">AI Budget</span>
@@ -131,7 +131,7 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
               </li>
               <li className="flex items-start gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0 mt-0.5" />
-                <span><strong>1 Customer Mailing List</strong> with double opt-in verification</span>
+                <span><strong>1 Customer Mailing List</strong> with up to 10 contacts (double opt-in)</span>
               </li>
               <li className="flex items-start gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0 mt-0.5" />
@@ -178,7 +178,7 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
                 )}
               </div>
               <p className="mt-1.5 text-[13px] text-[#11140F]/60 min-h-[38px] leading-snug">
-                For businesses needing smart scheduled routing, menus, forms & email outreach.
+                For businesses needing smart scheduled routing, menus, forms & 50-contact mailing lists.
               </p>
             </div>
 
@@ -208,11 +208,11 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[#11140F]/70 font-medium">Mailing Lists</span>
-                <strong className="text-[#2F6B4F] font-mono font-bold">3 lists • 5k contacts</strong>
+                <strong className="text-[#2F6B4F] font-mono font-bold">2 lists • 50 contacts</strong>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[#11140F]/70 font-medium">Broadcasts</span>
-                <strong className="text-[#2F6B4F] font-mono font-bold">10 / mo (Gmail + Resend)</strong>
+                <strong className="text-[#2F6B4F] font-mono font-bold">5 / mo (Gmail)</strong>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[#11140F]/70 font-medium">AI Budget</span>
@@ -231,7 +231,7 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
               </li>
               <li className="flex items-start gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0 mt-0.5" />
-                <span><strong>3 Customer Mailing Lists</strong> (up to 5,000 subscribers, merge tags)</span>
+                <span><strong>2 Customer Mailing Lists</strong> (up to 50 subscribers, merge tags)</span>
               </li>
               <li className="flex items-start gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0 mt-0.5" />
@@ -281,7 +281,7 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
                 )}
               </div>
               <p className="mt-1.5 text-[13px] text-[#11140F]/60 min-h-[38px] leading-snug">
-                For scaling brands wanting custom domains, event tickets & 25k subscriber campaigns.
+                For scaling brands wanting custom domains, event tickets & 100-contact campaigns.
               </p>
             </div>
 
@@ -311,11 +311,11 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[#11140F]/70 font-medium">Mailing Lists</span>
-                <strong className="text-blue-900 font-mono font-bold">10 lists • 25k contacts</strong>
+                <strong className="text-blue-900 font-mono font-bold">5 lists • 100 contacts</strong>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[#11140F]/70 font-medium">Broadcasts</span>
-                <strong className="text-blue-900 font-mono font-bold">50 / mo (Resend/SES API)</strong>
+                <strong className="text-blue-900 font-mono font-bold">15 / mo (Gmail)</strong>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[#11140F]/70 font-medium">AI Budget</span>
@@ -330,7 +330,7 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
               </li>
               <li className="flex items-start gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0 mt-0.5" />
-                <span><strong>10 Customer Mailing Lists</strong> (25,000 contacts, transactional SMTP/Resend)</span>
+                <span><strong>5 Customer Mailing Lists</strong> (up to 100 contacts, Gmail-powered)</span>
               </li>
               <li className="flex items-start gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0 mt-0.5" />
@@ -384,7 +384,7 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
                 )}
               </div>
               <p className="mt-1.5 text-[13px] text-[#11140F]/60 min-h-[38px] leading-snug">
-                For high-volume enterprises, agencies & unlimited multi-tenant mailing lists.
+                For high-volume enterprises, agencies & max 500-contact mailing lists.
               </p>
             </div>
 
@@ -414,11 +414,11 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[#11140F]/70 font-medium">Mailing Lists</span>
-                <strong className="text-purple-900 font-mono font-bold">Unlimited Lists & Contacts</strong>
+                <strong className="text-purple-900 font-mono font-bold">10 lists • 500 contacts</strong>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[#11140F]/70 font-medium">Broadcasts</span>
-                <strong className="text-purple-900 font-mono font-bold">Unlimited (Dedicated IP)</strong>
+                <strong className="text-purple-900 font-mono font-bold">30 / mo (Gmail Max)</strong>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[#11140F]/70 font-medium">AI Budget</span>
@@ -433,7 +433,7 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
               </li>
               <li className="flex items-start gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0 mt-0.5" />
-                <span><strong>Unlimited Customer Mailing Lists</strong> & dedicated IP pool delivery</span>
+                <span><strong>10 Customer Mailing Lists</strong> (up to 500 contacts, Gmail maximum)</span>
               </li>
               <li className="flex items-start gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0 mt-0.5" />

@@ -55,7 +55,6 @@ export async function POST(req: NextRequest) {
       campaignId: targetCampaignId,
       sentCount: result.sentCount,
       provider: result.provider,
-      warning: result.warning,
     });
   } catch (err: any) {
     console.error("[Broadcast Campaign Error]:", err);

@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 import { prisma } from "@/lib/prisma";
+import { PLANS, PlanTier } from "@/lib/plans";
 
 export interface EmailPayload {
   to: string;
@@ -49,23 +50,35 @@ function getTransporter() {
 }
 
 /**
- * Tracks Gmail daily volume to prevent account suspension (>500/day limit).
- * Queries NewsletterCampaigns sent today via Gmail.
+ * Tracks Gmail daily volume to prevent account suspension (>500/day hard Google cap).
+ * Queries NewsletterCampaigns and CustomerMailCampaigns sent today via Gmail.
  */
 export async function getGmailSentTodayCount(): Promise<number> {
   try {
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
 
-    const campaignsToday = await prisma.newsletterCampaign.findMany({
-      where: {
-        sentVia: "gmail",
-        sentAt: { gte: startOfDay },
-      },
-      select: { recipientCount: true },
-    });
+    const [platformCampaigns, customerCampaigns] = await Promise.all([
+      prisma.newsletterCampaign.findMany({
+        where: {
+          sentVia: "gmail",
+          sentAt: { gte: startOfDay },
+        },
+        select: { recipientCount: true },
+      }),
+      prisma.customerMailCampaign.findMany({
+        where: {
+          status: "sent",
+          sentAt: { gte: startOfDay },
+        },
+        select: { sentCount: true },
+      }),
+    ]);
 
-    return campaignsToday.reduce((sum, c) => sum + (c.recipientCount || 0), 0);
+    const platformTotal = platformCampaigns.reduce((sum, c) => sum + (c.recipientCount || 0), 0);
+    const customerTotal = customerCampaigns.reduce((sum, c) => sum + (c.sentCount || 0), 0);
+
+    return platformTotal + customerTotal;
   } catch (err) {
     console.error("[Email Quota Tracker] Error calculating Gmail daily volume:", err);
     return 0;
@@ -94,7 +107,7 @@ export async function sendEmail({
     console.info(`  Reply-To: ${defaultReplyTo}`);
     console.info(`  To: ${to}`);
     console.info(`  Subject: "${subject}"`);
-    console.info(`  Notice: Set GMAIL_APP_PASSWORD in .env to send real emails via yemuelinc@gmail.com.`);
+    console.info(`  Notice: Set GMAIL_APP_PASSWORD in .env to send real emails via Gmail.`);
     return { success: true, id: `mock_email_${Date.now()}` };
   }
 
@@ -124,7 +137,7 @@ export function buildDoubleOptInEmailHtml({
   confirmUrl,
   unsubscribeUrl,
   siteUrl = "https://dynamicqr.co",
-  businessName = "DynamicQR Inc.",
+  businessName = "DynamicQR",
   businessAddress = "San Francisco, CA & Lagos, NG",
 }: {
   confirmUrl: string;
@@ -142,13 +155,13 @@ export function buildDoubleOptInEmailHtml({
              style="max-width:600px;width:100%;background:#ffffff;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.03);">
         <tr><td style="padding:32px 32px 12px;font-size:16px;line-height:1.6;color:#111111;">
           <div style="font-size:20px;font-weight:800;color:#11140f;letter-spacing:-0.5px;margin-bottom:20px;">
-            DynamicQR
+            ${businessName}
           </div>
           <h1 style="font-size:20px;font-weight:700;color:#11140f;margin:0 0 16px;">
             Confirm your subscription
           </h1>
           <p style="color:#374151;font-size:15px;line-height:1.6;margin:0 0 24px;">
-            Thank you for subscribing to the DynamicQR product release notes and updates. Please confirm your email address by clicking the link below.
+            Please confirm your email address to receive updates and exclusive announcements.
           </p>
           <div style="text-align:left;margin:28px 0;">
             <a href="${confirmUrl}" style="background:#11140F;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:14px 28px;border-radius:8px;display:inline-block;">
@@ -156,7 +169,7 @@ export function buildDoubleOptInEmailHtml({
             </a>
           </div>
           <p style="color:#6b7280;font-size:13px;line-height:1.5;margin:20px 0 0;">
-            This single-use confirmation link will expire in 72 hours. If you did not enter your email on our site, you can safely ignore this message.
+            This single-use confirmation link will expire in 72 hours. If you did not sign up, you can safely ignore this message.
           </p>
         </td></tr>
         <tr><td style="padding:24px 32px;font-size:12px;line-height:1.5;color:#666666;border-top:1px solid #eeeeee;background:#fafafa;">
@@ -178,14 +191,16 @@ export function buildBroadcastEmailHtml({
   body,
   unsubscribeUrl,
   siteUrl = "https://dynamicqr.co",
-  businessName = "DynamicQR Inc.",
+  businessName = "DynamicQR",
   businessAddress = "San Francisco, CA & Lagos, NG",
+  showPoweredBy = false,
 }: {
   body: string;
   unsubscribeUrl: string;
   siteUrl?: string;
   businessName?: string;
   businessAddress?: string;
+  showPoweredBy?: boolean;
 }): string {
   return `<!doctype html>
 <html>
@@ -198,6 +213,13 @@ export function buildBroadcastEmailHtml({
           ${body}
         </td></tr>
         <tr><td style="padding:24px 32px;font-size:12px;line-height:1.5;color:#666666;border-top:1px solid #eeeeee;background:#fafafa;">
+          ${
+            showPoweredBy
+              ? `<div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #eeeeee;font-size:11.5px;color:#888888;text-align:center;">
+                   Powered by <a href="https://dynamicqr.co" style="color:#11140F;font-weight:bold;text-decoration:none;">DynamicQR</a> — Smart Dynamic QR & Micro-SaaS
+                 </div>`
+              : ""
+          }
           You're receiving this because you subscribed at <a href="${siteUrl}" style="color:#666666;">${siteUrl}</a>.<br>
           ${businessName}, ${businessAddress}<br>
           <a href="${unsubscribeUrl}" style="color:#666666;text-decoration:underline;">Unsubscribe</a>
@@ -241,9 +263,8 @@ export async function sendDoubleOptInEmail({
 }
 
 /**
- * Broadcast newsletter campaign with strict compliance & Gmail safety caps:
- * - If RESEND_API_KEY is present: sends via Resend API (transactional rate limits)
- * - If using Gmail: enforces max 450 recipients/day ceiling to protect account
+ * Broadcasts Platform Newsletter strictly via Gmail Nodemailer:
+ * - Stays strictly within Gmail's 500/day limit (with a 490 safe ceiling)
  * - Emits List-Unsubscribe & List-Unsubscribe-Post headers
  */
 export async function broadcastNewsletterCampaign({
@@ -259,43 +280,33 @@ export async function broadcastNewsletterCampaign({
 }): Promise<{
   success: boolean;
   sentCount: number;
-  provider: "gmail" | "resend" | "mock";
-  warning?: string;
+  provider: "gmail";
   error?: string;
 }> {
-  // 1. Fetch active subscribers
   const subscribers = await prisma.newsletterSubscriber.findMany({
     where: { status: "active" },
     select: { id: true, email: true, token: true, firstName: true },
   });
 
   if (subscribers.length === 0) {
-    return { success: true, sentCount: 0, provider: "mock", warning: "No active subscribers found." };
+    return { success: true, sentCount: 0, provider: "gmail" };
   }
 
-  const resendApiKey = process.env.RESEND_API_KEY;
-  const isResendConfigured = resendApiKey && resendApiKey.trim().length > 0;
+  // Gmail Daily Cap Enforcement (Max 490/day rolling ceiling)
+  const sentToday = await getGmailSentTodayCount();
+  const GMAIL_DAILY_CEILING = 490;
 
-  // 2. If using Gmail, enforce the 450/day safety ceiling
-  if (!isResendConfigured) {
-    const sentToday = await getGmailSentTodayCount();
-    const GMAIL_DAILY_SAFETY_CAP = 450; // Leave 50 buffer under Google's 500 hard cap
-
-    if (sentToday + subscribers.length > GMAIL_DAILY_SAFETY_CAP) {
-      const remainingQuota = Math.max(0, GMAIL_DAILY_SAFETY_CAP - sentToday);
-      return {
-        success: false,
-        sentCount: 0,
-        provider: "gmail",
-        error: `Gmail bulk safety cap exceeded: You have sent ${sentToday} emails today. Gmail limits accounts to ~500/day. Remaining capacity today is ${remainingQuota}. To send to all ${subscribers.length} subscribers without risk of account suspension, connect a transactional provider (Resend, Postmark, or Amazon SES) via RESEND_API_KEY in .env.`,
-      };
-    }
+  if (sentToday + subscribers.length > GMAIL_DAILY_CEILING) {
+    const remainingQuota = Math.max(0, GMAIL_DAILY_CEILING - sentToday);
+    return {
+      success: false,
+      sentCount: 0,
+      provider: "gmail",
+      error: `Gmail daily sending limit reached (${sentToday}/500 sent today). Remaining capacity today is ${remainingQuota} recipients. Please send later or reduce recipient count to protect your Gmail account.`,
+    };
   }
 
   let sentCount = 0;
-  const provider = isResendConfigured ? "resend" : "gmail";
-
-  // 3. Batch dispatch
   for (const subscriber of subscribers) {
     const unsubUrl = `${siteUrl}/api/newsletter/unsubscribe?token=${subscriber.token}`;
     const personalizedBody = bodyHtml
@@ -309,65 +320,174 @@ export async function broadcastNewsletterCampaign({
       siteUrl,
     });
 
-    if (isResendConfigured) {
-      try {
-        const res = await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${resendApiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            from: process.env.EMAIL_FROM || "DynamicQR <hello@dynamicqr.co>",
-            to: subscriber.email,
-            reply_to: process.env.EMAIL_REPLY_TO || "hello@dynamicqr.co",
-            subject,
-            html: fullHtml,
-            headers: {
-              "List-Unsubscribe": `<${unsubUrl}>`,
-              "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
-            },
-          }),
-        });
-        if (res.ok) sentCount++;
-      } catch (err) {
-        console.error(`[Resend Error] Failed sending to ${subscriber.email}:`, err);
-      }
-    } else {
-      // Send via Nodemailer (Gmail)
-      const res = await sendEmail({
-        to: subscriber.email,
-        subject,
-        html: fullHtml,
-        replyTo: process.env.EMAIL_REPLY_TO || "hello@dynamicqr.co",
-        headers: {
-          "List-Unsubscribe": `<${unsubUrl}>`,
-          "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
-        },
-      });
-      if (res.success) sentCount++;
-    }
+    const res = await sendEmail({
+      to: subscriber.email,
+      subject,
+      html: fullHtml,
+      replyTo: process.env.EMAIL_REPLY_TO || "hello@dynamicqr.co",
+      headers: {
+        "List-Unsubscribe": `<${unsubUrl}>`,
+        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+      },
+    });
+    if (res.success) sentCount++;
   }
 
-  // 4. Update campaign stats in DB
   await prisma.newsletterCampaign.update({
     where: { id: campaignId },
     data: {
       status: "sent",
       sentAt: new Date(),
       recipientCount: sentCount,
-      sentVia: provider,
+      sentVia: "gmail",
     },
   });
 
-  return {
-    success: true,
-    sentCount,
-    provider,
-    warning: !isResendConfigured
-      ? "Dispatched via personal Gmail. Note that Gmail caps accounts at ~500/day. For higher volume broadcasts, set RESEND_API_KEY in .env."
-      : undefined,
-  };
+  return { success: true, sentCount, provider: "gmail" };
+}
+
+/**
+ * Broadcasts Customer Mailing List campaign strictly via Gmail Nodemailer:
+ * - Free tier: max 10 contacts, Pro: 50, Plus: 100, Ultra: 500 (Gmail ceiling)
+ * - Checks daily Gmail 490 ceiling across the entire system
+ * - Adds "Powered by DynamicQR" footer badge for Free tier
+ */
+export async function broadcastCustomerMailCampaign({
+  userId,
+  listId,
+  subject,
+  bodyHtml,
+  siteUrl = "https://dynamicqr.co",
+}: {
+  userId: string;
+  listId: string;
+  subject: string;
+  bodyHtml: string;
+  siteUrl?: string;
+}): Promise<{
+  success: boolean;
+  sentCount: number;
+  error?: string;
+}> {
+  // 1. Fetch user & verify tier entitlements
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, email: true, tier: true },
+  });
+
+  if (!user) {
+    return { success: false, sentCount: 0, error: "User not found" };
+  }
+
+  const userTier = (user.tier || "free").toLowerCase() as PlanTier;
+  const entitlements = PLANS[userTier] || PLANS.free;
+
+  // 2. Fetch list & active contacts
+  const list = await prisma.customerMailList.findFirst({
+    where: { id: listId, userId },
+    include: {
+      contacts: {
+        where: { status: "active" },
+        take: entitlements.subscribers_max, // Strictly enforce tier contact cap: 10, 50, 100, 500
+      },
+    },
+  });
+
+  if (!list) {
+    return { success: false, sentCount: 0, error: "Mailing list not found" };
+  }
+
+  if (list.contacts.length === 0) {
+    return { success: false, sentCount: 0, error: "No active contacts found in this list" };
+  }
+
+  // 3. Monthly campaign frequency check per tier
+  const startOfMonth = new Date();
+  startOfMonth.setDate(1);
+  startOfMonth.setHours(0, 0, 0, 0);
+
+  const campaignsThisMonth = await prisma.customerMailCampaign.count({
+    where: {
+      userId,
+      status: "sent",
+      sentAt: { gte: startOfMonth },
+    },
+  });
+
+  if (campaignsThisMonth >= entitlements.campaigns_per_month) {
+    return {
+      success: false,
+      sentCount: 0,
+      error: `Monthly campaign limit reached (${campaignsThisMonth}/${entitlements.campaigns_per_month} on ${entitlements.name} plan). Upgrade your plan to send more campaigns.`,
+    };
+  }
+
+  // 4. Check global daily Gmail ceiling (490 cap)
+  const sentToday = await getGmailSentTodayCount();
+  const GMAIL_DAILY_CEILING = 490;
+
+  if (sentToday + list.contacts.length > GMAIL_DAILY_CEILING) {
+    const remaining = Math.max(0, GMAIL_DAILY_CEILING - sentToday);
+    return {
+      success: false,
+      sentCount: 0,
+      error: `Gmail daily capacity reached (${sentToday}/500 sent today). Remaining capacity is ${remaining}. Please try again tomorrow to protect sender reputation.`,
+    };
+  }
+
+  // 5. Create campaign record
+  const campaign = await prisma.customerMailCampaign.create({
+    data: {
+      userId,
+      listId,
+      subject,
+      bodyHtml,
+      status: "sending",
+    },
+  });
+
+  let sentCount = 0;
+  for (const contact of list.contacts) {
+    const unsubUrl = `${siteUrl}/api/mailing-lists/${listId}/unsubscribe?token=${contact.token}`;
+    const personalizedBody = bodyHtml
+      .replace(/{{first_name}}/g, contact.firstName || "there")
+      .replace(/{{unsubscribe_url}}/g, unsubUrl)
+      .replace(/{{list_name}}/g, list.name)
+      .replace(/{{site_url}}/g, siteUrl);
+
+    const fullHtml = buildBroadcastEmailHtml({
+      body: personalizedBody,
+      unsubscribeUrl: unsubUrl,
+      siteUrl,
+      businessName: list.name,
+      showPoweredBy: entitlements.branded_footer,
+    });
+
+    const res = await sendEmail({
+      to: contact.email,
+      subject,
+      html: fullHtml,
+      replyTo: process.env.EMAIL_REPLY_TO || "hello@dynamicqr.co",
+      headers: {
+        "List-Unsubscribe": `<${unsubUrl}>`,
+        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+      },
+    });
+
+    if (res.success) sentCount++;
+  }
+
+  // 6. Finalize campaign record
+  await prisma.customerMailCampaign.update({
+    where: { id: campaign.id },
+    data: {
+      status: "sent",
+      sentAt: new Date(),
+      sentCount,
+    },
+  });
+
+  return { success: true, sentCount };
 }
 
 /**

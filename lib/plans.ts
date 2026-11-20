@@ -34,6 +34,13 @@ export interface PlanEntitlements {
   };
 }
 
+/**
+ * Entitlements calibrated strictly to personal Gmail & Nodemailer capacity (max 500 emails/day):
+ * - Free: 1 list, up to 10 contacts, 2 campaigns/mo
+ * - Pro: 2 lists, up to 50 contacts, 5 campaigns/mo
+ * - Plus: 5 lists, up to 100 contacts, 15 campaigns/mo
+ * - Ultra: 10 lists, up to 500 contacts, 30 campaigns/mo (Gmail daily ceiling)
+ */
 export const PLANS: Record<PlanTier, PlanEntitlements> = {
   free: {
     name: 'Free',
@@ -42,7 +49,7 @@ export const PLANS: Record<PlanTier, PlanEntitlements> = {
     scans_monthly: 1000,
     ai_budget_usd: 0.50,
     mailing_lists: 1,
-    subscribers_max: 500,
+    subscribers_max: 10,
     campaigns_per_month: 2,
     custom_domains: 0,
     branded_footer: true,
@@ -74,9 +81,9 @@ export const PLANS: Record<PlanTier, PlanEntitlements> = {
     link_slots: 50,
     scans_monthly: 25000,
     ai_budget_usd: 5.00,
-    mailing_lists: 3,
-    subscribers_max: 5000,
-    campaigns_per_month: 10,
+    mailing_lists: 2,
+    subscribers_max: 50,
+    campaigns_per_month: 5,
     custom_domains: 0,
     branded_footer: false,
     microsaas: {
@@ -107,9 +114,9 @@ export const PLANS: Record<PlanTier, PlanEntitlements> = {
     link_slots: 500,
     scans_monthly: 250000,
     ai_budget_usd: 15.00,
-    mailing_lists: 10,
-    subscribers_max: 25000,
-    campaigns_per_month: 50,
+    mailing_lists: 5,
+    subscribers_max: 100,
+    campaigns_per_month: 15,
     custom_domains: 1,
     branded_footer: false,
     microsaas: {
@@ -140,9 +147,9 @@ export const PLANS: Record<PlanTier, PlanEntitlements> = {
     link_slots: 999999,
     scans_monthly: 999999,
     ai_budget_usd: 50.00,
-    mailing_lists: 999999,
-    subscribers_max: 999999,
-    campaigns_per_month: 999999,
+    mailing_lists: 10,
+    subscribers_max: 500,
+    campaigns_per_month: 30,
     custom_domains: 999999,
     branded_footer: false,
     microsaas: {

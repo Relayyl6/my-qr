@@ -7,6 +7,7 @@ import WorkspaceLocked from '@/components/WorkspaceLocked';
 import CampaignAnalyst from '@/components/CampaignAnalyst';
 import WorkspaceHeaderActions from '@/components/WorkspaceHeaderActions';
 import BrandedDomainsManager from '@/components/BrandedDomainsManager';
+import CustomerMailingListManager from '@/components/CustomerMailingListManager';
 import PlanUsageMeter from '@/components/PlanUsageMeter';
 import HomeTabs from '@/components/HomeTabs';
 import AppleProductTour from '@/components/AppleProductTour';
@@ -167,6 +168,12 @@ export default async function Home() {
           {/* Feature 4: Custom Branded Domains (Plus & Ultra) */}
           <BrandedDomainsManager
             initialDomains={customDomains}
+            userTier={user.tier || 'free'}
+            isAdmin={isAdmin}
+          />
+
+          {/* Feature 5: Customer Mailing Lists & Email Campaigns (Free, Pro, Plus, Ultra) */}
+          <CustomerMailingListManager
             userTier={user.tier || 'free'}
             isAdmin={isAdmin}
           />
