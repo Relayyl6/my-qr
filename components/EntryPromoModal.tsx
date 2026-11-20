@@ -5,11 +5,34 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { X, Sparkles, ArrowRight, Check } from 'lucide-react';
 
+interface ModalConfig {
+  enabled: boolean;
+  badgeText: string;
+  headline: string;
+  bodyText: string;
+  discountPercent: number;
+  promoCode: string;
+  ctaText: string;
+  frequencyDays: number;
+}
+
+const DEFAULT_MODAL: ModalConfig = {
+  enabled: true,
+  badgeText: 'BLACK FRIDAY SPECIAL',
+  headline: 'Unlock 40% Off DynamicQR Pro & Plus',
+  bodyText: 'Never reprint flyers again. Get autonomous time-scheduled routing, device-level app redirects, branded custom domains, and our new customer mailing list engine.',
+  discountPercent: 40,
+  promoCode: 'BLACKFRIDAY40',
+  ctaText: 'Claim 40% Discount',
+  frequencyDays: 7,
+};
+
 export default function EntryPromoModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [config, setConfig] = useState<ModalConfig>(DEFAULT_MODAL);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -18,29 +41,46 @@ export default function EntryPromoModal() {
       pathname?.startsWith('/admin') ||
       pathname?.startsWith('/checkout') ||
       pathname?.startsWith('/login') ||
-      pathname?.startsWith('/newsletter')
+      pathname?.startsWith('/newsletter') ||
+      pathname?.startsWith('/pricing')
     ) {
       return;
     }
 
-    // 7-day frequency cap check
-    try {
-      const lastDismissed = localStorage.getItem('dynamicqr_promo_modal_seen');
-      if (lastDismissed) {
-        const diffDays = (Date.now() - parseInt(lastDismissed, 10)) / (1000 * 60 * 60 * 24);
-        if (diffDays < 7) {
-          return;
+    // Fetch live config
+    fetch('/api/promo/config')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && data.modal) {
+          setConfig(data.modal);
+          if (data.modal.enabled === false) {
+            return;
+          }
+          checkFrequencyAndShow(data.modal.frequencyDays || 7);
+        } else {
+          checkFrequencyAndShow(7);
         }
-      }
+      })
+      .catch(() => {
+        checkFrequencyAndShow(7);
+      });
 
-      // Show after 2.5s delay
-      const timer = setTimeout(() => {
-        setIsOpen(true);
-      }, 2500);
+    function checkFrequencyAndShow(days: number) {
+      try {
+        const lastDismissed = localStorage.getItem('dynamicqr_promo_modal_seen');
+        if (lastDismissed) {
+          const diffDays = (Date.now() - parseInt(lastDismissed, 10)) / (1000 * 60 * 60 * 24);
+          if (diffDays < days) {
+            return;
+          }
+        }
 
-      return () => clearTimeout(timer);
-    } catch (e) {
-      // Ignore localStorage unavailable errors
+        const timer = setTimeout(() => {
+          setIsOpen(true);
+        }, 2500);
+
+        return () => clearTimeout(timer);
+      } catch (e) {}
     }
   }, [pathname]);
 
@@ -83,7 +123,7 @@ export default function EntryPromoModal() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !config.enabled) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-200">
@@ -97,7 +137,7 @@ export default function EntryPromoModal() {
         {/* Close Button */}
         <button
           onClick={handleDismiss}
-          className="absolute top-5 right-5 text-white/50 hover:text-white p-1 rounded-full transition-colors"
+          className="absolute top-5 right-5 text-white/50 hover:text-white p-1 rounded-full transition-colors cursor-pointer"
           aria-label="Close dialog"
         >
           <X className="w-5 h-5" />
@@ -106,24 +146,29 @@ export default function EntryPromoModal() {
         <div className="relative space-y-5">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#2F6B4F]/20 border border-[#34D399]/30 text-[#34D399] font-mono text-[11px] font-bold uppercase tracking-wider">
             <Sparkles className="w-3.5 h-3.5" />
-            Black Friday Special
+            {config.badgeText}
           </div>
 
           <div className="space-y-2">
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-              Unlock 40% Off DynamicQR Pro
+              {config.headline}
             </h2>
             <p className="text-[14px] text-white/70 leading-relaxed">
-              Never reprint flyers again. Get autonomous time-scheduled routing, device-level app redirects, branded custom domains, and our new customer mailing list engine.
+              {config.bodyText}
             </p>
           </div>
 
           {/* Promo code badge */}
           <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
-            <div className="text-xs text-white/60">Promo Code:</div>
-            <div className="font-mono text-sm font-bold text-[#34D399] tracking-wider bg-black/40 px-3 py-1 rounded-lg border border-[#34D399]/20">
-              BLACKFRIDAY40
+            <div>
+              <span className="text-xs text-white/60 block">Promo Code:</span>
+              <strong className="font-mono text-sm font-bold text-[#34D399] tracking-wider select-all">
+                {config.promoCode}
+              </strong>
             </div>
+            <span className="text-xs font-bold bg-[#34D399] text-[#0F120E] px-2.5 py-1 rounded-lg">
+              {config.discountPercent}% OFF
+            </span>
           </div>
 
           {/* Email Subscription Capture / CTA */}
@@ -139,7 +184,7 @@ export default function EntryPromoModal() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter email for instant discount..."
+                  placeholder="Enter email to lock in code..."
                   required
                   className="flex-1 bg-white/10 border border-white/15 rounded-xl px-4 py-3 text-sm text-white placeholder-white/40 focus:outline-hidden focus:border-[#34D399] transition-colors"
                 />
@@ -152,20 +197,21 @@ export default function EntryPromoModal() {
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
-              <div className="text-center">
+              <div className="text-center pt-1">
                 <Link
-                  href="/pricing"
+                  href={`/pricing?promo=${config.promoCode}`}
                   onClick={handleDismiss}
-                  className="text-[12px] text-white/50 hover:text-white underline underline-offset-4 transition-colors"
+                  className="text-[12px] text-white/60 hover:text-white underline underline-offset-4 transition-colors font-medium inline-flex items-center gap-1"
                 >
-                  Or jump directly to pricing plans &rarr;
+                  <span>Or apply {config.promoCode} directly on Pricing</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
             </form>
           )}
 
           <div className="pt-2 text-[11px] text-white/40 text-center font-mono">
-            Applies to all annual plans. Dismiss stays valid for 7 days.
+            Applies to all annual plans. Cooldown: {config.frequencyDays} days.
           </div>
         </div>
       </div>

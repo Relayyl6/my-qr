@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
+import { AdminPromoConfig, DEFAULT_PROMO_CONFIG } from '@/lib/promo';
 
 async function verifyAdmin() {
   const user = await getCurrentUser();
@@ -263,4 +264,144 @@ export async function adminPurgeUserAccount(targetUserId: string) {
 
   revalidatePath('/admin');
   return { success: true, ...result };
+}
+
+export async function adminGetPromoConfig(): Promise<AdminPromoConfig> {
+  try {
+    const record = await prisma.aiCache.findUnique({
+      where: { key: 'platform_promo_config' },
+    });
+    if (record && record.value) {
+      return {
+        banner: { ...DEFAULT_PROMO_CONFIG.banner, ...(record.value as any).banner },
+        modal: { ...DEFAULT_PROMO_CONFIG.modal, ...(record.value as any).modal },
+      };
+    }
+  } catch (e) {
+    console.warn('[adminGetPromoConfig] Failed to read promo config:', e);
+  }
+  return DEFAULT_PROMO_CONFIG;
+}
+
+export async function adminSavePromoConfig(config: Partial<AdminPromoConfig>) {
+  const admin = await verifyAdmin();
+  const current = await adminGetPromoConfig();
+  const updated: AdminPromoConfig = {
+    banner: { ...current.banner, ...(config.banner || {}) },
+    modal: { ...current.modal, ...(config.modal || {}) },
+  };
+
+  await prisma.aiCache.upsert({
+    where: { key: 'platform_promo_config' },
+    create: {
+      key: 'platform_promo_config',
+      value: updated as any,
+      expiresAt: new Date(Date.now() + 3650 * 24 * 60 * 60 * 1000),
+    },
+    update: {
+      value: updated as any,
+      expiresAt: new Date(Date.now() + 3650 * 24 * 60 * 60 * 1000),
+    },
+  });
+
+  await logAdminAction(admin.email, 'Updated Platform Promo & Banner Configuration');
+  revalidatePath('/admin');
+  revalidatePath('/');
+  revalidatePath('/pricing');
+  return { success: true, config: updated };
+}
+
+export async function adminGetPromoCodes() {
+  await verifyAdmin();
+  // Ensure default BLACKFRIDAY40 code exists
+  const existingBf = await prisma.promoCode.findUnique({
+    where: { code: 'BLACKFRIDAY40' },
+  });
+  if (!existingBf) {
+    await prisma.promoCode.create({
+      data: {
+        code: 'BLACKFRIDAY40',
+        type: 'percent',
+        value: 40.0,
+        appliesTo: 'all',
+        billingPeriod: 'both',
+        active: true,
+      },
+    });
+  }
+
+  const codes = await prisma.promoCode.findMany({
+    orderBy: { createdAt: 'desc' },
+  });
+  return codes.map((c) => ({
+    id: c.id,
+    code: c.code,
+    type: c.type,
+    value: Number(c.value),
+    appliesTo: c.appliesTo,
+    billingPeriod: c.billingPeriod,
+    maxRedemptions: c.maxRedemptions,
+    redemptionsCount: c.redemptionsCount,
+    expiresAt: c.expiresAt ? c.expiresAt.toISOString() : null,
+    active: c.active,
+    createdAt: c.createdAt.toISOString(),
+  }));
+}
+
+export async function adminCreatePromoCode(payload: {
+  code: string;
+  type?: string;
+  value: number;
+  appliesTo?: string;
+  billingPeriod?: string;
+  maxRedemptions?: number | null;
+  expiresAt?: string | null;
+}) {
+  const admin = await verifyAdmin();
+  const cleanCode = (payload.code || '').trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '');
+  if (!cleanCode) throw new Error('Valid promo code string is required.');
+  if (isNaN(payload.value) || payload.value <= 0) throw new Error('Discount value must be greater than 0.');
+
+  const existing = await prisma.promoCode.findUnique({ where: { code: cleanCode } });
+  if (existing) throw new Error(`Promo code "${cleanCode}" already exists.`);
+
+  const created = await prisma.promoCode.create({
+    data: {
+      code: cleanCode,
+      type: payload.type || 'percent',
+      value: payload.value,
+      appliesTo: payload.appliesTo || 'all',
+      billingPeriod: payload.billingPeriod || 'both',
+      maxRedemptions: payload.maxRedemptions ? Number(payload.maxRedemptions) : null,
+      expiresAt: payload.expiresAt ? new Date(payload.expiresAt) : null,
+      active: true,
+    },
+  });
+
+  await logAdminAction(admin.email, `Created promo code: ${cleanCode} (${payload.value}% / $)`);
+  revalidatePath('/admin');
+  return { success: true, promoCode: created };
+}
+
+export async function adminTogglePromoCode(id: string, active: boolean) {
+  const admin = await verifyAdmin();
+  const updated = await prisma.promoCode.update({
+    where: { id },
+    data: { active },
+  });
+
+  await logAdminAction(admin.email, `Toggled promo code ${updated.code} active: ${active}`);
+  revalidatePath('/admin');
+  return { success: true, updated };
+}
+
+export async function adminDeletePromoCode(id: string) {
+  const admin = await verifyAdmin();
+  const deleted = await prisma.promoCode.delete({
+    where: { id },
+  });
+
+  await logAdminAction(admin.email, `Deleted promo code: ${deleted.code}`);
+  revalidatePath('/admin');
+  return { success: true };
 }

@@ -465,7 +465,23 @@ export default function MicroSaasHub({ userTier, isAdmin = false }: MicroSaasHub
                       <div className="space-y-1 text-xs text-[#11140F]/70">
                         {spec.email && <div className="truncate">📧 {spec.email}</div>}
                         {spec.phone && <div className="truncate">📞 {spec.phone}</div>}
-                        <div className="truncate text-[#11140F]/50 font-mono text-[11px]">
+                        <div className="flex items-center gap-1.5 pt-1 flex-wrap">
+                          {entitlements.branded_footer ? (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 font-mono">
+                              Free: DynamicQR Watermark
+                            </span>
+                          ) : (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono">
+                              ✓ White-Label Clean
+                            </span>
+                          )}
+                          {entitlements.custom_domains > 0 && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 font-mono">
+                              Branded Domain
+                            </span>
+                          )}
+                        </div>
+                        <div className="truncate text-[#11140F]/50 font-mono text-[11px] pt-0.5">
                           URL: /c/{card.slug}
                         </div>
                       </div>
@@ -758,7 +774,17 @@ export default function MicroSaasHub({ userTier, isAdmin = false }: MicroSaasHub
                       </div>
 
                       <div className="space-y-1 text-xs text-[#11140F]/70">
-                        <div className="truncate text-[#11140F]/50 font-mono text-[11px]">
+                        <div className="flex items-center gap-1.5 pt-0.5 flex-wrap">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono">
+                            ✓ Pro Contactless Menu
+                          </span>
+                          {entitlements.custom_domains > 0 && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 font-mono">
+                              Branded Domain
+                            </span>
+                          )}
+                        </div>
+                        <div className="truncate text-[#11140F]/50 font-mono text-[11px] pt-1">
                           URL: /m/{menu.slug}
                         </div>
                       </div>
@@ -892,7 +918,19 @@ export default function MicroSaasHub({ userTier, isAdmin = false }: MicroSaasHub
                         </div>
                       </div>
 
-                      <div className="text-xs text-[#11140F]/50 font-mono">
+                      <div className="flex items-center gap-1.5 pt-0.5 flex-wrap">
+                        {entitlements.branded_footer ? (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 font-mono">
+                            Free: DynamicQR Watermark
+                          </span>
+                        ) : (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono">
+                            ✓ White-Label Clean
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="text-xs text-[#11140F]/50 font-mono pt-1">
                         URL: /w/{wifi.slug}
                       </div>
                     </div>

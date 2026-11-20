@@ -23,7 +23,8 @@ import {
 import AdminUserRow from '@/components/AdminUserRow';
 import AdminDomainRow from '@/components/AdminDomainRow';
 import AdminSovereigntyControls from '@/components/AdminSovereigntyControls';
-import { adminGetSystemConfig, adminGetAuditLogs } from '@/app/admin/actions';
+import AdminPromoManager from '@/components/AdminPromoManager';
+import { adminGetSystemConfig, adminGetAuditLogs, adminGetPromoConfig, adminGetPromoCodes } from '@/app/admin/actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,6 +52,8 @@ export default async function AdminDashboardPage() {
     customDomains,
     systemConfig,
     auditLogs,
+    promoConfig,
+    promoCodes,
   ] = await Promise.all([
     prisma.user.count(),
     prisma.user.count({ where: { tier: 'free' } }),
@@ -105,6 +108,8 @@ export default async function AdminDashboardPage() {
     }),
     adminGetSystemConfig(),
     adminGetAuditLogs(),
+    adminGetPromoConfig(),
+    adminGetPromoCodes(),
   ]);
 
   // Calculate MRR & ARR Run Rate
@@ -241,6 +246,12 @@ export default async function AdminDashboardPage() {
             Launch Full Analytics Hub &rarr;
           </Link>
         </div>
+
+        {/* Platform Promo & Top Announcement Banner Sovereignty Control */}
+        <AdminPromoManager
+          initialConfig={promoConfig}
+          initialPromoCodes={promoCodes}
+        />
 
         {/* Sovereignty Governance Panel */}
         <AdminSovereigntyControls

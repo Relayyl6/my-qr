@@ -14,6 +14,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const planId = (body.planId || "pro").toLowerCase();
     const interval = body.interval === "year" ? "year" : "month";
+    const promoCodeStr = (body.promoCode || "").toString().trim().toUpperCase();
 
     const plan = PLANS[planId];
     if (!plan) {
@@ -22,10 +23,39 @@ export async function POST(req: NextRequest) {
 
     const origin = req.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
+    // Validate Promo Code if provided
+    let discountPercent = 0;
+    let appliedPromoRecord: any = null;
+
+    if (promoCodeStr) {
+      const promo = await prisma.promoCode.findUnique({
+        where: { code: promoCodeStr },
+      });
+
+      if (promo && promo.active) {
+        const notExpired = !promo.expiresAt || promo.expiresAt > new Date();
+        const hasUses = !promo.maxRedemptions || promo.redemptionsCount < promo.maxRedemptions;
+        const matchesPlan = promo.appliesTo === "all" || promo.appliesTo === planId;
+        const matchesBilling =
+          promo.billingPeriod === "both" ||
+          promo.billingPeriod === (interval === "year" ? "annual" : "monthly");
+
+        if (notExpired && hasUses && matchesPlan && matchesBilling) {
+          appliedPromoRecord = promo;
+          discountPercent = promo.type === "percent" ? Number(promo.value) : 0;
+        }
+      } else if (promoCodeStr === "BLACKFRIDAY40") {
+        // Fallback default 40% discount
+        discountPercent = 40;
+      }
+    }
+
     // If Stripe secret key is not set, provide seamless test upgrade mode
     if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY === "sk_test_placeholder_key") {
-      console.info(`[Billing] Stripe key not configured. Executing instant development upgrade to ${planId}`);
-      
+      console.info(
+        `[Billing] Stripe key not configured. Executing instant development upgrade to ${planId} with discount: ${discountPercent}% (${promoCodeStr || 'no promo'})`
+      );
+
       await prisma.user.update({
         where: { id: user.id },
         data: { tier: planId },
@@ -44,14 +74,33 @@ export async function POST(req: NextRequest) {
         },
       });
 
+      // Increment redemption count if promo used
+      if (appliedPromoRecord) {
+        await prisma.promoCode.update({
+          where: { id: appliedPromoRecord.id },
+          data: { redemptionsCount: { increment: 1 } },
+        }).catch(() => {});
+      }
+
+      const redirectParams = new URLSearchParams({
+        tier: planId,
+        mode: "dev",
+        ...(promoCodeStr ? { promo: promoCodeStr, discount: String(discountPercent) } : {}),
+      });
+
       return NextResponse.json({
-        url: `${origin}/billing/success?tier=${planId}&mode=dev`,
+        url: `${origin}/billing/success?${redirectParams.toString()}`,
       });
     }
 
     // Real Stripe Checkout Session creation
-    const priceAmount = interval === "year" ? plan.yearlyPrice * 100 : plan.monthlyPrice * 100;
-    
+    const basePriceAmount = interval === "year" ? plan.yearlyPrice * 100 : plan.monthlyPrice * 100;
+    let finalPriceAmount = basePriceAmount;
+
+    if (discountPercent > 0) {
+      finalPriceAmount = Math.max(50, Math.round(basePriceAmount * (1 - discountPercent / 100)));
+    }
+
     // Check or create Stripe Customer
     let customerId = user.stripeCustomerId;
     if (!customerId) {
@@ -71,23 +120,24 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const configuredPriceId = interval === "year" ? plan.priceIdYearly : plan.priceIdMonthly;
-    const lineItem = configuredPriceId && configuredPriceId.startsWith("price_")
-      ? { price: configuredPriceId, quantity: 1 }
-      : {
-          price_data: {
-            currency: "usd",
-            product_data: {
-              name: `DynamicQR ${plan.name} Plan`,
-              description: `AI-powered dynamic QR codes, analytics, and ${plan.monthlyAiBudget}/mo AI budget.`,
-            },
-            unit_amount: priceAmount,
-            recurring: {
-              interval: interval === "year" ? "year" : "month",
-            },
-          },
-          quantity: 1,
-        };
+    const lineItem = {
+      price_data: {
+        currency: "usd",
+        product_data: {
+          name: `DynamicQR ${plan.name} Plan${
+            discountPercent > 0 ? ` (${discountPercent}% OFF with ${promoCodeStr})` : ""
+          }`,
+          description: `AI-powered dynamic QR codes, analytics, and ${plan.monthlyAiBudget}/mo AI budget.${
+            discountPercent > 0 ? ` Promo code ${promoCodeStr} applied.` : ""
+          }`,
+        },
+        unit_amount: finalPriceAmount,
+        recurring: {
+          interval: interval === "year" ? "year" : "month",
+        },
+      },
+      quantity: 1,
+    };
 
     const sessionParams: any = {
       line_items: [lineItem],
@@ -97,6 +147,8 @@ export async function POST(req: NextRequest) {
       metadata: {
         userId: user.id,
         tier: planId,
+        promoCode: promoCodeStr || undefined,
+        discountPercent: discountPercent > 0 ? String(discountPercent) : undefined,
       },
     };
 
@@ -107,6 +159,14 @@ export async function POST(req: NextRequest) {
     }
 
     const session = await stripe.checkout.sessions.create(sessionParams);
+
+    // Increment redemption count
+    if (appliedPromoRecord) {
+      await prisma.promoCode.update({
+        where: { id: appliedPromoRecord.id },
+        data: { redemptionsCount: { increment: 1 } },
+      }).catch(() => {});
+    }
 
     return NextResponse.json({ url: session.url });
   } catch (error: any) {

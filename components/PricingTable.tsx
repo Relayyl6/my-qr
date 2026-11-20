@@ -1,16 +1,81 @@
 'use client';
 
-import { useState } from 'react';
-import { Check, Sparkles, ArrowRight, Loader2 } from 'lucide-react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Check, Sparkles, ArrowRight, Loader2, Tag, X } from 'lucide-react';
 
 interface PricingTableProps {
   currentTier: string;
   isLoggedIn: boolean;
 }
 
-export default function PricingTable({ currentTier, isLoggedIn }: PricingTableProps) {
+interface AppliedPromo {
+  code: string;
+  type: string;
+  value: number;
+  description: string;
+}
+
+function PricingTableContent({ currentTier, isLoggedIn }: PricingTableProps) {
+  const searchParams = useSearchParams();
   const [interval, setInterval] = useState<'month' | 'year'>('month');
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+
+  // Promo code states
+  const [promoInput, setPromoInput] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState<AppliedPromo | null>(null);
+  const [validatingPromo, setValidatingPromo] = useState(false);
+  const [promoError, setPromoError] = useState<string | null>(null);
+
+  // Check URL query param ?promo=...
+  useEffect(() => {
+    const queryPromo = searchParams.get('promo');
+    if (queryPromo) {
+      setPromoInput(queryPromo.toUpperCase());
+      validateAndApplyPromo(queryPromo.toUpperCase());
+    }
+  }, [searchParams]);
+
+  const validateAndApplyPromo = async (codeToTest: string) => {
+    if (!codeToTest.trim()) return;
+    setValidatingPromo(true);
+    setPromoError(null);
+    try {
+      const res = await fetch('/api/promo/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: codeToTest.trim(), plan: 'pro' }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setPromoError(data.error || 'Invalid promo code');
+        setAppliedPromo(null);
+      } else {
+        setAppliedPromo({
+          code: data.code,
+          type: data.type,
+          value: Number(data.value),
+          description: data.description || `${data.value}% discount applied`,
+        });
+        setPromoError(null);
+      }
+    } catch (err: any) {
+      setPromoError('Validation network error');
+    } finally {
+      setValidatingPromo(false);
+    }
+  };
+
+  const handleApplyPromoSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    validateAndApplyPromo(promoInput);
+  };
+
+  const handleRemovePromo = () => {
+    setAppliedPromo(null);
+    setPromoInput('');
+    setPromoError(null);
+  };
 
   const handleCheckout = async (planId: string) => {
     if (planId === 'free') {
@@ -29,7 +94,11 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
       const res = await fetch('/api/billing/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planId, interval }),
+        body: JSON.stringify({
+          planId,
+          interval,
+          promoCode: appliedPromo?.code || undefined,
+        }),
       });
 
       const data = await res.json();
@@ -47,11 +116,100 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
 
   const current = currentTier.toLowerCase();
 
+  // Helper for discounted prices
+  const calcPrice = (base: number) => {
+    if (!appliedPromo) return { discounted: base, isDiscounted: false };
+    if (appliedPromo.type === 'percent') {
+      const discounted = Number((base * (1 - appliedPromo.value / 100)).toFixed(2));
+      return { discounted, isDiscounted: true };
+    }
+    const discounted = Math.max(1, base - appliedPromo.value);
+    return { discounted, isDiscounted: true };
+  };
+
+  // Prices
+  // Pro: $5/mo, $4/mo annual ($48/yr)
+  const proMonthly = calcPrice(5);
+  const proAnnualMonthly = calcPrice(4);
+  const proAnnualTotal = calcPrice(48);
+
+  // Plus: $12/mo, $10/mo annual ($120/yr)
+  const plusMonthly = calcPrice(12);
+  const plusAnnualMonthly = calcPrice(10);
+  const plusAnnualTotal = calcPrice(120);
+
+  // Ultra: $20/mo, $16/mo annual ($200/yr)
+  const ultraMonthly = calcPrice(20);
+  const ultraAnnualMonthly = calcPrice(16);
+  const ultraAnnualTotal = calcPrice(200);
+
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
+      {/* Dynamic Promo Code Bar */}
+      <div className="max-w-xl mx-auto p-3.5 sm:p-4 rounded-2xl border border-[#11140F]/10 bg-white shadow-xs">
+        {appliedPromo ? (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                <Tag className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-emerald-800 text-sm font-mono">
+                    {appliedPromo.code}
+                  </span>
+                  <span className="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full text-[10.5px] font-bold">
+                    {appliedPromo.value}% OFF
+                  </span>
+                </div>
+                <p className="text-[11.5px] text-[#11140F]/65 mt-0.5">
+                  {appliedPromo.description}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleRemovePromo}
+              className="text-xs font-semibold text-red-600 hover:text-red-700 hover:underline px-2.5 py-1 rounded cursor-pointer shrink-0"
+            >
+              Remove code
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleApplyPromoSubmit} className="flex flex-col sm:flex-row items-center gap-2">
+            <div className="relative flex-1 w-full">
+              <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#11140F]/40" />
+              <input
+                type="text"
+                value={promoInput}
+                onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
+                placeholder="Have a promo code? (e.g. BLACKFRIDAY40)"
+                className="w-full pl-9 pr-3 py-2 text-xs font-mono font-medium rounded-xl border border-[#11140F]/15 bg-[#F7F8F5] focus:bg-white focus:outline-hidden focus:border-[#2F6B4F]"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={validatingPromo || !promoInput.trim()}
+              className="w-full sm:w-auto px-5 py-2 rounded-xl bg-[#11140F] text-white text-xs font-semibold hover:bg-[#2A2E25] transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer disabled:opacity-50 shadow-xs"
+            >
+              {validatingPromo ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Apply Code'}
+            </button>
+          </form>
+        )}
+        {promoError && (
+          <p className="text-[11.5px] text-red-600 mt-2 font-medium">
+            ⚠️ {promoError}
+          </p>
+        )}
+      </div>
+
       {/* Interval Toggle */}
       <div className="flex items-center justify-center gap-3">
-        <span className={`text-[14px] font-medium transition-colors ${interval === 'month' ? 'text-[#11140F] font-semibold' : 'text-[#11140F]/50'}`}>
+        <span
+          className={`text-[14px] font-medium transition-colors ${
+            interval === 'month' ? 'text-[#11140F] font-semibold' : 'text-[#11140F]/50'
+          }`}
+        >
           Monthly Billing
         </span>
         <button
@@ -66,7 +224,11 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
           />
         </button>
         <div className="flex items-center gap-2">
-          <span className={`text-[14px] font-medium transition-colors ${interval === 'year' ? 'text-[#11140F] font-semibold' : 'text-[#11140F]/50'}`}>
+          <span
+            className={`text-[14px] font-medium transition-colors ${
+              interval === 'year' ? 'text-[#11140F] font-semibold' : 'text-[#11140F]/50'
+            }`}
+          >
             Yearly Billing
           </span>
           <span className="rounded-full bg-[#2F6B4F]/10 text-[#2F6B4F] text-[11px] font-bold px-2.5 py-0.5 tracking-wide uppercase font-mono">
@@ -77,7 +239,6 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
 
       {/* Grid of 4 Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
-        
         {/* FREE PLAN */}
         <div className="rounded-3xl border border-[#11140F]/10 bg-white p-6 sm:p-7 flex flex-col justify-between shadow-xs transition-shadow hover:shadow-md">
           <div className="space-y-5">
@@ -103,24 +264,24 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
             {/* Core Quotas Box */}
             <div className="rounded-2xl border border-[#11140F]/8 bg-[#F7F8F5] p-3.5 space-y-2 text-[12px]">
               <div className="flex items-center justify-between">
-                <span className="text-[#11140F]/60">Link Slots</span>
-                <strong className="text-[#11140F] font-mono">5 Active</strong>
+                <span className="text-[#11140F]/70 font-medium">Link Slots</span>
+                <strong className="text-[#11140F] font-mono font-bold">5 Active</strong>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-[#11140F]/60">Monthly Scans</span>
-                <strong className="text-[#11140F] font-mono">1,000 / mo</strong>
+                <span className="text-[#11140F]/70 font-medium">Monthly Scans</span>
+                <strong className="text-[#11140F] font-mono font-bold">1,000 / mo</strong>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-[#11140F]/60">Mailing List</span>
-                <strong className="text-[#11140F] font-mono">1 list • 10 contacts</strong>
+                <span className="text-[#11140F]/70 font-medium">Mailing Lists</span>
+                <strong className="text-[#11140F] font-mono font-bold">1 list • 10 contacts</strong>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-[#11140F]/60">Broadcasts</span>
-                <strong className="text-[#11140F] font-mono">2 / mo (Gmail)</strong>
+                <span className="text-[#11140F]/70 font-medium">Broadcasts</span>
+                <strong className="text-[#11140F] font-mono font-bold">2 / mo (Gmail)</strong>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-[#11140F]/60">AI Budget</span>
-                <strong className="text-[#11140F] font-mono">$0.50 / mo</strong>
+                <span className="text-[#11140F]/70 font-medium">AI Budget</span>
+                <strong className="text-[#11140F] font-mono font-bold">$0.50 / mo</strong>
               </div>
             </div>
 
@@ -152,7 +313,7 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
             <button
               onClick={() => handleCheckout('free')}
               disabled={current === 'free'}
-              className="w-full rounded-xl border border-[#11140F]/15 py-3 text-[13.5px] font-semibold text-[#11140F] hover:bg-[#EEF0EA] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-xl border border-[#11140F]/15 py-3 text-[13.5px] font-semibold text-[#11140F] hover:bg-[#EEF0EA] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               {current === 'free' ? 'Current Plan' : 'Select Free'}
             </button>
@@ -183,15 +344,21 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
             </div>
 
             <div>
-              <div className="flex items-baseline gap-1">
+              <div className="flex items-baseline gap-2 flex-wrap">
                 <span className="text-4xl font-extrabold tracking-tight text-[#11140F]">
-                  ${interval === 'year' ? '4' : '5'}
+                  ${interval === 'year' ? proAnnualMonthly.discounted : proMonthly.discounted}
                 </span>
+                {(interval === 'year' ? proAnnualMonthly.isDiscounted : proMonthly.isDiscounted) && (
+                  <span className="text-lg line-through text-[#11140F]/40 font-medium">
+                    ${interval === 'year' ? '4' : '5'}
+                  </span>
+                )}
                 <span className="text-[13px] text-[#11140F]/50">/month</span>
               </div>
               {interval === 'year' && (
                 <div className="mt-1 text-[11px] font-medium text-[#2F6B4F]">
-                  Billed annually ($48/yr)
+                  Billed annually (${proAnnualTotal.discounted}/yr
+                  {proAnnualTotal.isDiscounted && <span className="line-through text-[#11140F]/40 ml-1">$48</span>})
                 </div>
               )}
             </div>
@@ -252,7 +419,7 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
             <button
               onClick={() => handleCheckout('pro')}
               disabled={current === 'pro' || loadingPlan === 'pro'}
-              className="w-full rounded-xl bg-[#11140F] py-3 text-[13.5px] font-semibold text-white hover:bg-[#2A2E25] transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 cursor-pointer"
+              className="w-full rounded-xl bg-[#11140F] py-3 text-[13.5px] font-semibold text-white hover:bg-[#2A2E25] transition-colors flex items-center justify-center gap-2 shadow-xs disabled:opacity-50 cursor-pointer"
             >
               {loadingPlan === 'pro' ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -286,15 +453,21 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
             </div>
 
             <div>
-              <div className="flex items-baseline gap-1">
+              <div className="flex items-baseline gap-2 flex-wrap">
                 <span className="text-4xl font-extrabold tracking-tight text-[#11140F]">
-                  ${interval === 'year' ? '10' : '12'}
+                  ${interval === 'year' ? plusAnnualMonthly.discounted : plusMonthly.discounted}
                 </span>
+                {(interval === 'year' ? plusAnnualMonthly.isDiscounted : plusMonthly.isDiscounted) && (
+                  <span className="text-lg line-through text-[#11140F]/40 font-medium">
+                    ${interval === 'year' ? '10' : '12'}
+                  </span>
+                )}
                 <span className="text-[13px] text-[#11140F]/50">/month</span>
               </div>
               {interval === 'year' && (
                 <div className="mt-1 text-[11px] font-medium text-[#2F6B4F]">
-                  Billed annually ($120/yr)
+                  Billed annually (${plusAnnualTotal.discounted}/yr
+                  {plusAnnualTotal.isDiscounted && <span className="line-through text-[#11140F]/40 ml-1">$120</span>})
                 </div>
               )}
             </div>
@@ -326,27 +499,27 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
             <ul className="space-y-3 text-[12.5px] text-[#11140F]/85">
               <li className="flex items-start gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0 mt-0.5" />
-                <span><strong>Custom Branded Domain</strong> (1 domain with auto Let&apos;s Encrypt SSL)</span>
+                <span><strong>1 Custom Branded Domain</strong> (Zero DynamicQR watermark)</span>
               </li>
               <li className="flex items-start gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0 mt-0.5" />
-                <span><strong>5 Customer Mailing Lists</strong> (up to 100 contacts, Gmail-powered)</span>
+                <span><strong>5 Customer Mailing Lists</strong> (up to 100 subscribers)</span>
               </li>
               <li className="flex items-start gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0 mt-0.5" />
-                <span><strong>Event Tickets & QR Passes</strong> + Website Signup Embed Widget</span>
+                <span><strong>Extended Micro-SaaS:</strong> 10 Menus, 10 Forms, 10 Event Tickets, 15 Coupons</span>
               </li>
               <li className="flex items-start gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0 mt-0.5" />
-                <span><strong>Geo-IP Country Routing</strong> & All-Timezone Clock Alignment</span>
+                <span><strong>Geo-Country Routing</strong> (Redirect scans by visitor nation)</span>
               </li>
               <li className="flex items-start gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0 mt-0.5" />
-                <span><strong>Retargeting Pixels:</strong> Meta, Google Analytics 4, TikTok Pixels</span>
+                <span><strong>Vector SVG Exports</strong> with CMYK physical printer profiles</span>
               </li>
               <li className="flex items-start gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] shrink-0 mt-0.5" />
-                <span><strong>Vector SVG Print Export</strong> & Acrylic Table Tent Kit</span>
+                <span><strong>Webhook Ingress Stream</strong> (Pipe scans to external CRMs)</span>
               </li>
             </ul>
           </div>
@@ -355,7 +528,7 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
             <button
               onClick={() => handleCheckout('plus')}
               disabled={current === 'plus' || loadingPlan === 'plus'}
-              className="w-full rounded-xl bg-[#2F6B4F] py-3 text-[13.5px] font-semibold text-white hover:bg-[#25553E] transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 cursor-pointer"
+              className="w-full rounded-xl border border-[#11140F]/20 bg-white py-3 text-[13.5px] font-semibold text-[#11140F] hover:bg-[#EEF0EA] transition-colors flex items-center justify-center gap-2 shadow-xs disabled:opacity-50 cursor-pointer"
             >
               {loadingPlan === 'plus' ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -389,15 +562,21 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
             </div>
 
             <div>
-              <div className="flex items-baseline gap-1">
+              <div className="flex items-baseline gap-2 flex-wrap">
                 <span className="text-4xl font-extrabold tracking-tight text-[#11140F]">
-                  ${interval === 'year' ? '16' : '20'}
+                  ${interval === 'year' ? ultraAnnualMonthly.discounted : ultraMonthly.discounted}
                 </span>
+                {(interval === 'year' ? ultraAnnualMonthly.isDiscounted : ultraMonthly.isDiscounted) && (
+                  <span className="text-lg line-through text-[#11140F]/40 font-medium">
+                    ${interval === 'year' ? '16' : '20'}
+                  </span>
+                )}
                 <span className="text-[13px] text-[#11140F]/50">/month</span>
               </div>
               {interval === 'year' && (
                 <div className="mt-1 text-[11px] font-medium text-[#2F6B4F]">
-                  Billed annually ($200/yr)
+                  Billed annually (${ultraAnnualTotal.discounted}/yr
+                  {ultraAnnualTotal.isDiscounted && <span className="line-through text-[#11140F]/40 ml-1">$200</span>})
                 </div>
               )}
             </div>
@@ -473,8 +652,15 @@ export default function PricingTable({ currentTier, isLoggedIn }: PricingTablePr
             </button>
           </div>
         </div>
-
       </div>
     </div>
+  );
+}
+
+export default function PricingTable(props: PricingTableProps) {
+  return (
+    <Suspense fallback={<div className="py-12 text-center text-xs text-[#11140F]/50">Loading pricing plans...</div>}>
+      <PricingTableContent {...props} />
+    </Suspense>
   );
 }
