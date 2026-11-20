@@ -83,8 +83,8 @@ export async function sendEmail({
   replyTo,
   headers,
 }: EmailPayload): Promise<{ success: boolean; id?: string; error?: string }> {
-  const from = process.env.EMAIL_FROM || process.env.SMTP_FROM || '"DynamicQR" <yemuelinc@gmail.com>';
-  const defaultReplyTo = replyTo || "yemuelinc@gmail.com";
+  const from = process.env.EMAIL_FROM || process.env.SMTP_FROM || '"DynamicQR" <hello@dynamicqr.co>';
+  const defaultReplyTo = replyTo || process.env.EMAIL_REPLY_TO || "hello@dynamicqr.co";
   const transporter = getTransporter();
 
   // If SMTP is not yet configured with active credentials, log cleanly for dev and test
@@ -318,9 +318,9 @@ export async function broadcastNewsletterCampaign({
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            from: process.env.EMAIL_FROM || "DynamicQR <yemuelinc@gmail.com>",
+            from: process.env.EMAIL_FROM || "DynamicQR <hello@dynamicqr.co>",
             to: subscriber.email,
-            reply_to: "yemuelinc@gmail.com",
+            reply_to: process.env.EMAIL_REPLY_TO || "hello@dynamicqr.co",
             subject,
             html: fullHtml,
             headers: {
@@ -339,7 +339,7 @@ export async function broadcastNewsletterCampaign({
         to: subscriber.email,
         subject,
         html: fullHtml,
-        replyTo: "yemuelinc@gmail.com",
+        replyTo: process.env.EMAIL_REPLY_TO || "hello@dynamicqr.co",
         headers: {
           "List-Unsubscribe": `<${unsubUrl}>`,
           "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",

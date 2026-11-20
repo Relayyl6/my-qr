@@ -216,7 +216,7 @@ export default function Footer({ theme = 'dark', className = '' }: FooterProps) 
             <h4 className="text-[13px] font-semibold text-white tracking-wide">Company</h4>
             <ul className="space-y-2.5 text-[13px] text-[#9CA3AF]">
               <li>
-                <a href="mailto:yemuelinc@gmail.com" className="hover:text-white transition-colors">
+                <a href="mailto:hello@dynamicqr.co" className="hover:text-white transition-colors">
                   Contact
                 </a>
               </li>
