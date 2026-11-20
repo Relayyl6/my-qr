@@ -47,9 +47,13 @@ export async function GET(
     );
   }
 
+  // Row limits per plan: Pro 100 rows, Plus 1,000 rows (Matrix #75), Ultra uncapped
+  const maxRows = isAdmin || userTier === 'ultra' ? 999999 : userTier === 'plus' ? 1000 : 100;
+  const scansToExport = link.scans.slice(0, maxRows);
+
   // Build CSV content
   const headers = ['Scanned At (UTC)', 'Device OS', 'Country', 'City', 'Rule Matched', 'Referrer', 'User Agent'];
-  const rows = link.scans.map((s) => [
+  const rows = scansToExport.map((s) => [
     s.scannedAt.toISOString(),
     s.device || 'Unknown',
     s.country || 'Unknown',

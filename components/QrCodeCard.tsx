@@ -47,6 +47,7 @@ export default function QrCodeCard({
     ? `https://${customDomain}/id/${shortCode}`
     : (origin ? `${origin}/id/${shortCode}` : `https://dynamicqr.co/id/${shortCode}`);
   const safeName = (label || shortCode).toLowerCase().replace(/[^a-z0-9]/g, '-');
+  const canExportSvg = isAdmin || ['plus', 'ultra'].includes(userTier.toLowerCase());
 
   // 0. Quick Raw Zero-Margin PNG (pure die-cut QR code, zero padding, zero text)
   const handleDownloadRawPng = async () => {
@@ -178,6 +179,10 @@ export default function QrCodeCard({
   // 2. Pure Vector SVG Export
   const handleDownloadSvg = async () => {
     setIsMenuOpen(false);
+    if (!canExportSvg) {
+      alert('Vector SVG lossless print export is a Plus & Ultra plan feature. Please upgrade to download infinite-scale SVG graphics for commercial print shops.');
+      return;
+    }
     try {
       const svgString = await QRCode.toString(url, {
         type: 'svg',
@@ -274,13 +279,20 @@ export default function QrCodeCard({
 
               <button
                 onClick={handleDownloadSvg}
-                className="w-full flex items-center gap-2 px-2.5 py-1.5 text-[11px] font-medium text-[#11140F] rounded-xl hover:bg-[#EEF0EA] transition-colors cursor-pointer"
+                className="w-full flex items-center justify-between px-2.5 py-1.5 text-[11px] font-medium text-[#11140F] rounded-xl hover:bg-[#EEF0EA] transition-colors cursor-pointer"
               >
-                <FileCode className="w-3.5 h-3.5 text-[#2F6B4F] shrink-0" />
-                <div className="leading-tight text-left">
-                  <div>Vector SVG</div>
-                  <div className="text-[9px] text-[#11140F]/50">Infinite scale for print</div>
+                <div className="flex items-center gap-2">
+                  <FileCode className="w-3.5 h-3.5 text-[#2F6B4F] shrink-0" />
+                  <div className="leading-tight text-left">
+                    <div>Vector SVG</div>
+                    <div className="text-[9px] text-[#11140F]/50">Infinite scale for print</div>
+                  </div>
                 </div>
+                {!canExportSvg && (
+                  <span className="text-[9.5px] font-mono px-1.5 py-0.2 rounded bg-purple-100 text-purple-800 font-bold uppercase">
+                    Plus
+                  </span>
+                )}
               </button>
 
               <button

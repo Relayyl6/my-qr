@@ -38,12 +38,17 @@ export default function ExportCustomizerModal({
   userTier = 'free',
   isAdmin = false,
 }: ExportCustomizerModalProps) {
+  const tier = userTier.toLowerCase();
+  const canWhiteLabel = isAdmin || ['plus', 'ultra'].includes(tier);
+  const canExportSvg = isAdmin || ['plus', 'ultra'].includes(tier);
+  const canPrintPdf = isAdmin || ['plus', 'ultra'].includes(tier);
+
   const [layoutMode, setLayoutMode] = useState<LayoutMode>('compact-card');
   const [showTitle, setShowTitle] = useState(true);
   const [showShortCode, setShowShortCode] = useState(true);
   const [showUrlBadge, setShowUrlBadge] = useState(true);
   const [showCameraText, setShowCameraText] = useState(false);
-  const [showWatermark, setShowWatermark] = useState(false);
+  const [showWatermark, setShowWatermark] = useState(!canWhiteLabel);
   const [showBorder, setShowBorder] = useState(false);
   const [isTransparent, setIsTransparent] = useState(false);
   const [customTitle, setCustomTitle] = useState(label || 'Scan to Open');
@@ -251,6 +256,10 @@ export default function ExportCustomizerModal({
   };
 
   const handleDownloadSvg = async () => {
+    if (!canExportSvg) {
+      alert('Vector SVG lossless print export is a Plus & Ultra plan feature. Please upgrade to download infinite-scale SVG graphics for commercial print shops.');
+      return;
+    }
     try {
       const margin = layoutMode === 'zero-margin' ? 0 : 2;
       const svgString = await QRCode.toString(url, {
@@ -270,6 +279,10 @@ export default function ExportCustomizerModal({
 
   // Tight PDF Print: Zero Wasted Margins
   const handlePrintTightPdf = () => {
+    if (!canPrintPdf) {
+      alert('Offset print PDF templates and zero-margin printing are locked to Plus & Ultra plans. Please upgrade to export ready-to-print commercial sheets.');
+      return;
+    }
     const canvas = previewCanvasRef.current;
     if (!canvas) return;
     const dataUrl = canvas.toDataURL('image/png');
@@ -518,12 +531,25 @@ export default function ExportCustomizerModal({
                 </label>
 
                 <label className="flex items-center justify-between text-[12.5px] font-medium text-[#11140F] cursor-pointer">
-                  <span>Display "DynamicQR" Watermark Branding</span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span>Display "DynamicQR" Watermark Branding</span>
+                    {!canWhiteLabel && (
+                      <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-purple-100 text-purple-800 font-bold">
+                        Plus for 100% White-Label
+                      </span>
+                    )}
+                  </div>
                   <input
                     type="checkbox"
                     checked={showWatermark}
-                    onChange={(e) => setShowWatermark(e.target.checked)}
-                    disabled={layoutMode === 'zero-margin' || layoutMode === 'minimal'}
+                    onChange={(e) => {
+                      if (!canWhiteLabel) {
+                        alert('Zero-watermark white-labeling is reserved for Plus and Ultra plans. Please upgrade to remove DynamicQR branding.');
+                        return;
+                      }
+                      setShowWatermark(e.target.checked);
+                    }}
+                    disabled={!canWhiteLabel || layoutMode === 'zero-margin' || layoutMode === 'minimal'}
                     className="w-4 h-4 rounded text-emerald-600 cursor-pointer disabled:opacity-40"
                   />
                 </label>
@@ -596,7 +622,12 @@ export default function ExportCustomizerModal({
               className="px-3.5 py-2 rounded-xl border border-[#11140F]/15 bg-white text-[#11140F] text-[12.5px] font-semibold hover:bg-[#EEF0EA] transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
             >
               <Printer className="w-3.5 h-3.5 text-[#2F6B4F]" />
-              Save Tight PDF (No Margins)
+              <span>Save Tight PDF</span>
+              {!canPrintPdf && (
+                <span className="text-[9.5px] font-mono px-1.5 py-0.2 rounded bg-purple-100 text-purple-800 font-bold uppercase">
+                  Plus
+                </span>
+              )}
             </button>
 
             <button
@@ -605,7 +636,12 @@ export default function ExportCustomizerModal({
               className="px-3.5 py-2 rounded-xl border border-[#11140F]/15 bg-white text-[#11140F] text-[12.5px] font-semibold hover:bg-[#EEF0EA] transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
             >
               <FileCode className="w-3.5 h-3.5 text-[#2F6B4F]" />
-              Vector SVG
+              <span>Vector SVG</span>
+              {!canExportSvg && (
+                <span className="text-[9.5px] font-mono px-1.5 py-0.2 rounded bg-purple-100 text-purple-800 font-bold uppercase">
+                  Plus
+                </span>
+              )}
             </button>
 
             <button
@@ -614,7 +650,7 @@ export default function ExportCustomizerModal({
               className="px-4 py-2 rounded-xl bg-[#11140F] text-white text-[12.5px] font-semibold hover:bg-[#2A2E25] transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
             >
               <Download className="w-3.5 h-3.5 text-emerald-400" />
-              Download 300 DPI PNG
+              <span>Download {tier === 'free' ? 'Standard PNG' : '300 DPI PNG'}</span>
             </button>
           </div>
         </div>

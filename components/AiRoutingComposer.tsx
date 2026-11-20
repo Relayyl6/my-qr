@@ -304,6 +304,10 @@ export default function AiRoutingComposer({
         setStatusMessage(`✨ Synthesized ${res.output.rules.length} rule(s) from your prompt.`);
       }
     } catch (err: any) {
+      if (err.message?.includes("requires a") || err.message?.includes("subscription") || err.message?.includes("Authentication")) {
+        setStatusMessage(err.message || "Smart Destination Router requires a Pro, Plus, or Ultra subscription.");
+        return;
+      }
       // Robust Heuristic fallback with everyday & slang phrases
       const text = textToRun.toLowerCase();
       const rules: CompiledRule[] = [];
@@ -466,13 +470,8 @@ export default function AiRoutingComposer({
 
   const handleDeployRules = async () => {
     if (isFreeTier) {
-      const hasSchedule = compiledRules.some((r) =>
-        (r.conditions as any[]).some((c) => c.type === 'schedule')
-      );
-      if (hasSchedule) {
-        setStatusMessage('Autonomous Ingress Scheduling is reserved for Pro, Plus, and Ultra subscribers.');
-        return;
-      }
+      setStatusMessage('Conditional routing rules are a Pro feature. Please upgrade your plan to deploy routing rules.');
+      return;
     }
 
     setSaving(true);
@@ -715,7 +714,7 @@ export default function AiRoutingComposer({
           <button
             type="button"
             onClick={handleDeployRules}
-            disabled={saving || (isFreeTier && scheduleRules.length > 0)}
+            disabled={saving || isFreeTier}
             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white text-[12px] font-semibold hover:bg-emerald-700 transition-colors shadow-xs disabled:opacity-50 cursor-pointer shrink-0"
           >
             {saving ? (

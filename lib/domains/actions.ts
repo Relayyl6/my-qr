@@ -34,6 +34,18 @@ export async function addCustomDomain(prevState: DomainActionState, formData: Fo
     };
   }
 
+  // Tier limit: Plus plan allows 1 custom domain, Ultra allows unlimited (Matrix #54)
+  if (!isAdmin && userTier === 'plus') {
+    const existingCount = await prisma.customDomain.count({
+      where: { userId: user.id },
+    });
+    if (existingCount >= 1) {
+      return {
+        message: 'Your Plus plan includes 1 Custom Branded Domain. Please upgrade to Ultra to connect unlimited custom domains.',
+      };
+    }
+  }
+
   const rawDomain = (formData.get('domain') as string || '').trim().toLowerCase();
   const cleanDomain = rawDomain.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
 

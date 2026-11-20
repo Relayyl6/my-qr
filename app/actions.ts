@@ -90,6 +90,22 @@ export async function createLink(prevState: ActionState, formData: FormData): Pr
       }
     }
 
+    // Custom domain gating: Plus & Ultra only
+    if (customDomainId && customDomainId !== 'default') {
+      const allowedDomainTiers = ['plus', 'ultra'];
+      if (!isAdmin && !allowedDomainTiers.includes(tier)) {
+        return {
+          message: 'Custom Branded Domains require a Plus or Ultra plan. Please upgrade to route links on custom domains.',
+        };
+      }
+      const domain = await prisma.customDomain.findFirst({
+        where: { id: customDomainId, userId: user.id },
+      });
+      if (!domain) {
+        return { message: 'Custom domain not found or access denied.' };
+      }
+    }
+
     const existing = await prisma.qrLink.findUnique({ where: { shortCode } });
     if (existing) {
       return { errors: { shortCode: ['This short code is already taken'] } };

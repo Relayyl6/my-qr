@@ -67,14 +67,25 @@ export async function GET(
   const referrer = request.headers.get('referer') || null;
   const acceptLanguage = request.headers.get('accept-language') || null;
 
-  // Enforce tier entitlement: Autonomous Ingress schedule switching is unlocked for all tiers except Free
+  // Enforce tier entitlement per /pricing matrix
   const userTier = (link.user?.tier || 'free').toLowerCase();
-  const activeRoutingRules = userTier === 'free'
-    ? link.routingRules.filter((r) => {
+  let activeRoutingRules = link.routingRules;
+
+  if (userTier === 'free') {
+    // Free plan has no conditional routing rules
+    activeRoutingRules = [];
+  } else if (userTier === 'pro') {
+    // Pro plan: max 3 rules, device & schedule conditions only (no geo/country or referrer routing)
+    activeRoutingRules = link.routingRules
+      .slice(0, 3)
+      .filter((r) => {
         const conds = Array.isArray(r.conditions) ? r.conditions : [];
-        return !conds.some((c: any) => c.type === 'schedule');
-      })
-    : link.routingRules;
+        return !conds.some((c: any) => c.type === 'country' || c.type === 'referrer' || c.type === 'language');
+      });
+  } else if (userTier === 'plus') {
+    // Plus plan: up to 10 rules
+    activeRoutingRules = link.routingRules.slice(0, 10);
+  }
 
   // 3. Evaluate conditional rules (Smart Destination Router)
   const evaluation = evaluateRules(activeRoutingRules, link.destinationUrl, {

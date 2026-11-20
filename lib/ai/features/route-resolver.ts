@@ -94,14 +94,67 @@ export async function saveRoutingRulesAction(
     throw new Error("Link not found or access denied.");
   }
 
-  // Tier Guard: Conditional routing rules are only available on Pro, Plus, and Ultra
+  // Tier Guard: Enforce strict plan limits per /pricing feature matrix
   const userTier = (user.tier || "free").toLowerCase();
   const adminEmail = (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();
   const isAdmin = user.email.toLowerCase() === adminEmail;
-  if (!isAdmin && userTier === "free" && rules.length > 0) {
-    throw new Error(
-      "Smart Conditional Routing (device splitting and schedule rules) is a Pro feature. Please upgrade your plan to deploy routing rules."
-    );
+
+  if (!isAdmin) {
+    if (userTier === "free" && rules.length > 0) {
+      throw new Error(
+        "Smart Conditional Routing (device splitting and schedule rules) is a Pro feature. Please upgrade your plan to deploy routing rules."
+      );
+    }
+
+    if (userTier === "pro") {
+      // 1. Max 3 waterfall rules (Matrix #11: Pro Up to 3 Rules)
+      if (rules.length > 3) {
+        throw new Error(
+          "Pro plan allows up to 3 routing rules per QR link. Upgrade to Plus for up to 10 rules or Ultra for unlimited waterfall rules."
+        );
+      }
+
+      // 2. Max 2 schedule time slots (Matrix #1: Pro 2 Time Slots)
+      const scheduleCount = rules.filter((r) =>
+        (r.conditions as any[]).some((c) => c.type === "schedule" || c.type === "timeRange")
+      ).length;
+      if (scheduleCount > 2) {
+        throw new Error(
+          "Pro plan allows up to 2 scheduled time slots in the Autonomous Ingress Matrix. Upgrade to Plus for 5 time slots or Ultra for unlimited."
+        );
+      }
+
+      // 3. Country / Referrer / Language routing require Plus or Ultra (Matrix #7, #9, #10)
+      const hasGeoOrReferrer = rules.some((r) =>
+        (r.conditions as any[]).some(
+          (c) => c.type === "country" || c.type === "referrer" || c.type === "language"
+        )
+      );
+      if (hasGeoOrReferrer) {
+        throw new Error(
+          "Geographic Country Routing and Referrer Attribution Routing require a Plus or Ultra plan. Please upgrade to route by country or traffic source."
+        );
+      }
+    }
+
+    if (userTier === "plus") {
+      // 1. Max 10 waterfall rules (Matrix #11: Plus Up to 10 Rules)
+      if (rules.length > 10) {
+        throw new Error(
+          "Plus plan allows up to 10 routing rules per QR link. Upgrade to Ultra for unlimited waterfall rules."
+        );
+      }
+
+      // 2. Max 5 schedule time slots (Matrix #1: Plus 5 Time Slots)
+      const scheduleCount = rules.filter((r) =>
+        (r.conditions as any[]).some((c) => c.type === "schedule" || c.type === "timeRange")
+      ).length;
+      if (scheduleCount > 5) {
+        throw new Error(
+          "Plus plan allows up to 5 scheduled time slots in the Autonomous Ingress Matrix. Upgrade to Ultra for unlimited."
+        );
+      }
+    }
   }
 
   // Atomically replace routing rules

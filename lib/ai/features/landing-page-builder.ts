@@ -20,7 +20,7 @@ export async function buildLandingPageSpecAction(
 
   const access = await assertFeatureAccess(user.id, "landing-page-builder");
   if (!access.allowed) {
-    throw new Error(access.reason || "Prompt-to-Page AI Mobile Landing Pages require a Pro, Plus, or Ultra subscription.");
+    throw new Error(access.reason || "Prompt-to-Page AI Mobile Landing Pages require a Plus or Ultra subscription.");
   }
 
   const cacheSeed = `${promptText.trim().toLowerCase()}_${destinationUrl || ''}`;
@@ -55,7 +55,26 @@ export async function saveLandingPageAction(
 
   const access = await assertFeatureAccess(user.id, "landing-page-builder");
   if (!access.allowed) {
-    throw new Error(access.reason || "Saving AI Mobile Landing Pages requires a Pro, Plus, or Ultra subscription.");
+    throw new Error(access.reason || "Saving AI Mobile Landing Pages requires a Plus or Ultra subscription.");
+  }
+
+  // Tier limit: Plus plan includes up to 3 published showcase pages (Matrix #81)
+  const userTier = (user.tier || "free").toLowerCase();
+  const adminEmail = (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();
+  const isAdmin = user.email.toLowerCase() === adminEmail;
+  if (!isAdmin && userTier === "plus") {
+    const existingCount = await prisma.landingPage.count({
+      where: {
+        qrLink: { userId: user.id },
+        published: true,
+        qrLinkId: { not: linkId },
+      },
+    });
+    if (existingCount >= 3) {
+      throw new Error(
+        "Your Plus plan includes up to 3 published Mobile Landing Pages. Please upgrade to Ultra for unlimited mobile landing page showcases."
+      );
+    }
   }
 
   // Ensure link exists and belongs to user

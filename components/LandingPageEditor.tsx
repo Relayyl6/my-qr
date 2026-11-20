@@ -60,7 +60,7 @@ export default function LandingPageEditor({
   onReverted,
   onClose,
 }: LandingPageEditorProps) {
-  const isEligible = isAdmin || ['pro', 'plus', 'ultra'].includes(userTier.toLowerCase());
+  const isEligible = isAdmin || ['plus', 'ultra'].includes(userTier.toLowerCase());
 
   if (!isEligible) {
     return (
@@ -73,7 +73,7 @@ export default function LandingPageEditor({
             <div>
               <h3 className="font-semibold text-[16px] text-[#11140F]">Prompt-to-Page (AI)</h3>
               <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 uppercase tracking-wider">
-                Pro & Higher
+                Plus & Ultra
               </span>
             </div>
           </div>
@@ -89,9 +89,9 @@ export default function LandingPageEditor({
             Prompt-to-Page generates high-converting, mobile-optimized micro landing pages from a simple text description.
           </p>
           <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-4 space-y-2 text-[12.5px] text-blue-900">
-            <p className="font-semibold">Included on Pro, Plus & Ultra Plans:</p>
+            <p className="font-semibold">Included on Plus & Ultra Plans:</p>
             <ul className="space-y-1 list-disc pl-4 text-blue-800/80">
-              <li>Instant AI generation of links, hours, menus & showcase cards</li>
+              <li>Up to 3 Mobile Showcases (Plus) or Unlimited (Ultra)</li>
               <li>Responsive live mobile & tablet preview simulator</li>
               <li>Zero-reprint activation: instantly point physical codes to the page</li>
             </ul>
@@ -112,7 +112,7 @@ export default function LandingPageEditor({
             className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#11140F] text-white text-[13px] font-semibold hover:bg-[#2A2E25] transition-colors shadow-xs cursor-pointer"
           >
             <Lock className="w-3.5 h-3.5 text-blue-400" />
-            <span>Upgrade to Pro</span>
+            <span>Upgrade to Plus</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>

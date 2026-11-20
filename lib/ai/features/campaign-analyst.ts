@@ -29,8 +29,10 @@ export async function getCampaignAnalysisAction(
     throw new Error(access.reason || "AI Campaign Analyst requires a Pro, Plus, or Ultra subscription.");
   }
 
-  // 1. Pre-aggregate user's scans
-  const stats = await aggregateUserScans(user.id, 30);
+  // 1. Pre-aggregate user's scans based on plan retention window (Matrix #78: Pro 30d, Plus 90d, Ultra unlimited)
+  const userTier = (user.tier || "free").toLowerCase();
+  const retentionDays = userTier === "ultra" ? 3650 : userTier === "plus" ? 90 : 30;
+  const stats = await aggregateUserScans(user.id, retentionDays);
 
   // 2. Cache key incorporates scan count to automatically invalidate on new scans unless forced
   const cacheKey = forceRefresh

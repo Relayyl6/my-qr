@@ -379,6 +379,11 @@ export default function LinkList({
                         >
                           <Clock className="w-3 h-3 text-emerald-700 shrink-0" />
                           <span>Schedule Matrix</span>
+                          {!isAdmin && userTier.toLowerCase() === 'free' && (
+                            <span className="text-[9.5px] font-mono px-1.5 py-0.2 rounded bg-amber-200/80 text-amber-900 font-semibold uppercase">
+                              Pro
+                            </span>
+                          )}
                         </button>
                         <button
                           type="button"
@@ -400,6 +405,11 @@ export default function LinkList({
                               <Compass className="w-3 h-3 text-[#11140F]/60 shrink-0" />
                               <span>Smart Router</span>
                             </>
+                          )}
+                          {!isAdmin && userTier.toLowerCase() === 'free' && (
+                            <span className="text-[9.5px] font-mono px-1.5 py-0.2 rounded bg-amber-200/80 text-amber-900 font-semibold uppercase">
+                              Pro
+                            </span>
                           )}
                         </button>
                         <button
@@ -430,9 +440,9 @@ export default function LinkList({
                               ? 'Edit Mobile Page'
                               : 'Prompt-to-Page'}
                           </span>
-                          {!isAdmin && userTier.toLowerCase() === 'free' && (
+                          {!isAdmin && !['plus', 'ultra'].includes(userTier.toLowerCase()) && (
                             <span className="text-[9.5px] font-mono px-1.5 py-0.2 rounded bg-blue-200/80 text-blue-900 font-semibold uppercase">
-                              Pro
+                              Plus
                             </span>
                           )}
                         </button>
