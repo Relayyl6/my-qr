@@ -69,7 +69,7 @@ export default function HomeTabs({
 
       {/* Tab 1: Dedicated Workspace View (Zero scrolling past marketing copy) */}
       {activeTab === 'workspace' && (
-        <section id="workspace" className="flex-1 bg-[#EEF0EA] flex flex-col justify-between">
+        <section id="workspace" className="flex-1 bg-[#EEF0EA] dark:bg-[#0C0E0A] flex flex-col justify-between transition-colors duration-200">
           <AnnouncementBar />
           <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-12 space-y-8 w-full">
             {workspaceContent}
