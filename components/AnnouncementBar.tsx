@@ -14,12 +14,12 @@ interface BannerData {
 }
 
 const DEFAULT_BANNER: BannerData = {
-  enabled: true,
-  badgeText: 'BLACK FRIDAY',
-  messageText: 'Save 40% OFF all annual plans with code',
-  promoCode: 'BLACKFRIDAY40',
-  ctaText: 'Claim Offer',
-  ctaUrl: '/pricing?promo=BLACKFRIDAY40',
+  enabled: false,
+  badgeText: '',
+  messageText: '',
+  promoCode: '',
+  ctaText: '',
+  ctaUrl: '',
 };
 
 export default function AnnouncementBar() {
@@ -29,22 +29,23 @@ export default function AnnouncementBar() {
   useEffect(() => {
     // Check if dismissed in session
     const dismissed = sessionStorage.getItem('dynamicqr_announcement_dismissed');
-    if (!dismissed) {
-      setVisible(true);
-    }
 
     // Fetch live admin configuration
     fetch('/api/promo/config')
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data && data.banner) {
+        if (data && data.banner && data.banner.enabled && data.banner.messageText) {
           setBanner(data.banner);
-          if (data.banner.enabled === false) {
-            setVisible(false);
+          if (!dismissed) {
+            setVisible(true);
           }
+        } else {
+          setVisible(false);
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        setVisible(false);
+      });
   }, []);
 
   const handleDismiss = () => {
@@ -52,9 +53,9 @@ export default function AnnouncementBar() {
     sessionStorage.setItem('dynamicqr_announcement_dismissed', 'true');
   };
 
-  if (!visible || !banner.enabled) return null;
+  if (!visible || !banner.enabled || !banner.messageText) return null;
 
-  const targetUrl = banner.ctaUrl || `/pricing?promo=${banner.promoCode}`;
+  const targetUrl = banner.ctaUrl || (banner.promoCode ? `/pricing?promo=${banner.promoCode}` : '/pricing');
 
   return (
     <div className="relative isolate z-40 bg-gradient-to-r from-[#11140F] via-[#1a2218] to-[#11140F] text-white px-4 py-2.5 text-xs sm:text-[13px] border-b border-white/10 shadow-xs flex items-center justify-between">

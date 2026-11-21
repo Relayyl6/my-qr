@@ -313,23 +313,6 @@ export async function adminSavePromoConfig(config: Partial<AdminPromoConfig>) {
 
 export async function adminGetPromoCodes() {
   await verifyAdmin();
-  // Ensure default BLACKFRIDAY40 code exists
-  const existingBf = await prisma.promoCode.findUnique({
-    where: { code: 'BLACKFRIDAY40' },
-  });
-  if (!existingBf) {
-    await prisma.promoCode.create({
-      data: {
-        code: 'BLACKFRIDAY40',
-        type: 'percent',
-        value: 40.0,
-        appliesTo: 'all',
-        billingPeriod: 'both',
-        active: true,
-      },
-    });
-  }
-
   const codes = await prisma.promoCode.findMany({
     orderBy: { createdAt: 'desc' },
   });

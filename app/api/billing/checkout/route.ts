@@ -44,9 +44,6 @@ export async function POST(req: NextRequest) {
           appliedPromoRecord = promo;
           discountPercent = promo.type === "percent" ? Number(promo.value) : 0;
         }
-      } else if (promoCodeStr === "BLACKFRIDAY40") {
-        // Fallback default 40% discount
-        discountPercent = 40;
       }
     }
 

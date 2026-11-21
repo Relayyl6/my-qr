@@ -20,7 +20,7 @@ import {
   Layers,
   Percent,
 } from 'lucide-react';
-import { AdminPromoConfig } from '@/lib/promo';
+import { AdminPromoConfig, SAMPLE_PROMO_TEMPLATES } from '@/lib/promo';
 import {
   adminSavePromoConfig,
   adminCreatePromoCode,
@@ -317,6 +317,60 @@ export default function AdminPromoManager({
             </div>
           </div>
 
+          {/* Sample Template Loaders */}
+          <div className="flex flex-wrap items-center justify-between gap-2 p-3 bg-[#F7F8F5] rounded-xl border border-[#11140F]/8">
+            <div className="flex items-center gap-1.5 text-xs text-[#11140F]/70">
+              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+              <span className="font-semibold text-[#11140F]">Load Sample Template:</span>
+              <span className="text-[#11140F]/50 hidden sm:inline">(Populates form fields as sample placeholder)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  setConfig({
+                    ...config,
+                    banner: { ...SAMPLE_PROMO_TEMPLATES.black_friday.banner },
+                  })
+                }
+                className="px-2.5 py-1 text-[11px] font-medium rounded-lg bg-white border border-[#11140F]/15 hover:bg-[#EEF0EA] text-[#11140F] transition-all cursor-pointer"
+              >
+                Black Friday 40%
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setConfig({
+                    ...config,
+                    banner: { ...SAMPLE_PROMO_TEMPLATES.flash_sale.banner },
+                  })
+                }
+                className="px-2.5 py-1 text-[11px] font-medium rounded-lg bg-white border border-[#11140F]/15 hover:bg-[#EEF0EA] text-[#11140F] transition-all cursor-pointer"
+              >
+                Flash Sale 25%
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setConfig({
+                    ...config,
+                    banner: {
+                      enabled: false,
+                      badgeText: '',
+                      messageText: '',
+                      promoCode: '',
+                      ctaText: 'Claim Offer',
+                      ctaUrl: '/pricing',
+                    },
+                  })
+                }
+                className="px-2.5 py-1 text-[11px] font-medium rounded-lg bg-red-50 border border-red-200 hover:bg-red-100 text-red-700 transition-all cursor-pointer"
+              >
+                Clear Form
+              </button>
+            </div>
+          </div>
+
           {/* Configuration Form */}
           <form onSubmit={handleSaveBanner} className="space-y-4 pt-2">
             <div className="flex items-center justify-between p-4 bg-[#F7F8F5] rounded-xl border border-[#11140F]/5">
@@ -504,6 +558,62 @@ export default function AdminPromoManager({
                   {config.modal.ctaText} &rarr;
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Sample Template Loaders */}
+          <div className="flex flex-wrap items-center justify-between gap-2 p-3 bg-[#F7F8F5] rounded-xl border border-[#11140F]/8">
+            <div className="flex items-center gap-1.5 text-xs text-[#11140F]/70">
+              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+              <span className="font-semibold text-[#11140F]">Load Sample Template:</span>
+              <span className="text-[#11140F]/50 hidden sm:inline">(Populates modal preview & fields)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  setConfig({
+                    ...config,
+                    modal: { ...SAMPLE_PROMO_TEMPLATES.black_friday.modal },
+                  })
+                }
+                className="px-2.5 py-1 text-[11px] font-medium rounded-lg bg-white border border-[#11140F]/15 hover:bg-[#EEF0EA] text-[#11140F] transition-all cursor-pointer"
+              >
+                Black Friday 40%
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setConfig({
+                    ...config,
+                    modal: { ...SAMPLE_PROMO_TEMPLATES.flash_sale.modal },
+                  })
+                }
+                className="px-2.5 py-1 text-[11px] font-medium rounded-lg bg-white border border-[#11140F]/15 hover:bg-[#EEF0EA] text-[#11140F] transition-all cursor-pointer"
+              >
+                Flash Sale 25%
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setConfig({
+                    ...config,
+                    modal: {
+                      enabled: false,
+                      badgeText: '',
+                      headline: '',
+                      bodyText: '',
+                      discountPercent: 0,
+                      promoCode: '',
+                      ctaText: 'Claim Discount',
+                      frequencyDays: 7,
+                    },
+                  })
+                }
+                className="px-2.5 py-1 text-[11px] font-medium rounded-lg bg-red-50 border border-red-200 hover:bg-red-100 text-red-700 transition-all cursor-pointer"
+              >
+                Clear Form
+              </button>
             </div>
           </div>
 
@@ -766,6 +876,47 @@ export default function AdminPromoManager({
             </div>
 
             <form onSubmit={handleCreateCode} className="space-y-4">
+              {/* Quick Preset Fillers */}
+              <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#F7F8F5] border border-[#11140F]/8">
+                <span className="text-[11px] font-medium text-[#11140F]/60">Quick Presets:</span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setNewCodeForm({
+                        code: 'BLACKFRIDAY40',
+                        type: 'percent',
+                        value: 40,
+                        appliesTo: 'all',
+                        billingPeriod: 'both',
+                        maxRedemptions: '',
+                        expiresAt: '',
+                      })
+                    }
+                    className="px-2 py-0.5 text-[10.5px] font-mono font-bold rounded-md bg-white border border-[#11140F]/15 hover:bg-[#EEF0EA] text-[#11140F] transition-all cursor-pointer"
+                  >
+                    BLACKFRIDAY40
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setNewCodeForm({
+                        code: 'FLASH25',
+                        type: 'percent',
+                        value: 25,
+                        appliesTo: 'all',
+                        billingPeriod: 'both',
+                        maxRedemptions: '',
+                        expiresAt: '',
+                      })
+                    }
+                    className="px-2 py-0.5 text-[10.5px] font-mono font-bold rounded-md bg-white border border-[#11140F]/15 hover:bg-[#EEF0EA] text-[#11140F] transition-all cursor-pointer"
+                  >
+                    FLASH25
+                  </button>
+                </div>
+              </div>
+
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-[#11140F]">Promo Code *</label>
                 <input

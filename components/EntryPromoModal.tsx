@@ -17,13 +17,13 @@ interface ModalConfig {
 }
 
 const DEFAULT_MODAL: ModalConfig = {
-  enabled: true,
-  badgeText: 'BLACK FRIDAY SPECIAL',
-  headline: 'Unlock 40% Off DynamicQR Pro & Plus',
-  bodyText: 'Never reprint flyers again. Get autonomous time-scheduled routing, device-level app redirects, branded custom domains, and our new customer mailing list engine.',
-  discountPercent: 40,
-  promoCode: 'BLACKFRIDAY40',
-  ctaText: 'Claim 40% Discount',
+  enabled: false,
+  badgeText: '',
+  headline: '',
+  bodyText: '',
+  discountPercent: 0,
+  promoCode: '',
+  ctaText: 'Claim Discount',
   frequencyDays: 7,
 };
 
@@ -47,22 +47,19 @@ export default function EntryPromoModal() {
       return;
     }
 
-    // Fetch live config
+    // Fetch live config from server
     fetch('/api/promo/config')
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data && data.modal) {
+        if (data && data.modal && data.modal.enabled && data.modal.headline) {
           setConfig(data.modal);
-          if (data.modal.enabled === false) {
-            return;
-          }
           checkFrequencyAndShow(data.modal.frequencyDays || 7);
         } else {
-          checkFrequencyAndShow(7);
+          setIsOpen(false);
         }
       })
       .catch(() => {
-        checkFrequencyAndShow(7);
+        setIsOpen(false);
       });
 
     function checkFrequencyAndShow(days: number) {
@@ -123,7 +120,9 @@ export default function EntryPromoModal() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen]);
 
-  if (!isOpen || !config.enabled) return null;
+  if (!isOpen || !config.enabled || !config.headline) return null;
+
+  const pricingTargetUrl = config.promoCode ? `/pricing?promo=${config.promoCode}` : '/pricing';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-200">
@@ -144,32 +143,40 @@ export default function EntryPromoModal() {
         </button>
 
         <div className="relative space-y-5">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#2F6B4F]/20 border border-[#34D399]/30 text-[#34D399] font-mono text-[11px] font-bold uppercase tracking-wider">
-            <Sparkles className="w-3.5 h-3.5" />
-            {config.badgeText}
-          </div>
+          {config.badgeText && (
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#2F6B4F]/20 border border-[#34D399]/30 text-[#34D399] font-mono text-[11px] font-bold uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5" />
+              {config.badgeText}
+            </div>
+          )}
 
           <div className="space-y-2">
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
               {config.headline}
             </h2>
-            <p className="text-[14px] text-white/70 leading-relaxed">
-              {config.bodyText}
-            </p>
+            {config.bodyText && (
+              <p className="text-[14px] text-white/70 leading-relaxed">
+                {config.bodyText}
+              </p>
+            )}
           </div>
 
           {/* Promo code badge */}
-          <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
-            <div>
-              <span className="text-xs text-white/60 block">Promo Code:</span>
-              <strong className="font-mono text-sm font-bold text-[#34D399] tracking-wider select-all">
-                {config.promoCode}
-              </strong>
+          {config.promoCode && (
+            <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
+              <div>
+                <span className="text-xs text-white/60 block">Promo Code:</span>
+                <strong className="font-mono text-sm font-bold text-[#34D399] tracking-wider select-all">
+                  {config.promoCode}
+                </strong>
+              </div>
+              {config.discountPercent > 0 && (
+                <span className="text-xs font-bold bg-[#34D399] text-[#0F120E] px-2.5 py-1 rounded-lg">
+                  {config.discountPercent}% OFF
+                </span>
+              )}
             </div>
-            <span className="text-xs font-bold bg-[#34D399] text-[#0F120E] px-2.5 py-1 rounded-lg">
-              {config.discountPercent}% OFF
-            </span>
-          </div>
+          )}
 
           {/* Email Subscription Capture / CTA */}
           {submitted ? (
@@ -199,11 +206,11 @@ export default function EntryPromoModal() {
               </div>
               <div className="text-center pt-1">
                 <Link
-                  href={`/pricing?promo=${config.promoCode}`}
+                  href={pricingTargetUrl}
                   onClick={handleDismiss}
                   className="text-[12px] text-white/60 hover:text-white underline underline-offset-4 transition-colors font-medium inline-flex items-center gap-1"
                 >
-                  <span>Or apply {config.promoCode} directly on Pricing</span>
+                  <span>{config.ctaText || 'Or jump directly to pricing plans'}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
@@ -211,7 +218,7 @@ export default function EntryPromoModal() {
           )}
 
           <div className="pt-2 text-[11px] text-white/40 text-center font-mono">
-            Applies to all annual plans. Cooldown: {config.frequencyDays} days.
+            Cooldown: {config.frequencyDays} days.
           </div>
         </div>
       </div>

@@ -19,23 +19,74 @@ export interface AdminPromoConfig {
   };
 }
 
+/**
+ * Default clean state: Disabled by default until admin explicitly activates a campaign.
+ */
 export const DEFAULT_PROMO_CONFIG: AdminPromoConfig = {
   banner: {
-    enabled: true,
-    badgeText: 'BLACK FRIDAY',
-    messageText: 'Save 40% OFF all annual plans with code',
-    promoCode: 'BLACKFRIDAY40',
+    enabled: false,
+    badgeText: '',
+    messageText: '',
+    promoCode: '',
     ctaText: 'Claim Offer',
-    ctaUrl: '/pricing?promo=BLACKFRIDAY40',
+    ctaUrl: '/pricing',
   },
   modal: {
-    enabled: true,
-    badgeText: 'BLACK FRIDAY SPECIAL',
-    headline: 'Unlock 40% Off DynamicQR Pro & Plus',
-    bodyText: 'Get high-converting QR codes, 307 speed redirects, branded domains, and AI routing.',
-    discountPercent: 40,
-    promoCode: 'BLACKFRIDAY40',
-    ctaText: 'Claim 40% Discount',
+    enabled: false,
+    badgeText: '',
+    headline: '',
+    bodyText: '',
+    discountPercent: 0,
+    promoCode: '',
+    ctaText: 'Claim Discount',
     frequencyDays: 7,
+  },
+};
+
+/**
+ * Sample campaign templates available in the Admin Console to quickly populate inputs
+ */
+export const SAMPLE_PROMO_TEMPLATES = {
+  black_friday: {
+    name: 'Black Friday 40% Off',
+    banner: {
+      enabled: true,
+      badgeText: 'BLACK FRIDAY',
+      messageText: 'Save 40% OFF all annual plans with code',
+      promoCode: 'BLACKFRIDAY40',
+      ctaText: 'Claim Offer',
+      ctaUrl: '/pricing?promo=BLACKFRIDAY40',
+    },
+    modal: {
+      enabled: true,
+      badgeText: 'BLACK FRIDAY SPECIAL',
+      headline: 'Unlock 40% Off DynamicQR Pro & Plus',
+      bodyText: 'Get high-converting QR codes, 307 speed redirects, branded domains, and AI routing.',
+      discountPercent: 40,
+      promoCode: 'BLACKFRIDAY40',
+      ctaText: 'Claim 40% Discount',
+      frequencyDays: 7,
+    },
+  },
+  flash_sale: {
+    name: 'Flash Sale 25% Off',
+    banner: {
+      enabled: true,
+      badgeText: 'FLASH SALE',
+      messageText: 'Limited time: 25% OFF all upgrades with code',
+      promoCode: 'FLASH25',
+      ctaText: 'Upgrade Now',
+      ctaUrl: '/pricing?promo=FLASH25',
+    },
+    modal: {
+      enabled: true,
+      badgeText: 'LIMITED FLASH SALE',
+      headline: 'Save 25% on Any Paid Plan',
+      bodyText: 'Upgrade your dynamic routing links, unbranded micro-apps, and custom domains.',
+      discountPercent: 25,
+      promoCode: 'FLASH25',
+      ctaText: 'Claim 25% Off',
+      frequencyDays: 3,
+    },
   },
 };

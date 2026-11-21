@@ -11,18 +11,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Please enter a promo code" }, { status: 400 });
     }
 
-    // Default seeded Black Friday promo check
-    if (code === "BLACKFRIDAY40") {
-      return NextResponse.json({
-        valid: true,
-        code: "BLACKFRIDAY40",
-        type: "percent",
-        value: 40,
-        appliesTo: "all",
-        description: "Black Friday Special: 40% OFF all plans",
-      });
-    }
-
     const promo = await prisma.promoCode.findUnique({
       where: { code },
       include: { campaign: true },
