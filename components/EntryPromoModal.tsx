@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { X, Sparkles, ArrowRight, Check } from 'lucide-react';
-import { PROMO_DEFAULTS } from '@/lib/promo';
 
 interface ModalConfig {
   enabled: boolean;
@@ -48,24 +47,13 @@ export default function EntryPromoModal() {
       return;
     }
 
-    // Fetch live config from server
+    // Fetch live config from server — strictly display what the admin set
     fetch('/api/promo/config')
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data && data.modal && data.modal.enabled) {
-          const effectiveModal: ModalConfig = {
-            enabled: true,
-            badgeText: data.modal.badgeText?.trim() || PROMO_DEFAULTS.modal.badgeText,
-            headline: data.modal.headline?.trim() || PROMO_DEFAULTS.modal.headline,
-            bodyText: data.modal.bodyText?.trim() || PROMO_DEFAULTS.modal.bodyText,
-            discountPercent: data.modal.discountPercent || PROMO_DEFAULTS.modal.discountPercent,
-            promoCode: data.modal.promoCode?.trim() || PROMO_DEFAULTS.modal.promoCode,
-            ctaText: data.modal.ctaText?.trim() || PROMO_DEFAULTS.modal.ctaText,
-            frequencyDays: data.modal.frequencyDays || PROMO_DEFAULTS.modal.frequencyDays,
-          };
-
-          setConfig(effectiveModal);
-          checkFrequencyAndShow(effectiveModal);
+        if (data && data.modal && data.modal.enabled && data.modal.headline?.trim()) {
+          setConfig(data.modal);
+          checkFrequencyAndShow(data.modal);
         } else {
           setIsOpen(false);
         }
@@ -80,7 +68,7 @@ export default function EntryPromoModal() {
         const lastDismissed = localStorage.getItem(seenKey);
         if (lastDismissed) {
           const diffDays = (Date.now() - parseInt(lastDismissed, 10)) / (1000 * 60 * 60 * 24);
-          if (diffDays < modalCfg.frequencyDays) {
+          if (diffDays < (modalCfg.frequencyDays || 7)) {
             return;
           }
         }
@@ -134,7 +122,7 @@ export default function EntryPromoModal() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen]);
 
-  if (!isOpen || !config.enabled) return null;
+  if (!isOpen || !config.enabled || !config.headline?.trim()) return null;
 
   const pricingTargetUrl = config.promoCode ? `/pricing?promo=${config.promoCode}` : '/pricing';
 
@@ -157,31 +145,31 @@ export default function EntryPromoModal() {
         </button>
 
         <div className="relative space-y-5">
-          {config.badgeText && (
+          {config.badgeText?.trim() && (
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#2F6B4F]/20 border border-[#34D399]/30 text-[#34D399] font-mono text-[11px] font-bold uppercase tracking-wider">
               <Sparkles className="w-3.5 h-3.5" />
-              {config.badgeText}
+              {config.badgeText.trim()}
             </div>
           )}
 
           <div className="space-y-2">
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-              {config.headline}
+              {config.headline.trim()}
             </h2>
-            {config.bodyText && (
+            {config.bodyText?.trim() && (
               <p className="text-[14px] text-white/70 leading-relaxed">
-                {config.bodyText}
+                {config.bodyText.trim()}
               </p>
             )}
           </div>
 
           {/* Promo code badge */}
-          {config.promoCode && (
+          {config.promoCode?.trim() && (
             <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
               <div>
                 <span className="text-xs text-white/60 block">Promo Code:</span>
                 <strong className="font-mono text-sm font-bold text-[#34D399] tracking-wider select-all">
-                  {config.promoCode}
+                  {config.promoCode.trim()}
                 </strong>
               </div>
               {config.discountPercent > 0 && (
@@ -224,7 +212,7 @@ export default function EntryPromoModal() {
                   onClick={handleDismiss}
                   className="text-[12px] text-white/60 hover:text-white underline underline-offset-4 transition-colors font-medium inline-flex items-center gap-1"
                 >
-                  <span>{config.ctaText || 'Or jump directly to pricing plans'}</span>
+                  <span>{config.ctaText?.trim() || 'Or jump directly to pricing plans'}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
@@ -232,7 +220,7 @@ export default function EntryPromoModal() {
           )}
 
           <div className="pt-2 text-[11px] text-white/40 text-center font-mono">
-            Cooldown: {config.frequencyDays} days.
+            Cooldown: {config.frequencyDays || 7} days.
           </div>
         </div>
       </div>

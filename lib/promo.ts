@@ -20,30 +20,8 @@ export interface AdminPromoConfig {
 }
 
 /**
- * Standard default campaign copy used whenever an admin activates a promo
- * without typing custom text into the inputs.
- */
-export const PROMO_DEFAULTS = {
-  banner: {
-    badgeText: 'BLACK FRIDAY',
-    messageText: 'Save 40% OFF all annual plans with code',
-    promoCode: 'BLACKFRIDAY40',
-    ctaText: 'Claim Offer',
-    ctaUrl: '/pricing?promo=BLACKFRIDAY40',
-  },
-  modal: {
-    badgeText: 'BLACK FRIDAY SPECIAL',
-    headline: 'Unlock 40% Off DynamicQR Pro & Plus',
-    bodyText: 'Get high-converting QR codes, 307 speed redirects, branded domains, and AI routing.',
-    discountPercent: 40,
-    promoCode: 'BLACKFRIDAY40',
-    ctaText: 'Claim 40% Discount',
-    frequencyDays: 7,
-  },
-};
-
-/**
- * Default clean state: Disabled by default until admin explicitly activates a campaign.
+ * Default clean state: Completely disabled and empty until admin explicitly configures it.
+ * No hardcoded marketing copy or fallbacks.
  */
 export const DEFAULT_PROMO_CONFIG: AdminPromoConfig = {
   banner: {
@@ -67,7 +45,8 @@ export const DEFAULT_PROMO_CONFIG: AdminPromoConfig = {
 };
 
 /**
- * Sample campaign templates available in the Admin Console to quickly populate inputs
+ * Sample campaign templates optionally loadable on-demand in the Admin Console
+ * via click to populate form fields. Never active or shown by default.
  */
 export const SAMPLE_PROMO_TEMPLATES = {
   black_friday: {

@@ -20,7 +20,7 @@ import {
   Layers,
   Percent,
 } from 'lucide-react';
-import { AdminPromoConfig, SAMPLE_PROMO_TEMPLATES, PROMO_DEFAULTS } from '@/lib/promo';
+import { AdminPromoConfig, SAMPLE_PROMO_TEMPLATES } from '@/lib/promo';
 import {
   adminSavePromoConfig,
   adminCreatePromoCode,
@@ -74,35 +74,17 @@ export default function AdminPromoManager({
   });
 
   const handleToggleBannerSwitch = async (checked: boolean) => {
-    const effectiveMessage = config.banner.messageText?.trim() || PROMO_DEFAULTS.banner.messageText;
-    const effectiveBadge = config.banner.badgeText?.trim() || PROMO_DEFAULTS.banner.badgeText;
-    const effectivePromoCode = config.banner.promoCode?.trim() || PROMO_DEFAULTS.banner.promoCode;
-    const effectiveCtaText = config.banner.ctaText?.trim() || PROMO_DEFAULTS.banner.ctaText;
-    const effectiveCtaUrl =
-      config.banner.ctaUrl?.trim() ||
-      (effectivePromoCode ? `/pricing?promo=${effectivePromoCode}` : PROMO_DEFAULTS.banner.ctaUrl);
-
-    const updatedBanner = {
-      ...config.banner,
-      enabled: checked,
-      messageText: checked ? effectiveMessage : config.banner.messageText,
-      badgeText: checked ? effectiveBadge : config.banner.badgeText,
-      promoCode: checked ? effectivePromoCode : config.banner.promoCode,
-      ctaText: checked ? effectiveCtaText : config.banner.ctaText,
-      ctaUrl: checked ? effectiveCtaUrl : config.banner.ctaUrl,
-    };
-
     const updated = {
       ...config,
-      banner: updatedBanner,
+      banner: { ...config.banner, enabled: checked },
     };
     setConfig(updated);
     try {
-      await adminSavePromoConfig({ banner: updatedBanner });
+      await adminSavePromoConfig({ banner: updated.banner });
       setStatusMsg(
         checked
-          ? 'Announcement bar activated platform-wide!'
-          : 'Announcement bar disabled platform-wide!'
+          ? 'Announcement bar turned ON platform-wide!'
+          : 'Announcement bar turned OFF platform-wide!'
       );
       setTimeout(() => setStatusMsg(null), 3000);
     } catch (err: any) {
@@ -111,37 +93,17 @@ export default function AdminPromoManager({
   };
 
   const handleToggleModalSwitch = async (checked: boolean) => {
-    const effectiveHeadline = config.modal.headline?.trim() || PROMO_DEFAULTS.modal.headline;
-    const effectiveBody = config.modal.bodyText?.trim() || PROMO_DEFAULTS.modal.bodyText;
-    const effectiveBadge = config.modal.badgeText?.trim() || PROMO_DEFAULTS.modal.badgeText;
-    const effectiveDiscount = config.modal.discountPercent || PROMO_DEFAULTS.modal.discountPercent;
-    const effectivePromoCode = config.modal.promoCode?.trim() || PROMO_DEFAULTS.modal.promoCode;
-    const effectiveCtaText = config.modal.ctaText?.trim() || PROMO_DEFAULTS.modal.ctaText;
-    const effectiveFrequency = config.modal.frequencyDays || PROMO_DEFAULTS.modal.frequencyDays;
-
-    const updatedModal = {
-      ...config.modal,
-      enabled: checked,
-      headline: checked ? effectiveHeadline : config.modal.headline,
-      bodyText: checked ? effectiveBody : config.modal.bodyText,
-      badgeText: checked ? effectiveBadge : config.modal.badgeText,
-      discountPercent: checked ? effectiveDiscount : config.modal.discountPercent,
-      promoCode: checked ? effectivePromoCode : config.modal.promoCode,
-      ctaText: checked ? effectiveCtaText : config.modal.ctaText,
-      frequencyDays: checked ? effectiveFrequency : config.modal.frequencyDays,
-    };
-
     const updated = {
       ...config,
-      modal: updatedModal,
+      modal: { ...config.modal, enabled: checked },
     };
     setConfig(updated);
     try {
-      await adminSavePromoConfig({ modal: updatedModal });
+      await adminSavePromoConfig({ modal: updated.modal });
       setStatusMsg(
         checked
-          ? 'Entry popup modal activated platform-wide!'
-          : 'Entry popup modal disabled platform-wide!'
+          ? 'Entry promo modal turned ON platform-wide!'
+          : 'Entry promo modal turned OFF platform-wide!'
       );
       setTimeout(() => setStatusMsg(null), 3000);
     } catch (err: any) {
@@ -155,24 +117,9 @@ export default function AdminPromoManager({
     setStatusMsg(null);
     setErrorMsg(null);
 
-    const bannerToSave = {
-      ...config.banner,
-      messageText: config.banner.messageText?.trim() || PROMO_DEFAULTS.banner.messageText,
-      badgeText: config.banner.badgeText?.trim() || PROMO_DEFAULTS.banner.badgeText,
-      promoCode: config.banner.promoCode?.trim() || PROMO_DEFAULTS.banner.promoCode,
-      ctaText: config.banner.ctaText?.trim() || PROMO_DEFAULTS.banner.ctaText,
-      ctaUrl:
-        config.banner.ctaUrl?.trim() ||
-        (config.banner.promoCode?.trim()
-          ? `/pricing?promo=${config.banner.promoCode.trim()}`
-          : PROMO_DEFAULTS.banner.ctaUrl),
-    };
-
-    setConfig((prev) => ({ ...prev, banner: bannerToSave }));
-
     try {
-      await adminSavePromoConfig({ banner: bannerToSave });
-      setStatusMsg('Announcement bar settings published platform-wide!');
+      await adminSavePromoConfig({ banner: config.banner });
+      setStatusMsg('Announcement bar settings saved and published!');
       setTimeout(() => setStatusMsg(null), 3500);
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to save announcement bar.');
@@ -187,22 +134,9 @@ export default function AdminPromoManager({
     setStatusMsg(null);
     setErrorMsg(null);
 
-    const modalToSave = {
-      ...config.modal,
-      headline: config.modal.headline?.trim() || PROMO_DEFAULTS.modal.headline,
-      bodyText: config.modal.bodyText?.trim() || PROMO_DEFAULTS.modal.bodyText,
-      badgeText: config.modal.badgeText?.trim() || PROMO_DEFAULTS.modal.badgeText,
-      discountPercent: config.modal.discountPercent || PROMO_DEFAULTS.modal.discountPercent,
-      promoCode: config.modal.promoCode?.trim() || PROMO_DEFAULTS.modal.promoCode,
-      ctaText: config.modal.ctaText?.trim() || PROMO_DEFAULTS.modal.ctaText,
-      frequencyDays: config.modal.frequencyDays || PROMO_DEFAULTS.modal.frequencyDays,
-    };
-
-    setConfig((prev) => ({ ...prev, modal: modalToSave }));
-
     try {
-      await adminSavePromoConfig({ modal: modalToSave });
-      setStatusMsg('Entry promotional popup settings published platform-wide!');
+      await adminSavePromoConfig({ modal: config.modal });
+      setStatusMsg('Entry promotional popup settings saved and published!');
       setTimeout(() => setStatusMsg(null), 3500);
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to save promo popup.');
@@ -394,31 +328,51 @@ export default function AdminPromoManager({
               </span>
               <span
                 className={`text-[11px] font-mono px-2 py-0.5 rounded-full ${
-                  config.banner.enabled
+                  config.banner.enabled && (config.banner.messageText?.trim() || config.banner.badgeText?.trim())
                     ? 'bg-emerald-100 text-emerald-800 font-bold'
+                    : config.banner.enabled
+                    ? 'bg-amber-100 text-amber-800 font-bold'
                     : 'bg-gray-100 text-gray-600'
                 }`}
               >
-                {config.banner.enabled ? 'ACTIVE & VISIBLE' : 'DISABLED (HIDDEN)'}
+                {config.banner.enabled && (config.banner.messageText?.trim() || config.banner.badgeText?.trim())
+                  ? 'ACTIVE & VISIBLE'
+                  : config.banner.enabled
+                  ? 'ENABLED (ENTER TEXT BELOW TO DISPLAY)'
+                  : 'DISABLED (HIDDEN)'}
               </span>
             </div>
 
             <div className="rounded-xl overflow-hidden border border-[#11140F]/15 shadow-sm">
-              <div className="bg-gradient-to-r from-[#11140F] via-[#1a2218] to-[#11140F] text-white px-4 py-3 text-xs sm:text-[13px] flex items-center justify-center gap-3 text-center">
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#2F6B4F]/40 border border-[#34D399]/30 text-[#34D399] font-mono text-[11px] font-bold uppercase tracking-wider">
-                  <Tag className="w-3 h-3" />
-                  {config.banner.badgeText || 'PROMOTION'}
-                </span>
-                <span className="text-white/90">
-                  {config.banner.messageText || 'Special Offer:'}{' '}
-                  <code className="font-mono bg-white/15 px-1.5 py-0.5 rounded text-white font-bold">
-                    {config.banner.promoCode || 'PROMO'}
-                  </code>
-                </span>
-                <span className="inline-flex items-center gap-1 font-semibold text-[#34D399] ml-1 underline underline-offset-4">
-                  {config.banner.ctaText || 'Claim Offer'}
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </span>
+              <div className="bg-gradient-to-r from-[#11140F] via-[#1a2218] to-[#11140F] text-white px-4 py-3 text-xs sm:text-[13px] flex items-center justify-center gap-3 text-center flex-wrap">
+                {config.banner.badgeText?.trim() ? (
+                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#2F6B4F]/40 border border-[#34D399]/30 text-[#34D399] font-mono text-[11px] font-bold uppercase tracking-wider">
+                    <Tag className="w-3 h-3" />
+                    {config.banner.badgeText.trim()}
+                  </span>
+                ) : null}
+
+                {config.banner.messageText?.trim() ? (
+                  <span className="text-white/90">
+                    {config.banner.messageText.trim()}{' '}
+                    {config.banner.promoCode?.trim() && (
+                      <code className="font-mono bg-white/15 px-1.5 py-0.5 rounded text-white font-bold select-all">
+                        {config.banner.promoCode.trim()}
+                      </code>
+                    )}
+                  </span>
+                ) : !config.banner.badgeText?.trim() ? (
+                  <span className="text-white/40 italic">
+                    (No announcement message entered yet — enter text below to publish)
+                  </span>
+                ) : null}
+
+                {(config.banner.ctaText?.trim() || config.banner.ctaUrl) && (
+                  <span className="inline-flex items-center gap-1 font-semibold text-[#34D399] ml-1 underline underline-offset-4">
+                    {config.banner.ctaText?.trim() || 'Claim Offer'}
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -611,52 +565,70 @@ export default function AdminPromoManager({
               </span>
               <span
                 className={`text-[11px] font-mono px-2 py-0.5 rounded-full ${
-                  config.modal.enabled
+                  config.modal.enabled && config.modal.headline?.trim()
                     ? 'bg-emerald-100 text-emerald-800 font-bold'
+                    : config.modal.enabled
+                    ? 'bg-amber-100 text-amber-800 font-bold'
                     : 'bg-gray-100 text-gray-600'
                 }`}
               >
-                {config.modal.enabled ? 'ACTIVE & TRIGGERING' : 'DISABLED (INACTIVE)'}
+                {config.modal.enabled && config.modal.headline?.trim()
+                  ? 'ACTIVE & TRIGGERING'
+                  : config.modal.enabled
+                  ? 'ENABLED (ENTER HEADLINE BELOW TO TRIGGER)'
+                  : 'DISABLED (INACTIVE)'}
               </span>
             </div>
 
             <div className="rounded-2xl p-6 bg-[#0F120E] text-white border border-white/15 max-w-lg mx-auto shadow-xl space-y-4 relative overflow-hidden">
               <div className="flex items-center justify-between">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#2F6B4F]/30 border border-[#34D399]/30 text-[#34D399] font-mono text-[10.5px] font-bold uppercase tracking-wider">
-                  <Sparkles className="w-3 h-3" />
-                  {config.modal.badgeText || 'SPECIAL OFFER'}
-                </span>
+                {config.modal.badgeText?.trim() ? (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#2F6B4F]/30 border border-[#34D399]/30 text-[#34D399] font-mono text-[10.5px] font-bold uppercase tracking-wider">
+                    <Sparkles className="w-3 h-3" />
+                    {config.modal.badgeText.trim()}
+                  </span>
+                ) : <span />}
                 <span className="text-[11px] font-mono text-white/50">
-                  {config.modal.frequencyDays}d cap
+                  {config.modal.frequencyDays || 7}d cap
                 </span>
               </div>
 
               <div>
                 <h3 className="text-lg font-bold text-white tracking-tight">
-                  {config.modal.headline}
+                  {config.modal.headline?.trim() || (
+                    <span className="text-white/40 italic font-normal">
+                      (No headline entered yet — enter headline below)
+                    </span>
+                  )}
                 </h3>
-                <p className="text-xs text-white/70 mt-1 leading-relaxed">
-                  {config.modal.bodyText}
-                </p>
+                {config.modal.bodyText?.trim() && (
+                  <p className="text-xs text-white/70 mt-1 leading-relaxed">
+                    {config.modal.bodyText.trim()}
+                  </p>
+                )}
               </div>
 
-              <div className="p-3 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] text-white/50 uppercase font-mono block">
-                    Promo Code
-                  </span>
-                  <strong className="text-sm font-mono text-[#34D399] tracking-wider">
-                    {config.modal.promoCode}
-                  </strong>
+              {config.modal.promoCode?.trim() && (
+                <div className="p-3 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] text-white/50 uppercase font-mono block">
+                      Promo Code
+                    </span>
+                    <strong className="text-sm font-mono text-[#34D399] tracking-wider">
+                      {config.modal.promoCode.trim()}
+                    </strong>
+                  </div>
+                  {config.modal.discountPercent > 0 && (
+                    <span className="text-xs font-bold bg-[#34D399] text-[#0F120E] px-2.5 py-1 rounded-lg">
+                      {config.modal.discountPercent}% OFF
+                    </span>
+                  )}
                 </div>
-                <span className="text-xs font-bold bg-[#34D399] text-[#0F120E] px-2.5 py-1 rounded-lg">
-                  {config.modal.discountPercent}% OFF
-                </span>
-              </div>
+              )}
 
               <div className="pt-1">
                 <div className="w-full py-2.5 rounded-xl bg-white text-[#11140F] text-xs font-bold text-center">
-                  {config.modal.ctaText} &rarr;
+                  {config.modal.ctaText?.trim() || 'Claim Discount'} &rarr;
                 </div>
               </div>
             </div>
