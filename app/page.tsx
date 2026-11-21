@@ -10,6 +10,7 @@ import BrandedDomainsManager from '@/components/BrandedDomainsManager';
 import MicroSaasHub from '@/components/MicroSaasHub';
 import PlanUsageMeter from '@/components/PlanUsageMeter';
 import HomeTabs from '@/components/HomeTabs';
+import WorkspaceShell from '@/components/WorkspaceShell';
 import AppleProductTour from '@/components/AppleProductTour';
 import MaintenanceScreen from '@/components/MaintenanceScreen';
 import { TIER_CONFIGS } from '@/lib/ai/flags';
@@ -137,75 +138,61 @@ export default async function Home() {
     <AppleProductTour />
   );
 
-  const workspaceContent = (
-    <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2
-            className="text-[1.5rem] sm:text-[1.75rem] tracking-tight font-medium text-[#11140F] dark:text-white"
-            style={{ fontFamily: 'var(--font-display)' }}
-          >
-            {user ? `${user.name ? `${user.name}'s` : 'Your'} Workspace` : 'Your Workspace'}
-          </h2>
-          <p className="mt-1 text-[#11140F]/55 dark:text-white/60 text-[14px] sm:text-[15px]">
-            {user
-              ? 'Create, manage, smart-route, and analyze your dynamic QR codes.'
-              : 'Sign in to generate, route, and track your dynamic QR codes.'}
-          </p>
-        </div>
-
-        {user && <WorkspaceHeaderActions isAdmin={isAdmin} user={user} />}
-      </div>
-
-      {user ? (
-        <div className="space-y-8">
-          {/* Plan Capacity & Usage Meter with Real-time Counters */}
-          <PlanUsageMeter
-            userTier={user.tier || 'free'}
-            isAdmin={isAdmin}
-            activeLinksCount={activeLinksCount}
-            maxLinks={maxLinks}
-            monthlyScansCount={monthlyScansCount}
-            maxScans={maxScans}
-            aiUsedUsd={aiUsedUsd}
-            aiLimitUsd={aiLimitUsd}
-            daysUntilReset={daysUntilReset}
-          />
-
-          {/* Feature 3: AI Campaign Analyst Panel (Pro, Plus, Ultra) */}
-          <CampaignAnalyst userTier={user.tier || 'free'} isAdmin={isAdmin} />
-
-          {/* Feature 4: Custom Branded Domains (Plus & Ultra) */}
-          <BrandedDomainsManager
-            initialDomains={customDomains}
-            userTier={user.tier || 'free'}
-            isAdmin={isAdmin}
-          />
-
-          {/* Feature 5: Micro-SaaS Ecosystem Hub (Mailing Lists, vCards, Shortener, Menus, Wi-Fi) */}
-          <MicroSaasHub
-            userTier={user.tier || 'free'}
-            isAdmin={isAdmin}
-          />
-
-          {/* Link creation & Link list workspace */}
-          <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-6 items-start w-full min-w-0">
-            <section className="w-full min-w-0 max-w-full h-fit rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#11140F] p-4 sm:p-7 shadow-xs dark:shadow-[0_10px_30px_rgba(0,0,0,0.5)] lg:sticky lg:top-36 text-[#11140F] dark:text-white transition-colors">
-              <h3 className="mb-5 sm:mb-7 text-[16px] sm:text-[17px] font-medium text-[#11140F] dark:text-white">Create new link</h3>
-              <LinkForm customDomains={customDomains} />
-            </section>
-
-            <section className="w-full min-w-0 max-w-full rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#11140F] p-4 sm:p-7 shadow-xs dark:shadow-[0_10px_30px_rgba(0,0,0,0.5)] text-[#11140F] dark:text-white transition-colors">
-              <h3 className="mb-5 sm:mb-7 text-[16px] sm:text-[17px] font-medium text-[#11140F] dark:text-white">
-                Active links <span className="text-[#11140F]/35 dark:text-white/40 font-normal">({links.filter((l) => !l.isArchived).length})</span>
-              </h3>
-              <LinkList links={links} userTier={user.tier || 'free'} isAdmin={isAdmin} />
-            </section>
-          </div>
-        </div>
-      ) : (
-        <WorkspaceLocked />
+  const workspaceContent = user ? (
+    <WorkspaceShell
+      user={user}
+      isAdmin={isAdmin}
+      activeLinksCount={activeLinksCount}
+      planUsageMeter={
+        <PlanUsageMeter
+          userTier={user.tier || 'free'}
+          isAdmin={isAdmin}
+          activeLinksCount={activeLinksCount}
+          maxLinks={maxLinks}
+          monthlyScansCount={monthlyScansCount}
+          maxScans={maxScans}
+          aiUsedUsd={aiUsedUsd}
+          aiLimitUsd={aiLimitUsd}
+          daysUntilReset={daysUntilReset}
+        />
+      }
+      campaignAnalyst={
+        <CampaignAnalyst userTier={user.tier || 'free'} isAdmin={isAdmin} />
+      }
+      brandedDomainsManager={
+        <BrandedDomainsManager
+          initialDomains={customDomains}
+          userTier={user.tier || 'free'}
+          isAdmin={isAdmin}
+        />
+      }
+      renderMicroSaasHub={(currentTab, onTabChange) => (
+        <MicroSaasHub
+          userTier={user.tier || 'free'}
+          isAdmin={isAdmin}
+          externalActiveTab={currentTab}
+          onTabChange={onTabChange}
+        />
       )}
+      linkCreationAndList={
+        <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-6 items-start w-full min-w-0">
+          <section className="w-full min-w-0 max-w-full h-fit rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#11140F] p-4 sm:p-7 shadow-xs dark:shadow-[0_10px_30px_rgba(0,0,0,0.5)] lg:sticky lg:top-36 text-[#11140F] dark:text-white transition-colors">
+            <h3 className="mb-5 sm:mb-7 text-[16px] sm:text-[17px] font-medium text-[#11140F] dark:text-white">Create new link</h3>
+            <LinkForm customDomains={customDomains} />
+          </section>
+
+          <section className="w-full min-w-0 max-w-full rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#11140F] p-4 sm:p-7 shadow-xs dark:shadow-[0_10px_30px_rgba(0,0,0,0.5)] text-[#11140F] dark:text-white transition-colors">
+            <h3 className="mb-5 sm:mb-7 text-[16px] sm:text-[17px] font-medium text-[#11140F] dark:text-white">
+              Active links <span className="text-[#11140F]/35 dark:text-white/40 font-normal">({links.filter((l) => !l.isArchived).length})</span>
+            </h3>
+            <LinkList links={links} userTier={user.tier || 'free'} isAdmin={isAdmin} />
+          </section>
+        </div>
+      }
+    />
+  ) : (
+    <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-12 space-y-8 w-full">
+      <WorkspaceLocked />
     </div>
   );
 

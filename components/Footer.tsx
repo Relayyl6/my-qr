@@ -97,14 +97,15 @@ export default function Footer({ theme = 'dark', className = '' }: FooterProps) 
 
   return (
     <footer
-      className={`w-full bg-[#080907] text-[#EEF0EA] border-t border-white/10 relative overflow-hidden select-none min-h-screen md:min-h-0 md:h-screen md:max-h-[100dvh] flex flex-col justify-between ${className}`}
+      id="footer"
+      className={`w-full bg-[#080907] text-[#EEF0EA] border-t border-white/10 relative overflow-hidden select-none min-h-[calc(100dvh-4.25rem)] md:h-[calc(100dvh-4.25rem)] md:max-h-[calc(100dvh-4.25rem)] flex flex-col justify-between scroll-mt-20 ${className}`}
     >
       {/* 1. TOP SECTION: 5-Column Navigation & Newsletter Signup */}
-      <div className="max-w-[1280px] w-full mx-auto px-6 sm:px-8 pt-8 sm:pt-10 pb-4 relative z-10 shrink-0">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 items-start">
+      <div className="max-w-[1280px] w-full mx-auto px-6 sm:px-8 pt-4 sm:pt-6 md:pt-7 pb-2 relative z-10 shrink-0">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
           
           {/* Column 1: Brand & Bio (4 cols) */}
-          <div className="lg:col-span-4 space-y-4">
+          <div className="lg:col-span-4 space-y-3">
             <Link href="/" className="inline-flex items-center gap-2.5 group">
               <QrMark className="w-5 h-5 text-white group-hover:text-[#34D399] transition-colors" fill="currentColor" />
               <span className="text-xl font-bold tracking-tight text-white font-sans">
@@ -112,12 +113,12 @@ export default function Footer({ theme = 'dark', className = '' }: FooterProps) 
               </span>
             </Link>
 
-            <p className="text-[13.5px] text-[#E5E7EB]/80 max-w-xs leading-relaxed">
+            <p className="text-[13px] text-[#E5E7EB]/80 max-w-xs leading-relaxed">
               DynamicQR keeps every printed link alive, so you never have to reprint marketing materials from scratch.
             </p>
 
             {/* Social Icons */}
-            <div className="flex items-center gap-3.5 pt-2 text-[#E5E7EB]">
+            <div className="flex items-center gap-3 pt-1 text-[#E5E7EB]">
               <a
                 href="https://linkedin.com"
                 target="_blank"
@@ -291,10 +292,10 @@ export default function Footer({ theme = 'dark', className = '' }: FooterProps) 
       </div>
 
       {/* 2. MIDDLE SECTION: Michelangelo Hands Widened Apart & Centered Tagline */}
-      <div className="relative w-full flex-1 min-h-[260px] md:min-h-0 flex items-center justify-center overflow-hidden border-t border-white/[0.06] my-auto">
+      <div className="relative w-full flex-1 min-h-[130px] max-h-[220px] md:max-h-[250px] flex items-center justify-center overflow-hidden border-t border-white/[0.06] my-auto">
         
         {/* Left Hand: Reaching in from Left edge */}
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none select-none z-10 h-[80%] md:h-[88%] max-h-[360px] w-auto flex items-center -translate-x-[18%] sm:-translate-x-[10%] md:-translate-x-[4%]">
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none select-none z-10 h-[75%] md:h-[84%] max-h-[240px] w-auto flex items-center -translate-x-[18%] sm:-translate-x-[10%] md:-translate-x-[4%]">
           <img
             src="/images/creation-hand-left.png"
             alt="Creation Left Hand"
@@ -303,20 +304,20 @@ export default function Footer({ theme = 'dark', className = '' }: FooterProps) 
         </div>
 
         {/* Center Tagline: Spaced cleanly in the wide gap between fingertips */}
-        <div className="relative z-20 text-center px-4 max-w-[290px] sm:max-w-xs md:max-w-sm space-y-2 bg-[#080907]/80 sm:bg-[#080907]/45 md:bg-transparent backdrop-blur-[3px] md:backdrop-blur-none py-3 px-4 rounded-2xl border border-white/10 md:border-transparent">
-          <div className="text-[11.5px] font-mono text-white/60 tracking-wider">
+        <div className="relative z-20 text-center px-4 max-w-[290px] sm:max-w-xs md:max-w-sm space-y-1.5 bg-[#080907]/80 sm:bg-[#080907]/45 md:bg-transparent backdrop-blur-[3px] md:backdrop-blur-none py-2 px-3 rounded-2xl border border-white/10 md:border-transparent">
+          <div className="text-[11px] font-mono text-white/60 tracking-wider">
             © {new Date().getFullYear()}
           </div>
-          <div className="text-xl sm:text-2xl font-bold tracking-tight text-white font-sans">
+          <div className="text-lg sm:text-xl font-bold tracking-tight text-white font-sans">
             DynamicQR
           </div>
-          <p className="text-[12.5px] sm:text-[13px] text-[#E5E7EB]/80 leading-relaxed">
+          <p className="text-[12px] sm:text-[12.5px] text-[#E5E7EB]/80 leading-relaxed">
             One code, printed once. Routed as long as it needs to be.
           </p>
         </div>
 
         {/* Right Hand: Reaching in from Right edge */}
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none select-none z-10 h-[80%] md:h-[88%] max-h-[360px] w-auto flex items-center translate-x-[18%] sm:translate-x-[10%] md:translate-x-[4%]">
+        <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none select-none z-10 h-[75%] md:h-[84%] max-h-[240px] w-auto flex items-center translate-x-[18%] sm:translate-x-[10%] md:translate-x-[4%]">
           <img
             src="/images/creation-hand-right.png"
             alt="Creation Right Hand"
@@ -326,8 +327,8 @@ export default function Footer({ theme = 'dark', className = '' }: FooterProps) 
       </div>
 
       {/* 3. BOTTOM WATERMARK: Large faint typography across the base */}
-      <div className="w-full overflow-hidden text-center select-none pointer-events-none pb-2 pt-0 relative z-0 shrink-0 -mt-6 sm:-mt-8 md:-mt-10">
-        <span className="text-[15vw] sm:text-[14vw] font-bold tracking-tighter text-white/[0.04] leading-none block font-sans whitespace-nowrap">
+      <div className="w-full overflow-hidden text-center select-none pointer-events-none pb-2 pt-0 relative z-0 shrink-0 -mt-4 sm:-mt-6 md:-mt-8">
+        <span className="text-[12vw] sm:text-[11vw] font-bold tracking-tighter text-white/[0.04] leading-none block font-sans whitespace-nowrap">
           DynamicQR
         </span>
       </div>
