@@ -17,6 +17,7 @@ interface HomeTabsProps {
   overviewContent: React.ReactNode;
   workspaceContent: React.ReactNode;
   announcementBanner?: string | null;
+  promoBanner?: any;
 }
 
 export default function HomeTabs({
@@ -25,6 +26,7 @@ export default function HomeTabs({
   overviewContent,
   workspaceContent,
   announcementBanner,
+  promoBanner,
 }: HomeTabsProps) {
   // If user is logged in, default directly to the dedicated Workspace tab; otherwise Overview tour
   const [activeTab, setActiveTab] = useState<'workspace' | 'overview'>(
@@ -36,6 +38,9 @@ export default function HomeTabs({
       const hash = window.location.hash.toLowerCase();
       if (hash === '#workspace') {
         setActiveTab('workspace');
+        if (typeof window !== 'undefined') {
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        }
       } else if (
         hash === '#overview' ||
         hash === '#how-it-works' ||
@@ -53,26 +58,28 @@ export default function HomeTabs({
 
   return (
     <div className="w-full min-h-screen flex flex-col">
-      {/* Top Announcement Bar: Renders at top of Workspace view without polluting the Product Tour */}
-      {activeTab === 'workspace' && <AnnouncementBar />}
+      {/* Sticky Top Header: Platform-wide Promotional Announcement + Primary Navigation */}
+      <div className="sticky top-0 inset-x-0 z-50 w-full">
+        <AnnouncementBar initialBanner={promoBanner} />
 
-      {/* Unified Top Navigation Bar (Zero duplicate sub-bars) */}
-      <HeaderNav
-        user={user}
-        isAdmin={isAdmin}
-        activeTab={activeTab}
-        onTabChange={(tab) => {
-          setActiveTab(tab);
-          if (typeof window !== 'undefined') {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }
-        }}
-        announcementBanner={announcementBanner}
-      />
+        {/* Unified Top Navigation Bar (Zero duplicate sub-bars) */}
+        <HeaderNav
+          user={user}
+          isAdmin={isAdmin}
+          activeTab={activeTab}
+          onTabChange={(tab) => {
+            setActiveTab(tab);
+            if (typeof window !== 'undefined') {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          }}
+          announcementBanner={announcementBanner}
+        />
+      </div>
 
       {/* Tab 1: Dedicated Workspace View (Zero scrolling past marketing copy) */}
       {activeTab === 'workspace' && (
-        <section id="workspace" className="flex-1 bg-[#EEF0EA] dark:bg-[#0C0E0A] flex flex-col justify-between transition-colors duration-200">
+        <section id="workspace-tab" className="flex-1 bg-[#EEF0EA] dark:bg-[#0C0E0A] flex flex-col justify-between transition-colors duration-200">
           <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-12 space-y-8 w-full">
             {workspaceContent}
           </div>

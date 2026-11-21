@@ -67,7 +67,7 @@ export default function HeaderNav({
   return (
     <>
       <header
-        className={`sticky top-0 left-0 right-0 z-50 w-full transition-colors duration-200 backdrop-blur-md ${
+        className={`w-full transition-colors duration-200 backdrop-blur-md ${
           isDark
             ? 'bg-[#11140F]/95 border-b border-white/10 text-white shadow-md'
             : 'bg-[#EEF0EA]/95 dark:bg-[#0D0F0C]/95 border-b border-[#11140F]/10 dark:border-white/10 text-[#11140F] dark:text-white shadow-2xs'

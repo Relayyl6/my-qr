@@ -37,17 +37,27 @@ export default async function Home() {
   let isMaintenanceActive = false;
   let monthlyScansCount = 0;
   let aiCredit: any = null;
+  let promoBanner: any = null;
 
   try {
     // 1. Authoritative System Sovereignty Config (Available to all visitors)
-    const sysRecord = await prisma.aiCache.findUnique({
-      where: { key: 'system_sovereignty_config' },
-    }).catch(() => null);
+    const [sysRecord, promoRecord] = await Promise.all([
+      prisma.aiCache.findUnique({
+        where: { key: 'system_sovereignty_config' },
+      }).catch(() => null),
+      prisma.aiCache.findUnique({
+        where: { key: 'platform_promo_config' },
+      }).catch(() => null),
+    ]);
 
     if (sysRecord && sysRecord.value) {
       const val = sysRecord.value as any;
       if (val.announcementBanner) announcementBanner = val.announcementBanner;
       if (val.maintenanceMode) isMaintenanceActive = true;
+    }
+
+    if (promoRecord && (promoRecord.value as any)?.banner) {
+      promoBanner = (promoRecord.value as any).banner;
     }
 
     // Security: Only the owner's admin account can claim the original legacy links!
@@ -211,6 +221,7 @@ export default async function Home() {
         overviewContent={overviewContent}
         workspaceContent={workspaceContent}
         announcementBanner={effectiveAnnouncement}
+        promoBanner={promoBanner}
       />
     </div>
   );

@@ -33,12 +33,21 @@ export default async function PricingPage() {
   const isAdmin = !!(user && user.email.toLowerCase() === adminEmail);
 
   let isMaintenanceActive = false;
+  let promoBanner: any = null;
   try {
-    const sysRecord = await prisma.aiCache.findUnique({
-      where: { key: 'system_sovereignty_config' },
-    }).catch(() => null);
+    const [sysRecord, promoRecord] = await Promise.all([
+      prisma.aiCache.findUnique({
+        where: { key: 'system_sovereignty_config' },
+      }).catch(() => null),
+      prisma.aiCache.findUnique({
+        where: { key: 'platform_promo_config' },
+      }).catch(() => null),
+    ]);
     if (sysRecord && (sysRecord.value as any)?.maintenanceMode) {
       isMaintenanceActive = true;
+    }
+    if (promoRecord && (promoRecord.value as any)?.banner) {
+      promoBanner = (promoRecord.value as any).banner;
     }
   } catch (err) {}
 
@@ -52,7 +61,7 @@ export default async function PricingPage() {
     <div className="bg-[#EEF0EA] dark:bg-[#080907] text-[#11140F] dark:text-[#EEF0EA] min-h-screen w-full flex flex-col justify-between transition-colors duration-200">
       {/* Sticky Header with Announcement Bar & Navigation */}
       <div className="sticky top-0 inset-x-0 z-50">
-        <AnnouncementBar />
+        <AnnouncementBar initialBanner={promoBanner} />
         <nav className="bg-[#EEF0EA]/90 dark:bg-[#0D0F0C]/90 backdrop-blur-md border-b border-[#11140F]/10 dark:border-white/10">
           <div className="max-w-[1360px] mx-auto px-5 md:px-8 h-16 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2.5 font-medium text-[15px] hover:opacity-80 transition-opacity">

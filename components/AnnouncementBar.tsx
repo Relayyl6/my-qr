@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Tag, ArrowRight, X } from 'lucide-react';
 
-interface BannerData {
+export interface BannerData {
   enabled: boolean;
   badgeText: string;
   messageText: string;
@@ -22,13 +22,25 @@ const DEFAULT_BANNER: BannerData = {
   ctaUrl: '',
 };
 
-export default function AnnouncementBar() {
-  const [visible, setVisible] = useState(false);
-  const [banner, setBanner] = useState<BannerData>(DEFAULT_BANNER);
+interface AnnouncementBarProps {
+  initialBanner?: BannerData | null;
+}
+
+export default function AnnouncementBar({ initialBanner }: AnnouncementBarProps) {
+  // If initialBanner is provided via SSR, initialize state immediately (zero delay, zero jitter)
+  const hasInitialContent =
+    initialBanner &&
+    initialBanner.enabled &&
+    Boolean(initialBanner.messageText?.trim() || initialBanner.badgeText?.trim());
+
+  const [banner, setBanner] = useState<BannerData>(
+    initialBanner || DEFAULT_BANNER
+  );
+  const [visible, setVisible] = useState(Boolean(hasInitialContent));
 
   useEffect(() => {
-    // Fetch live admin configuration — strictly display what the admin set
-    fetch('/api/promo/config')
+    // Live update check to keep bar reactive when admin toggles without hard refresh
+    fetch('/api/promo/config', { cache: 'no-store' })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (
@@ -38,43 +50,32 @@ export default function AnnouncementBar() {
           (data.banner.messageText?.trim() || data.banner.badgeText?.trim())
         ) {
           setBanner(data.banner);
-
-          const dismissKey = `dynamicqr_announcement_dismissed_${data.banner.promoCode || data.banner.messageText || 'active'}`;
-          const isDismissed = sessionStorage.getItem(dismissKey) === 'true';
-
-          if (!isDismissed) {
-            setVisible(true);
-          }
+          setVisible(true);
         } else {
           setVisible(false);
         }
       })
       .catch(() => {
-        setVisible(false);
+        // Fall back to SSR state
       });
   }, []);
-
-  const handleDismiss = () => {
-    setVisible(false);
-    const dismissKey = `dynamicqr_announcement_dismissed_${banner.promoCode || banner.messageText || 'active'}`;
-    try {
-      sessionStorage.setItem(dismissKey, 'true');
-    } catch (e) {}
-  };
 
   if (!visible || !banner.enabled || (!banner.messageText?.trim() && !banner.badgeText?.trim())) {
     return null;
   }
 
   const targetUrl =
-    banner.ctaUrl ||
-    (banner.promoCode ? `/pricing?promo=${banner.promoCode}` : '/pricing');
+    banner.ctaUrl?.trim() ||
+    (banner.promoCode?.trim() ? `/pricing?promo=${banner.promoCode.trim()}` : '/pricing');
 
   return (
-    <div className="relative isolate z-40 bg-gradient-to-r from-[#11140F] via-[#1a2218] to-[#11140F] text-white px-4 py-2.5 text-xs sm:text-[13px] border-b border-white/10 shadow-xs flex items-center justify-between transition-all duration-300 ease-out animate-in fade-in">
+    <aside
+      aria-label="Announcement"
+      className="relative isolate z-50 w-full bg-gradient-to-r from-[#11140F] via-[#1a2218] to-[#11140F] text-white px-4 py-2.5 text-xs sm:text-[13px] border-b border-white/10 shadow-xs flex items-center justify-between"
+    >
       <div className="max-w-[1240px] mx-auto w-full flex items-center justify-center gap-3 text-center pr-6 flex-wrap">
         {banner.badgeText?.trim() && (
-          <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#2F6B4F]/40 border border-[#34D399]/30 text-[#34D399] font-mono text-[11px] font-bold uppercase tracking-wider">
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#2F6B4F]/40 border border-[#34D399]/30 text-[#34D399] font-mono text-[11px] font-bold uppercase tracking-wider">
             <Tag className="w-3 h-3" />
             {banner.badgeText.trim()}
           </span>
@@ -100,12 +101,13 @@ export default function AnnouncementBar() {
         )}
       </div>
       <button
-        onClick={handleDismiss}
+        type="button"
+        onClick={() => setVisible(false)}
         className="absolute right-3 text-white/50 hover:text-white transition-colors p-1 rounded-md cursor-pointer"
         aria-label="Dismiss banner"
       >
         <X className="w-4 h-4" />
       </button>
-    </div>
+    </aside>
   );
 }
