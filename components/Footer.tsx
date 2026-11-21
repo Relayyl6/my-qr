@@ -291,19 +291,19 @@ export default function Footer({ theme = 'dark', className = '' }: FooterProps) 
       </div>
 
       {/* 2. MIDDLE SECTION: Michelangelo Hands Widened Apart & Centered Tagline */}
-      <div className="relative w-full h-[280px] sm:h-[340px] md:h-[400px] flex items-center justify-center overflow-hidden border-t border-white/[0.04]">
+      <div className="relative w-full h-[380px] sm:h-[420px] md:h-[450px] lg:h-[460px] flex items-center justify-center overflow-hidden border-t border-white/[0.04]">
         
         {/* Left Hand: Reaching in from Left edge */}
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none select-none z-10 w-[42%] max-w-[460px] sm:max-w-[520px]">
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none select-none z-10 h-[80%] sm:h-[85%] md:h-[90%] max-h-[420px] w-auto flex items-center -translate-x-[18%] sm:-translate-x-[10%] md:-translate-x-[4%]">
           <img
             src="/images/creation-hand-left.png"
             alt="Creation Left Hand"
-            className="w-full h-auto object-contain filter invert brightness-110 contrast-105 opacity-90 -translate-x-[6%] sm:-translate-x-[4%]"
+            className="h-full w-auto object-contain filter invert brightness-110 contrast-105 opacity-85 sm:opacity-90"
           />
         </div>
 
         {/* Center Tagline: Spaced cleanly in the wide gap between fingertips */}
-        <div className="relative z-20 text-center px-4 max-w-sm space-y-2">
+        <div className="relative z-20 text-center px-4 max-w-[290px] sm:max-w-xs md:max-w-sm space-y-2 bg-[#080907]/70 sm:bg-[#080907]/35 md:bg-transparent backdrop-blur-[3px] md:backdrop-blur-none py-3 px-4 rounded-2xl border border-white/5 md:border-transparent">
           <div className="text-[12px] font-mono text-white/50 tracking-wider">
             © {new Date().getFullYear()}
           </div>
@@ -316,11 +316,11 @@ export default function Footer({ theme = 'dark', className = '' }: FooterProps) 
         </div>
 
         {/* Right Hand: Reaching in from Right edge */}
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none select-none z-10 w-[42%] max-w-[460px] sm:max-w-[520px]">
+        <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none select-none z-10 h-[80%] sm:h-[85%] md:h-[90%] max-h-[420px] w-auto flex items-center translate-x-[18%] sm:translate-x-[10%] md:translate-x-[4%]">
           <img
             src="/images/creation-hand-right.png"
             alt="Creation Right Hand"
-            className="w-full h-auto object-contain filter invert brightness-110 contrast-105 opacity-90 translate-x-[6%] sm:translate-x-[4%]"
+            className="h-full w-auto object-contain filter invert brightness-110 contrast-105 opacity-85 sm:opacity-90"
           />
         </div>
       </div>

@@ -2,6 +2,7 @@ import { getCurrentUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import Footer from '@/components/Footer';
+import AnnouncementBar from '@/components/AnnouncementBar';
 import { ArrowLeft, ShieldCheck, Sparkles } from 'lucide-react';
 import PricingTable from '@/components/PricingTable';
 import ComprehensiveFeatureMatrix from '@/components/ComprehensiveFeatureMatrix';
@@ -48,26 +49,29 @@ export default async function PricingPage() {
   const currentTier = user?.tier || 'free';
 
   return (
-    <div className="bg-[#EEF0EA] text-[#11140F] min-h-screen w-full">
-      {/* Navigation */}
-      <nav className="fixed top-0 inset-x-0 z-50 bg-[#EEF0EA]/90 backdrop-blur-md border-b border-[#11140F]/10">
-        <div className="max-w-[1360px] mx-auto px-5 md:px-8 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5 font-medium text-[15px] hover:opacity-80 transition-opacity">
-            <QrMark className="w-5 h-5" fill="#11140F" />
-            <span style={{ fontFamily: 'var(--font-display)' }}>DynamicQR</span>
-          </Link>
+    <div className="bg-[#EEF0EA] text-[#11140F] min-h-screen w-full flex flex-col justify-between">
+      {/* Sticky Header with Announcement Bar & Navigation */}
+      <div className="sticky top-0 inset-x-0 z-50">
+        <AnnouncementBar />
+        <nav className="bg-[#EEF0EA]/90 backdrop-blur-md border-b border-[#11140F]/10">
+          <div className="max-w-[1360px] mx-auto px-5 md:px-8 h-16 flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-2.5 font-medium text-[15px] hover:opacity-80 transition-opacity">
+              <QrMark className="w-5 h-5" fill="#11140F" />
+              <span style={{ fontFamily: 'var(--font-display)' }}>DynamicQR</span>
+            </Link>
 
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1.5 text-[14px] text-[#11140F]/70 hover:text-[#11140F] font-medium transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to workspace
-          </Link>
-        </div>
-      </nav>
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 text-[14px] text-[#11140F]/70 hover:text-[#11140F] font-medium transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to workspace
+            </Link>
+          </div>
+        </nav>
+      </div>
 
-      <main className="max-w-[1360px] mx-auto px-4 sm:px-6 md:px-8 pt-32 pb-24 space-y-16">
+      <main className="max-w-[1360px] mx-auto px-4 sm:px-6 md:px-8 pt-10 sm:pt-14 pb-24 space-y-16 flex-1 w-full">
         {/* Header Title */}
         <div className="text-center max-w-2xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#11140F]/5 text-[#11140F] text-[12px] font-mono uppercase tracking-wider">

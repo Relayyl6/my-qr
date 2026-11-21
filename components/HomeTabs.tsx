@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import HeaderNav from './HeaderNav';
 import Footer from './Footer';
+import AnnouncementBar from './AnnouncementBar';
 import { ChevronRight } from 'lucide-react';
 
 interface HomeTabsProps {
@@ -69,6 +70,7 @@ export default function HomeTabs({
       {/* Tab 1: Dedicated Workspace View (Zero scrolling past marketing copy) */}
       {activeTab === 'workspace' && (
         <section id="workspace" className="flex-1 bg-[#EEF0EA] flex flex-col justify-between">
+          <AnnouncementBar />
           <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-12 space-y-8 w-full">
             {workspaceContent}
           </div>

@@ -73,6 +73,36 @@ export default function AdminPromoManager({
     expiresAt: '',
   });
 
+  const handleToggleBannerSwitch = async (checked: boolean) => {
+    const updated = {
+      ...config,
+      banner: { ...config.banner, enabled: checked },
+    };
+    setConfig(updated);
+    try {
+      await adminSavePromoConfig({ banner: updated.banner });
+      setStatusMsg(checked ? 'Announcement bar activated platform-wide!' : 'Announcement bar disabled platform-wide!');
+      setTimeout(() => setStatusMsg(null), 3000);
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Failed to update announcement bar state.');
+    }
+  };
+
+  const handleToggleModalSwitch = async (checked: boolean) => {
+    const updated = {
+      ...config,
+      modal: { ...config.modal, enabled: checked },
+    };
+    setConfig(updated);
+    try {
+      await adminSavePromoConfig({ modal: updated.modal });
+      setStatusMsg(checked ? 'Entry popup modal activated platform-wide!' : 'Entry popup modal disabled platform-wide!');
+      setTimeout(() => setStatusMsg(null), 3000);
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Failed to update modal state.');
+    }
+  };
+
   const handleSaveBanner = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -384,12 +414,7 @@ export default function AdminPromoManager({
                 <input
                   type="checkbox"
                   checked={config.banner.enabled}
-                  onChange={(e) =>
-                    setConfig({
-                      ...config,
-                      banner: { ...config.banner, enabled: e.target.checked },
-                    })
-                  }
+                  onChange={(e) => handleToggleBannerSwitch(e.target.checked)}
                   className="sr-only peer"
                 />
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#11140F]" />
@@ -630,12 +655,7 @@ export default function AdminPromoManager({
                 <input
                   type="checkbox"
                   checked={config.modal.enabled}
-                  onChange={(e) =>
-                    setConfig({
-                      ...config,
-                      modal: { ...config.modal, enabled: e.target.checked },
-                    })
-                  }
+                  onChange={(e) => handleToggleModalSwitch(e.target.checked)}
                   className="sr-only peer"
                 />
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#11140F]" />
