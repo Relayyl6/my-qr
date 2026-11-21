@@ -58,24 +58,26 @@ export default function HomeTabs({
 
   return (
     <div className="w-full min-h-screen flex flex-col">
-      {/* Sticky Top Header: Platform-wide Promotional Announcement + Primary Navigation */}
-      <div className="sticky top-0 inset-x-0 z-50 w-full">
-        <AnnouncementBar initialBanner={promoBanner} />
+      {/* Sticky Top Header: ONLY shown on marketing/tour overview, NOT in dedicated workspace */}
+      {activeTab !== 'workspace' && (
+        <div className="sticky top-0 inset-x-0 z-50 w-full">
+          <AnnouncementBar initialBanner={promoBanner} />
 
-        {/* Unified Top Navigation Bar (Zero duplicate sub-bars) */}
-        <HeaderNav
-          user={user}
-          isAdmin={isAdmin}
-          activeTab={activeTab}
-          onTabChange={(tab) => {
-            setActiveTab(tab);
-            if (typeof window !== 'undefined') {
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-          }}
-          announcementBanner={announcementBanner}
-        />
-      </div>
+          {/* Unified Top Navigation Bar */}
+          <HeaderNav
+            user={user}
+            isAdmin={isAdmin}
+            activeTab={activeTab}
+            onTabChange={(tab) => {
+              setActiveTab(tab);
+              if (typeof window !== 'undefined') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }
+            }}
+            announcementBanner={announcementBanner}
+          />
+        </div>
+      )}
 
       {/* Tab 1: Dedicated Workspace View (Zero scrolling past marketing copy) */}
       {activeTab === 'workspace' && (

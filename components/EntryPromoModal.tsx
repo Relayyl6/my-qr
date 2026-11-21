@@ -27,8 +27,13 @@ const DEFAULT_MODAL: ModalConfig = {
   frequencyDays: 7,
 };
 
-export default function EntryPromoModal() {
-  const [isOpen, setIsOpen] = useState(false);
+interface EntryPromoModalProps {
+  forceOpen?: boolean;
+  onClose?: () => void;
+}
+
+export default function EntryPromoModal({ forceOpen = false, onClose }: EntryPromoModalProps = {}) {
+  const [isOpen, setIsOpen] = useState(forceOpen);
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -36,6 +41,26 @@ export default function EntryPromoModal() {
   const pathname = usePathname();
 
   useEffect(() => {
+    if (forceOpen) {
+      setIsOpen(true);
+      fetch('/api/promo/config')
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data && data.modal) {
+            setConfig({
+              ...data.modal,
+              enabled: true,
+              headline: data.modal.headline || 'Exclusive Limited-Time Special',
+              badgeText: data.modal.badgeText || 'SPECIAL OFFER',
+              bodyText: data.modal.bodyText || 'Unlock instant dynamic QR codes, 307 speed handoff, and full lead routing.',
+              ctaText: data.modal.ctaText || 'Claim Discount',
+            });
+          }
+        })
+        .catch(() => {});
+      return;
+    }
+
     // Exclude admin, checkout, login pages
     if (
       pathname?.startsWith('/admin') ||
@@ -84,10 +109,13 @@ export default function EntryPromoModal() {
 
   const handleDismiss = () => {
     setIsOpen(false);
-    try {
-      const seenKey = `dynamicqr_promo_modal_seen_${config.promoCode || 'active'}`;
-      localStorage.setItem(seenKey, Date.now().toString());
-    } catch (e) {}
+    onClose?.();
+    if (!forceOpen) {
+      try {
+        const seenKey = `dynamicqr_promo_modal_seen_${config.promoCode || 'active'}`;
+        localStorage.setItem(seenKey, Date.now().toString());
+      } catch (e) {}
+    }
   };
 
   const handleSubscribe = async (e: React.FormEvent) => {
