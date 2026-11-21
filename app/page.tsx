@@ -7,7 +7,6 @@ import WorkspaceLocked from '@/components/WorkspaceLocked';
 import CampaignAnalyst from '@/components/CampaignAnalyst';
 import WorkspaceHeaderActions from '@/components/WorkspaceHeaderActions';
 import BrandedDomainsManager from '@/components/BrandedDomainsManager';
-import MicroSaasHub from '@/components/MicroSaasHub';
 import PlanUsageMeter from '@/components/PlanUsageMeter';
 import HomeTabs from '@/components/HomeTabs';
 import WorkspaceShell from '@/components/WorkspaceShell';
@@ -166,14 +165,6 @@ export default async function Home() {
           isAdmin={isAdmin}
         />
       }
-      renderMicroSaasHub={(currentTab, onTabChange) => (
-        <MicroSaasHub
-          userTier={user.tier || 'free'}
-          isAdmin={isAdmin}
-          externalActiveTab={currentTab}
-          onTabChange={onTabChange}
-        />
-      )}
       linkCreationAndList={
         <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-6 items-start w-full min-w-0">
           <section className="w-full min-w-0 max-w-full h-fit rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#11140F] p-4 sm:p-7 shadow-xs dark:shadow-[0_10px_30px_rgba(0,0,0,0.5)] lg:sticky lg:top-36 text-[#11140F] dark:text-white transition-colors">

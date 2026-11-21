@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import BulkImportWizard from './BulkImportWizard';
 import AccountSettingsModal from './AccountSettingsModal';
+import MicroSaasHub from './MicroSaasHub';
 import { signOut } from '@/app/auth-actions';
 
 export type WorkspaceSection =
@@ -55,10 +56,6 @@ interface WorkspaceShellProps {
   planUsageMeter: React.ReactNode;
   campaignAnalyst: React.ReactNode;
   brandedDomainsManager: React.ReactNode;
-  renderMicroSaasHub: (
-    activeTab: 'mailing' | 'vcard' | 'shortener' | 'menu' | 'wifi',
-    onTabChange: (t: 'mailing' | 'vcard' | 'shortener' | 'menu' | 'wifi') => void
-  ) => React.ReactNode;
   linkCreationAndList: React.ReactNode;
   activeLinksCount: number;
 }
@@ -69,7 +66,6 @@ export default function WorkspaceShell({
   planUsageMeter,
   campaignAnalyst,
   brandedDomainsManager,
-  renderMicroSaasHub,
   linkCreationAndList,
   activeLinksCount,
 }: WorkspaceShellProps) {
@@ -488,7 +484,12 @@ export default function WorkspaceShell({
             {planUsageMeter}
             {campaignAnalyst}
             {brandedDomainsManager}
-            {renderMicroSaasHub(microSaasTab, (t) => setMicroSaasTab(t))}
+            <MicroSaasHub
+              userTier={user?.tier || 'free'}
+              isAdmin={isAdmin}
+              externalActiveTab={microSaasTab}
+              onTabChange={(t) => setMicroSaasTab(t)}
+            />
             {linkCreationAndList}
           </div>
         )}
@@ -525,10 +526,15 @@ export default function WorkspaceShell({
         {/* VIEW 6-10: INDIVIDUAL MICRO-SAAS TOOLS FOCUSED */}
         {isMicroSaasSection && (
           <div className="space-y-6">
-            {renderMicroSaasHub(microSaasTab, (t) => {
-              setMicroSaasTab(t);
-              setActiveSection(t as any);
-            })}
+            <MicroSaasHub
+              userTier={user?.tier || 'free'}
+              isAdmin={isAdmin}
+              externalActiveTab={microSaasTab}
+              onTabChange={(t) => {
+                setMicroSaasTab(t);
+                setActiveSection(t as any);
+              }}
+            />
           </div>
         )}
       </main>
