@@ -97,10 +97,10 @@ export default function Footer({ theme = 'dark', className = '' }: FooterProps) 
 
   return (
     <footer
-      className={`w-full bg-[#080907] text-[#EEF0EA] border-t border-white/10 relative overflow-hidden select-none ${className}`}
+      className={`w-full bg-[#080907] text-[#EEF0EA] border-t border-white/10 relative overflow-hidden select-none min-h-screen md:min-h-[100dvh] flex flex-col justify-between ${className}`}
     >
       {/* 1. TOP SECTION: 5-Column Navigation & Newsletter Signup */}
-      <div className="max-w-[1280px] mx-auto px-6 sm:px-8 pt-16 sm:pt-20 pb-12 relative z-10">
+      <div className="max-w-[1280px] w-full mx-auto px-6 sm:px-8 pt-12 sm:pt-16 pb-8 relative z-10 shrink-0">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 items-start">
           
           {/* Column 1: Brand & Bio (4 cols) */}
@@ -112,18 +112,18 @@ export default function Footer({ theme = 'dark', className = '' }: FooterProps) 
               </span>
             </Link>
 
-            <p className="text-[13.5px] text-[#9CA3AF] max-w-xs leading-relaxed">
+            <p className="text-[13.5px] text-[#E5E7EB]/80 max-w-xs leading-relaxed">
               DynamicQR keeps every printed link alive, so you never have to reprint marketing materials from scratch.
             </p>
 
             {/* Social Icons */}
-            <div className="flex items-center gap-3.5 pt-2 text-[#9CA3AF]">
+            <div className="flex items-center gap-3.5 pt-2 text-[#E5E7EB]">
               <a
                 href="https://linkedin.com"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="LinkedIn"
-                className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/10 flex items-center justify-center hover:text-white hover:border-white/30 hover:bg-white/[0.08] transition-all"
+                className="w-8 h-8 rounded-lg bg-white/[0.06] border border-white/15 flex items-center justify-center text-white/80 hover:text-white hover:border-white/35 hover:bg-white/[0.12] transition-all"
               >
                 <LinkedInIcon className="w-3.5 h-3.5" />
               </a>
@@ -132,7 +132,7 @@ export default function Footer({ theme = 'dark', className = '' }: FooterProps) 
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Instagram"
-                className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/10 flex items-center justify-center hover:text-white hover:border-white/30 hover:bg-white/[0.08] transition-all"
+                className="w-8 h-8 rounded-lg bg-white/[0.06] border border-white/15 flex items-center justify-center text-white/80 hover:text-white hover:border-white/35 hover:bg-white/[0.12] transition-all"
               >
                 <InstagramIcon className="w-3.5 h-3.5" />
               </a>
@@ -141,7 +141,7 @@ export default function Footer({ theme = 'dark', className = '' }: FooterProps) 
                 target="_blank"
                 rel="noreferrer"
                 aria-label="YouTube"
-                className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/10 flex items-center justify-center hover:text-white hover:border-white/30 hover:bg-white/[0.08] transition-all"
+                className="w-8 h-8 rounded-lg bg-white/[0.06] border border-white/15 flex items-center justify-center text-white/80 hover:text-white hover:border-white/35 hover:bg-white/[0.12] transition-all"
               >
                 <YouTubeIcon className="w-3.5 h-3.5" />
               </a>
@@ -150,7 +150,7 @@ export default function Footer({ theme = 'dark', className = '' }: FooterProps) 
                 target="_blank"
                 rel="noreferrer"
                 aria-label="X (Twitter)"
-                className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/10 flex items-center justify-center hover:text-white hover:border-white/30 hover:bg-white/[0.08] transition-all"
+                className="w-8 h-8 rounded-lg bg-white/[0.06] border border-white/15 flex items-center justify-center text-white/80 hover:text-white hover:border-white/35 hover:bg-white/[0.12] transition-all"
               >
                 <XTwitterIcon className="w-3.5 h-3.5" />
               </a>
@@ -159,8 +159,8 @@ export default function Footer({ theme = 'dark', className = '' }: FooterProps) 
 
           {/* Column 2: Product (2 cols) */}
           <div className="lg:col-span-2 space-y-3.5">
-            <h4 className="text-[13px] font-semibold text-white tracking-wide">Product</h4>
-            <ul className="space-y-2.5 text-[13px] text-[#9CA3AF]">
+            <h4 className="text-[13.5px] font-semibold text-white tracking-wide">Product</h4>
+            <ul className="space-y-2.5 text-[13px] text-[#E5E7EB]/75">
               <li>
                 <Link href="/product-tour" className="hover:text-white transition-colors">
                   Preview
@@ -186,8 +186,8 @@ export default function Footer({ theme = 'dark', className = '' }: FooterProps) 
 
           {/* Column 3: Resources (2 cols) */}
           <div className="lg:col-span-2 space-y-3.5">
-            <h4 className="text-[13px] font-semibold text-white tracking-wide">Resources</h4>
-            <ul className="space-y-2.5 text-[13px] text-[#9CA3AF]">
+            <h4 className="text-[13.5px] font-semibold text-white tracking-wide">Resources</h4>
+            <ul className="space-y-2.5 text-[13px] text-[#E5E7EB]/75">
               <li>
                 <Link href="/pricing" className="hover:text-white transition-colors">
                   Pricing Plans
@@ -213,8 +213,8 @@ export default function Footer({ theme = 'dark', className = '' }: FooterProps) 
 
           {/* Column 4: Company (2 cols) */}
           <div className="lg:col-span-2 space-y-3.5">
-            <h4 className="text-[13px] font-semibold text-white tracking-wide">Company</h4>
-            <ul className="space-y-2.5 text-[13px] text-[#9CA3AF]">
+            <h4 className="text-[13.5px] font-semibold text-white tracking-wide">Company</h4>
+            <ul className="space-y-2.5 text-[13px] text-[#E5E7EB]/75">
               <li>
                 <a href="mailto:hello@dynamicqr.co" className="hover:text-white transition-colors">
                   Contact
@@ -240,12 +240,12 @@ export default function Footer({ theme = 'dark', className = '' }: FooterProps) 
 
           {/* Column 5: Newsletter Form (2 cols) */}
           <div className="lg:col-span-2 space-y-3.5">
-            <h4 className="text-[13px] font-semibold text-white tracking-wide">
+            <h4 className="text-[13.5px] font-semibold text-white tracking-wide">
               Subscribe to our newsletter
             </h4>
 
             <form onSubmit={handleSubscribe} className="space-y-2">
-              <div className="relative flex items-center bg-white/[0.06] border border-white/15 rounded-xl p-1 focus-within:border-white/30 focus-within:bg-white/[0.08] transition-all shadow-[inset_0_1px_2px_rgba(255,255,255,0.06)]">
+              <div className="relative flex items-center bg-white/[0.08] border border-white/20 rounded-xl p-1 focus-within:border-white/40 focus-within:bg-white/[0.12] transition-all shadow-[inset_0_1px_2px_rgba(255,255,255,0.06)]">
                 <input
                   type="email"
                   value={email}
@@ -253,13 +253,13 @@ export default function Footer({ theme = 'dark', className = '' }: FooterProps) 
                   placeholder="johndoe@gmail.com"
                   required
                   disabled={status === 'loading'}
-                  className="bg-transparent text-[13px] text-white placeholder-white/30 px-3 py-1.5 outline-none w-full min-w-0"
+                  className="bg-transparent text-[13px] text-white placeholder-white/40 px-3 py-1.5 outline-none w-full min-w-0"
                 />
                 <button
                   type="submit"
                   disabled={status === 'loading'}
                   aria-label="Subscribe to newsletter"
-                  className="h-8 w-8 rounded-lg bg-gradient-to-b from-white/25 to-white/10 border border-white/25 flex items-center justify-center text-white/90 hover:text-white hover:border-white/40 shadow-xs transition-all shrink-0 cursor-pointer disabled:opacity-50"
+                  className="h-8 w-8 rounded-lg bg-gradient-to-b from-white/30 to-white/15 border border-white/30 flex items-center justify-center text-white hover:border-white/50 hover:bg-white/25 shadow-xs transition-all shrink-0 cursor-pointer disabled:opacity-50"
                 >
                   {status === 'loading' ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -280,7 +280,7 @@ export default function Footer({ theme = 'dark', className = '' }: FooterProps) 
                   {message}
                 </p>
               ) : (
-                <p className="text-[11.5px] text-[#9CA3AF]/70">
+                <p className="text-[11.5px] text-[#E5E7EB]/60">
                   Unsubscribe anytime
                 </p>
               )}
@@ -291,43 +291,43 @@ export default function Footer({ theme = 'dark', className = '' }: FooterProps) 
       </div>
 
       {/* 2. MIDDLE SECTION: Michelangelo Hands Widened Apart & Centered Tagline */}
-      <div className="relative w-full h-[380px] sm:h-[420px] md:h-[450px] lg:h-[460px] flex items-center justify-center overflow-hidden border-t border-white/[0.04]">
+      <div className="relative w-full flex-1 min-h-[380px] sm:min-h-[420px] md:min-h-[460px] flex items-center justify-center overflow-hidden border-t border-white/[0.06] my-auto">
         
         {/* Left Hand: Reaching in from Left edge */}
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none select-none z-10 h-[80%] sm:h-[85%] md:h-[90%] max-h-[420px] w-auto flex items-center -translate-x-[18%] sm:-translate-x-[10%] md:-translate-x-[4%]">
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none select-none z-10 h-[82%] sm:h-[88%] md:h-[92%] max-h-[440px] w-auto flex items-center -translate-x-[18%] sm:-translate-x-[10%] md:-translate-x-[4%]">
           <img
             src="/images/creation-hand-left.png"
             alt="Creation Left Hand"
-            className="h-full w-auto object-contain filter invert brightness-110 contrast-105 opacity-85 sm:opacity-90"
+            className="h-full w-auto object-contain filter invert brightness-125 contrast-110 opacity-90 sm:opacity-95"
           />
         </div>
 
         {/* Center Tagline: Spaced cleanly in the wide gap between fingertips */}
-        <div className="relative z-20 text-center px-4 max-w-[290px] sm:max-w-xs md:max-w-sm space-y-2 bg-[#080907]/70 sm:bg-[#080907]/35 md:bg-transparent backdrop-blur-[3px] md:backdrop-blur-none py-3 px-4 rounded-2xl border border-white/5 md:border-transparent">
-          <div className="text-[12px] font-mono text-white/50 tracking-wider">
+        <div className="relative z-20 text-center px-4 max-w-[290px] sm:max-w-xs md:max-w-sm space-y-2.5 bg-[#080907]/80 sm:bg-[#080907]/45 md:bg-transparent backdrop-blur-[3px] md:backdrop-blur-none py-4 px-4 rounded-2xl border border-white/10 md:border-transparent">
+          <div className="text-[12px] font-mono text-white/60 tracking-wider">
             © {new Date().getFullYear()}
           </div>
-          <div className="text-xl sm:text-2xl font-bold tracking-tight text-white font-sans">
+          <div className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-sans">
             DynamicQR
           </div>
-          <p className="text-[12.5px] sm:text-[13px] text-[#9CA3AF] leading-relaxed">
+          <p className="text-[13px] sm:text-[13.5px] text-[#E5E7EB]/80 leading-relaxed">
             One code, printed once. Routed as long as it needs to be.
           </p>
         </div>
 
         {/* Right Hand: Reaching in from Right edge */}
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none select-none z-10 h-[80%] sm:h-[85%] md:h-[90%] max-h-[420px] w-auto flex items-center translate-x-[18%] sm:translate-x-[10%] md:translate-x-[4%]">
+        <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none select-none z-10 h-[82%] sm:h-[88%] md:h-[92%] max-h-[440px] w-auto flex items-center translate-x-[18%] sm:translate-x-[10%] md:translate-x-[4%]">
           <img
             src="/images/creation-hand-right.png"
             alt="Creation Right Hand"
-            className="h-full w-auto object-contain filter invert brightness-110 contrast-105 opacity-85 sm:opacity-90"
+            className="h-full w-auto object-contain filter invert brightness-125 contrast-110 opacity-90 sm:opacity-95"
           />
         </div>
       </div>
 
       {/* 3. BOTTOM WATERMARK: Large faint typography across the base */}
-      <div className="w-full overflow-hidden text-center select-none pointer-events-none pb-0 pt-0 relative z-0 -mt-10 sm:-mt-16 md:-mt-20">
-        <span className="text-[16vw] sm:text-[15vw] font-bold tracking-tighter text-white/[0.035] leading-none block font-sans whitespace-nowrap">
+      <div className="w-full overflow-hidden text-center select-none pointer-events-none pb-2 pt-0 relative z-0 shrink-0 -mt-8 sm:-mt-12 md:-mt-16">
+        <span className="text-[17vw] sm:text-[16vw] font-bold tracking-tighter text-white/[0.045] leading-none block font-sans whitespace-nowrap">
           DynamicQR
         </span>
       </div>

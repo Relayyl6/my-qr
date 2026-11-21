@@ -151,7 +151,7 @@ export default function LinkList({
               placeholder="Search links…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-full border border-[#11140F]/15 bg-white px-3 py-1 text-xs text-[#11140F] placeholder:text-[#11140F]/35 outline-none focus:border-[#11140F]"
+              className="w-full rounded-full border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-1 text-xs text-[#11140F] dark:text-white placeholder:text-[#11140F]/35 dark:placeholder:text-white/35 outline-none focus:border-[#11140F] dark:focus:border-white transition-colors"
             />
           </div>
         )}
@@ -159,7 +159,7 @@ export default function LinkList({
 
       <div className="space-y-3 w-full min-w-0">
         {filteredLinks.length === 0 ? (
-          <div className="w-full min-w-0 rounded-xl border border-dashed border-[#11140F]/15 p-6 text-center text-xs text-[#11140F]/40">
+          <div className="w-full min-w-0 rounded-xl border border-dashed border-[#11140F]/15 dark:border-white/15 p-6 text-center text-xs text-[#11140F]/40 dark:text-white/40">
             No {tab} links match your search.
           </div>
         ) : (
@@ -173,14 +173,14 @@ export default function LinkList({
                 key={link.id}
                 className={`w-full min-w-0 rounded-2xl border p-4 sm:p-5 transition-all shadow-xs ${
                   link.isArchived
-                    ? 'border-[#11140F]/10 bg-[#11140F]/[0.02] opacity-80'
-                    : 'border-[#11140F]/15 bg-white hover:border-[#11140F]/30'
+                    ? 'border-[#11140F]/10 dark:border-white/10 bg-[#11140F]/[0.02] dark:bg-white/[0.02] opacity-80'
+                    : 'border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#161A13] hover:border-[#11140F]/30 dark:hover:border-white/30 text-[#11140F] dark:text-white'
                 }`}
               >
                 {/* Header row: Label & primary actions */}
                 <div className="flex items-center justify-between gap-2 mb-3">
                   <div className="flex items-center gap-2 min-w-0">
-                    <h3 className="text-[14px] font-semibold text-[#11140F] truncate" title={link.label || 'Untitled link'}>
+                    <h3 className="text-[14px] font-semibold text-[#11140F] dark:text-white truncate" title={link.label || 'Untitled link'}>
                       {link.label || 'Untitled link'}
                     </h3>
                     {link.isArchived ? (
@@ -188,12 +188,12 @@ export default function LinkList({
                         Paused
                       </span>
                     ) : (
-                      <span className="text-[10px] text-[#2F6B4F] bg-[#2F6B4F]/10 rounded-full px-2 py-0.5 shrink-0 font-medium">
+                      <span className="text-[10px] text-[#2F6B4F] dark:text-emerald-400 bg-[#2F6B4F]/10 dark:bg-emerald-500/20 rounded-full px-2 py-0.5 shrink-0 font-medium">
                         Live
                       </span>
                     )}
                     {link.type === 'landing-page' && (
-                      <span className="text-[10px] text-purple-700 bg-purple-100 rounded-full px-2 py-0.5 shrink-0 font-medium">
+                      <span className="text-[10px] text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/40 rounded-full px-2 py-0.5 shrink-0 font-medium">
                         Mobile Page
                       </span>
                     )}
@@ -202,21 +202,21 @@ export default function LinkList({
                     {editingId !== link.id && !link.isArchived && (
                       <button
                         onClick={() => setEditingId(link.id)}
-                        className="font-medium text-[#11140F]/60 hover:text-[#11140F] transition-colors"
+                        className="font-medium text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white transition-colors cursor-pointer"
                       >
                         Edit
                       </button>
                     )}
                     <button
                       onClick={() => toggleArchiveLink(link.id)}
-                      className="font-medium text-[#11140F]/60 hover:text-[#11140F] transition-colors"
+                      className="font-medium text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white transition-colors cursor-pointer"
                       title={link.isArchived ? 'Restore link redirect' : 'Pause link redirect'}
                     >
                       {link.isArchived ? 'Restore' : 'Pause'}
                     </button>
                     <button
                       onClick={() => setPendingDeleteLink(link)}
-                      className="font-medium text-[#B8842E] hover:text-[#8A631F] transition-colors"
+                      className="font-medium text-[#B8842E] hover:text-[#8A631F] transition-colors cursor-pointer"
                     >
                       Delete
                     </button>

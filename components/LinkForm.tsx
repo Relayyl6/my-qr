@@ -12,7 +12,7 @@ function SubmitBtn() {
     <button
       type="submit"
       disabled={pending}
-      className="mt-2 w-full rounded-xl bg-[#11140F] px-4 py-3 sm:py-3.5 text-[14px] font-medium text-white transition-colors hover:bg-[#2A2E25] disabled:opacity-50"
+      className="mt-2 w-full rounded-xl bg-[#11140F] dark:bg-white px-4 py-3 sm:py-3.5 text-[14px] font-medium text-white dark:text-[#11140F] transition-colors hover:bg-[#2A2E25] dark:hover:bg-white/90 disabled:opacity-50 cursor-pointer shadow-xs"
     >
       {pending ? 'Creating link…' : 'Create QR link'}
     </button>
@@ -140,7 +140,7 @@ export default function LinkForm({ customDomains = [] }: LinkFormProps) {
           value={destinationUrl}
           onChange={(e) => setDestinationUrl(e.target.value)}
           onPaste={handlePasteDestination}
-          className="block w-full min-w-0 rounded-xl border border-[#11140F]/15 bg-white px-3 py-2.5 sm:py-3 text-[14px] text-[#11140F] placeholder:text-[#11140F]/30 outline-none focus:border-[#11140F] transition-colors"
+          className="block w-full min-w-0 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 sm:py-3 text-[14px] text-[#11140F] dark:text-white placeholder:text-[#11140F]/30 dark:placeholder:text-white/30 outline-none focus:border-[#11140F] dark:focus:border-white transition-colors"
           placeholder="https://example.com/landing"
         />
         {state.errors?.destinationUrl && (
@@ -192,7 +192,7 @@ export default function LinkForm({ customDomains = [] }: LinkFormProps) {
       {/* Custom Branded Domain Selector (if user has connected domains) */}
       {customDomains.length > 0 ? (
         <div className="w-full min-w-0">
-          <label htmlFor="customDomainId" className="block text-[13px] font-medium text-[#11140F]/70 mb-1.5">
+          <label htmlFor="customDomainId" className="block text-[13px] font-medium text-[#11140F]/70 dark:text-white/70 mb-1.5">
             Serving Domain Prefix
           </label>
           <select
@@ -200,7 +200,7 @@ export default function LinkForm({ customDomains = [] }: LinkFormProps) {
             name="customDomainId"
             value={selectedDomainId}
             onChange={(e) => setSelectedDomainId(e.target.value)}
-            className="w-full rounded-xl border border-[#11140F]/15 bg-white px-3 py-2 sm:py-2.5 text-[13px] font-mono text-[#11140F] outline-none focus:border-[#11140F] transition-colors"
+            className="w-full rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#11140F] px-3 py-2 sm:py-2.5 text-[13px] font-mono text-[#11140F] dark:text-white outline-none focus:border-[#11140F] dark:focus:border-white transition-colors cursor-pointer"
           >
             <option value="default">{(origin || 'https://my-qr-sandy.vercel.app').replace(/^https?:\/\//, '')} (Default)</option>
             {customDomains.map((d) => (
@@ -217,19 +217,19 @@ export default function LinkForm({ customDomains = [] }: LinkFormProps) {
       {/* Short Code Field */}
       <div className="w-full min-w-0">
         <div className="flex items-center justify-between mb-1.5">
-          <label htmlFor="shortCode" className="block text-[13px] font-medium text-[#11140F]/70">
+          <label htmlFor="shortCode" className="block text-[13px] font-medium text-[#11140F]/70 dark:text-white/70">
             Short code
           </label>
           {isAiSuggested && (
-            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-              <Sparkles className="w-3 h-3 text-emerald-600" />
+            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-700">
+              <Sparkles className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
               AI Suggested
             </span>
           )}
         </div>
-        <div className="flex w-full min-w-0 rounded-xl overflow-hidden border border-[#11140F]/15 bg-white focus-within:border-[#11140F] transition-colors">
+        <div className="flex w-full min-w-0 rounded-xl overflow-hidden border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.06] focus-within:border-[#11140F] dark:focus-within:border-white transition-colors">
           <span
-            className="inline-flex items-center border-r border-[#11140F]/10 bg-[#11140F]/[0.03] px-3 text-[13px] text-[#11140F]/45 select-none shrink-0"
+            className="inline-flex items-center border-r border-[#11140F]/10 dark:border-white/10 bg-[#11140F]/[0.03] dark:bg-white/[0.04] px-3 text-[13px] text-[#11140F]/45 dark:text-white/50 select-none shrink-0"
             style={{ fontFamily: 'var(--font-mono)' }}
           >
             /id/
@@ -244,13 +244,13 @@ export default function LinkForm({ customDomains = [] }: LinkFormProps) {
               setShortCode(e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, ''));
               setIsAiSuggested(false);
             }}
-            className="block w-full min-w-0 flex-1 px-3 py-2.5 sm:py-3 text-[#11140F] placeholder:text-[#11140F]/30 text-[14px] outline-none bg-transparent"
+            className="block w-full min-w-0 flex-1 px-3 py-2.5 sm:py-3 text-[#11140F] dark:text-white placeholder:text-[#11140F]/30 dark:placeholder:text-white/30 text-[14px] outline-none bg-transparent"
             style={{ fontFamily: 'var(--font-mono)' }}
-            placeholder="promo-2024"
+            placeholder="promo-2026"
           />
         </div>
-        <p className="mt-1.5 text-[11px] text-[#11140F]/50 break-all leading-normal" style={{ fontFamily: 'var(--font-mono)' }}>
-          Preview: <span className="text-[#11140F]/80 font-medium break-all">
+        <p className="mt-1.5 text-[11px] text-[#11140F]/50 dark:text-white/50 break-all leading-normal" style={{ fontFamily: 'var(--font-mono)' }}>
+          Preview: <span className="text-[#11140F]/80 dark:text-emerald-400 font-medium break-all">
             {selectedDomainId !== 'default'
               ? `https://${customDomains.find((d) => d.id === selectedDomainId)?.domain || 'qr.yourbrand.com'}`
               : (origin || 'https://dynamicqr.co')}/id/{shortCode || 'promo-2024'}
@@ -272,7 +272,7 @@ export default function LinkForm({ customDomains = [] }: LinkFormProps) {
           name="label"
           value={label}
           onChange={(e) => setLabel(e.target.value)}
-          className="block w-full min-w-0 rounded-xl border border-[#11140F]/15 bg-white px-3 py-2.5 sm:py-3 text-[14px] text-[#11140F] placeholder:text-[#11140F]/30 outline-none focus:border-[#11140F] transition-colors"
+          className="block w-full min-w-0 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 sm:py-3 text-[14px] text-[#11140F] dark:text-white placeholder:text-[#11140F]/30 dark:placeholder:text-white/30 outline-none focus:border-[#11140F] dark:focus:border-white transition-colors"
           placeholder="Summer promo flyer"
         />
         {state.errors?.label && (

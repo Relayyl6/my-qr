@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { X, Sparkles, ArrowRight, Check } from 'lucide-react';
+import { PROMO_DEFAULTS } from '@/lib/promo';
 
 interface ModalConfig {
   enabled: boolean;
@@ -51,9 +52,20 @@ export default function EntryPromoModal() {
     fetch('/api/promo/config')
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data && data.modal && data.modal.enabled && data.modal.headline) {
-          setConfig(data.modal);
-          checkFrequencyAndShow(data.modal.frequencyDays || 7);
+        if (data && data.modal && data.modal.enabled) {
+          const effectiveModal: ModalConfig = {
+            enabled: true,
+            badgeText: data.modal.badgeText?.trim() || PROMO_DEFAULTS.modal.badgeText,
+            headline: data.modal.headline?.trim() || PROMO_DEFAULTS.modal.headline,
+            bodyText: data.modal.bodyText?.trim() || PROMO_DEFAULTS.modal.bodyText,
+            discountPercent: data.modal.discountPercent || PROMO_DEFAULTS.modal.discountPercent,
+            promoCode: data.modal.promoCode?.trim() || PROMO_DEFAULTS.modal.promoCode,
+            ctaText: data.modal.ctaText?.trim() || PROMO_DEFAULTS.modal.ctaText,
+            frequencyDays: data.modal.frequencyDays || PROMO_DEFAULTS.modal.frequencyDays,
+          };
+
+          setConfig(effectiveModal);
+          checkFrequencyAndShow(effectiveModal);
         } else {
           setIsOpen(false);
         }
@@ -62,19 +74,20 @@ export default function EntryPromoModal() {
         setIsOpen(false);
       });
 
-    function checkFrequencyAndShow(days: number) {
+    function checkFrequencyAndShow(modalCfg: ModalConfig) {
       try {
-        const lastDismissed = localStorage.getItem('dynamicqr_promo_modal_seen');
+        const seenKey = `dynamicqr_promo_modal_seen_${modalCfg.promoCode || 'active'}`;
+        const lastDismissed = localStorage.getItem(seenKey);
         if (lastDismissed) {
           const diffDays = (Date.now() - parseInt(lastDismissed, 10)) / (1000 * 60 * 60 * 24);
-          if (diffDays < days) {
+          if (diffDays < modalCfg.frequencyDays) {
             return;
           }
         }
 
         const timer = setTimeout(() => {
           setIsOpen(true);
-        }, 2500);
+        }, 2000);
 
         return () => clearTimeout(timer);
       } catch (e) {}
@@ -84,7 +97,8 @@ export default function EntryPromoModal() {
   const handleDismiss = () => {
     setIsOpen(false);
     try {
-      localStorage.setItem('dynamicqr_promo_modal_seen', Date.now().toString());
+      const seenKey = `dynamicqr_promo_modal_seen_${config.promoCode || 'active'}`;
+      localStorage.setItem(seenKey, Date.now().toString());
     } catch (e) {}
   };
 
@@ -120,7 +134,7 @@ export default function EntryPromoModal() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen]);
 
-  if (!isOpen || !config.enabled || !config.headline) return null;
+  if (!isOpen || !config.enabled) return null;
 
   const pricingTargetUrl = config.promoCode ? `/pricing?promo=${config.promoCode}` : '/pricing';
 

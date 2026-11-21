@@ -20,7 +20,7 @@ import {
   Layers,
   Percent,
 } from 'lucide-react';
-import { AdminPromoConfig, SAMPLE_PROMO_TEMPLATES } from '@/lib/promo';
+import { AdminPromoConfig, SAMPLE_PROMO_TEMPLATES, PROMO_DEFAULTS } from '@/lib/promo';
 import {
   adminSavePromoConfig,
   adminCreatePromoCode,
@@ -74,14 +74,36 @@ export default function AdminPromoManager({
   });
 
   const handleToggleBannerSwitch = async (checked: boolean) => {
+    const effectiveMessage = config.banner.messageText?.trim() || PROMO_DEFAULTS.banner.messageText;
+    const effectiveBadge = config.banner.badgeText?.trim() || PROMO_DEFAULTS.banner.badgeText;
+    const effectivePromoCode = config.banner.promoCode?.trim() || PROMO_DEFAULTS.banner.promoCode;
+    const effectiveCtaText = config.banner.ctaText?.trim() || PROMO_DEFAULTS.banner.ctaText;
+    const effectiveCtaUrl =
+      config.banner.ctaUrl?.trim() ||
+      (effectivePromoCode ? `/pricing?promo=${effectivePromoCode}` : PROMO_DEFAULTS.banner.ctaUrl);
+
+    const updatedBanner = {
+      ...config.banner,
+      enabled: checked,
+      messageText: checked ? effectiveMessage : config.banner.messageText,
+      badgeText: checked ? effectiveBadge : config.banner.badgeText,
+      promoCode: checked ? effectivePromoCode : config.banner.promoCode,
+      ctaText: checked ? effectiveCtaText : config.banner.ctaText,
+      ctaUrl: checked ? effectiveCtaUrl : config.banner.ctaUrl,
+    };
+
     const updated = {
       ...config,
-      banner: { ...config.banner, enabled: checked },
+      banner: updatedBanner,
     };
     setConfig(updated);
     try {
-      await adminSavePromoConfig({ banner: updated.banner });
-      setStatusMsg(checked ? 'Announcement bar activated platform-wide!' : 'Announcement bar disabled platform-wide!');
+      await adminSavePromoConfig({ banner: updatedBanner });
+      setStatusMsg(
+        checked
+          ? 'Announcement bar activated platform-wide!'
+          : 'Announcement bar disabled platform-wide!'
+      );
       setTimeout(() => setStatusMsg(null), 3000);
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to update announcement bar state.');
@@ -89,14 +111,38 @@ export default function AdminPromoManager({
   };
 
   const handleToggleModalSwitch = async (checked: boolean) => {
+    const effectiveHeadline = config.modal.headline?.trim() || PROMO_DEFAULTS.modal.headline;
+    const effectiveBody = config.modal.bodyText?.trim() || PROMO_DEFAULTS.modal.bodyText;
+    const effectiveBadge = config.modal.badgeText?.trim() || PROMO_DEFAULTS.modal.badgeText;
+    const effectiveDiscount = config.modal.discountPercent || PROMO_DEFAULTS.modal.discountPercent;
+    const effectivePromoCode = config.modal.promoCode?.trim() || PROMO_DEFAULTS.modal.promoCode;
+    const effectiveCtaText = config.modal.ctaText?.trim() || PROMO_DEFAULTS.modal.ctaText;
+    const effectiveFrequency = config.modal.frequencyDays || PROMO_DEFAULTS.modal.frequencyDays;
+
+    const updatedModal = {
+      ...config.modal,
+      enabled: checked,
+      headline: checked ? effectiveHeadline : config.modal.headline,
+      bodyText: checked ? effectiveBody : config.modal.bodyText,
+      badgeText: checked ? effectiveBadge : config.modal.badgeText,
+      discountPercent: checked ? effectiveDiscount : config.modal.discountPercent,
+      promoCode: checked ? effectivePromoCode : config.modal.promoCode,
+      ctaText: checked ? effectiveCtaText : config.modal.ctaText,
+      frequencyDays: checked ? effectiveFrequency : config.modal.frequencyDays,
+    };
+
     const updated = {
       ...config,
-      modal: { ...config.modal, enabled: checked },
+      modal: updatedModal,
     };
     setConfig(updated);
     try {
-      await adminSavePromoConfig({ modal: updated.modal });
-      setStatusMsg(checked ? 'Entry popup modal activated platform-wide!' : 'Entry popup modal disabled platform-wide!');
+      await adminSavePromoConfig({ modal: updatedModal });
+      setStatusMsg(
+        checked
+          ? 'Entry popup modal activated platform-wide!'
+          : 'Entry popup modal disabled platform-wide!'
+      );
       setTimeout(() => setStatusMsg(null), 3000);
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to update modal state.');
@@ -108,8 +154,24 @@ export default function AdminPromoManager({
     setSaving(true);
     setStatusMsg(null);
     setErrorMsg(null);
+
+    const bannerToSave = {
+      ...config.banner,
+      messageText: config.banner.messageText?.trim() || PROMO_DEFAULTS.banner.messageText,
+      badgeText: config.banner.badgeText?.trim() || PROMO_DEFAULTS.banner.badgeText,
+      promoCode: config.banner.promoCode?.trim() || PROMO_DEFAULTS.banner.promoCode,
+      ctaText: config.banner.ctaText?.trim() || PROMO_DEFAULTS.banner.ctaText,
+      ctaUrl:
+        config.banner.ctaUrl?.trim() ||
+        (config.banner.promoCode?.trim()
+          ? `/pricing?promo=${config.banner.promoCode.trim()}`
+          : PROMO_DEFAULTS.banner.ctaUrl),
+    };
+
+    setConfig((prev) => ({ ...prev, banner: bannerToSave }));
+
     try {
-      await adminSavePromoConfig({ banner: config.banner });
+      await adminSavePromoConfig({ banner: bannerToSave });
       setStatusMsg('Announcement bar settings published platform-wide!');
       setTimeout(() => setStatusMsg(null), 3500);
     } catch (err: any) {
@@ -124,8 +186,22 @@ export default function AdminPromoManager({
     setSaving(true);
     setStatusMsg(null);
     setErrorMsg(null);
+
+    const modalToSave = {
+      ...config.modal,
+      headline: config.modal.headline?.trim() || PROMO_DEFAULTS.modal.headline,
+      bodyText: config.modal.bodyText?.trim() || PROMO_DEFAULTS.modal.bodyText,
+      badgeText: config.modal.badgeText?.trim() || PROMO_DEFAULTS.modal.badgeText,
+      discountPercent: config.modal.discountPercent || PROMO_DEFAULTS.modal.discountPercent,
+      promoCode: config.modal.promoCode?.trim() || PROMO_DEFAULTS.modal.promoCode,
+      ctaText: config.modal.ctaText?.trim() || PROMO_DEFAULTS.modal.ctaText,
+      frequencyDays: config.modal.frequencyDays || PROMO_DEFAULTS.modal.frequencyDays,
+    };
+
+    setConfig((prev) => ({ ...prev, modal: modalToSave }));
+
     try {
-      await adminSavePromoConfig({ modal: config.modal });
+      await adminSavePromoConfig({ modal: modalToSave });
       setStatusMsg('Entry promotional popup settings published platform-wide!');
       setTimeout(() => setStatusMsg(null), 3500);
     } catch (err: any) {

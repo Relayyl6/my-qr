@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Tag, ArrowRight, X } from 'lucide-react';
+import { PROMO_DEFAULTS } from '@/lib/promo';
 
 interface BannerData {
   enabled: boolean;
@@ -27,16 +28,31 @@ export default function AnnouncementBar() {
   const [banner, setBanner] = useState<BannerData>(DEFAULT_BANNER);
 
   useEffect(() => {
-    // Check if dismissed in session
-    const dismissed = sessionStorage.getItem('dynamicqr_announcement_dismissed');
-
     // Fetch live admin configuration
     fetch('/api/promo/config')
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data && data.banner && data.banner.enabled && data.banner.messageText) {
-          setBanner(data.banner);
-          if (!dismissed) {
+        if (data && data.banner && data.banner.enabled) {
+          const effectiveBanner: BannerData = {
+            enabled: true,
+            badgeText: data.banner.badgeText?.trim() || PROMO_DEFAULTS.banner.badgeText,
+            messageText: data.banner.messageText?.trim() || PROMO_DEFAULTS.banner.messageText,
+            promoCode: data.banner.promoCode?.trim() || PROMO_DEFAULTS.banner.promoCode,
+            ctaText: data.banner.ctaText?.trim() || PROMO_DEFAULTS.banner.ctaText,
+            ctaUrl:
+              data.banner.ctaUrl?.trim() ||
+              (data.banner.promoCode?.trim()
+                ? `/pricing?promo=${data.banner.promoCode.trim()}`
+                : PROMO_DEFAULTS.banner.ctaUrl),
+          };
+
+          setBanner(effectiveBanner);
+
+          // Check dismissal keyed to the active campaign so new promos surface immediately
+          const dismissKey = `dynamicqr_announcement_dismissed_${effectiveBanner.promoCode || effectiveBanner.messageText}`;
+          const isDismissed = sessionStorage.getItem(dismissKey) === 'true';
+
+          if (!isDismissed) {
             setVisible(true);
           }
         } else {
@@ -50,12 +66,17 @@ export default function AnnouncementBar() {
 
   const handleDismiss = () => {
     setVisible(false);
-    sessionStorage.setItem('dynamicqr_announcement_dismissed', 'true');
+    const dismissKey = `dynamicqr_announcement_dismissed_${banner.promoCode || banner.messageText}`;
+    try {
+      sessionStorage.setItem(dismissKey, 'true');
+    } catch (e) {}
   };
 
-  if (!visible || !banner.enabled || !banner.messageText) return null;
+  if (!visible || !banner.enabled) return null;
 
-  const targetUrl = banner.ctaUrl || (banner.promoCode ? `/pricing?promo=${banner.promoCode}` : '/pricing');
+  const targetUrl =
+    banner.ctaUrl ||
+    (banner.promoCode ? `/pricing?promo=${banner.promoCode}` : '/pricing');
 
   return (
     <div className="relative isolate z-40 bg-gradient-to-r from-[#11140F] via-[#1a2218] to-[#11140F] text-white px-4 py-2.5 text-xs sm:text-[13px] border-b border-white/10 shadow-xs flex items-center justify-between transition-all duration-300 ease-out animate-in fade-in">

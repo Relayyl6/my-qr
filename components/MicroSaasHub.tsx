@@ -545,20 +545,20 @@ export default function MicroSaasHub({ userTier, isAdmin = false }: MicroSaasHub
   };
 
   return (
-    <div className="w-full rounded-2xl border border-[#11140F]/10 bg-white p-4 sm:p-7 shadow-xs space-y-6">
+    <div className="w-full rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#11140F] p-4 sm:p-7 shadow-xs dark:shadow-[0_10px_30px_rgba(0,0,0,0.5)] space-y-6 text-[#11140F] dark:text-white transition-colors">
       {/* Header & Tabs */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#11140F]/10 pb-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#11140F]/10 dark:border-white/10 pb-5">
         <div>
           <div className="flex items-center gap-2">
-            <span className="flex h-2 w-2 rounded-full bg-[#2F6B4F]" />
-            <h2 className="text-lg sm:text-xl font-bold text-[#11140F] tracking-tight">
+            <span className="flex h-2 w-2 rounded-full bg-[#2F6B4F] dark:bg-emerald-400" />
+            <h2 className="text-lg sm:text-xl font-bold text-[#11140F] dark:text-white tracking-tight">
               Micro-SaaS Ecosystem
             </h2>
-            <span className="text-[11px] font-semibold uppercase px-2 py-0.5 rounded-full bg-[#2F6B4F]/10 text-[#2F6B4F]">
+            <span className="text-[11px] font-semibold uppercase px-2 py-0.5 rounded-full bg-[#2F6B4F]/10 dark:bg-emerald-500/20 text-[#2F6B4F] dark:text-emerald-400">
               5 Standalone Apps
             </span>
           </div>
-          <p className="text-xs sm:text-[13px] text-[#11140F]/60 mt-1">
+          <p className="text-xs sm:text-[13px] text-[#11140F]/60 dark:text-white/60 mt-1">
             Turnkey micro-tools powered by DynamicQR routing, QR code engine, and lead capture.
           </p>
         </div>
@@ -570,8 +570,8 @@ export default function MicroSaasHub({ userTier, isAdmin = false }: MicroSaasHub
             onClick={() => setActiveTab('mailing')}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               activeTab === 'mailing'
-                ? 'bg-[#11140F] text-white shadow-sm'
-                : 'bg-[#F7F8F5] text-[#11140F]/70 hover:bg-[#EEF0EA]'
+                ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] shadow-sm'
+                : 'bg-[#F7F8F5] dark:bg-white/5 text-[#11140F]/70 dark:text-white/70 hover:bg-[#EEF0EA] dark:hover:bg-white/10'
             }`}
           >
             <Mail className="w-3.5 h-3.5" />
@@ -583,13 +583,13 @@ export default function MicroSaasHub({ userTier, isAdmin = false }: MicroSaasHub
             onClick={() => setActiveTab('vcard')}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               activeTab === 'vcard'
-                ? 'bg-[#11140F] text-white shadow-sm'
-                : 'bg-[#F7F8F5] text-[#11140F]/70 hover:bg-[#EEF0EA]'
+                ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] shadow-sm'
+                : 'bg-[#F7F8F5] dark:bg-white/5 text-[#11140F]/70 dark:text-white/70 hover:bg-[#EEF0EA] dark:hover:bg-white/10'
             }`}
           >
             <Contact className="w-3.5 h-3.5" />
             <span>Digital vCard</span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-[#2F6B4F]/15 text-[#2F6B4F] font-mono">
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-[#2F6B4F]/15 dark:bg-emerald-500/20 text-[#2F6B4F] dark:text-emerald-400 font-mono">
               {entitlements.microsaas.vcard}
             </span>
           </button>
@@ -599,13 +599,13 @@ export default function MicroSaasHub({ userTier, isAdmin = false }: MicroSaasHub
             onClick={() => setActiveTab('shortener')}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               activeTab === 'shortener'
-                ? 'bg-[#11140F] text-white shadow-sm'
-                : 'bg-[#F7F8F5] text-[#11140F]/70 hover:bg-[#EEF0EA]'
+                ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] shadow-sm'
+                : 'bg-[#F7F8F5] dark:bg-white/5 text-[#11140F]/70 dark:text-white/70 hover:bg-[#EEF0EA] dark:hover:bg-white/10'
             }`}
           >
             <Link2 className="w-3.5 h-3.5" />
             <span>Link Shortener</span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-[#2F6B4F]/15 text-[#2F6B4F] font-mono">
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-[#2F6B4F]/15 dark:bg-emerald-500/20 text-[#2F6B4F] dark:text-emerald-400 font-mono">
               {entitlements.microsaas.shortener}
             </span>
           </button>
@@ -615,8 +615,8 @@ export default function MicroSaasHub({ userTier, isAdmin = false }: MicroSaasHub
             onClick={() => setActiveTab('menu')}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               activeTab === 'menu'
-                ? 'bg-[#11140F] text-white shadow-sm'
-                : 'bg-[#F7F8F5] text-[#11140F]/70 hover:bg-[#EEF0EA]'
+                ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] shadow-sm'
+                : 'bg-[#F7F8F5] dark:bg-white/5 text-[#11140F]/70 dark:text-white/70 hover:bg-[#EEF0EA] dark:hover:bg-white/10'
             }`}
           >
             <Utensils className="w-3.5 h-3.5" />
@@ -624,7 +624,7 @@ export default function MicroSaasHub({ userTier, isAdmin = false }: MicroSaasHub
             {entitlements.microsaas.menu === 0 ? (
               <Lock className="w-3 h-3 text-amber-600" />
             ) : (
-              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-[#2F6B4F]/15 text-[#2F6B4F] font-mono">
+              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-[#2F6B4F]/15 dark:bg-emerald-500/20 text-[#2F6B4F] dark:text-emerald-400 font-mono">
                 {entitlements.microsaas.menu}
               </span>
             )}
@@ -635,13 +635,13 @@ export default function MicroSaasHub({ userTier, isAdmin = false }: MicroSaasHub
             onClick={() => setActiveTab('wifi')}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               activeTab === 'wifi'
-                ? 'bg-[#11140F] text-white shadow-sm'
-                : 'bg-[#F7F8F5] text-[#11140F]/70 hover:bg-[#EEF0EA]'
+                ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] shadow-sm'
+                : 'bg-[#F7F8F5] dark:bg-white/5 text-[#11140F]/70 dark:text-white/70 hover:bg-[#EEF0EA] dark:hover:bg-white/10'
             }`}
           >
             <Wifi className="w-3.5 h-3.5" />
             <span>Dynamic Wi-Fi</span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-[#2F6B4F]/15 text-[#2F6B4F] font-mono">
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-[#2F6B4F]/15 dark:bg-emerald-500/20 text-[#2F6B4F] dark:text-emerald-400 font-mono">
               {entitlements.microsaas.wifi}
             </span>
           </button>

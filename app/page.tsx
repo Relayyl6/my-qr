@@ -132,12 +132,12 @@ export default async function Home() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2
-            className="text-[1.5rem] sm:text-[1.75rem] tracking-tight font-medium"
+            className="text-[1.5rem] sm:text-[1.75rem] tracking-tight font-medium text-[#11140F] dark:text-white"
             style={{ fontFamily: 'var(--font-display)' }}
           >
             {user ? `${user.name ? `${user.name}'s` : 'Your'} Workspace` : 'Your Workspace'}
           </h2>
-          <p className="mt-1 text-[#11140F]/55 text-[14px] sm:text-[15px]">
+          <p className="mt-1 text-[#11140F]/55 dark:text-white/60 text-[14px] sm:text-[15px]">
             {user
               ? 'Create, manage, smart-route, and analyze your dynamic QR codes.'
               : 'Sign in to generate, route, and track your dynamic QR codes.'}
@@ -180,14 +180,14 @@ export default async function Home() {
 
           {/* Link creation & Link list workspace */}
           <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-6 items-start w-full min-w-0">
-            <section className="w-full min-w-0 max-w-full h-fit rounded-2xl border border-[#11140F]/10 bg-white p-4 sm:p-7 shadow-xs lg:sticky lg:top-36">
-              <h3 className="mb-5 sm:mb-7 text-[16px] sm:text-[17px] font-medium">Create new link</h3>
+            <section className="w-full min-w-0 max-w-full h-fit rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#11140F] p-4 sm:p-7 shadow-xs dark:shadow-[0_10px_30px_rgba(0,0,0,0.5)] lg:sticky lg:top-36 text-[#11140F] dark:text-white transition-colors">
+              <h3 className="mb-5 sm:mb-7 text-[16px] sm:text-[17px] font-medium text-[#11140F] dark:text-white">Create new link</h3>
               <LinkForm customDomains={customDomains} />
             </section>
 
-            <section className="w-full min-w-0 max-w-full rounded-2xl border border-[#11140F]/10 bg-white p-4 sm:p-7 shadow-xs">
-              <h3 className="mb-5 sm:mb-7 text-[16px] sm:text-[17px] font-medium">
-                Active links <span className="text-[#11140F]/35 font-normal">({links.filter((l) => !l.isArchived).length})</span>
+            <section className="w-full min-w-0 max-w-full rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#11140F] p-4 sm:p-7 shadow-xs dark:shadow-[0_10px_30px_rgba(0,0,0,0.5)] text-[#11140F] dark:text-white transition-colors">
+              <h3 className="mb-5 sm:mb-7 text-[16px] sm:text-[17px] font-medium text-[#11140F] dark:text-white">
+                Active links <span className="text-[#11140F]/35 dark:text-white/40 font-normal">({links.filter((l) => !l.isArchived).length})</span>
               </h3>
               <LinkList links={links} userTier={user.tier || 'free'} isAdmin={isAdmin} />
             </section>
@@ -201,7 +201,7 @@ export default async function Home() {
 
   return (
     <div
-      className={`${display.variable} ${body.variable} ${mono.variable} bg-[#EEF0EA] text-[#11140F] min-h-screen w-full overflow-x-clip`}
+      className={`${display.variable} ${body.variable} ${mono.variable} bg-[#EEF0EA] dark:bg-[#080907] text-[#11140F] dark:text-[#EEF0EA] min-h-screen w-full overflow-x-clip transition-colors duration-200`}
       style={{ fontFamily: 'var(--font-body)' }}
     >
       {/* Unified Navigation & Tabbed View: Dedicated Workspace vs Product Tour */}

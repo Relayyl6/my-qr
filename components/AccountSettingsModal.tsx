@@ -147,27 +147,27 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-[#11140F]/65 dark:bg-black/75 backdrop-blur-xs flex items-center justify-center p-4 transition-colors"
+      className="fixed inset-0 z-50 bg-[#11140F]/65 dark:bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 transition-colors"
       onClick={(e) => {
         if (e.target === e.currentTarget && !loading) onClose();
       }}
     >
-      <div className="bg-white dark:bg-[#141712] rounded-2xl border border-[#11140F]/15 dark:border-white/10 shadow-2xl max-w-lg w-full overflow-hidden text-[#11140F] dark:text-[#EEF0EA] transition-all duration-200">
+      <div className="bg-white dark:bg-[#0D0F0C] rounded-2xl border border-[#11140F]/15 dark:border-white/15 shadow-2xl max-w-lg w-full overflow-hidden text-[#11140F] dark:text-[#EEF0EA] transition-all duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#11140F]/10 dark:border-white/10">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#0D0F0C]">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] flex items-center justify-center shadow-xs">
               <User className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="font-semibold text-[15px] leading-tight">Account & Experience Settings</h3>
-              <p className="text-[12px] text-[#11140F]/50 dark:text-white/50">{user.email}</p>
+              <h3 className="font-semibold text-[15px] leading-tight text-[#11140F] dark:text-white">Account & Experience Settings</h3>
+              <p className="text-[12px] text-[#11140F]/50 dark:text-[#D1D5DB]">{user.email}</p>
             </div>
           </div>
           <button
             onClick={onClose}
             disabled={loading}
-            className="p-1.5 rounded-lg text-[#11140F]/40 dark:text-white/40 hover:text-[#11140F] dark:hover:text-white hover:bg-[#11140F]/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-[#11140F]/40 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white hover:bg-[#11140F]/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
             aria-label="Close settings"
           >
             <X className="w-4 h-4" />
@@ -175,14 +175,14 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
         </div>
 
         {/* Tab selection */}
-        <div className="flex border-b border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5] dark:bg-[#181C15] px-6 pt-2 overflow-x-auto">
+        <div className="flex border-b border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5] dark:bg-[#11140F] px-6 pt-2 overflow-x-auto">
           <button
             type="button"
             onClick={() => setActiveTab('preferences')}
             className={`pb-2.5 px-3 text-[12.5px] font-medium border-b-2 transition-all flex items-center gap-1.5 shrink-0 ${
               activeTab === 'preferences'
                 ? 'border-[#11140F] dark:border-emerald-400 text-[#11140F] dark:text-white font-semibold'
-                : 'border-transparent text-[#11140F]/50 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white'
+                : 'border-transparent text-[#11140F]/50 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white'
             }`}
           >
             <Sliders className="w-3.5 h-3.5" />
@@ -194,7 +194,7 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
             className={`pb-2.5 px-3 text-[12.5px] font-medium border-b-2 transition-all shrink-0 ${
               activeTab === 'profile'
                 ? 'border-[#11140F] dark:border-emerald-400 text-[#11140F] dark:text-white font-semibold'
-                : 'border-transparent text-[#11140F]/50 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white'
+                : 'border-transparent text-[#11140F]/50 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white'
             }`}
           >
             Account Overview
@@ -205,7 +205,7 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
             className={`pb-2.5 px-3 text-[12.5px] font-medium border-b-2 transition-all flex items-center gap-1.5 shrink-0 ${
               activeTab === 'privacy'
                 ? 'border-rose-600 text-rose-600 font-semibold'
-                : 'border-transparent text-[#11140F]/50 dark:text-white/50 hover:text-rose-600'
+                : 'border-transparent text-[#11140F]/50 dark:text-white/60 hover:text-rose-600'
             }`}
           >
             <Shield className="w-3.5 h-3.5" />
@@ -292,8 +292,8 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
               </div>
 
               {/* Startup & Workspace Preferences */}
-              <div className="p-3.5 rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5] dark:bg-[#1A1E17] space-y-3.5">
-                <div className="text-xs font-bold uppercase tracking-wide text-[#11140F]/70 dark:text-white/70 flex items-center gap-1.5">
+              <div className="p-3.5 rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5] dark:bg-white/[0.04] space-y-3.5">
+                <div className="text-xs font-bold uppercase tracking-wide text-[#11140F]/70 dark:text-emerald-400 flex items-center gap-1.5">
                   <Layout className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                   Workspace & Navigation
                 </div>
@@ -302,15 +302,15 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
                 <div className="flex items-center justify-between text-[12.5px]">
                   <div>
                     <div className="font-medium text-[#11140F] dark:text-white">Default Home Tab</div>
-                    <div className="text-[11px] text-[#11140F]/50 dark:text-white/50">View loaded upon opening the platform</div>
+                    <div className="text-[11px] text-[#11140F]/50 dark:text-[#D1D5DB]/70">View loaded upon opening the platform</div>
                   </div>
-                  <div className="flex rounded-lg border border-[#11140F]/10 dark:border-white/15 p-0.5 bg-white dark:bg-[#11140F]">
+                  <div className="flex rounded-lg border border-[#11140F]/10 dark:border-white/15 p-0.5 bg-white dark:bg-white/[0.08]">
                     <button
                       type="button"
                       onClick={() => handleUpdatePref({ defaultLanding: 'workspace' })}
                       className={`px-2.5 py-1 rounded-md text-[11.5px] font-medium transition-all ${
                         preferences.defaultLanding === 'workspace'
-                          ? 'bg-[#11140F] text-white dark:bg-emerald-600'
+                          ? 'bg-[#11140F] text-white dark:bg-white dark:text-[#11140F] shadow-xs'
                           : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white'
                       }`}
                     >
@@ -321,7 +321,7 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
                       onClick={() => handleUpdatePref({ defaultLanding: 'overview' })}
                       className={`px-2.5 py-1 rounded-md text-[11.5px] font-medium transition-all ${
                         preferences.defaultLanding === 'overview'
-                          ? 'bg-[#11140F] text-white dark:bg-emerald-600'
+                          ? 'bg-[#11140F] text-white dark:bg-white dark:text-[#11140F] shadow-xs'
                           : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white'
                       }`}
                     >
@@ -331,18 +331,18 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
                 </div>
 
                 {/* Analytics Density */}
-                <div className="flex items-center justify-between text-[12.5px] pt-2 border-t border-[#11140F]/5 dark:border-white/5">
+                <div className="flex items-center justify-between text-[12.5px] pt-2 border-t border-[#11140F]/5 dark:border-white/10">
                   <div>
                     <div className="font-medium text-[#11140F] dark:text-white">Analytics Density</div>
-                    <div className="text-[11px] text-[#11140F]/50 dark:text-white/50">Layout spacing for link analytics</div>
+                    <div className="text-[11px] text-[#11140F]/50 dark:text-[#D1D5DB]/70">Layout spacing for link analytics</div>
                   </div>
-                  <div className="flex rounded-lg border border-[#11140F]/10 dark:border-white/15 p-0.5 bg-white dark:bg-[#11140F]">
+                  <div className="flex rounded-lg border border-[#11140F]/10 dark:border-white/15 p-0.5 bg-white dark:bg-white/[0.08]">
                     <button
                       type="button"
                       onClick={() => handleUpdatePref({ analyticsDensity: 'comfortable' })}
                       className={`px-2.5 py-1 rounded-md text-[11.5px] font-medium transition-all ${
                         preferences.analyticsDensity === 'comfortable'
-                          ? 'bg-[#11140F] text-white dark:bg-emerald-600'
+                          ? 'bg-[#11140F] text-white dark:bg-white dark:text-[#11140F] shadow-xs'
                           : 'text-[#11140F]/60 dark:text-white/60'
                       }`}
                     >
@@ -353,7 +353,7 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
                       onClick={() => handleUpdatePref({ analyticsDensity: 'compact' })}
                       className={`px-2.5 py-1 rounded-md text-[11.5px] font-medium transition-all ${
                         preferences.analyticsDensity === 'compact'
-                          ? 'bg-[#11140F] text-white dark:bg-emerald-600'
+                          ? 'bg-[#11140F] text-white dark:bg-white dark:text-[#11140F] shadow-xs'
                           : 'text-[#11140F]/60 dark:text-white/60'
                       }`}
                     >
@@ -363,18 +363,18 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
                 </div>
 
                 {/* QR Error Correction Level */}
-                <div className="flex items-center justify-between text-[12.5px] pt-2 border-t border-[#11140F]/5 dark:border-white/5">
+                <div className="flex items-center justify-between text-[12.5px] pt-2 border-t border-[#11140F]/5 dark:border-white/10">
                   <div>
                     <div className="font-medium text-[#11140F] dark:text-white flex items-center gap-1.5">
                       <QrCode className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                       Default QR Error Correction
                     </div>
-                    <div className="text-[11px] text-[#11140F]/50 dark:text-white/50">Print resilience against surface wear</div>
+                    <div className="text-[11px] text-[#11140F]/50 dark:text-[#D1D5DB]/70">Print resilience against surface wear</div>
                   </div>
                   <select
                     value={preferences.qrPrecision}
                     onChange={(e) => handleUpdatePref({ qrPrecision: e.target.value as any })}
-                    className="px-2 py-1 rounded-lg border border-[#11140F]/15 dark:border-white/20 bg-white dark:bg-[#11140F] text-[11.5px] font-medium text-[#11140F] dark:text-white outline-hidden cursor-pointer"
+                    className="px-2 py-1 rounded-lg border border-[#11140F]/15 dark:border-white/20 bg-white dark:bg-[#161A13] text-[11.5px] font-medium text-[#11140F] dark:text-white outline-hidden cursor-pointer"
                   >
                     <option value="H">High (H - 30% recovery)</option>
                     <option value="Q">Quartile (Q - 25% recovery)</option>
@@ -384,8 +384,8 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
               </div>
 
               {/* Toggles: Sounds & Notifications */}
-              <div className="p-3.5 rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5] dark:bg-[#1A1E17] space-y-3">
-                <div className="text-xs font-bold uppercase tracking-wide text-[#11140F]/70 dark:text-white/70 flex items-center gap-1.5">
+              <div className="p-3.5 rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5] dark:bg-white/[0.04] space-y-3">
+                <div className="text-xs font-bold uppercase tracking-wide text-[#11140F]/70 dark:text-emerald-400 flex items-center gap-1.5">
                   <Bell className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                   Experience & Alerts
                 </div>
@@ -393,10 +393,10 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
                 {/* Sound Effects */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Volume2 className="w-4 h-4 text-[#11140F]/50 dark:text-white/50" />
+                    <Volume2 className="w-4 h-4 text-[#11140F]/50 dark:text-white/60" />
                     <div>
                       <div className="text-[12.5px] font-medium text-[#11140F] dark:text-white">Audio Feedback</div>
-                      <div className="text-[11px] text-[#11140F]/50 dark:text-white/50">Subtle click upon generating codes or copying links</div>
+                      <div className="text-[11px] text-[#11140F]/50 dark:text-[#D1D5DB]/70">Subtle click upon generating codes or copying links</div>
                     </div>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
@@ -411,12 +411,12 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
                 </div>
 
                 {/* Email Digests */}
-                <div className="flex items-center justify-between pt-2 border-t border-[#11140F]/5 dark:border-white/5">
+                <div className="flex items-center justify-between pt-2 border-t border-[#11140F]/5 dark:border-white/10">
                   <div className="flex items-center gap-2">
-                    <Gauge className="w-4 h-4 text-[#11140F]/50 dark:text-white/50" />
+                    <Gauge className="w-4 h-4 text-[#11140F]/50 dark:text-white/60" />
                     <div>
                       <div className="text-[12.5px] font-medium text-[#11140F] dark:text-white">Weekly Analytics Digest</div>
-                      <div className="text-[11px] text-[#11140F]/50 dark:text-white/50">Summary of total scans, top referrers & link performance</div>
+                      <div className="text-[11px] text-[#11140F]/50 dark:text-[#D1D5DB]/70">Summary of total scans, top referrers & link performance</div>
                     </div>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
@@ -436,20 +436,20 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
           {/* TAB 2: ACCOUNT OVERVIEW */}
           {activeTab === 'profile' && (
             <div className="space-y-4 text-[13px]">
-              <div className="p-4 rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5] dark:bg-[#1A1E17] space-y-3">
+              <div className="p-4 rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5] dark:bg-white/[0.04] space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-[#11140F]/50 dark:text-white/50">Email Address:</span>
+                  <span className="text-[#11140F]/50 dark:text-[#D1D5DB]">Email Address:</span>
                   <span className="font-mono font-medium text-[#11140F] dark:text-white">{user.email}</span>
                 </div>
                 {user.name && (
                   <div className="flex justify-between items-center">
-                    <span className="text-[#11140F]/50 dark:text-white/50">Account Name:</span>
+                    <span className="text-[#11140F]/50 dark:text-[#D1D5DB]">Account Name:</span>
                     <span className="font-medium text-[#11140F] dark:text-white">{user.name}</span>
                   </div>
                 )}
                 <div className="flex justify-between items-center">
-                  <span className="text-[#11140F]/50 dark:text-white/50">Current Plan:</span>
-                  <span className="px-2.5 py-0.5 rounded-full bg-[#11140F] dark:bg-emerald-700 text-white text-[11px] font-bold uppercase tracking-wider">
+                  <span className="text-[#11140F]/50 dark:text-[#D1D5DB]">Current Plan:</span>
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#11140F] dark:bg-emerald-600 text-white text-[11px] font-bold uppercase tracking-wider">
                     {user.tier || 'free'}
                   </span>
                 </div>
