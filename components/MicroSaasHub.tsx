@@ -24,9 +24,11 @@ import {
   Globe,
   Share2,
   Pencil,
+  Printer,
 } from 'lucide-react';
 import CustomerMailingListManager from '@/components/CustomerMailingListManager';
 import { PlanTier, PLANS } from '@/lib/plans';
+import PrintTemplateModal from '@/components/PrintTemplateModal';
 
 interface MicroSaasHubProps {
   userTier: string;
@@ -67,6 +69,12 @@ export default function MicroSaasHub({ userTier, isAdmin = false }: MicroSaasHub
   // Edit modal / drawer states
   const [editingItem, setEditingItem] = useState<MicroItem | null>(null);
   const [showEditModal, setShowEditModal] = useState<'vcard' | 'shortener' | 'menu' | 'wifi' | null>(null);
+
+  // Print modal states
+  const [printVcard, setPrintVcard] = useState<MicroItem | null>(null);
+  const [printLink, setPrintLink] = useState<MicroItem | null>(null);
+  const [printMenu, setPrintMenu] = useState<MicroItem | null>(null);
+  const [printWifi, setPrintWifi] = useState<MicroItem | null>(null);
 
   // Edit form states
   const [editVcardForm, setEditVcardForm] = useState({
@@ -799,6 +807,15 @@ export default function MicroSaasHub({ userTier, isAdmin = false }: MicroSaasHub
                           <Pencil className="w-3.5 h-3.5" />
                           <span>Edit</span>
                         </button>
+                        <button
+                          type="button"
+                          onClick={() => setPrintVcard(card)}
+                          className="p-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                          title="Print QR Card"
+                        >
+                          <Printer className="w-3.5 h-3.5" />
+                          <span>Print</span>
+                        </button>
                       </div>
 
                       <button
@@ -941,6 +958,14 @@ export default function MicroSaasHub({ userTier, isAdmin = false }: MicroSaasHub
                               title="Edit Short Link"
                             >
                               <Pencil className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setPrintLink(link)}
+                              className="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 transition-colors cursor-pointer"
+                              title="Print QR Sign"
+                            >
+                              <Printer className="w-3.5 h-3.5" />
                             </button>
                             <button
                               type="button"
@@ -1119,6 +1144,15 @@ export default function MicroSaasHub({ userTier, isAdmin = false }: MicroSaasHub
                           <Pencil className="w-3.5 h-3.5" />
                           <span>Edit</span>
                         </button>
+                        <button
+                          type="button"
+                          onClick={() => setPrintMenu(menu)}
+                          className="p-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                          title="Print Table Tent QR"
+                        >
+                          <Printer className="w-3.5 h-3.5" />
+                          <span>Print</span>
+                        </button>
                       </div>
 
                       <button
@@ -1272,6 +1306,15 @@ export default function MicroSaasHub({ userTier, isAdmin = false }: MicroSaasHub
                         >
                           <Pencil className="w-3.5 h-3.5" />
                           <span>Edit</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setPrintWifi(wifi)}
+                          className="p-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                          title="Print Wi-Fi QR Card"
+                        >
+                          <Printer className="w-3.5 h-3.5" />
+                          <span>Print</span>
                         </button>
                       </div>
 
@@ -2281,6 +2324,79 @@ export default function MicroSaasHub({ userTier, isAdmin = false }: MicroSaasHub
             </form>
           </div>
         </div>
+      )}
+
+      {/* Print Modals for all Micro-SaaS tabs */}
+      {printVcard && (
+        <PrintTemplateModal
+          isOpen={!!printVcard}
+          onClose={() => setPrintVcard(null)}
+          shortCode={printVcard.slug}
+          label={printVcard.title}
+          url={`${typeof window !== 'undefined' ? window.location.origin : 'https://dynamicqr.co'}/c/${printVcard.slug}`}
+          userTier={normalizedTier}
+          isAdmin={isAdmin}
+          defaultHeadline={printVcard.title}
+          defaultHeaderTag="SCAN MY CONTACT CARD"
+          defaultSubline="Tap to save my contact details instantly"
+          defaultFooterNote="Digital Business Card • DynamicQR"
+          defaultTemplate="card-badge"
+          featureBannerText="Print on physical business cards or badge holders. When scanned, contacts are instantly saved to the customer's phone — no app required."
+        />
+      )}
+
+      {printLink && (
+        <PrintTemplateModal
+          isOpen={!!printLink}
+          onClose={() => setPrintLink(null)}
+          shortCode={printLink.slug}
+          label={printLink.title}
+          url={`${typeof window !== 'undefined' ? window.location.origin : 'https://dynamicqr.co'}/s/${printLink.slug}`}
+          userTier={normalizedTier}
+          isAdmin={isAdmin}
+          defaultHeadline={printLink.title}
+          defaultHeaderTag="SCAN TO OPEN"
+          defaultSubline="Instant smart redirect — iOS & Android aware"
+          defaultFooterNote="307 Edge Redirect • No app required"
+          defaultTemplate="table-tent"
+          featureBannerText="Print on marketing materials, packaging, or displays. This smart link automatically routes iOS to App Store and Android to Play Store."
+        />
+      )}
+
+      {printMenu && (
+        <PrintTemplateModal
+          isOpen={!!printMenu}
+          onClose={() => setPrintMenu(null)}
+          shortCode={printMenu.slug}
+          label={printMenu.title}
+          url={`${typeof window !== 'undefined' ? window.location.origin : 'https://dynamicqr.co'}/m/${printMenu.slug}`}
+          userTier={normalizedTier}
+          isAdmin={isAdmin}
+          defaultHeadline={printMenu.title}
+          defaultHeaderTag="SCAN FOR MENU"
+          defaultSubline="View our full menu on your phone"
+          defaultFooterNote="Contactless dining • No app required • Always up-to-date"
+          defaultTemplate="table-tent"
+          featureBannerText="Place on dining tables, counters, or at the door. Customers scan to view your live-updated menu without ever reprinting."
+        />
+      )}
+
+      {printWifi && (
+        <PrintTemplateModal
+          isOpen={!!printWifi}
+          onClose={() => setPrintWifi(null)}
+          shortCode={printWifi.slug}
+          label={printWifi.spec?.ssid || printWifi.title}
+          url={`${typeof window !== 'undefined' ? window.location.origin : 'https://dynamicqr.co'}/w/${printWifi.slug}`}
+          userTier={normalizedTier}
+          isAdmin={isAdmin}
+          defaultHeadline="Connect to Guest Wi-Fi"
+          defaultHeaderTag="FREE WI-FI"
+          defaultSubline={printWifi.spec?.ssid || 'Guest Network'}
+          defaultFooterNote="One tap • No password typing • Instant connection"
+          defaultTemplate="card-badge"
+          featureBannerText="Print on tabletop tent cards or at the entrance. Guests scan once and are instantly connected — no password required."
+        />
       )}
     </div>
   );

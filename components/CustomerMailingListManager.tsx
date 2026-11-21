@@ -22,8 +22,12 @@ import {
   Palette,
   Tag,
   Pencil,
+  Printer,
+  QrCode,
+  ExternalLink,
 } from 'lucide-react';
 import Link from 'next/link';
+import PrintTemplateModal from './PrintTemplateModal';
 
 interface MailingList {
   id: string;
@@ -180,6 +184,7 @@ export default function CustomerMailingListManager({
 
   // Embed Studio
   const [showEmbedModal, setShowEmbedModal] = useState(false);
+  const [showPrintModal, setShowPrintModal] = useState(false);
   const [embedStyle, setEmbedStyle] = useState<'inline' | 'floating_pill' | 'card'>('inline');
   const [embedAccent, setEmbedAccent] = useState('#2F6B4F');
   const [copiedEmbed, setCopiedEmbed] = useState(false);
@@ -715,12 +720,61 @@ export default function CustomerMailingListManager({
                   </button>
 
                   <button
+                    onClick={() => setShowPrintModal(true)}
+                    className="px-3.5 py-2 rounded-lg bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-semibold hover:bg-emerald-100 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                  >
+                    <Printer className="w-3.5 h-3.5 text-[#2F6B4F]" />
+                    Print QR Sign / Tent
+                  </button>
+
+                  <button
                     onClick={() => setShowBroadcastModal(true)}
                     disabled={contacts.filter((c) => c.status === 'active').length === 0}
                     className="px-4 py-2 rounded-lg bg-[#2F6B4F] text-white text-xs font-semibold hover:bg-[#25553E] transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer disabled:opacity-40"
                   >
                     <Send className="w-3.5 h-3.5" />
                     Compose Broadcast
+                  </button>
+                </div>
+              </div>
+
+              {/* Physical Print & Retail Setup Banner */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#2F6B4F]/10 via-[#2F6B4F]/5 to-transparent border border-[#2F6B4F]/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div className="flex items-start gap-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-[#2F6B4F] text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+                    <Printer className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h5 className="text-xs font-bold text-[#11140F] uppercase tracking-wide">
+                        Retail Counters, Packaging &amp; Table Tents
+                      </h5>
+                      <span className="px-2 py-0.5 rounded-full bg-[#2F6B4F]/20 text-[#2F6B4F] text-[10px] font-mono font-bold">
+                        300 DPI PRINT READY
+                      </span>
+                    </div>
+                    <p className="text-xs text-[#11140F]/70 max-w-xl leading-relaxed">
+                      Print QR codes on retail counters, packaging, or table tents. When customers scan, they enter their email on a branded mobile form with automated double opt-in. Dispatch broadcast campaigns straight from your workspace using native Gmail delivery.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <Link
+                    href={`/join/${selectedList.id}`}
+                    target="_blank"
+                    className="px-3.5 py-2 rounded-xl border border-[#11140F]/15 bg-white text-[#11140F] text-xs font-semibold hover:bg-gray-50 transition-colors flex items-center gap-1.5"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>Test Form</span>
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => setShowPrintModal(true)}
+                    className="px-4 py-2 rounded-xl bg-[#2F6B4F] text-white text-xs font-semibold hover:bg-[#25553E] transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
+                  >
+                    <Printer className="w-3.5 h-3.5" />
+                    <span>Print Displays</span>
                   </button>
                 </div>
               </div>
@@ -1361,6 +1415,25 @@ export default function CustomerMailingListManager({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Print Template Modal for Mailing List QR Displays */}
+      {showPrintModal && selectedList && (
+        <PrintTemplateModal
+          isOpen={showPrintModal}
+          onClose={() => setShowPrintModal(false)}
+          shortCode={selectedList.id.slice(-8)}
+          label={selectedList.name}
+          url={`${typeof window !== 'undefined' ? window.location.origin : 'https://dynamicqr.co'}/join/${selectedList.id}`}
+          userTier={quotas?.tier || 'free'}
+          isAdmin={false}
+          defaultHeadline={`Join ${selectedList.name}`}
+          defaultHeaderTag="SCAN TO SUBSCRIBE"
+          defaultSubline="Enter your email for exclusive updates"
+          defaultFooterNote="Double opt-in • Zero spam • Unsubscribe anytime"
+          defaultTemplate="table-tent"
+          featureBannerText="Print this QR code on retail counters, packaging, or table tents. When customers scan, they enter their email on a branded mobile form with automated double opt-in."
+        />
       )}
 
     </div>

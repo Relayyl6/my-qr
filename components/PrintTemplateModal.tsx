@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import {
   Printer,
@@ -33,6 +33,12 @@ interface Props {
   url: string;
   userTier?: string;
   isAdmin?: boolean;
+  defaultHeadline?: string;
+  defaultHeaderTag?: string;
+  defaultSubline?: string;
+  defaultFooterNote?: string;
+  defaultTemplate?: TemplateType;
+  featureBannerText?: string;
 }
 
 type TemplateType = 'table-tent' | 'window-sign' | 'card-badge' | 'full-poster';
@@ -55,14 +61,30 @@ export default function PrintTemplateModal({
   url,
   userTier = 'free',
   isAdmin = false,
+  defaultHeadline,
+  defaultHeaderTag,
+  defaultSubline,
+  defaultFooterNote,
+  defaultTemplate,
+  featureBannerText,
 }: Props) {
-  const [template, setTemplate] = useState<TemplateType>('table-tent');
-  const [headline, setHeadline] = useState(label || 'Scan to Open');
-  const [headerTag, setHeaderTag] = useState('OFFICIAL SCAN POINT');
-  const [subline, setSubline] = useState('Point your camera at this code');
-  const [footerNote, setFooterNote] = useState('No app required • Instant redirect');
+  const [template, setTemplate] = useState<TemplateType>(defaultTemplate || 'table-tent');
+  const [headline, setHeadline] = useState(defaultHeadline || label || 'Scan to Open');
+  const [headerTag, setHeaderTag] = useState(defaultHeaderTag || 'OFFICIAL SCAN POINT');
+  const [subline, setSubline] = useState(defaultSubline || 'Point your camera at this code');
+  const [footerNote, setFooterNote] = useState(defaultFooterNote || 'No app required • Instant redirect');
   const [accentColor, setAccentColor] = useState('#11140F');
   const [centerLogo, setCenterLogo] = useState<CenterLogoType>('none');
+
+  useEffect(() => {
+    if (isOpen) {
+      if (defaultTemplate) setTemplate(defaultTemplate);
+      setHeadline(defaultHeadline || label || 'Scan to Open');
+      if (defaultHeaderTag) setHeaderTag(defaultHeaderTag);
+      if (defaultSubline) setSubline(defaultSubline);
+      if (defaultFooterNote) setFooterNote(defaultFooterNote);
+    }
+  }, [isOpen, url, defaultHeadline, defaultHeaderTag, defaultSubline, defaultFooterNote, defaultTemplate, label]);
 
   // Element visibility toggles
   const [showHeaderTag, setShowHeaderTag] = useState(true);
@@ -379,6 +401,14 @@ export default function PrintTemplateModal({
                 <X className="w-5 h-5" />
               </button>
             </div>
+
+            {/* Feature Guidance Banner */}
+            {featureBannerText && (
+              <div className="p-3 rounded-2xl bg-[#2F6B4F]/10 border border-[#2F6B4F]/20 text-[11.5px] text-[#2F6B4F] leading-relaxed flex items-start gap-2.5">
+                <Sparkles className="w-4 h-4 shrink-0 text-[#2F6B4F] mt-0.5" />
+                <span>{featureBannerText}</span>
+              </div>
+            )}
 
             {/* Sub-tabs: Format, Text Content, Visibility Toggles, Theme */}
             <div className="flex items-center gap-1.5 p-1 bg-[#EEF0EA] rounded-xl text-[12px] font-medium">
