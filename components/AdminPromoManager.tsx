@@ -626,6 +626,17 @@ export default function AdminPromoManager({
                 </div>
               )}
 
+              {config.modal.requireEmail && (
+                <div className="flex gap-1.5 mt-1">
+                  <div className="flex-1 px-2.5 py-2 rounded-lg bg-white/10 border border-white/15 text-[10px] text-white/40">
+                    {config.modal.emailPlaceholder?.trim() || 'Enter your email...'}
+                  </div>
+                  <div className="px-2.5 py-2 rounded-lg bg-[#34D399] text-[#0F120E] text-[10px] font-bold shrink-0">
+                    {config.modal.emailButtonText?.trim() || 'Get Code'}
+                  </div>
+                </div>
+              )}
+
               <div className="pt-1">
                 <div className="w-full py-2.5 rounded-xl bg-white text-[#11140F] text-xs font-bold text-center">
                   {config.modal.ctaText?.trim() || 'Claim Discount'} &rarr;
@@ -808,6 +819,69 @@ export default function AdminPromoManager({
                   className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 bg-white font-mono focus:outline-hidden focus:border-[#2F6B4F]"
                 />
               </div>
+            </div>
+
+            {/* Email Capture Settings */}
+            <div className="space-y-3 pt-2 border-t border-[#11140F]/8">
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="text-xs font-semibold text-[#11140F]">Require Email Capture</label>
+                  <p className="text-[11px] text-[#11140F]/50 mt-0.5">Show an email input field in the modal to capture leads</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setConfig({
+                      ...config,
+                      modal: { ...config.modal, requireEmail: !config.modal.requireEmail },
+                    })
+                  }
+                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors cursor-pointer ${
+                    config.modal.requireEmail ? 'bg-[#2F6B4F]' : 'bg-[#11140F]/20'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow-sm transition-transform ${
+                      config.modal.requireEmail ? 'translate-x-4' : 'translate-x-0.5'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {config.modal.requireEmail && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pl-1">
+                  <div>
+                    <label className="text-xs font-semibold text-[#11140F]">Email Input Placeholder</label>
+                    <input
+                      type="text"
+                      placeholder="Enter your email..."
+                      value={config.modal.emailPlaceholder || ''}
+                      onChange={(e) =>
+                        setConfig({
+                          ...config,
+                          modal: { ...config.modal, emailPlaceholder: e.target.value },
+                        })
+                      }
+                      className="mt-1 w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 bg-white focus:outline-hidden focus:border-[#2F6B4F]"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-[#11140F]">Submit Button Text</label>
+                    <input
+                      type="text"
+                      placeholder="Get Code"
+                      value={config.modal.emailButtonText || ''}
+                      onChange={(e) =>
+                        setConfig({
+                          ...config,
+                          modal: { ...config.modal, emailButtonText: e.target.value },
+                        })
+                      }
+                      className="mt-1 w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 bg-white focus:outline-hidden focus:border-[#2F6B4F]"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="pt-3 flex justify-end">

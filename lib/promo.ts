@@ -16,6 +16,9 @@ export interface AdminPromoConfig {
     promoCode: string;
     ctaText: string;
     frequencyDays: number;
+    requireEmail?: boolean;
+    emailPlaceholder?: string;
+    emailButtonText?: string;
   };
 }
 
@@ -41,6 +44,9 @@ export const DEFAULT_PROMO_CONFIG: AdminPromoConfig = {
     promoCode: '',
     ctaText: 'Claim Discount',
     frequencyDays: 7,
+    requireEmail: false,
+    emailPlaceholder: '',
+    emailButtonText: 'Get Code',
   },
 };
 

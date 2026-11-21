@@ -14,6 +14,9 @@ interface ModalConfig {
   promoCode: string;
   ctaText: string;
   frequencyDays: number;
+  requireEmail?: boolean;
+  emailPlaceholder?: string;
+  emailButtonText?: string;
 }
 
 const DEFAULT_MODAL: ModalConfig = {
@@ -25,6 +28,9 @@ const DEFAULT_MODAL: ModalConfig = {
   promoCode: '',
   ctaText: 'Claim Discount',
   frequencyDays: 7,
+  requireEmail: false,
+  emailPlaceholder: '',
+  emailButtonText: 'Get Code',
 };
 
 interface EntryPromoModalProps {
@@ -47,14 +53,7 @@ export default function EntryPromoModal({ forceOpen = false, onClose }: EntryPro
         .then((res) => (res.ok ? res.json() : null))
         .then((data) => {
           if (data && data.modal) {
-            setConfig({
-              ...data.modal,
-              enabled: true,
-              headline: data.modal.headline || 'Exclusive Limited-Time Special',
-              badgeText: data.modal.badgeText || 'SPECIAL OFFER',
-              bodyText: data.modal.bodyText || 'Unlock instant dynamic QR codes, 307 speed handoff, and full lead routing.',
-              ctaText: data.modal.ctaText || 'Claim Discount',
-            });
+            setConfig({ ...data.modal, enabled: true });
           }
         })
         .catch(() => {});
@@ -155,7 +154,10 @@ export default function EntryPromoModal({ forceOpen = false, onClose }: EntryPro
   const pricingTargetUrl = config.promoCode ? `/pricing?promo=${config.promoCode}` : '/pricing';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-200">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+      onClick={handleDismiss}
+    >
       <div
         className="relative w-full max-w-lg bg-[#0F120E] text-white border border-white/15 rounded-3xl p-7 sm:p-9 shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
@@ -165,8 +167,9 @@ export default function EntryPromoModal({ forceOpen = false, onClose }: EntryPro
 
         {/* Close Button */}
         <button
+          type="button"
           onClick={handleDismiss}
-          className="absolute top-5 right-5 text-white/50 hover:text-white p-1 rounded-full transition-colors cursor-pointer"
+          className="absolute top-4 right-4 z-10 text-white/60 hover:text-white p-2.5 rounded-full transition-colors cursor-pointer touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
           aria-label="Close dialog"
         >
           <X className="w-5 h-5" />
@@ -221,7 +224,7 @@ export default function EntryPromoModal({ forceOpen = false, onClose }: EntryPro
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter email to lock in code..."
+                  placeholder={config.emailPlaceholder?.trim() || 'Enter your email...'}
                   required
                   className="flex-1 bg-white/10 border border-white/15 rounded-xl px-4 py-3 text-sm text-white placeholder-white/40 focus:outline-hidden focus:border-[#34D399] transition-colors"
                 />
@@ -230,7 +233,7 @@ export default function EntryPromoModal({ forceOpen = false, onClose }: EntryPro
                   disabled={loading}
                   className="px-5 py-3 rounded-xl bg-[#34D399] text-[#11140F] font-semibold text-sm hover:bg-[#34D399]/90 transition-colors flex items-center justify-center gap-1.5 shrink-0 disabled:opacity-50 cursor-pointer"
                 >
-                  {loading ? 'Sending...' : 'Get Code'}
+                  {loading ? 'Sending...' : (config.emailButtonText?.trim() || 'Get Code')}
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>

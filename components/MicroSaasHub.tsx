@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Mail,
@@ -15,7 +15,6 @@ import {
   Trash2,
   Sparkles,
   Lock,
-  ChevronLeft,
   ChevronRight,
   Eye,
   Smartphone,
@@ -58,7 +57,6 @@ export default function MicroSaasHub({
   const [activeTab, setActiveTab] = useState<'mailing' | 'vcard' | 'shortener' | 'menu' | 'wifi'>(
     externalActiveTab || 'mailing'
   );
-  const tabsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (externalActiveTab && externalActiveTab !== activeTab) {
@@ -66,17 +64,6 @@ export default function MicroSaasHub({
     }
   }, [externalActiveTab]);
 
-  const handleTabSwitch = (tab: 'mailing' | 'vcard' | 'shortener' | 'menu' | 'wifi') => {
-    setActiveTab(tab);
-    onTabChange?.(tab);
-  };
-
-  const scrollTabs = (direction: 'left' | 'right') => {
-    if (tabsRef.current) {
-      const scrollAmount = direction === 'left' ? -220 : 220;
-      tabsRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-    }
-  };
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Data states
@@ -600,120 +587,22 @@ export default function MicroSaasHub({
           </p>
         </div>
 
-        {/* Navigation Tabs with smooth scroll controls and zero clipping */}
-        <div className="relative flex items-center min-w-0 max-w-full">
-          {/* Scroll Left Button */}
-          <button
-            type="button"
-            onClick={() => scrollTabs('left')}
-            className="hidden sm:flex items-center justify-center w-7 h-7 rounded-lg bg-[#F7F8F5] dark:bg-white/10 hover:bg-[#EEF0EA] dark:hover:bg-white/20 text-[#11140F]/70 dark:text-white/70 mr-1 shrink-0 transition-colors shadow-2xs cursor-pointer z-10"
-            title="Scroll tabs left"
-            aria-label="Scroll left"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-
-          <div
-            ref={tabsRef}
-            onWheel={(e) => {
-              if (e.deltaY !== 0 && tabsRef.current) {
-                tabsRef.current.scrollLeft += e.deltaY;
-              }
-            }}
-            className="flex items-center gap-2 overflow-x-auto py-1 px-1 scroll-smooth touch-pan-x scrollbar-thin scrollbar-thumb-[#11140F]/20 dark:scrollbar-thumb-white/20"
-          >
-            <button
-              type="button"
-              onClick={() => handleTabSwitch('mailing')}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
-                activeTab === 'mailing'
-                  ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] shadow-sm'
-                  : 'bg-[#F7F8F5] dark:bg-white/5 text-[#11140F]/70 dark:text-white/70 hover:bg-[#EEF0EA] dark:hover:bg-white/10'
-              }`}
-            >
-              <Mail className="w-3.5 h-3.5" />
-              <span>Mailing Lists</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleTabSwitch('vcard')}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
-                activeTab === 'vcard'
-                  ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] shadow-sm'
-                  : 'bg-[#F7F8F5] dark:bg-white/5 text-[#11140F]/70 dark:text-white/70 hover:bg-[#EEF0EA] dark:hover:bg-white/10'
-              }`}
-            >
-              <Contact className="w-3.5 h-3.5" />
-              <span>Digital vCard</span>
-              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-[#2F6B4F]/15 dark:bg-emerald-500/20 text-[#2F6B4F] dark:text-emerald-400 font-mono">
-                {entitlements.microsaas.vcard}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleTabSwitch('shortener')}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
-                activeTab === 'shortener'
-                  ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] shadow-sm'
-                  : 'bg-[#F7F8F5] dark:bg-white/5 text-[#11140F]/70 dark:text-white/70 hover:bg-[#EEF0EA] dark:hover:bg-white/10'
-              }`}
-            >
-              <Link2 className="w-3.5 h-3.5" />
-              <span>Link Shortener</span>
-              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-[#2F6B4F]/15 dark:bg-emerald-500/20 text-[#2F6B4F] dark:text-emerald-400 font-mono">
-                {entitlements.microsaas.shortener}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleTabSwitch('menu')}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
-                activeTab === 'menu'
-                  ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] shadow-sm'
-                  : 'bg-[#F7F8F5] dark:bg-white/5 text-[#11140F]/70 dark:text-white/70 hover:bg-[#EEF0EA] dark:hover:bg-white/10'
-              }`}
-            >
-              <Utensils className="w-3.5 h-3.5" />
-              <span>Restaurant Menu</span>
-              {entitlements.microsaas.menu === 0 ? (
-                <Lock className="w-3 h-3 text-amber-600" />
-              ) : (
-                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-[#2F6B4F]/15 dark:bg-emerald-500/20 text-[#2F6B4F] dark:text-emerald-400 font-mono">
-                  {entitlements.microsaas.menu}
-                </span>
-              )}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleTabSwitch('wifi')}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
-                activeTab === 'wifi'
-                  ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] shadow-sm'
-                  : 'bg-[#F7F8F5] dark:bg-white/5 text-[#11140F]/70 dark:text-white/70 hover:bg-[#EEF0EA] dark:hover:bg-white/10'
-              }`}
-            >
-              <Wifi className="w-3.5 h-3.5" />
-              <span>Dynamic Wi-Fi</span>
-              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-[#2F6B4F]/15 dark:bg-emerald-500/20 text-[#2F6B4F] dark:text-emerald-400 font-mono">
-                {entitlements.microsaas.wifi}
-              </span>
-            </button>
+        {/* Active Tool Indicator — switching is driven exclusively from the sidebar */}
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] shadow-2xs text-xs font-semibold">
+            {activeTab === 'mailing' && <Mail className="w-3.5 h-3.5 text-emerald-400 dark:text-[#2F6B4F]" />}
+            {activeTab === 'vcard' && <Contact className="w-3.5 h-3.5 text-emerald-400 dark:text-[#2F6B4F]" />}
+            {activeTab === 'shortener' && <Link2 className="w-3.5 h-3.5 text-emerald-400 dark:text-[#2F6B4F]" />}
+            {activeTab === 'menu' && <Utensils className="w-3.5 h-3.5 text-emerald-400 dark:text-[#2F6B4F]" />}
+            {activeTab === 'wifi' && <Wifi className="w-3.5 h-3.5 text-emerald-400 dark:text-[#2F6B4F]" />}
+            <span>
+              {activeTab === 'mailing' && 'Mailing Lists'}
+              {activeTab === 'vcard' && 'Digital vCards'}
+              {activeTab === 'shortener' && 'Smart Shortener'}
+              {activeTab === 'menu' && 'Restaurant Menus'}
+              {activeTab === 'wifi' && 'Dynamic Wi-Fi'}
+            </span>
           </div>
-
-          {/* Scroll Right Button */}
-          <button
-            type="button"
-            onClick={() => scrollTabs('right')}
-            className="hidden sm:flex items-center justify-center w-7 h-7 rounded-lg bg-[#F7F8F5] dark:bg-white/10 hover:bg-[#EEF0EA] dark:hover:bg-white/20 text-[#11140F]/70 dark:text-white/70 ml-1 shrink-0 transition-colors shadow-2xs cursor-pointer z-10"
-            title="Scroll tabs right"
-            aria-label="Scroll right"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
         </div>
       </div>
 

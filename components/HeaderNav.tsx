@@ -54,6 +54,10 @@ export default function HeaderNav({
   };
 
   const handleTabClick = (tab: 'workspace' | 'overview') => {
+    if (typeof window !== 'undefined' && window.location.pathname !== '/') {
+      window.location.href = `/#${tab}`;
+      return;
+    }
     if (onTabChange) {
       onTabChange(tab);
       window.history.replaceState(null, '', `#${tab}`);

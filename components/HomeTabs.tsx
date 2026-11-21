@@ -79,13 +79,12 @@ export default function HomeTabs({
         </div>
       )}
 
-      {/* Tab 1: Dedicated Workspace View (Zero scrolling past marketing copy) */}
+      {/* Tab 1: Dedicated Workspace View (Full-height dashboard with sidebar, NO marketing footer) */}
       {activeTab === 'workspace' && (
         <section id="workspace-tab" className="flex-1 bg-[#EEF0EA] dark:bg-[#0C0E0A] flex flex-col justify-between transition-colors duration-200">
           <div className="w-full flex-1">
             {workspaceContent}
           </div>
-          <Footer theme="light" />
         </section>
       )}
 
