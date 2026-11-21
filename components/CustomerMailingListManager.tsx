@@ -21,6 +21,7 @@ import {
   Monitor,
   Palette,
   Tag,
+  Pencil,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -144,10 +145,25 @@ export default function CustomerMailingListManager({
   const [newListDesc, setNewListDesc] = useState('');
   const [creatingList, setCreatingList] = useState(false);
 
+  // Edit List Modal
+  const [showEditListModal, setShowEditListModal] = useState(false);
+  const [editListName, setEditListName] = useState('');
+  const [editListDesc, setEditListDesc] = useState('');
+  const [updatingList, setUpdatingList] = useState(false);
+  const [deletingList, setDeletingList] = useState(false);
+
   const [showAddContactModal, setShowAddContactModal] = useState(false);
   const [newContactEmail, setNewContactEmail] = useState('');
   const [newContactName, setNewContactName] = useState('');
   const [addingContact, setAddingContact] = useState(false);
+
+  // Edit Contact Modal
+  const [showEditContactModal, setShowEditContactModal] = useState(false);
+  const [editingContactId, setEditingContactId] = useState<string | null>(null);
+  const [editContactEmail, setEditContactEmail] = useState('');
+  const [editContactName, setEditContactName] = useState('');
+  const [editContactStatus, setEditContactStatus] = useState('active');
+  const [updatingContact, setUpdatingContact] = useState(false);
 
   // CSV Bulk Import Modal
   const [showCsvModal, setShowCsvModal] = useState(false);
@@ -245,6 +261,117 @@ export default function CustomerMailingListManager({
       setFeedback({ type: 'error', message: err.message });
     } finally {
       setCreatingList(false);
+    }
+  };
+
+  // Open Edit List Modal
+  const handleOpenEditList = () => {
+    if (!selectedList) return;
+    setEditListName(selectedList.name);
+    setEditListDesc(selectedList.description || '');
+    setShowEditListModal(true);
+  };
+
+  // Submit Update List
+  const handleUpdateList = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedListId || !editListName.trim()) return;
+
+    setUpdatingList(true);
+    setFeedback(null);
+    try {
+      const res = await fetch(`/api/mailing-lists/${selectedListId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: editListName.trim(), description: editListDesc.trim() }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setShowEditListModal(false);
+        setFeedback({ type: 'success', message: 'Mailing list updated successfully!' });
+        await loadLists();
+      } else {
+        setFeedback({ type: 'error', message: data.error || 'Failed to update list' });
+      }
+    } catch (err: any) {
+      setFeedback({ type: 'error', message: err.message });
+    } finally {
+      setUpdatingList(false);
+    }
+  };
+
+  // Delete List
+  const handleDeleteList = async () => {
+    if (!selectedList || !selectedListId) return;
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete the mailing list "${selectedList.name}" and all of its contacts? This action cannot be undone.`
+    );
+    if (!confirmDelete) return;
+
+    setDeletingList(true);
+    setFeedback(null);
+    try {
+      const res = await fetch(`/api/mailing-lists/${selectedListId}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setFeedback({ type: 'success', message: `Mailing list "${selectedList.name}" deleted.` });
+        const remainingLists = lists.filter((l) => l.id !== selectedListId);
+        setLists(remainingLists);
+        setSelectedListId(remainingLists.length > 0 ? remainingLists[0].id : null);
+        await loadLists();
+      } else {
+        setFeedback({ type: 'error', message: data.error || 'Failed to delete list' });
+      }
+    } catch (err: any) {
+      setFeedback({ type: 'error', message: err.message });
+    } finally {
+      setDeletingList(false);
+    }
+  };
+
+  // Open Edit Contact Modal
+  const handleOpenEditContact = (contact: Contact) => {
+    setEditingContactId(contact.id);
+    setEditContactEmail(contact.email);
+    setEditContactName(contact.firstName || '');
+    setEditContactStatus(contact.status);
+    setShowEditContactModal(true);
+  };
+
+  // Submit Update Contact
+  const handleUpdateContact = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedListId || !editingContactId || !editContactEmail.trim()) return;
+
+    setUpdatingContact(true);
+    setFeedback(null);
+    try {
+      const res = await fetch(`/api/mailing-lists/${selectedListId}/contacts`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contactId: editingContactId,
+          email: editContactEmail.trim(),
+          firstName: editContactName.trim(),
+          status: editContactStatus,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setShowEditContactModal(false);
+        setFeedback({ type: 'success', message: 'Contact updated successfully!' });
+        const cRes = await fetch(`/api/mailing-lists/${selectedListId}/contacts`);
+        const cData = await cRes.json();
+        setContacts(cData.contacts || []);
+      } else {
+        setFeedback({ type: 'error', message: data.error || 'Failed to update contact' });
+      }
+    } catch (err: any) {
+      setFeedback({ type: 'error', message: err.message });
+    } finally {
+      setUpdatingContact(false);
     }
   };
 
@@ -535,8 +662,27 @@ export default function CustomerMailingListManager({
             <div className="space-y-4 pt-2">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#F7F8F5] p-4 rounded-xl border border-[#11140F]/8">
                 <div>
-                  <h4 className="text-sm font-bold text-[#11140F]">{selectedList.name}</h4>
-                  <p className="text-xs text-[#11140F]/60">
+                  <div className="flex items-center gap-2">
+                    <h4 className="text-sm font-bold text-[#11140F]">{selectedList.name}</h4>
+                    <button
+                      type="button"
+                      onClick={handleOpenEditList}
+                      className="p-1 rounded-md text-[#11140F]/40 hover:text-[#11140F] hover:bg-white transition-colors cursor-pointer"
+                      title="Edit mailing list name & description"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDeleteList}
+                      disabled={deletingList}
+                      className="p-1 rounded-md text-red-400 hover:text-red-700 hover:bg-red-50 transition-colors cursor-pointer disabled:opacity-40"
+                      title="Delete this mailing list"
+                    >
+                      {deletingList ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                  <p className="text-xs text-[#11140F]/60 mt-0.5">
                     {selectedList.description || 'Double opt-in customer subscriber list.'}
                   </p>
                 </div>
@@ -617,7 +763,7 @@ export default function CustomerMailingListManager({
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1.5">
                           <span
                             className={`px-2 py-0.5 rounded-full text-[10.5px] font-mono font-semibold ${
                               c.status === 'active'
@@ -629,9 +775,19 @@ export default function CustomerMailingListManager({
                           </span>
 
                           <button
+                            type="button"
+                            onClick={() => handleOpenEditContact(c)}
+                            className="text-[#11140F]/40 hover:text-[#11140F] hover:bg-gray-100 rounded-md transition-colors p-1 cursor-pointer"
+                            title="Edit contact"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+
+                          <button
+                            type="button"
                             onClick={() => handleDeleteContact(c.id)}
-                            className="text-[#11140F]/40 hover:text-red-600 transition-colors p-1"
-                            aria-label="Remove contact"
+                            className="text-[#11140F]/40 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors p-1 cursor-pointer"
+                            title="Remove contact"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -696,6 +852,65 @@ export default function CustomerMailingListManager({
         </div>
       )}
 
+      {/* Modal 1B: Edit List */}
+      {showEditListModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+          <div className="w-full max-w-md bg-white rounded-2xl p-6 shadow-xl border border-[#11140F]/15 space-y-4">
+            <div className="flex items-center justify-between">
+              <h4 className="text-base font-bold text-[#11140F]">Edit Mailing List</h4>
+              <button
+                type="button"
+                onClick={() => setShowEditListModal(false)}
+                className="text-xs text-[#11140F]/50 hover:text-[#11140F] cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+            <form onSubmit={handleUpdateList} className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-[#11140F]">List Name *</label>
+                <input
+                  type="text"
+                  value={editListName}
+                  onChange={(e) => setEditListName(e.target.value)}
+                  placeholder="e.g. VIP Customers, Event Attendees"
+                  required
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-[#11140F]">Description (optional)</label>
+                <input
+                  type="text"
+                  value={editListDesc}
+                  onChange={(e) => setEditListDesc(e.target.value)}
+                  placeholder="e.g. In-store flyer scan subscribers"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowEditListModal(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-[#11140F]/60 hover:text-[#11140F] cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={updatingList}
+                  className="px-5 py-2 rounded-xl bg-[#11140F] text-white text-xs font-semibold hover:bg-[#2A2E25] transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                >
+                  {updatingList ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Modal 2: Add Contact */}
       {showAddContactModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
@@ -739,6 +954,78 @@ export default function CustomerMailingListManager({
                   className="px-5 py-2 rounded-xl bg-[#11140F] text-white text-xs font-semibold hover:bg-[#2A2E25] transition-colors flex items-center gap-1.5 disabled:opacity-50"
                 >
                   {addingContact ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Save Contact'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal 2B: Edit Contact */}
+      {showEditContactModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+          <div className="w-full max-w-md bg-white rounded-2xl p-6 shadow-xl border border-[#11140F]/15 space-y-4">
+            <div className="flex items-center justify-between">
+              <h4 className="text-base font-bold text-[#11140F]">Edit Contact Details</h4>
+              <button
+                type="button"
+                onClick={() => setShowEditContactModal(false)}
+                className="text-xs text-[#11140F]/50 hover:text-[#11140F] cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+            <form onSubmit={handleUpdateContact} className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-[#11140F]">Email Address *</label>
+                <input
+                  type="email"
+                  value={editContactEmail}
+                  onChange={(e) => setEditContactEmail(e.target.value)}
+                  placeholder="customer@example.com"
+                  required
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-[#11140F]">First Name</label>
+                <input
+                  type="text"
+                  value={editContactName}
+                  onChange={(e) => setEditContactName(e.target.value)}
+                  placeholder="John"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-[#11140F]">Subscription Status</label>
+                <select
+                  value={editContactStatus}
+                  onChange={(e) => setEditContactStatus(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#11140F]/15 text-xs text-[#11140F] bg-white focus:outline-none focus:border-[#2F6B4F]"
+                >
+                  <option value="active">Active (Receives broadcasts)</option>
+                  <option value="unsubscribed">Unsubscribed (Suppressed)</option>
+                  <option value="pending">Pending Confirmation</option>
+                </select>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowEditContactModal(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-[#11140F]/60 hover:text-[#11140F] cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={updatingContact}
+                  className="px-5 py-2 rounded-xl bg-[#11140F] text-white text-xs font-semibold hover:bg-[#2A2E25] transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                >
+                  {updatingContact ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Update Contact'}
                 </button>
               </div>
             </form>

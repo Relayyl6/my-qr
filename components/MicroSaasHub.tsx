@@ -23,6 +23,7 @@ import {
   QrCode,
   Globe,
   Share2,
+  Pencil,
 } from 'lucide-react';
 import CustomerMailingListManager from '@/components/CustomerMailingListManager';
 import { PlanTier, PLANS } from '@/lib/plans';
@@ -62,6 +63,60 @@ export default function MicroSaasHub({ userTier, isAdmin = false }: MicroSaasHub
   const [showShortenerModal, setShowShortenerModal] = useState(false);
   const [showMenuModal, setShowMenuModal] = useState(false);
   const [showWifiModal, setShowWifiModal] = useState(false);
+
+  // Edit modal / drawer states
+  const [editingItem, setEditingItem] = useState<MicroItem | null>(null);
+  const [showEditModal, setShowEditModal] = useState<'vcard' | 'shortener' | 'menu' | 'wifi' | null>(null);
+
+  // Edit form states
+  const [editVcardForm, setEditVcardForm] = useState({
+    firstName: '',
+    lastName: '',
+    title: '',
+    company: '',
+    phone: '',
+    email: '',
+    website: '',
+    bio: '',
+  });
+
+  const [editShortenerForm, setEditShortenerForm] = useState({
+    title: '',
+    destinationUrl: '',
+    utmSource: '',
+    utmMedium: '',
+    utmCampaign: '',
+    iosUrl: '',
+    androidUrl: '',
+  });
+
+  const [editMenuForm, setEditMenuForm] = useState<{
+    title: string;
+    currency: string;
+    sections: {
+      name: string;
+      items: {
+        id: string;
+        title: string;
+        description: string;
+        price: string;
+        isSoldOut: boolean;
+      }[];
+    }[];
+  }>({
+    title: '',
+    currency: '$',
+    sections: [],
+  });
+
+  const [editWifiForm, setEditWifiForm] = useState({
+    ssid: '',
+    password: '',
+    authType: 'WPA',
+    isHidden: false,
+    location: '',
+    welcomeMessage: '',
+  });
 
   // Form states
   const [vcardForm, setVcardForm] = useState({
@@ -252,6 +307,234 @@ export default function MicroSaasHub({ userTier, isAdmin = false }: MicroSaasHub
       setShowWifiModal(false);
       setWifiForm({ ssid: '', password: '', authType: 'WPA', location: '', welcomeMessage: '', slug: '' });
       setSuccessMsg('Wi-Fi access card created successfully!');
+      setTimeout(() => setSuccessMsg(null), 3000);
+      fetchItems();
+    } catch (err: any) {
+      setErrorMsg(err.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // --- EDIT HANDLERS (FULL CRUD) ---
+
+  // vCard Edit Handlers
+  const handleOpenEditVcard = (item: MicroItem) => {
+    setEditingItem(item);
+    const spec = item.spec || {};
+    setEditVcardForm({
+      firstName: spec.firstName || '',
+      lastName: spec.lastName || '',
+      title: spec.title || '',
+      company: spec.company || '',
+      phone: spec.phone || '',
+      email: spec.email || '',
+      website: spec.website || '',
+      bio: spec.bio || '',
+    });
+    setShowEditModal('vcard');
+  };
+
+  const handleUpdateVcard = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingItem) return;
+    setActionLoading(true);
+    setErrorMsg(null);
+    try {
+      const res = await fetch(`/api/microsaas/${editingItem.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: `${editVcardForm.firstName} ${editVcardForm.lastName}`.trim(),
+          spec: {
+            ...editingItem.spec,
+            ...editVcardForm,
+          },
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to update vCard');
+      setShowEditModal(null);
+      setSuccessMsg('Digital vCard updated successfully!');
+      setTimeout(() => setSuccessMsg(null), 3000);
+      fetchItems();
+    } catch (err: any) {
+      setErrorMsg(err.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Shortener Edit Handlers
+  const handleOpenEditShortener = (item: MicroItem) => {
+    setEditingItem(item);
+    const spec = item.spec || {};
+    setEditShortenerForm({
+      title: item.title || '',
+      destinationUrl: spec.destinationUrl || '',
+      utmSource: spec.utmSource || '',
+      utmMedium: spec.utmMedium || '',
+      utmCampaign: spec.utmCampaign || '',
+      iosUrl: spec.iosUrl || '',
+      androidUrl: spec.androidUrl || '',
+    });
+    setShowEditModal('shortener');
+  };
+
+  const handleUpdateShortener = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingItem) return;
+    setActionLoading(true);
+    setErrorMsg(null);
+    try {
+      const res = await fetch(`/api/microsaas/${editingItem.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: editShortenerForm.title,
+          spec: {
+            ...editingItem.spec,
+            ...editShortenerForm,
+          },
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to update short link');
+      setShowEditModal(null);
+      setSuccessMsg('Short link updated successfully!');
+      setTimeout(() => setSuccessMsg(null), 3000);
+      fetchItems();
+    } catch (err: any) {
+      setErrorMsg(err.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Menu Edit Handlers
+  const handleOpenEditMenu = (item: MicroItem) => {
+    setEditingItem(item);
+    const spec = item.spec || {};
+    setEditMenuForm({
+      title: item.title || '',
+      currency: spec.currency || '$',
+      sections: spec.sections ? JSON.parse(JSON.stringify(spec.sections)) : [],
+    });
+    setShowEditModal('menu');
+  };
+
+  const handleAddDish = (sectionIndex: number) => {
+    const updated = [...editMenuForm.sections];
+    updated[sectionIndex].items.push({
+      id: Date.now().toString(),
+      title: 'New Dish',
+      description: 'Fresh ingredients',
+      price: '15',
+      isSoldOut: false,
+    });
+    setEditMenuForm({ ...editMenuForm, sections: updated });
+  };
+
+  const handleRemoveDish = (sectionIndex: number, itemIndex: number) => {
+    const updated = [...editMenuForm.sections];
+    updated[sectionIndex].items.splice(itemIndex, 1);
+    setEditMenuForm({ ...editMenuForm, sections: updated });
+  };
+
+  const handleToggleSoldOut = (sectionIndex: number, itemIndex: number) => {
+    const updated = [...editMenuForm.sections];
+    updated[sectionIndex].items[itemIndex].isSoldOut = !updated[sectionIndex].items[itemIndex].isSoldOut;
+    setEditMenuForm({ ...editMenuForm, sections: updated });
+  };
+
+  const handleAddSection = () => {
+    setEditMenuForm({
+      ...editMenuForm,
+      sections: [
+        ...editMenuForm.sections,
+        {
+          name: 'New Section',
+          items: [],
+        },
+      ],
+    });
+  };
+
+  const handleRemoveSection = (sectionIndex: number) => {
+    const updated = [...editMenuForm.sections];
+    updated.splice(sectionIndex, 1);
+    setEditMenuForm({ ...editMenuForm, sections: updated });
+  };
+
+  const handleUpdateMenu = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingItem) return;
+    setActionLoading(true);
+    setErrorMsg(null);
+    try {
+      const res = await fetch(`/api/microsaas/${editingItem.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: editMenuForm.title,
+          spec: {
+            ...editingItem.spec,
+            currency: editMenuForm.currency,
+            sections: editMenuForm.sections,
+          },
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to update restaurant menu');
+      setShowEditModal(null);
+      setSuccessMsg('Restaurant menu updated successfully!');
+      setTimeout(() => setSuccessMsg(null), 3000);
+      fetchItems();
+    } catch (err: any) {
+      setErrorMsg(err.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Wi-Fi Edit Handlers
+  const handleOpenEditWifi = (item: MicroItem) => {
+    setEditingItem(item);
+    const spec = item.spec || {};
+    setEditWifiForm({
+      ssid: spec.ssid || '',
+      password: spec.password || '',
+      authType: spec.authType || 'WPA',
+      isHidden: Boolean(spec.isHidden),
+      location: spec.location || '',
+      welcomeMessage: spec.welcomeMessage || '',
+    });
+    setShowEditModal('wifi');
+  };
+
+  const handleUpdateWifi = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingItem) return;
+    setActionLoading(true);
+    setErrorMsg(null);
+    try {
+      const wifiQrString = `WIFI:T:${editWifiForm.authType};S:${editWifiForm.ssid};P:${editWifiForm.password};H:${editWifiForm.isHidden ? 'true' : 'false'};;`;
+      const res = await fetch(`/api/microsaas/${editingItem.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: editWifiForm.ssid,
+          spec: {
+            ...editingItem.spec,
+            ...editWifiForm,
+            wifiQrString,
+          },
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to update Wi-Fi card');
+      setShowEditModal(null);
+      setSuccessMsg('Wi-Fi access card updated successfully!');
       setTimeout(() => setSuccessMsg(null), 3000);
       fetchItems();
     } catch (err: any) {
@@ -507,6 +790,15 @@ export default function MicroSaasHub({ userTier, isAdmin = false }: MicroSaasHub
                           {copiedId === card.id ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                           <span>{copiedId === card.id ? 'Copied' : 'Share'}</span>
                         </button>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEditVcard(card)}
+                          className="p-2 rounded-lg bg-[#F7F8F5] hover:bg-[#EEF0EA] text-[#11140F] text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                          title="Edit vCard"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                          <span>Edit</span>
+                        </button>
                       </div>
 
                       <button
@@ -642,6 +934,14 @@ export default function MicroSaasHub({ userTier, isAdmin = false }: MicroSaasHub
                             >
                               <ExternalLink className="w-3.5 h-3.5" />
                             </Link>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditShortener(link)}
+                              className="p-1.5 rounded-lg bg-[#F7F8F5] hover:bg-[#EEF0EA] text-[#11140F] transition-colors cursor-pointer"
+                              title="Edit Short Link"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </button>
                             <button
                               type="button"
                               onClick={() => handleDeleteItem(link.id)}
@@ -810,6 +1110,15 @@ export default function MicroSaasHub({ userTier, isAdmin = false }: MicroSaasHub
                           {copiedId === menu.id ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                           <span>{copiedId === menu.id ? 'Copied' : 'Share'}</span>
                         </button>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEditMenu(menu)}
+                          className="p-2 rounded-lg bg-[#F7F8F5] hover:bg-[#EEF0EA] text-[#11140F] text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                          title="Edit Menu & Dishes"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                          <span>Edit</span>
+                        </button>
                       </div>
 
                       <button
@@ -954,6 +1263,15 @@ export default function MicroSaasHub({ userTier, isAdmin = false }: MicroSaasHub
                         >
                           {copiedId === wifi.id ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                           <span>{copiedId === wifi.id ? 'Copied' : 'Share'}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEditWifi(wifi)}
+                          className="p-2 rounded-lg bg-[#F7F8F5] hover:bg-[#EEF0EA] text-[#11140F] text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                          title="Edit Wi-Fi Network"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                          <span>Edit</span>
                         </button>
                       </div>
 
@@ -1436,6 +1754,528 @@ export default function MicroSaasHub({ userTier, isAdmin = false }: MicroSaasHub
                   className="px-5 py-2.5 rounded-xl bg-[#11140F] text-white text-xs font-bold hover:bg-[#2A2E25] transition-all cursor-pointer shadow-xs disabled:opacity-50"
                 >
                   {actionLoading ? 'Creating...' : 'Create Wi-Fi QR'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT MODAL 1: DIGITAL VCARD */}
+      {showEditModal === 'vcard' && editingItem && (
+        <div className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl border border-[#11140F]/10 shadow-2xl max-w-lg w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#11140F]/10 pb-4">
+              <div className="flex items-center gap-2">
+                <Contact className="w-5 h-5 text-[#2F6B4F]" />
+                <h3 className="text-base font-bold text-[#11140F]">Edit Digital vCard</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowEditModal(null)}
+                className="text-[#11140F]/50 hover:text-[#11140F] text-sm font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateVcard} className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-[#11140F]">First Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editVcardForm.firstName}
+                    onChange={(e) => setEditVcardForm({ ...editVcardForm, firstName: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-[#11140F]">Last Name</label>
+                  <input
+                    type="text"
+                    value={editVcardForm.lastName}
+                    onChange={(e) => setEditVcardForm({ ...editVcardForm, lastName: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-[#11140F]">Job Title</label>
+                  <input
+                    type="text"
+                    value={editVcardForm.title}
+                    onChange={(e) => setEditVcardForm({ ...editVcardForm, title: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-[#11140F]">Company</label>
+                  <input
+                    type="text"
+                    value={editVcardForm.company}
+                    onChange={(e) => setEditVcardForm({ ...editVcardForm, company: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-[#11140F]">Email *</label>
+                  <input
+                    type="email"
+                    required
+                    value={editVcardForm.email}
+                    onChange={(e) => setEditVcardForm({ ...editVcardForm, email: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-[#11140F]">Phone Number</label>
+                  <input
+                    type="tel"
+                    value={editVcardForm.phone}
+                    onChange={(e) => setEditVcardForm({ ...editVcardForm, phone: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-[#11140F]">Website or Portfolio</label>
+                <input
+                  type="url"
+                  value={editVcardForm.website}
+                  onChange={(e) => setEditVcardForm({ ...editVcardForm, website: e.target.value })}
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-[#11140F]">Bio / Pitch</label>
+                <textarea
+                  rows={2}
+                  value={editVcardForm.bio}
+                  onChange={(e) => setEditVcardForm({ ...editVcardForm, bio: e.target.value })}
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F] resize-none"
+                />
+              </div>
+
+              <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(null)}
+                  className="px-4 py-2 text-xs font-semibold text-[#11140F]/70 hover:text-[#11140F] cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={actionLoading}
+                  className="px-5 py-2.5 rounded-xl bg-[#11140F] text-white text-xs font-bold hover:bg-[#2A2E25] transition-all cursor-pointer shadow-xs disabled:opacity-50"
+                >
+                  {actionLoading ? 'Saving...' : 'Update vCard'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT MODAL 2: LINK SHORTENER */}
+      {showEditModal === 'shortener' && editingItem && (
+        <div className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl border border-[#11140F]/10 shadow-2xl max-w-lg w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#11140F]/10 pb-4">
+              <div className="flex items-center gap-2">
+                <Link2 className="w-5 h-5 text-[#2F6B4F]" />
+                <h3 className="text-base font-bold text-[#11140F]">Edit Short Link</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowEditModal(null)}
+                className="text-[#11140F]/50 hover:text-[#11140F] text-sm font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateShortener} className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-[#11140F]">Link Title *</label>
+                <input
+                  type="text"
+                  required
+                  value={editShortenerForm.title}
+                  onChange={(e) => setEditShortenerForm({ ...editShortenerForm, title: e.target.value })}
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-[#11140F]">Destination URL *</label>
+                <input
+                  type="url"
+                  required
+                  value={editShortenerForm.destinationUrl}
+                  onChange={(e) => setEditShortenerForm({ ...editShortenerForm, destinationUrl: e.target.value })}
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-[#11140F]">iOS App Store Fallback</label>
+                  <input
+                    type="url"
+                    value={editShortenerForm.iosUrl}
+                    onChange={(e) => setEditShortenerForm({ ...editShortenerForm, iosUrl: e.target.value })}
+                    placeholder="https://apps.apple.com/..."
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-[#11140F]">Android Play Store Fallback</label>
+                  <input
+                    type="url"
+                    value={editShortenerForm.androidUrl}
+                    onChange={(e) => setEditShortenerForm({ ...editShortenerForm, androidUrl: e.target.value })}
+                    placeholder="https://play.google.com/..."
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                  />
+                </div>
+              </div>
+
+              <div className="p-3 bg-[#F7F8F5] rounded-xl space-y-2 border border-[#11140F]/8">
+                <span className="text-[11px] font-semibold text-[#11140F] block">Marketing UTM Parameters</span>
+                <div className="grid grid-cols-3 gap-2">
+                  <input
+                    type="text"
+                    value={editShortenerForm.utmSource}
+                    onChange={(e) => setEditShortenerForm({ ...editShortenerForm, utmSource: e.target.value })}
+                    placeholder="utm_source"
+                    className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-[#11140F]/15 bg-white"
+                  />
+                  <input
+                    type="text"
+                    value={editShortenerForm.utmMedium}
+                    onChange={(e) => setEditShortenerForm({ ...editShortenerForm, utmMedium: e.target.value })}
+                    placeholder="utm_medium"
+                    className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-[#11140F]/15 bg-white"
+                  />
+                  <input
+                    type="text"
+                    value={editShortenerForm.utmCampaign}
+                    onChange={(e) => setEditShortenerForm({ ...editShortenerForm, utmCampaign: e.target.value })}
+                    placeholder="utm_campaign"
+                    className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-[#11140F]/15 bg-white"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(null)}
+                  className="px-4 py-2 text-xs font-semibold text-[#11140F]/70 hover:text-[#11140F] cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={actionLoading}
+                  className="px-5 py-2.5 rounded-xl bg-[#11140F] text-white text-xs font-bold hover:bg-[#2A2E25] transition-all cursor-pointer shadow-xs disabled:opacity-50"
+                >
+                  {actionLoading ? 'Saving...' : 'Update Short Link'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT MODAL 3: RESTAURANT MENU */}
+      {showEditModal === 'menu' && editingItem && (
+        <div className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl border border-[#11140F]/10 shadow-2xl max-w-2xl w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#11140F]/10 pb-4">
+              <div className="flex items-center gap-2">
+                <Utensils className="w-5 h-5 text-[#2F6B4F]" />
+                <h3 className="text-base font-bold text-[#11140F]">Edit Restaurant Menu & Dishes</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowEditModal(null)}
+                className="text-[#11140F]/50 hover:text-[#11140F] text-sm font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateMenu} className="space-y-5">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="sm:col-span-2 space-y-1">
+                  <label className="text-xs font-semibold text-[#11140F]">Menu Title *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editMenuForm.title}
+                    onChange={(e) => setEditMenuForm({ ...editMenuForm, title: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-[#11140F]">Currency Symbol</label>
+                  <select
+                    value={editMenuForm.currency}
+                    onChange={(e) => setEditMenuForm({ ...editMenuForm, currency: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 bg-white"
+                  >
+                    <option value="$">$ (USD / CAD / AUD)</option>
+                    <option value="€">€ (EUR)</option>
+                    <option value="£">£ (GBP)</option>
+                    <option value="₦">₦ (NGN)</option>
+                    <option value="¥">¥ (JPY / CNY)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Sections & Items Management */}
+              <div className="space-y-4 pt-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-[#11140F] uppercase tracking-wider">
+                    Menu Sections & Dishes ({editMenuForm.sections.length} categories)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleAddSection}
+                    className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-[#F7F8F5] hover:bg-[#EEF0EA] text-[#2F6B4F] flex items-center gap-1 cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add Section</span>
+                  </button>
+                </div>
+
+                {editMenuForm.sections.map((section, sIdx) => (
+                  <div key={sIdx} className="p-3.5 rounded-2xl bg-[#F7F8F5] border border-[#11140F]/8 space-y-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <input
+                        type="text"
+                        value={section.name}
+                        onChange={(e) => {
+                          const updated = [...editMenuForm.sections];
+                          updated[sIdx].name = e.target.value;
+                          setEditMenuForm({ ...editMenuForm, sections: updated });
+                        }}
+                        className="text-xs font-bold text-[#11140F] bg-white px-2.5 py-1.5 rounded-lg border border-[#11140F]/15 w-full max-w-xs"
+                        placeholder="Section Category Name"
+                      />
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => handleAddDish(sIdx)}
+                          className="px-2 py-1 text-[11px] font-semibold bg-white border border-[#11140F]/15 rounded-md hover:bg-gray-50 text-[#11140F] flex items-center gap-1 cursor-pointer"
+                        >
+                          <Plus className="w-3 h-3" />
+                          <span>Dish</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveSection(sIdx)}
+                          className="p-1 text-red-500 hover:bg-red-50 rounded-md cursor-pointer"
+                          title="Remove Category"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      {section.items.map((dish, dIdx) => (
+                        <div
+                          key={dish.id || dIdx}
+                          className="p-2.5 bg-white rounded-xl border border-[#11140F]/8 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                        >
+                          <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <input
+                              type="text"
+                              value={dish.title}
+                              onChange={(e) => {
+                                const updated = [...editMenuForm.sections];
+                                updated[sIdx].items[dIdx].title = e.target.value;
+                                setEditMenuForm({ ...editMenuForm, sections: updated });
+                              }}
+                              placeholder="Dish name"
+                              className="text-xs font-semibold px-2 py-1 rounded border border-[#11140F]/10"
+                            />
+                            <input
+                              type="text"
+                              value={dish.price}
+                              onChange={(e) => {
+                                const updated = [...editMenuForm.sections];
+                                updated[sIdx].items[dIdx].price = e.target.value;
+                                setEditMenuForm({ ...editMenuForm, sections: updated });
+                              }}
+                              placeholder="Price"
+                              className="text-xs px-2 py-1 rounded border border-[#11140F]/10 font-mono"
+                            />
+                            <input
+                              type="text"
+                              value={dish.description}
+                              onChange={(e) => {
+                                const updated = [...editMenuForm.sections];
+                                updated[sIdx].items[dIdx].description = e.target.value;
+                                setEditMenuForm({ ...editMenuForm, sections: updated });
+                              }}
+                              placeholder="Description"
+                              className="text-xs px-2 py-1 rounded border border-[#11140F]/10 text-gray-600"
+                            />
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0">
+                            <label className="flex items-center gap-1 text-[11px] font-mono cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={dish.isSoldOut}
+                                onChange={() => handleToggleSoldOut(sIdx, dIdx)}
+                                className="rounded text-red-600 cursor-pointer"
+                              />
+                              <span className={dish.isSoldOut ? 'text-red-600 font-bold' : 'text-gray-500'}>
+                                {dish.isSoldOut ? 'Sold Out' : 'Available'}
+                              </span>
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveDish(sIdx, dIdx)}
+                              className="p-1 text-red-400 hover:text-red-700 cursor-pointer"
+                              title="Delete Dish"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(null)}
+                  className="px-4 py-2 text-xs font-semibold text-[#11140F]/70 hover:text-[#11140F] cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={actionLoading}
+                  className="px-5 py-2.5 rounded-xl bg-[#11140F] text-white text-xs font-bold hover:bg-[#2A2E25] transition-all cursor-pointer shadow-xs disabled:opacity-50"
+                >
+                  {actionLoading ? 'Saving...' : 'Update Restaurant Menu'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT MODAL 4: DYNAMIC WI-FI */}
+      {showEditModal === 'wifi' && editingItem && (
+        <div className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl border border-[#11140F]/10 shadow-2xl max-w-md w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#11140F]/10 pb-4">
+              <div className="flex items-center gap-2">
+                <Wifi className="w-5 h-5 text-[#2F6B4F]" />
+                <h3 className="text-base font-bold text-[#11140F]">Edit Wi-Fi Access Card</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowEditModal(null)}
+                className="text-[#11140F]/50 hover:text-[#11140F] text-sm font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateWifi} className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-[#11140F]">Wi-Fi Network SSID *</label>
+                <input
+                  type="text"
+                  required
+                  value={editWifiForm.ssid}
+                  onChange={(e) => setEditWifiForm({ ...editWifiForm, ssid: e.target.value })}
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-[#11140F]">Network Password</label>
+                  <input
+                    type="text"
+                    value={editWifiForm.password}
+                    onChange={(e) => setEditWifiForm({ ...editWifiForm, password: e.target.value })}
+                    placeholder="Leave empty for open"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-[#11140F]">Security Encryption</label>
+                  <select
+                    value={editWifiForm.authType}
+                    onChange={(e) => setEditWifiForm({ ...editWifiForm, authType: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F] bg-white"
+                  >
+                    <option value="WPA">WPA / WPA2 / WPA3</option>
+                    <option value="WEP">WEP</option>
+                    <option value="nopass">None (Open)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-[#11140F]">Location / Area (Optional)</label>
+                <input
+                  type="text"
+                  value={editWifiForm.location}
+                  onChange={(e) => setEditWifiForm({ ...editWifiForm, location: e.target.value })}
+                  placeholder="e.g. Ground Floor Lounge & Cafe"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-[#11140F]">Welcome Message</label>
+                <input
+                  type="text"
+                  value={editWifiForm.welcomeMessage}
+                  onChange={(e) => setEditWifiForm({ ...editWifiForm, welcomeMessage: e.target.value })}
+                  placeholder="Welcome message displayed on mobile"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                />
+              </div>
+
+              <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(null)}
+                  className="px-4 py-2 text-xs font-semibold text-[#11140F]/70 hover:text-[#11140F] cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={actionLoading}
+                  className="px-5 py-2.5 rounded-xl bg-[#11140F] text-white text-xs font-bold hover:bg-[#2A2E25] transition-all cursor-pointer shadow-xs disabled:opacity-50"
+                >
+                  {actionLoading ? 'Saving...' : 'Update Wi-Fi QR'}
                 </button>
               </div>
             </form>

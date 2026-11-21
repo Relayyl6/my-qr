@@ -115,3 +115,52 @@ export async function DELETE(
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const user = await getCurrentUser();
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { id } = await params;
+    const body = await req.json();
+    const { contactId, firstName, email, status } = body;
+
+    if (!contactId) {
+      return NextResponse.json({ error: "contactId is required" }, { status: 400 });
+    }
+
+    const contact = await prisma.customerMailContact.findFirst({
+      where: { id: contactId, listId: id, userId: user.id },
+    });
+
+    if (!contact) {
+      return NextResponse.json({ error: "Contact not found" }, { status: 404 });
+    }
+
+    const updateData: any = {};
+    if (firstName !== undefined) updateData.firstName = String(firstName).trim() || null;
+    if (email !== undefined) {
+      const cleanEmail = String(email).trim().toLowerCase();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!cleanEmail || !emailRegex.test(cleanEmail)) {
+        return NextResponse.json({ error: "Please enter a valid email address" }, { status: 400 });
+      }
+      updateData.email = cleanEmail;
+    }
+    if (status !== undefined) {
+      updateData.status = ["active", "unsubscribed", "pending"].includes(status) ? status : "active";
+    }
+
+    const updated = await prisma.customerMailContact.update({
+      where: { id: contactId },
+      data: updateData,
+    });
+
+    return NextResponse.json({ success: true, contact: updated });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
