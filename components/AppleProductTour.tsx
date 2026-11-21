@@ -56,6 +56,9 @@ import {
   Mail,
   Share2,
   Wifi,
+  Contact,
+  Link2,
+  Download,
 } from 'lucide-react';
 
 interface Props {
@@ -133,7 +136,115 @@ const INDUSTRIES: Record<
   },
 };
 
+export type MicroSaasTab = 'mailing' | 'vcard' | 'shortener' | 'menu' | 'wifi';
+
+interface MicroSaasInfo {
+  title: string;
+  badge: string;
+  replaces: string;
+  icon: any;
+  headline: string;
+  description: string;
+  features: string[];
+  metrics: { label: string; value: string };
+  mockUrl: string;
+}
+
+const MICRO_SAAS_APPS: Record<MicroSaasTab, MicroSaasInfo> = {
+  mailing: {
+    title: 'Customer Mailing Lists',
+    badge: 'EMAIL MARKETING & LEAD CAPTURE',
+    replaces: 'Replaces $29/mo Mailchimp or Klaviyo',
+    icon: Mail,
+    headline: 'Turn physical foot traffic into lifetime email subscribers.',
+    description:
+      'Print QR codes on retail counters, packaging, or table tents. When customers scan, they enter their email on a branded mobile form with automated double opt-in. Dispatch broadcast campaigns straight from your workspace using native Gmail delivery.',
+    features: [
+      'Self-hosted double opt-in verification with zero spam risk',
+      'Native Gmail Nodemailer broadcast engine with zero third-party fees',
+      'One-click CSV subscriber export and segmentation tags',
+      'Instant real-time scan-to-subscriber conversion attribution',
+    ],
+    metrics: { label: 'Average Scan Conversion', value: '38.4%' },
+    mockUrl: 'https://dynamicqr.co/m/vip-club',
+  },
+  vcard: {
+    title: 'Digital Executive vCards',
+    badge: 'TAP-TO-SAVE MOBILE IDENTITY',
+    replaces: 'Replaces $19/mo Linktree or Popl subscriptions',
+    icon: Contact,
+    headline: 'One tap saves your entire executive profile directly to their phone.',
+    description:
+      'Never print disposable paper business cards again. Scanning your DynamicQR business card opens a sleek obsidian profile and generates an instant .vcf file that saves your name, title, direct phone, WhatsApp, email, and company website directly to their contacts with zero typing.',
+    features: [
+      'Instant .vcf address book integration on iOS & Android',
+      'Dynamic editing: change your phone or title without reprinting badges',
+      'Direct social & WhatsApp one-tap action buttons',
+      'Full company branding with custom photo and bio badge',
+    ],
+    metrics: { label: 'Address Book Save Rate', value: '92.1%' },
+    mockUrl: 'https://dynamicqr.co/v/alex-chen',
+  },
+  shortener: {
+    title: 'Smart Deep Link Shortener',
+    badge: 'CAMPAIGN ATTRIBUTION & APP ROUTING',
+    replaces: 'Replaces $49/mo Bitly Pro or Branch.io',
+    icon: Link2,
+    headline: 'Short links that understand device architecture and UTM telemetry.',
+    description:
+      'Create high-converting branded short links with automated UTM tagging and deep mobile OS routing. If an iPhone scans, route them straight to the App Store; if Android scans, launch Google Play; if desktop opens, show your web app.',
+    features: [
+      'Autonomous OS detection: iOS App Store vs Android Google Play routing',
+      'Built-in UTM builder (utm_source, utm_medium, utm_campaign)',
+      'Sub-10ms 307 temporary redirect engine with zero latency penalty',
+      'Granular click analytics by country, device, and referrer',
+    ],
+    metrics: { label: 'Routing Latency', value: '< 9ms' },
+    mockUrl: 'https://dynamicqr.co/s/summer-drop',
+  },
+  menu: {
+    title: 'Digital Restaurant Menus',
+    badge: 'TOUCHLESS DINING & LIVE UPDATES',
+    replaces: 'Replaces $39/mo QR Menu SaaS subscriptions',
+    icon: Utensils,
+    headline: 'Update items, daily specials, and prices live without reprinting menus.',
+    description:
+      'Table menus that update the moment a dish sells out. Organize your culinary offerings into Appetizers, Mains, Cocktails, and Desserts with dietary indicators (Vegan, Gluten-Free, Halal, Spicy) and multi-currency pricing.',
+    features: [
+      'Zero paper reprints when prices or wine lists change',
+      'Dietary flags: Vegan, Gluten-Free, Halal, Spicy, and Chef Specials',
+      'Instant mobile-optimized table browsing with zero app download',
+      'Supports all global currencies ($, €, £, ₦, ¥, and custom)',
+    ],
+    metrics: { label: 'Reprint Costs Saved', value: '$1,200/yr' },
+    mockUrl: 'https://dynamicqr.co/menu/atelier-bistro',
+  },
+  wifi: {
+    title: 'Instant Wi-Fi Access Points',
+    badge: 'ONE-TAP GUEST ONBOARDING',
+    replaces: 'Replaces manual paper Wi-Fi sheets & password confusion',
+    icon: Wifi,
+    headline: 'Connect guests to secure Wi-Fi in one camera scan — zero password typing.',
+    description:
+      'Eliminate guest frustration and staff interruptions. Scanning your tabletop Wi-Fi card triggers the native iOS and Android prompt: "Join Network DynamicGuest?". Customers tap once and are instantly connected, even with complex 64-character encrypted keys.',
+    features: [
+      'Native camera join prompt on both Apple iOS & Google Android',
+      'Supports WPA2/WPA3 Personal, WEP, and Open networks',
+      'Hidden SSID support for private office and VIP lounges',
+      'Exportable print-ready tabletop tent card templates',
+    ],
+    metrics: { label: 'Connection Speed', value: '1 Scan' },
+    mockUrl: 'WIFI:S:Guest-Lounge;T:WPA;P:ultra-secure-key-2026;;',
+  },
+};
+
 const COMPARISON = [
+  {
+    feature: 'Integrated Micro-SaaS Applications',
+    staticQr: 'None. Only opens a basic static URL.',
+    dynamicQr: '5 turnkey micro-apps: Mailing Lists, vCards, Shortener, Menus & Wi-Fi.',
+    isWin: true,
+  },
   {
     feature: 'Link destination update',
     staticQr: 'Impossible. Requires full reprint.',
@@ -174,6 +285,7 @@ const COMPARISON = [
 
 export default function AppleProductTour({ onOpenWorkspace }: Props) {
   const [activeTab, setActiveTab] = useState<IndustryTab>('hospitality');
+  const [activeMicroSaas, setActiveMicroSaas] = useState<MicroSaasTab>('mailing');
   const [simulatedDevice, setSimulatedDevice] = useState<'ios' | 'android' | 'desktop'>('ios');
   const [, startTransition] = useTransition();
 
@@ -187,6 +299,7 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
   };
 
   const currentIndustry = INDUSTRIES[activeTab];
+  const currentMicroSaas = MICRO_SAAS_APPS[activeMicroSaas];
 
   return (
     <div className="w-full bg-[#11140F] text-white overflow-hidden selection:bg-emerald-500 selection:text-black">
@@ -704,6 +817,412 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
                   {currentIndustry.mockTarget}
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 2.5. Apple-Style Turnkey Micro-SaaS Ecosystem */}
+      <section id="microsaas" className="py-20 md:py-32 px-5 md:px-8 max-w-[1280px] mx-auto border-t border-white/10">
+        <div className="text-center max-w-3xl mx-auto space-y-4 mb-14">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 font-mono text-[11px] font-semibold tracking-wider uppercase shadow-[0_0_20px_rgba(52,211,153,0.15)]">
+            <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+            Turnkey Micro-SaaS Ecosystem
+          </div>
+          <h2
+            className="text-[2.2rem] sm:text-[3rem] font-bold tracking-tight leading-tight text-white"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
+            One code.{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-emerald-400">
+              Five turnkey micro-apps.
+            </span>
+          </h2>
+          <p className="text-[15px] sm:text-[17px] text-white/60">
+            DynamicQR goes far beyond basic URL redirects. Every dynamic QR code can instantly launch full-fledged customer mailing lists, digital executive vCards, deep link shorteners, restaurant menus, or Wi-Fi cards — zero extra tools required.
+          </p>
+
+          {/* Micro-SaaS Tab Selector: Strictly in ONE Single Line */}
+          <div className="flex flex-nowrap items-center justify-start sm:justify-center gap-2 pt-4 overflow-x-auto max-w-full pb-2 px-1">
+            {(Object.keys(MICRO_SAAS_APPS) as MicroSaasTab[]).map((tabKey) => {
+              const app = MICRO_SAAS_APPS[tabKey];
+              const Icon = app.icon;
+              const isActive = activeMicroSaas === tabKey;
+              return (
+                <button
+                  key={tabKey}
+                  type="button"
+                  onClick={() => {
+                    startTransition(() => {
+                      setActiveMicroSaas(tabKey);
+                    });
+                  }}
+                  className={`whitespace-nowrap shrink-0 inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-[12.5px] sm:text-[13px] font-medium transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-white text-[#11140F] font-semibold shadow-md'
+                      : 'bg-white/5 border border-white/10 text-white/70 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  {app.title}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Active Micro-SaaS Showcase Card */}
+        <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02] p-8 sm:p-12 shadow-2xl backdrop-blur-md">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+            {/* Left Column: Narrative, Value Proposition, Features & Metrics */}
+            <div className="lg:col-span-7 space-y-6">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11.5px] font-mono uppercase tracking-wider">
+                  {currentMicroSaas.badge}
+                </div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.06] border border-white/10 text-[11px] font-mono text-white/70">
+                  <Check className="w-3 h-3 text-emerald-400" />
+                  <span>{currentMicroSaas.replaces}</span>
+                </div>
+              </div>
+
+              <h3 className="text-2xl sm:text-3xl font-bold tracking-tight text-white leading-snug">
+                {currentMicroSaas.headline}
+              </h3>
+
+              <p className="text-[15px] text-white/65 leading-relaxed">
+                {currentMicroSaas.description}
+              </p>
+
+              {/* Core Feature Matrix */}
+              <div className="space-y-2 pt-2">
+                <span className="text-[12px] font-semibold text-white/80 uppercase tracking-wider block font-mono">
+                  Engineered Micro-SaaS Capabilities:
+                </span>
+                <ul className="space-y-2">
+                  {currentMicroSaas.features.map((feature, idx) => (
+                    <li
+                      key={idx}
+                      className="flex items-center gap-2.5 text-[13px] font-mono text-emerald-300 bg-white/[0.03] p-2.5 rounded-xl border border-white/5"
+                    >
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Tangible Metrics & Launch CTA */}
+              <div className="pt-4 border-t border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                <div>
+                  <span className="text-[12px] text-white/50 block font-mono uppercase tracking-wider">
+                    {currentMicroSaas.metrics.label}
+                  </span>
+                  <span className="text-2xl sm:text-3xl font-bold text-white font-mono">
+                    {currentMicroSaas.metrics.value}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleOpenWorkspace}
+                  className="px-6 py-3 rounded-xl bg-white text-[#11140F] hover:bg-[#EEF0EA] font-semibold text-[13.5px] flex items-center gap-2 shadow-lg shadow-white/10 transition-all cursor-pointer shrink-0"
+                >
+                  <span>Build In Workspace</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Right Column: Interactive Real-World Simulation */}
+            <div className="lg:col-span-5">
+              {activeMicroSaas === 'mailing' && (
+                <div className="rounded-2xl border border-white/10 bg-black/60 p-6 space-y-4">
+                  <div className="flex items-center justify-between text-[11px] font-mono text-white/40">
+                    <span className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      LIVE LEAD CAPTURE
+                    </span>
+                    <span>DOUBLE OPT-IN READY</span>
+                  </div>
+
+                  <div className="p-5 rounded-2xl bg-gradient-to-b from-[#181C15] to-[#0E110C] border border-white/10 space-y-4 shadow-xl">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                        <Mail className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-[14px] font-bold text-white">The Artisan Club</h4>
+                        <p className="text-[11px] text-white/50">Scan table card to claim 15% discount</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="px-3.5 py-2.5 rounded-xl bg-white/[0.06] border border-white/10 text-[12px] text-white/60 font-mono">
+                        customer@example.com
+                      </div>
+                      <div className="w-full py-2.5 rounded-xl bg-white text-[#11140F] font-semibold text-[12.5px] text-center shadow-md">
+                        Join VIP Mailing List
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[10.5px] font-mono text-white/40">
+                      <span>Native Gmail Nodemailer</span>
+                      <span className="text-emerald-400 font-semibold">500 Contacts Free</span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-white text-black flex items-center gap-4 shadow-lg">
+                    <div className="p-2 bg-white rounded-lg border border-black/10 shrink-0">
+                      <MemoizedQRCode value={currentMicroSaas.mockUrl} size={64} level="M" fgColor="#11140F" />
+                    </div>
+                    <div className="space-y-0.5 min-w-0">
+                      <span className="text-[11.5px] font-bold text-black uppercase tracking-wide block">
+                        Scan with Phone Camera
+                      </span>
+                      <p className="text-[10.5px] text-black/60 font-mono truncate">
+                        Captures subscriber straight to DB
+                      </p>
+                      <span className="text-[10px] text-emerald-700 font-medium block">✓ Zero third-party fees</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeMicroSaas === 'vcard' && (
+                <div className="rounded-2xl border border-white/10 bg-black/60 p-6 space-y-4">
+                  <div className="flex items-center justify-between text-[11px] font-mono text-white/40">
+                    <span className="flex items-center gap-1.5 text-blue-400 font-semibold">
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+                      EXECUTIVE PROFILE CARD
+                    </span>
+                    <span>.VCF TAP TO SAVE</span>
+                  </div>
+
+                  <div className="p-5 rounded-2xl bg-gradient-to-b from-[#181C15] to-[#0E110C] border border-white/10 space-y-3.5 shadow-xl">
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 text-black font-bold text-[14px] flex items-center justify-center shadow-md">
+                        AC
+                      </div>
+                      <div>
+                        <h4 className="text-[14px] font-bold text-white">Alex Chen</h4>
+                        <p className="text-[11.5px] text-emerald-400 font-medium">VP of Architecture &amp; Systems</p>
+                        <p className="text-[10.5px] text-white/45">Vanguard Global Technologies</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-4 gap-2 pt-1 font-mono text-[10.5px]">
+                      <div className="py-1.5 rounded-lg bg-white/[0.06] border border-white/10 text-center text-white/80">
+                        📞 Call
+                      </div>
+                      <div className="py-1.5 rounded-lg bg-white/[0.06] border border-white/10 text-center text-white/80">
+                        💬 Chat
+                      </div>
+                      <div className="py-1.5 rounded-lg bg-white/[0.06] border border-white/10 text-center text-white/80">
+                        📧 Email
+                      </div>
+                      <div className="py-1.5 rounded-lg bg-white/[0.06] border border-white/10 text-center text-white/80">
+                        🌐 Web
+                      </div>
+                    </div>
+
+                    <div className="w-full py-2.5 rounded-xl bg-white text-[#11140F] font-semibold text-[12px] text-center flex items-center justify-center gap-1.5 shadow-md">
+                      <Download className="w-3.5 h-3.5 text-[#11140F]" />
+                      <span>Save Contact to Phone (.vcf)</span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-white text-black flex items-center gap-4 shadow-lg">
+                    <div className="p-2 bg-white rounded-lg border border-black/10 shrink-0">
+                      <MemoizedQRCode value={currentMicroSaas.mockUrl} size={64} level="M" fgColor="#11140F" />
+                    </div>
+                    <div className="space-y-0.5 min-w-0">
+                      <span className="text-[11.5px] font-bold text-black uppercase tracking-wide block">
+                        Scan with Phone Camera
+                      </span>
+                      <p className="text-[10.5px] text-black/60 font-mono truncate">
+                        One tap adds directly to Address Book
+                      </p>
+                      <span className="text-[10px] text-emerald-700 font-medium block">✓ Zero paper card reprints</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeMicroSaas === 'shortener' && (
+                <div className="rounded-2xl border border-white/10 bg-black/60 p-6 space-y-4">
+                  <div className="flex items-center justify-between text-[11px] font-mono text-white/40">
+                    <span className="flex items-center gap-1.5 text-teal-400 font-semibold">
+                      <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse" />
+                      SMART DEEP LINK DISPATCH
+                    </span>
+                    <span>SUB-10MS 307</span>
+                  </div>
+
+                  <div className="p-5 rounded-2xl bg-gradient-to-b from-[#181C15] to-[#0E110C] border border-white/10 space-y-3 shadow-xl font-mono text-[11px]">
+                    <div className="px-3.5 py-2 rounded-lg bg-white/[0.06] border border-white/10 flex items-center justify-between">
+                      <span className="text-white font-semibold">dynamicqr.co/s/app</span>
+                      <span className="text-emerald-400 text-[10px]">ACTIVE SHORT LINK</span>
+                    </div>
+
+                    <div className="space-y-1.5 pl-2.5 border-l-2 border-emerald-500/30">
+                      <div className="flex items-center justify-between p-1.5 rounded bg-white/[0.03] text-white/80">
+                        <span>🍎 Apple iOS Device</span>
+                        <span className="text-blue-400 font-semibold">→ App Store</span>
+                      </div>
+                      <div className="flex items-center justify-between p-1.5 rounded bg-white/[0.03] text-white/80">
+                        <span>🤖 Android Device</span>
+                        <span className="text-emerald-400 font-semibold">→ Google Play</span>
+                      </div>
+                      <div className="flex items-center justify-between p-1.5 rounded bg-white/[0.03] text-white/80">
+                        <span>💻 Desktop Browser</span>
+                        <span className="text-purple-400 font-semibold">→ Web Landing</span>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-white/50">
+                      <span>Automated UTM Injection</span>
+                      <span className="text-emerald-400">7.2ms latency</span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-white text-black flex items-center gap-4 shadow-lg">
+                    <div className="p-2 bg-white rounded-lg border border-black/10 shrink-0">
+                      <MemoizedQRCode value={currentMicroSaas.mockUrl} size={64} level="M" fgColor="#11140F" />
+                    </div>
+                    <div className="space-y-0.5 min-w-0">
+                      <span className="text-[11.5px] font-bold text-black uppercase tracking-wide block">
+                        Scan with Phone Camera
+                      </span>
+                      <p className="text-[10.5px] text-black/60 font-mono truncate">
+                        Detects OS &amp; branches autonomously
+                      </p>
+                      <span className="text-[10px] text-emerald-700 font-medium block">✓ Full UTM telemetry</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeMicroSaas === 'menu' && (
+                <div className="rounded-2xl border border-white/10 bg-black/60 p-6 space-y-4">
+                  <div className="flex items-center justify-between text-[11px] font-mono text-white/40">
+                    <span className="flex items-center gap-1.5 text-amber-400 font-semibold">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                      TOUCHLESS DINING MENU
+                    </span>
+                    <span>LIVE EDIT · NO REPRINTS</span>
+                  </div>
+
+                  <div className="p-5 rounded-2xl bg-gradient-to-b from-[#181C15] to-[#0E110C] border border-white/10 space-y-3 shadow-xl">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="text-[14px] font-bold text-white">L&apos;Atelier Bistro</h4>
+                        <p className="text-[10.5px] text-white/50">Dinner &amp; Cocktail Offerings</p>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-mono">
+                        Table 14
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 text-[10.5px]">
+                      <span className="px-2.5 py-0.5 rounded-full bg-white text-[#11140F] font-semibold">Mains</span>
+                      <span className="px-2.5 py-0.5 rounded-full bg-white/[0.06] text-white/60">Starters</span>
+                      <span className="px-2.5 py-0.5 rounded-full bg-white/[0.06] text-white/60">Wine List</span>
+                    </div>
+
+                    <div className="space-y-2 pt-1 text-[11.5px]">
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-white/[0.03] border border-white/5">
+                        <div>
+                          <span className="font-semibold text-white">Prime Truffle Ribeye</span>
+                          <span className="ml-2 text-[9.5px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono">Chef&apos;s Cut</span>
+                        </div>
+                        <span className="font-mono font-bold text-emerald-400">$48</span>
+                      </div>
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-white/[0.03] border border-white/5">
+                        <div>
+                          <span className="font-semibold text-white">Wild Mushroom Risotto</span>
+                          <span className="ml-2 text-[9.5px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-mono">Vegan · GF</span>
+                        </div>
+                        <span className="font-mono font-bold text-emerald-400">$32</span>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-white/40 font-mono">
+                      <span>Updated 4 mins ago</span>
+                      <span className="text-emerald-400">Zero reprint cost</span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-white text-black flex items-center gap-4 shadow-lg">
+                    <div className="p-2 bg-white rounded-lg border border-black/10 shrink-0">
+                      <MemoizedQRCode value={currentMicroSaas.mockUrl} size={64} level="M" fgColor="#11140F" />
+                    </div>
+                    <div className="space-y-0.5 min-w-0">
+                      <span className="text-[11.5px] font-bold text-black uppercase tracking-wide block">
+                        Scan with Phone Camera
+                      </span>
+                      <p className="text-[10.5px] text-black/60 font-mono truncate">
+                        Instant interactive mobile menu
+                      </p>
+                      <span className="text-[10px] text-emerald-700 font-medium block">✓ No app download needed</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeMicroSaas === 'wifi' && (
+                <div className="rounded-2xl border border-white/10 bg-black/60 p-6 space-y-4">
+                  <div className="flex items-center justify-between text-[11px] font-mono text-white/40">
+                    <span className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      TABLETOP WI-FI TENT
+                    </span>
+                    <span>ONE-SCAN NATIVE JOIN</span>
+                  </div>
+
+                  <div className="p-5 rounded-2xl bg-gradient-to-b from-[#181C15] to-[#0E110C] border border-white/10 space-y-3.5 shadow-xl">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                        <Wifi className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-[14px] font-bold text-white">Atelier-Guest-5G</h4>
+                        <p className="text-[11px] text-emerald-400 font-mono">WPA3-Personal Secured</p>
+                      </div>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-white/[0.08] border border-white/15 space-y-2 text-center">
+                      <p className="text-[11.5px] text-white font-medium">
+                        Join &quot;Atelier-Guest-5G&quot; Network?
+                      </p>
+                      <div className="grid grid-cols-2 gap-2 text-[11px] font-semibold">
+                        <div className="py-1.5 rounded-lg bg-white/10 text-white/70">Cancel</div>
+                        <div className="py-1.5 rounded-lg bg-emerald-500 text-black font-bold">Join</div>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-white/40 font-mono">
+                      <span>Zero password typing</span>
+                      <span className="text-emerald-400">iOS &amp; Android Native</span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-white text-black flex items-center gap-4 shadow-lg">
+                    <div className="p-2 bg-white rounded-lg border border-black/10 shrink-0">
+                      <MemoizedQRCode value={currentMicroSaas.mockUrl} size={64} level="M" fgColor="#11140F" />
+                    </div>
+                    <div className="space-y-0.5 min-w-0">
+                      <span className="text-[11.5px] font-bold text-black uppercase tracking-wide block">
+                        Scan with Phone Camera
+                      </span>
+                      <p className="text-[10.5px] text-black/60 font-mono truncate">
+                        Camera connects to Wi-Fi instantly
+                      </p>
+                      <span className="text-[10px] text-emerald-700 font-medium block">✓ Supports hidden SSIDs</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
