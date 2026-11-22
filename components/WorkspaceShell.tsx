@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   LayoutDashboard,
@@ -46,6 +46,19 @@ export type WorkspaceSection =
   | 'shortener'
   | 'menu'
   | 'wifi';
+
+const VALID_SECTIONS: WorkspaceSection[] = [
+  'all',
+  'overview',
+  'links',
+  'analyst',
+  'domains',
+  'mailing',
+  'vcard',
+  'shortener',
+  'menu',
+  'wifi',
+];
 
 function QrMark({ className = 'w-5 h-5', fill = '#11140F' }: { className?: string; fill?: string }) {
   return (
@@ -96,11 +109,74 @@ export default function WorkspaceShell({
   const [showAccountModal, setShowAccountModal] = useState(false);
   const [showPromoModalPreview, setShowPromoModalPreview] = useState(false);
 
+  const storageSectionKey = user?.id ? `dynamicqr_workspace_section_${user.id}` : 'dynamicqr_workspace_section';
+  const storageTabKey = user?.id ? `dynamicqr_microsaas_tab_${user.id}` : 'dynamicqr_microsaas_tab';
+
+  // Restore remembered section & subtab on mount/refresh
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    let targetSection: WorkspaceSection | null = null;
+    let targetMicroTab: 'mailing' | 'vcard' | 'shortener' | 'menu' | 'wifi' | null = null;
+
+    // 1. Check URL hash (e.g. #workspace?section=vcard or #workspace/vcard)
+    const hash = window.location.hash;
+    if (hash.includes('section=')) {
+      const match = hash.match(/section=([a-z0-9_-]+)/i);
+      if (match && VALID_SECTIONS.includes(match[1] as WorkspaceSection)) {
+        targetSection = match[1] as WorkspaceSection;
+      }
+    } else if (hash.startsWith('#workspace/')) {
+      const sub = hash.replace('#workspace/', '').toLowerCase() as WorkspaceSection;
+      if (VALID_SECTIONS.includes(sub)) {
+        targetSection = sub;
+      }
+    }
+
+    // 2. If not specified in URL, check localStorage for remembered location
+    if (!targetSection) {
+      try {
+        const saved = localStorage.getItem(storageSectionKey) as WorkspaceSection | null;
+        if (saved && VALID_SECTIONS.includes(saved)) {
+          targetSection = saved;
+        }
+      } catch (e) {}
+    }
+
+    // 3. Restore remembered MicroSaaS subtab
+    try {
+      const savedTab = localStorage.getItem(storageTabKey) as 'mailing' | 'vcard' | 'shortener' | 'menu' | 'wifi' | null;
+      if (savedTab && ['mailing', 'vcard', 'shortener', 'menu', 'wifi'].includes(savedTab)) {
+        targetMicroTab = savedTab;
+      }
+    } catch (e) {}
+
+    if (targetSection) {
+      setActiveSection(targetSection);
+      if (['mailing', 'vcard', 'shortener', 'menu', 'wifi'].includes(targetSection)) {
+        setMicroSaasTab(targetSection as any);
+      } else if (targetMicroTab) {
+        setMicroSaasTab(targetMicroTab);
+      }
+    } else if (targetMicroTab) {
+      setMicroSaasTab(targetMicroTab);
+    }
+  }, [storageSectionKey, storageTabKey]);
+
   const handleSelectSection = (section: WorkspaceSection) => {
     setActiveSection(section);
     if (['mailing', 'vcard', 'shortener', 'menu', 'wifi'].includes(section)) {
       setMicroSaasTab(section as any);
+      try {
+        localStorage.setItem(storageTabKey, section);
+      } catch (e) {}
     }
+    try {
+      localStorage.setItem(storageSectionKey, section);
+      if (typeof window !== 'undefined') {
+        window.history.replaceState(null, '', `#workspace?section=${section}`);
+      }
+    } catch (e) {}
     setMobileDrawerOpen(false);
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -109,6 +185,12 @@ export default function WorkspaceShell({
 
   const handleCreateNewClick = () => {
     setActiveSection('links');
+    try {
+      localStorage.setItem(storageSectionKey, 'links');
+      if (typeof window !== 'undefined') {
+        window.history.replaceState(null, '', '#workspace?section=links');
+      }
+    } catch (e) {}
     setMobileDrawerOpen(false);
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -206,12 +288,16 @@ export default function WorkspaceShell({
           >
             <Menu className="w-5 h-5" />
           </button>
-          <Link href="/#workspace" className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => handleSelectSection('links')}
+            className="flex items-center gap-2 cursor-pointer text-left"
+          >
             <div className="w-7 h-7 rounded-lg bg-[#11140F] dark:bg-white flex items-center justify-center text-white dark:text-[#11140F]">
               <QrMark className="w-4 h-4" fill="currentColor" />
             </div>
             <span className="font-bold text-base tracking-tight text-[#11140F] dark:text-white">DynamicQR</span>
-          </Link>
+          </button>
         </div>
 
         <div className="flex items-center gap-2">
@@ -238,7 +324,11 @@ export default function WorkspaceShell({
       >
         {/* Brand Header */}
         <div className="p-4 lg:p-5 border-b border-[#11140F]/10 dark:border-white/10 flex items-center justify-between gap-3 shrink-0">
-          <Link href="/#workspace" className="flex items-center gap-2.5 min-w-0 group">
+          <button
+            type="button"
+            onClick={() => handleSelectSection('links')}
+            className="flex items-center gap-2.5 min-w-0 group cursor-pointer text-left"
+          >
             <div className="w-9 h-9 rounded-xl bg-[#11140F] dark:bg-white flex items-center justify-center text-white dark:text-[#11140F] shadow-sm group-hover:scale-105 transition-transform">
               <QrMark className="w-5 h-5" fill="currentColor" />
             </div>
@@ -252,7 +342,7 @@ export default function WorkspaceShell({
                 </span>
               </div>
             )}
-          </Link>
+          </button>
 
           <button
             type="button"
@@ -660,7 +750,12 @@ export default function WorkspaceShell({
               userTier={user?.tier || 'free'}
               isAdmin={isAdmin}
               externalActiveTab={microSaasTab}
-              onTabChange={(t) => setMicroSaasTab(t)}
+              onTabChange={(t) => {
+                setMicroSaasTab(t);
+                try {
+                  localStorage.setItem(storageTabKey, t);
+                } catch (e) {}
+              }}
             />
             {linkCreationAndList}
           </div>
@@ -705,6 +800,13 @@ export default function WorkspaceShell({
               onTabChange={(t) => {
                 setMicroSaasTab(t);
                 setActiveSection(t as any);
+                try {
+                  localStorage.setItem(storageTabKey, t);
+                  localStorage.setItem(storageSectionKey, t);
+                  if (typeof window !== 'undefined') {
+                    window.history.replaceState(null, '', `#workspace?section=${t}`);
+                  }
+                } catch (e) {}
               }}
             />
           </div>

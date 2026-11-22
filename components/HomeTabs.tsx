@@ -36,7 +36,11 @@ export default function HomeTabs({
   useEffect(() => {
     const handleHash = () => {
       const hash = window.location.hash.toLowerCase();
-      if (hash === '#workspace') {
+      if (
+        hash === '#workspace' ||
+        hash.startsWith('#workspace?') ||
+        hash.startsWith('#workspace/')
+      ) {
         setActiveTab('workspace');
         if (typeof window !== 'undefined') {
           window.scrollTo({ top: 0, behavior: 'instant' });
