@@ -315,7 +315,12 @@ export default function WorkspaceShell({
   return (
     <div className="w-full min-h-screen bg-[#F4F5F1] dark:bg-[#080907] text-[#11140F] dark:text-[#EEF0EA] flex flex-col md:flex-row relative">
       {/* 1. MOBILE TOP HEADER (Phones & Tablets only) */}
-      <div className="md:hidden sticky top-0 z-40 w-full bg-white/90 dark:bg-[#0D0F0C]/90 backdrop-blur-md border-b border-[#11140F]/10 dark:border-white/10 px-4 py-3 flex items-center justify-between">
+      <div
+        style={{
+          top: 'var(--announcement-bar-height, 0px)',
+        }}
+        className="md:hidden sticky z-40 w-full bg-white/90 dark:bg-[#0D0F0C]/90 backdrop-blur-md border-b border-[#11140F]/10 dark:border-white/10 px-4 py-3 flex items-center justify-between"
+      >
         <div className="flex items-center gap-2.5">
           <button
             type="button"
@@ -357,7 +362,11 @@ export default function WorkspaceShell({
 
       {/* 2. DESKTOP SIDEBAR (Principal Source of Navigation — Insp. from Healthy App) */}
       <aside
-        className={`hidden md:flex flex-col shrink-0 border-r border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#0D0F0C] transition-all duration-300 sticky top-0 h-screen z-30 ${
+        style={{
+          top: 'var(--announcement-bar-height, 0px)',
+          height: 'calc(100vh - var(--announcement-bar-height, 0px))',
+        }}
+        className={`hidden md:flex flex-col shrink-0 border-r border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#0D0F0C] transition-all duration-300 sticky z-30 ${
           sidebarCollapsed ? 'w-[72px]' : 'w-64 lg:w-72'
         }`}
       >

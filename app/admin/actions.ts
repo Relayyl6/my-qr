@@ -465,3 +465,127 @@ export async function adminDeletePlatformSubscriber(id: string) {
   revalidatePath('/admin');
   return { success: true };
 }
+
+// -------------------------------------------------------------
+// PLATFORM EMAIL BROADCASTS (Sovereign Platform-Wide Dispatcher)
+// -------------------------------------------------------------
+
+export interface PlatformBroadcastPayload {
+  subject: string;
+  bodyHtml: string;
+  preheader?: string;
+  testEmail?: string;
+}
+
+export async function adminSendPlatformBroadcast(payload: PlatformBroadcastPayload) {
+  const admin = await verifyAdmin();
+  const { subject, bodyHtml, preheader, testEmail } = payload;
+
+  if (!subject?.trim()) throw new Error('Subject line is required.');
+  if (!bodyHtml?.trim()) throw new Error('Broadcast content body is required.');
+
+  const {
+    broadcastNewsletterCampaign,
+    sendEmail,
+    buildBroadcastEmailHtml,
+  } = await import('@/lib/email/send');
+
+  // Handle single test email
+  if (testEmail && testEmail.trim()) {
+    const targetEmail = testEmail.trim().toLowerCase();
+    const siteUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || 'https://my-qr-sandy.vercel.app';
+    const unsubUrl = `${siteUrl}/api/newsletter/unsubscribe?token=preview_token`;
+
+    const personalizedBody = bodyHtml
+      .replace(/{{first_name}}/g, 'Admin Preview')
+      .replace(/{{unsubscribe_url}}/g, unsubUrl)
+      .replace(/{{site_url}}/g, siteUrl);
+
+    const fullHtml = buildBroadcastEmailHtml({
+      body: personalizedBody,
+      unsubscribeUrl: unsubUrl,
+      siteUrl,
+      businessName: 'DynamicQR',
+      isCustomerBroadcast: false,
+    });
+
+    const res = await sendEmail({
+      to: targetEmail,
+      subject: `[TEST PREVIEW] ${subject.trim()}`,
+      html: fullHtml,
+      replyTo: process.env.EMAIL_REPLY_TO || 'hello@dynamicqr.co',
+      headers: {
+        'List-Unsubscribe': `<${unsubUrl}>`,
+        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+      },
+    });
+
+    if (!res.success) {
+      throw new Error(`Test email failed: ${res.error || 'Unknown transport error'}`);
+    }
+
+    await logAdminAction(admin.email, `Sent test platform broadcast to ${targetEmail}: "${subject.trim()}"`);
+    return { success: true, isTest: true, recipient: targetEmail };
+  }
+
+  // Full platform-wide broadcast to all active subscribers
+  const activeCount = await prisma.newsletterSubscriber.count({
+    where: { status: 'active' },
+  });
+
+  if (activeCount === 0) {
+    throw new Error('No active platform subscribers found to broadcast to.');
+  }
+
+  // Create campaign record
+  const campaign = await prisma.newsletterCampaign.create({
+    data: {
+      subject: subject.trim(),
+      preheader: preheader?.trim() || null,
+      bodyHtml: bodyHtml.trim(),
+      status: 'sending',
+    },
+  });
+
+  const result = await broadcastNewsletterCampaign({
+    campaignId: campaign.id,
+    subject: subject.trim(),
+    bodyHtml: bodyHtml.trim(),
+  });
+
+  if (!result.success) {
+    throw new Error(result.error || 'Failed to dispatch broadcast campaign');
+  }
+
+  await logAdminAction(
+    admin.email,
+    `Dispatched platform broadcast "${subject.trim()}" to ${result.sentCount} active subscribers via ${result.provider}`
+  );
+  revalidatePath('/admin');
+
+  return {
+    success: true,
+    campaignId: campaign.id,
+    sentCount: result.sentCount,
+    provider: result.provider,
+  };
+}
+
+export async function adminGetPlatformBroadcasts() {
+  await verifyAdmin();
+  const campaigns = await prisma.newsletterCampaign.findMany({
+    orderBy: { createdAt: 'desc' },
+    take: 50,
+  });
+  return campaigns;
+}
+
+export async function adminDeletePlatformCampaign(id: string) {
+  const admin = await verifyAdmin();
+  await prisma.newsletterCampaign.delete({
+    where: { id },
+  });
+  await logAdminAction(admin.email, `Deleted platform campaign: ${id}`);
+  revalidatePath('/admin');
+  return { success: true };
+}

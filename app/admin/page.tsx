@@ -56,6 +56,7 @@ export default async function AdminDashboardPage() {
     promoConfig,
     promoCodes,
     platformSubscribers,
+    platformBroadcasts,
   ] = await Promise.all([
     prisma.user.count(),
     prisma.user.count({ where: { tier: 'free' } }),
@@ -123,6 +124,23 @@ export default async function AdminDashboardPage() {
         source: true,
         consentAt: true,
         confirmedAt: true,
+        createdAt: true,
+      },
+    }),
+    prisma.newsletterCampaign.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+      select: {
+        id: true,
+        subject: true,
+        preheader: true,
+        bodyHtml: true,
+        status: true,
+        sentAt: true,
+        recipientCount: true,
+        deliveredCount: true,
+        sentVia: true,
+        recipients: true,
         createdAt: true,
       },
     }),
@@ -401,7 +419,11 @@ export default async function AdminDashboardPage() {
         </div>
 
         {/* Platform-Wide Mailing List & Newsletter Subscribers */}
-        <AdminPlatformMailingList initialSubscribers={platformSubscribers} />
+        <AdminPlatformMailingList
+          initialSubscribers={platformSubscribers}
+          initialBroadcasts={platformBroadcasts}
+          adminEmail={user?.email || adminEmail}
+        />
       </div>
     </div>
   );

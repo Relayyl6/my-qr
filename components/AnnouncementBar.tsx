@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Tag, ArrowRight, X } from 'lucide-react';
 
@@ -37,6 +37,7 @@ export default function AnnouncementBar({ initialBanner }: AnnouncementBarProps)
     initialBanner || DEFAULT_BANNER
   );
   const [visible, setVisible] = useState(Boolean(hasInitialContent));
+  const barRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     // Live update check to keep bar reactive when admin toggles without hard refresh
@@ -60,6 +61,34 @@ export default function AnnouncementBar({ initialBanner }: AnnouncementBarProps)
       });
   }, []);
 
+  // Synchronize CSS variable --announcement-bar-height so any sticky child below it adjusts without clipping
+  useEffect(() => {
+    const isShowing = visible && banner.enabled && Boolean(banner.messageText?.trim() || banner.badgeText?.trim());
+    if (isShowing && barRef.current) {
+      const updateHeight = () => {
+        if (barRef.current) {
+          document.documentElement.style.setProperty(
+            '--announcement-bar-height',
+            `${barRef.current.offsetHeight}px`
+          );
+        }
+      };
+      updateHeight();
+      window.addEventListener('resize', updateHeight);
+      return () => {
+        window.removeEventListener('resize', updateHeight);
+        document.documentElement.style.setProperty('--announcement-bar-height', '0px');
+      };
+    } else {
+      document.documentElement.style.setProperty('--announcement-bar-height', '0px');
+    }
+  }, [visible, banner]);
+
+  const handleDismiss = () => {
+    setVisible(false);
+    document.documentElement.style.setProperty('--announcement-bar-height', '0px');
+  };
+
   if (!visible || !banner.enabled || (!banner.messageText?.trim() && !banner.badgeText?.trim())) {
     return null;
   }
@@ -70,8 +99,9 @@ export default function AnnouncementBar({ initialBanner }: AnnouncementBarProps)
 
   return (
     <aside
+      ref={barRef}
       aria-label="Announcement"
-      className="relative isolate z-50 w-full bg-gradient-to-r from-[#11140F] via-[#1a2218] to-[#11140F] text-white px-4 py-2.5 text-xs sm:text-[13px] border-b border-white/10 shadow-xs flex items-center justify-between"
+      className="sticky top-0 isolate z-50 w-full bg-gradient-to-r from-[#11140F] via-[#1a2218] to-[#11140F] text-white px-4 py-2.5 text-xs sm:text-[13px] border-b border-white/10 shadow-xs flex items-center justify-between"
     >
       <div className="max-w-[1240px] mx-auto w-full flex items-center justify-center gap-3 text-center pr-6 flex-wrap">
         {banner.badgeText?.trim() && (
@@ -102,7 +132,7 @@ export default function AnnouncementBar({ initialBanner }: AnnouncementBarProps)
       </div>
       <button
         type="button"
-        onClick={() => setVisible(false)}
+        onClick={handleDismiss}
         className="absolute right-3 text-white/50 hover:text-white transition-colors p-1 rounded-md cursor-pointer"
         aria-label="Dismiss banner"
       >

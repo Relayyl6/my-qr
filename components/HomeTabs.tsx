@@ -87,7 +87,12 @@ export default function HomeTabs({
 
       {/* Sticky Top Header: ONLY shown on marketing/tour overview, NOT in dedicated workspace */}
       {activeTab !== 'workspace' && (
-        <div className="sticky top-0 inset-x-0 z-50 w-full">
+        <div
+          style={{
+            top: 'var(--announcement-bar-height, 0px)',
+          }}
+          className="sticky inset-x-0 z-40 w-full"
+        >
           {/* Unified Top Navigation Bar */}
           <HeaderNav
             user={user}
