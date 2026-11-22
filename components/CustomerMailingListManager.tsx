@@ -47,6 +47,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import PrintTemplateModal from './PrintTemplateModal';
+import ConfirmModal from './ConfirmModal';
 import { APP_URL } from '@/lib/config';
 
 interface MailingList {
@@ -218,6 +219,15 @@ export default function CustomerMailingListManager({
   const [showCsvModal, setShowCsvModal] = useState(false);
   const [csvText, setCsvText] = useState('');
   const [importingCsv, setImportingCsv] = useState(false);
+
+  // Centered Confirm Modal state
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    confirmLabel: string;
+    onConfirm: () => void | Promise<void>;
+  } | null>(null);
 
   // Broadcast Modal & Live Preview
   const [showBroadcastModal, setShowBroadcastModal] = useState(false);
@@ -416,9 +426,22 @@ export default function CustomerMailingListManager({
   };
 
   // Delete List
-  const handleDeleteList = async () => {
+  const handleDeleteList = () => {
     if (!selectedList || !selectedListId) return;
-    if (!window.confirm(`Delete list "${selectedList.name}" and all contacts? This cannot be undone.`)) return;
+    setConfirmModal({
+      isOpen: true,
+      title: `Delete List "${selectedList.name}"?`,
+      description: 'This will permanently delete this mailing list and all associated contacts. This action cannot be undone.',
+      confirmLabel: 'Delete List',
+      onConfirm: async () => {
+        setConfirmModal(null);
+        await executeDeleteList();
+      },
+    });
+  };
+
+  const executeDeleteList = async () => {
+    if (!selectedList || !selectedListId) return;
 
     setDeletingList(true);
     setFeedback(null);
@@ -600,7 +623,21 @@ export default function CustomerMailingListManager({
   };
 
   // Single Delete Contact
-  const handleDeleteContact = async (contactId: string) => {
+  const handleDeleteContact = (contactId: string, email?: string) => {
+    if (!selectedListId) return;
+    setConfirmModal({
+      isOpen: true,
+      title: 'Remove Subscriber?',
+      description: email ? `Remove "${email}" from this mailing list?` : 'Remove this subscriber from the mailing list?',
+      confirmLabel: 'Remove Subscriber',
+      onConfirm: async () => {
+        setConfirmModal(null);
+        await executeDeleteContact(contactId);
+      },
+    });
+  };
+
+  const executeDeleteContact = async (contactId: string) => {
     if (!selectedListId) return;
     try {
       const res = await fetch(`/api/mailing-lists/${selectedListId}/contacts?contactId=${contactId}`, {
@@ -617,9 +654,22 @@ export default function CustomerMailingListManager({
   };
 
   // Bulk Delete Selected Contacts
-  const handleBulkDelete = async () => {
+  const handleBulkDelete = () => {
     if (!selectedListId || selectedContactIds.length === 0) return;
-    if (!window.confirm(`Delete ${selectedContactIds.length} selected contacts? This cannot be undone.`)) return;
+    setConfirmModal({
+      isOpen: true,
+      title: `Delete ${selectedContactIds.length} Subscribers?`,
+      description: `These ${selectedContactIds.length} contacts will be permanently removed from this mailing list. This action cannot be undone.`,
+      confirmLabel: `Delete ${selectedContactIds.length} Subscribers`,
+      onConfirm: async () => {
+        setConfirmModal(null);
+        await executeBulkDelete();
+      },
+    });
+  };
+
+  const executeBulkDelete = async () => {
+    if (!selectedListId || selectedContactIds.length === 0) return;
 
     setDeletingBulk(true);
     try {
@@ -1128,7 +1178,7 @@ export default function CustomerMailingListManager({
                                     </button>
                                     <button
                                       type="button"
-                                      onClick={() => handleDeleteContact(c.id)}
+                                      onClick={() => handleDeleteContact(c.id, c.email)}
                                       className="p-1 rounded-md text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors cursor-pointer"
                                       title="Remove contact"
                                     >
@@ -2152,6 +2202,21 @@ export default function CustomerMailingListManager({
           defaultFooterNote="Instant confirmation • Zero spam • Unsubscribe anytime"
           defaultTemplate="table-tent"
           featureBannerText="Print this QR code on retail counters, packaging, or table tents. When customers scan, they enter their email on a branded mobile form with automated double opt-in."
+        />
+      )}
+
+      {/* Centered Mobile-Responsive Confirmation Modal */}
+      {confirmModal && (
+        <ConfirmModal
+          isOpen={confirmModal.isOpen}
+          onClose={() => setConfirmModal(null)}
+          onConfirm={confirmModal.onConfirm}
+          title={confirmModal.title}
+          description={confirmModal.description}
+          confirmLabel={confirmModal.confirmLabel}
+          cancelLabel="Cancel"
+          isDestructive={true}
+          loading={deletingList || deletingBulk}
         />
       )}
     </div>

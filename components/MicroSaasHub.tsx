@@ -29,6 +29,7 @@ import {
 import CustomerMailingListManager from '@/components/CustomerMailingListManager';
 import { PlanTier, PLANS } from '@/lib/plans';
 import PrintTemplateModal from '@/components/PrintTemplateModal';
+import ConfirmModal from '@/components/ConfirmModal';
 import { APP_URL } from '@/lib/config';
 
 interface MicroSaasHubProps {
@@ -92,6 +93,7 @@ export default function MicroSaasHub({
   const [printLink, setPrintLink] = useState<MicroItem | null>(null);
   const [printMenu, setPrintMenu] = useState<MicroItem | null>(null);
   const [printWifi, setPrintWifi] = useState<MicroItem | null>(null);
+  const [deleteConfirmTarget, setDeleteConfirmTarget] = useState<{ id: string; title: string } | null>(null);
 
   // Edit form states
   const [editVcardForm, setEditVcardForm] = useState({
@@ -228,7 +230,6 @@ export default function MicroSaasHub({
   };
 
   const handleDeleteItem = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this micro-app? This action cannot be undone.')) return;
     setActionLoading(true);
     try {
       const res = await fetch(`/api/microsaas/${id}`, { method: 'DELETE' });
@@ -241,6 +242,7 @@ export default function MicroSaasHub({
       setErrorMsg(err.message);
     } finally {
       setActionLoading(false);
+      setDeleteConfirmTarget(null);
     }
   };
 
@@ -771,7 +773,7 @@ export default function MicroSaasHub({
 
                       <button
                         type="button"
-                        onClick={() => handleDeleteItem(card.id)}
+                        onClick={() => setDeleteConfirmTarget({ id: card.id, title: card.title || 'Digital Card' })}
                         disabled={actionLoading}
                         className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
                         title="Delete Card"
@@ -920,7 +922,7 @@ export default function MicroSaasHub({
                             </button>
                             <button
                               type="button"
-                              onClick={() => handleDeleteItem(link.id)}
+                              onClick={() => setDeleteConfirmTarget({ id: link.id, title: link.title || 'Short Link' })}
                               className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
                               title="Delete Link"
                             >
@@ -1108,7 +1110,7 @@ export default function MicroSaasHub({
 
                       <button
                         type="button"
-                        onClick={() => handleDeleteItem(menu.id)}
+                        onClick={() => setDeleteConfirmTarget({ id: menu.id, title: menu.title || 'Restaurant Menu' })}
                         disabled={actionLoading}
                         className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
                         title="Delete Menu"
@@ -1271,7 +1273,7 @@ export default function MicroSaasHub({
 
                       <button
                         type="button"
-                        onClick={() => handleDeleteItem(wifi.id)}
+                        onClick={() => setDeleteConfirmTarget({ id: wifi.id, title: wifi.title || 'Wi-Fi Network' })}
                         disabled={actionLoading}
                         className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
                         title="Delete Network"
@@ -2349,6 +2351,23 @@ export default function MicroSaasHub({
           featureBannerText="Print on tabletop tent cards or at the entrance. Guests scan once and are instantly connected — no password required."
         />
       )}
+
+      {/* Centered Mobile-Responsive Delete Confirm Modal */}
+      <ConfirmModal
+        isOpen={!!deleteConfirmTarget}
+        onClose={() => setDeleteConfirmTarget(null)}
+        onConfirm={() => {
+          if (deleteConfirmTarget) {
+            handleDeleteItem(deleteConfirmTarget.id);
+          }
+        }}
+        title={`Delete "${deleteConfirmTarget?.title || 'Micro-App'}"?`}
+        description="Are you sure you want to delete this micro-app? This action cannot be undone."
+        confirmLabel="Delete Micro-App"
+        cancelLabel="Cancel"
+        isDestructive={true}
+        loading={actionLoading}
+      />
     </div>
   );
 }

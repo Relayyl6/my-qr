@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { deleteLink, updateLink, toggleArchiveLink, checkDestinationHealth } from '@/app/actions';
 import QrCodeCard from './QrCodeCard';
 import DeleteConfirmModal from './DeleteConfirmModal';
+import ConfirmModal from './ConfirmModal';
 import AiRoutingComposer from './AiRoutingComposer';
 import QrArtStudio from './QrArtStudio';
 import LandingPageEditor from './LandingPageEditor';
@@ -55,6 +56,7 @@ export default function LinkList({
   const [healthMap, setHealthMap] = useState<Record<string, { ok: boolean; status?: number; error?: string }>>({});
   const [checkingHealthId, setCheckingHealthId] = useState<string | null>(null);
   const [revertingId, setRevertingId] = useState<string | null>(null);
+  const [revertTargetId, setRevertTargetId] = useState<string | null>(null);
 
   // AI Feature Modals state
   const [activeRouterLink, setActiveRouterLink] = useState<{ link: QrLink; tab: 'schedule' | 'ai' | 'rules' } | null>(null);
@@ -65,16 +67,21 @@ export default function LinkList({
     setOrigin(window.location.origin);
   }, []);
 
-  const handleQuickRevert = async (linkId: string) => {
-    if (!confirm('Revert this link back to direct URL redirection? (Your mobile showcase page will be unlinked)')) {
-      return;
-    }
+  const handleQuickRevert = (linkId: string) => {
+    setRevertTargetId(linkId);
+  };
+
+  const executeQuickRevert = async () => {
+    if (!revertTargetId) return;
+    const linkId = revertTargetId;
     setRevertingId(linkId);
     try {
       await revertLandingPageAction(linkId);
+      setRevertTargetId(null);
       window.location.reload();
     } catch (err: any) {
       alert('Failed to revert: ' + err.message);
+      setRevertTargetId(null);
     } finally {
       setRevertingId(null);
     }
@@ -542,6 +549,17 @@ export default function LinkList({
         onConfirmDelete={
           pendingDeleteLink ? () => deleteLink(pendingDeleteLink.id) : () => {}
         }
+      />
+
+      <ConfirmModal
+        isOpen={!!revertTargetId}
+        onClose={() => setRevertTargetId(null)}
+        onConfirm={executeQuickRevert}
+        title="Revert Link Destination"
+        description="Revert this link back to direct URL redirection? Your mobile showcase page will be unlinked."
+        confirmLabel="Revert Link"
+        isDestructive={false}
+        loading={!!revertingId}
       />
     </div>
   );

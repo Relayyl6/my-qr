@@ -27,6 +27,7 @@ import {
   adminTogglePromoCode,
   adminDeletePromoCode,
 } from '@/app/admin/actions';
+import ConfirmModal from './ConfirmModal';
 
 interface PromoCodeItem {
   id: string;
@@ -63,6 +64,8 @@ export default function AdminPromoManager({
 
   // New promo code form modal
   const [showCreateCodeModal, setShowCreateCodeModal] = useState(false);
+  const [codeToDelete, setCodeToDelete] = useState<{ id: string; code: string } | null>(null);
+  const [deletingCode, setDeletingCode] = useState(false);
   const [newCodeForm, setNewCodeForm] = useState({
     code: '',
     type: 'percent',
@@ -156,15 +159,23 @@ export default function AdminPromoManager({
     }
   };
 
-  const handleDeleteCode = async (id: string, codeStr: string) => {
-    if (!confirm(`Are you sure you want to delete promo code "${codeStr}"?`)) return;
+  const handleDeleteCode = (id: string, codeStr: string) => {
+    setCodeToDelete({ id, code: codeStr });
+  };
+
+  const executeDeleteCode = async () => {
+    if (!codeToDelete) return;
+    setDeletingCode(true);
     try {
-      await adminDeletePromoCode(id);
-      setPromoCodes((prev) => prev.filter((c) => c.id !== id));
-      setStatusMsg(`Promo code "${codeStr}" deleted.`);
+      await adminDeletePromoCode(codeToDelete.id);
+      setPromoCodes((prev) => prev.filter((c) => c.id !== codeToDelete.id));
+      setStatusMsg(`Promo code "${codeToDelete.code}" deleted.`);
       setTimeout(() => setStatusMsg(null), 3000);
+      setCodeToDelete(null);
     } catch (err: any) {
       alert(err.message || 'Failed to delete promo code');
+    } finally {
+      setDeletingCode(false);
     }
   };
 
@@ -1178,6 +1189,17 @@ export default function AdminPromoManager({
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={!!codeToDelete}
+        onClose={() => setCodeToDelete(null)}
+        onConfirm={executeDeleteCode}
+        title="Delete Promo Code"
+        description={codeToDelete ? `Are you sure you want to delete promo code "${codeToDelete.code}"? This action cannot be undone.` : ''}
+        confirmLabel="Delete Promo Code"
+        isDestructive={true}
+        loading={deletingCode}
+      />
     </div>
   );
 }

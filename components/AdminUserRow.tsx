@@ -24,6 +24,7 @@ import {
   PowerOff,
   RotateCcw,
 } from 'lucide-react';
+import ConfirmModal from './ConfirmModal';
 
 interface UserRecord {
   id: string;
@@ -46,6 +47,14 @@ export default function AdminUserRow({ user, isSelf }: { user: UserRecord; isSel
   const [inspectModalOpen, setInspectModalOpen] = useState(false);
   const [inspectingLinks, setInspectingLinks] = useState<any[] | null>(null);
   const [loadingInspect, setLoadingInspect] = useState(false);
+  const [pendingAction, setPendingAction] = useState<{
+    type: 'deactivate' | 'reactivate' | 'purge';
+    title: string;
+    description: string;
+    confirmLabel: string;
+    isDestructive: boolean;
+  } | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
 
   const handleTierChange = async (newTier: string) => {
     setLoading(true);
@@ -90,63 +99,59 @@ export default function AdminUserRow({ user, isSelf }: { user: UserRecord; isSel
     }
   };
 
-  const handleDeactivateUser = async () => {
-    const confirmed = window.confirm(
-      `Deactivate account for ${user.email}?\n\nThis decouples all QR links (setting userId to null), archives them, and preserves platform scan metrics.`
-    );
-    if (!confirmed) return;
-
-    setLoading(true);
-    setStatusMsg(null);
-    try {
-      await adminDeactivateUserAccount(user.id);
-      setStatusMsg('Account deactivated');
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    } catch (err: any) {
-      setStatusMsg(err.message || 'Failed to deactivate');
-      setLoading(false);
-    }
+  const handleDeactivateUser = () => {
+    setPendingAction({
+      type: 'deactivate',
+      title: `Deactivate Account: ${user.email}`,
+      description: 'This decouples all QR links (setting userId to null), archives them, and preserves platform scan metrics.',
+      confirmLabel: 'Deactivate Account',
+      isDestructive: true,
+    });
   };
 
-  const handleReactivateUser = async () => {
-    const confirmed = window.confirm(
-      `Reactivate account for ${user.email}?\n\nThis will restore active status and re-attach all decoupled QR links (restoring userId and unarchiving them).`
-    );
-    if (!confirmed) return;
-
-    setLoading(true);
-    setStatusMsg(null);
-    try {
-      await adminReactivateUserAccount(user.id);
-      setStatusMsg('Account reactivated');
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    } catch (err: any) {
-      setStatusMsg(err.message || 'Failed to reactivate');
-      setLoading(false);
-    }
+  const handleReactivateUser = () => {
+    setPendingAction({
+      type: 'reactivate',
+      title: `Reactivate Account: ${user.email}`,
+      description: 'This will restore active status and re-attach all decoupled QR links (restoring userId and unarchiving them).',
+      confirmLabel: 'Reactivate Account',
+      isDestructive: false,
+    });
   };
 
-  const handlePurgeUser = async () => {
-    const confirmed = window.confirm(
-      `DANGER: Permanently wipe account and ALL data for ${user.email}?\n\nThis will completely delete ALL QR codes, ALL scan history, ALL rules, domains, and the user. Nothing will be retained as null. EVERY SINGLE THING will be wiped.`
-    );
-    if (!confirmed) return;
+  const handlePurgeUser = () => {
+    setPendingAction({
+      type: 'purge',
+      title: `Permanently Wipe Account: ${user.email}`,
+      description: 'DANGER: This will completely delete ALL QR codes, ALL scan history, ALL rules, domains, and the user. Nothing will be retained as null. EVERY SINGLE THING will be wiped permanently.',
+      confirmLabel: 'Permanently Wipe Everything',
+      isDestructive: true,
+    });
+  };
 
-    setLoading(true);
+  const executePendingAction = async () => {
+    if (!pendingAction) return;
+    setActionLoading(true);
     setStatusMsg(null);
     try {
-      await adminPurgeUserAccount(user.id);
-      setStatusMsg('Account wiped completely');
+      if (pendingAction.type === 'deactivate') {
+        await adminDeactivateUserAccount(user.id);
+        setStatusMsg('Account deactivated');
+      } else if (pendingAction.type === 'reactivate') {
+        await adminReactivateUserAccount(user.id);
+        setStatusMsg('Account reactivated');
+      } else if (pendingAction.type === 'purge') {
+        await adminPurgeUserAccount(user.id);
+        setStatusMsg('Account wiped completely');
+      }
+      setPendingAction(null);
       setTimeout(() => {
         window.location.reload();
       }, 1000);
     } catch (err: any) {
-      setStatusMsg(err.message || 'Failed to wipe');
-      setLoading(false);
+      setStatusMsg(err.message || 'Action failed');
+      setActionLoading(false);
+      setPendingAction(null);
     }
   };
 
@@ -403,6 +408,22 @@ export default function AdminUserRow({ user, isSelf }: { user: UserRecord; isSel
                 </div>
               </div>
             </div>
+          </td>
+        </tr>
+      )}
+      {pendingAction && (
+        <tr>
+          <td colSpan={6} className="p-0 border-0 m-0 h-0">
+            <ConfirmModal
+              isOpen={!!pendingAction}
+              onClose={() => setPendingAction(null)}
+              onConfirm={executePendingAction}
+              title={pendingAction.title}
+              description={pendingAction.description}
+              confirmLabel={pendingAction.confirmLabel}
+              isDestructive={pendingAction.isDestructive}
+              loading={actionLoading}
+            />
           </td>
         </tr>
       )}

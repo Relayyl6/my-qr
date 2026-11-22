@@ -19,6 +19,7 @@ import {
   adminUpdatePlatformSubscriber,
   adminDeletePlatformSubscriber,
 } from '@/app/admin/actions';
+import ConfirmModal from '@/components/ConfirmModal';
 
 export interface PlatformSubscriberItem {
   id: string;
@@ -45,6 +46,7 @@ export default function AdminPlatformMailingList({ initialSubscribers }: Props) 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingItem, setEditingItem] = useState<PlatformSubscriberItem | null>(null);
+  const [subscriberToDelete, setSubscriberToDelete] = useState<{ id: string; email: string } | null>(null);
 
   // Form states
   const [formEmail, setFormEmail] = useState('');
@@ -145,14 +147,21 @@ export default function AdminPlatformMailingList({ initialSubscribers }: Props) 
   };
 
   const handleDelete = (id: string, email: string) => {
-    if (!confirm(`Remove ${email} from the platform mailing list?`)) return;
+    setSubscriberToDelete({ id, email });
+  };
+
+  const executeDelete = () => {
+    if (!subscriberToDelete) return;
+    const { id } = subscriberToDelete;
 
     startTransition(async () => {
       try {
         await adminDeletePlatformSubscriber(id);
         setSubscribers((prev) => prev.filter((s) => s.id !== id));
+        setSubscriberToDelete(null);
       } catch (err: any) {
-        alert(err.message || 'Failed to delete subscriber');
+        setErrorMsg(err.message || 'Failed to delete subscriber');
+        setSubscriberToDelete(null);
       }
     });
   };
@@ -476,6 +485,18 @@ export default function AdminPlatformMailingList({ initialSubscribers }: Props) 
           </div>
         </div>
       )}
+      {/* Centered Mobile-Responsive Confirm Delete Modal */}
+      <ConfirmModal
+        isOpen={!!subscriberToDelete}
+        onClose={() => setSubscriberToDelete(null)}
+        onConfirm={executeDelete}
+        title="Remove Platform Subscriber?"
+        description={`Are you sure you want to remove "${subscriberToDelete?.email}" from the platform mailing list?`}
+        confirmLabel="Remove Subscriber"
+        cancelLabel="Cancel"
+        isDestructive={true}
+        loading={isPending}
+      />
     </div>
   );
 }

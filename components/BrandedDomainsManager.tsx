@@ -23,6 +23,7 @@ import {
   Zap,
   Info,
 } from 'lucide-react';
+import ConfirmModal from './ConfirmModal';
 
 interface Domain {
   id: string;
@@ -59,6 +60,8 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [verifyingId, setVerifyingId] = useState<string | null>(null);
   const [actionMsg, setActionMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  const [domainToDelete, setDomainToDelete] = useState<{ id: string; domain: string } | null>(null);
+  const [deletingDomain, setDeletingDomain] = useState(false);
 
   const [state, formAction] = useFormState(addCustomDomain, {});
 
@@ -126,16 +129,27 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to remove this domain?')) return;
+  const handleDelete = (id: string, domainName?: string) => {
+    const d = domains.find((item) => item.id === id);
+    setDomainToDelete({ id, domain: domainName || d?.domain || 'this domain' });
+  };
+
+  const executeDeleteDomain = async () => {
+    if (!domainToDelete) return;
+    setDeletingDomain(true);
     try {
-      const res = await deleteCustomDomain(id);
+      const res = await deleteCustomDomain(domainToDelete.id);
       if (res.success) {
-        setDomains((prev) => prev.filter((d) => d.id !== id));
+        setDomains((prev) => prev.filter((d) => d.id !== domainToDelete.id));
         setActionMsg({ text: 'Domain removed.', type: 'success' });
+        setDomainToDelete(null);
+      } else {
+        setActionMsg({ text: res.message || 'Delete failed', type: 'error' });
       }
     } catch (err: any) {
-      alert('Delete failed: ' + err.message);
+      setActionMsg({ text: 'Delete failed: ' + err.message, type: 'error' });
+    } finally {
+      setDeletingDomain(false);
     }
   };
 
@@ -352,7 +366,7 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
 
                             <button
                               type="button"
-                              onClick={() => handleDelete(d.id)}
+                              onClick={() => handleDelete(d.id, d.domain)}
                               className="p-1.5 rounded-lg text-[#11140F]/40 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
                               title="Delete domain"
                             >
@@ -439,6 +453,17 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
           )}
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={!!domainToDelete}
+        onClose={() => setDomainToDelete(null)}
+        onConfirm={executeDeleteDomain}
+        title="Remove Branded Domain"
+        description={domainToDelete ? `Are you sure you want to remove domain "${domainToDelete.domain}"? Dynamic QR codes using this domain may stop resolving until reconfigured.` : ''}
+        confirmLabel="Remove Domain"
+        isDestructive={true}
+        loading={deletingDomain}
+      />
     </div>
   );
 }
