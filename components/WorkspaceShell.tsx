@@ -116,6 +116,13 @@ export default function WorkspaceShell({
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
+    try {
+      const savedCollapsed = localStorage.getItem('dynamicqr_sidebar_collapsed');
+      if (savedCollapsed !== null) {
+        setSidebarCollapsed(savedCollapsed === 'true');
+      }
+    } catch (e) {}
+
     let targetSection: WorkspaceSection | null = null;
     let targetMicroTab: 'mailing' | 'vcard' | 'shortener' | 'menu' | 'wifi' | null = null;
 
@@ -195,6 +202,16 @@ export default function WorkspaceShell({
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+  };
+
+  const handleToggleSidebar = () => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('dynamicqr_sidebar_collapsed', String(next));
+      } catch (e) {}
+      return next;
+    });
   };
 
   const isMicroSaasSection = ['mailing', 'vcard', 'shortener', 'menu', 'wifi'].includes(activeSection);
@@ -319,49 +336,79 @@ export default function WorkspaceShell({
       {/* 2. DESKTOP SIDEBAR (Principal Source of Navigation — Insp. from Healthy App) */}
       <aside
         className={`hidden md:flex flex-col shrink-0 border-r border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#0D0F0C] transition-all duration-300 sticky top-0 h-screen z-30 ${
-          sidebarCollapsed ? 'w-20' : 'w-64 lg:w-72'
+          sidebarCollapsed ? 'w-[72px]' : 'w-64 lg:w-72'
         }`}
       >
         {/* Brand Header */}
-        <div className="p-4 lg:p-5 border-b border-[#11140F]/10 dark:border-white/10 flex items-center justify-between gap-3 shrink-0">
-          <button
-            type="button"
-            onClick={() => handleSelectSection('links')}
-            className="flex items-center gap-2.5 min-w-0 group cursor-pointer text-left"
-          >
-            <div className="w-9 h-9 rounded-xl bg-[#11140F] dark:bg-white flex items-center justify-center text-white dark:text-[#11140F] shadow-sm group-hover:scale-105 transition-transform">
-              <QrMark className="w-5 h-5" fill="currentColor" />
-            </div>
-            {!sidebarCollapsed && (
-              <div className="min-w-0">
-                <span className="font-bold text-base tracking-tight text-[#11140F] dark:text-white block leading-tight">
-                  DynamicQR
-                </span>
-                <span className="text-[10.5px] font-mono text-[#11140F]/50 dark:text-white/50 block leading-tight">
-                  Sovereign Workspace
-                </span>
-              </div>
-            )}
-          </button>
+        <div
+          className={`border-b border-[#11140F]/10 dark:border-white/10 shrink-0 transition-all ${
+            sidebarCollapsed
+              ? 'py-4 px-2 flex flex-col items-center gap-2.5'
+              : 'p-4 lg:p-5 flex items-center justify-between gap-3'
+          }`}
+        >
+          {sidebarCollapsed ? (
+            <>
+              <button
+                type="button"
+                onClick={() => handleSelectSection('links')}
+                className="w-10 h-10 rounded-xl bg-[#11140F] dark:bg-white flex items-center justify-center text-white dark:text-[#11140F] shadow-sm hover:scale-105 transition-transform cursor-pointer"
+                title="DynamicQR Home"
+              >
+                <QrMark className="w-5 h-5" fill="currentColor" />
+              </button>
+              <button
+                type="button"
+                onClick={handleToggleSidebar}
+                className="w-7 h-7 rounded-lg bg-[#11140F]/5 dark:bg-white/5 hover:bg-[#11140F]/10 dark:hover:bg-white/10 text-[#11140F]/60 dark:text-white/60 flex items-center justify-center transition-colors cursor-pointer"
+                title="Expand sidebar"
+                aria-label="Expand sidebar"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => handleSelectSection('links')}
+                className="flex items-center gap-2.5 min-w-0 group cursor-pointer text-left"
+              >
+                <div className="w-9 h-9 rounded-xl bg-[#11140F] dark:bg-white flex items-center justify-center text-white dark:text-[#11140F] shadow-sm group-hover:scale-105 transition-transform shrink-0">
+                  <QrMark className="w-5 h-5" fill="currentColor" />
+                </div>
+                <div className="min-w-0">
+                  <span className="font-bold text-base tracking-tight text-[#11140F] dark:text-white block leading-tight truncate">
+                    DynamicQR
+                  </span>
+                  <span className="text-[10.5px] font-mono text-[#11140F]/50 dark:text-white/50 block leading-tight truncate">
+                    Sovereign Workspace
+                  </span>
+                </div>
+              </button>
 
-          <button
-            type="button"
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="p-1.5 rounded-lg bg-[#11140F]/5 dark:bg-white/5 hover:bg-[#11140F]/10 dark:hover:bg-white/10 text-[#11140F]/60 dark:text-white/60 transition-colors cursor-pointer"
-            title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            aria-label="Toggle sidebar"
-          >
-            {sidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-          </button>
+              <button
+                type="button"
+                onClick={handleToggleSidebar}
+                className="p-1.5 rounded-lg bg-[#11140F]/5 dark:bg-white/5 hover:bg-[#11140F]/10 dark:hover:bg-white/10 text-[#11140F]/60 dark:text-white/60 transition-colors cursor-pointer shrink-0"
+                title="Collapse sidebar"
+                aria-label="Collapse sidebar"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+            </>
+          )}
         </div>
 
-        {/* Primary Action Button (Inspired by "+ New prescription" in Insp. image) */}
-        <div className="p-3 shrink-0 space-y-2">
+        {/* Primary Action Button (New QR Code & Test Promo Modal) */}
+        <div className={`shrink-0 ${sidebarCollapsed ? 'p-2 flex flex-col items-center gap-2' : 'p-3 space-y-2'}`}>
           <button
             type="button"
             onClick={handleCreateNewClick}
-            className={`w-full py-2.5 px-3.5 rounded-xl bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] text-xs font-bold hover:bg-[#2A2E25] dark:hover:bg-white/90 transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer ${
-              sidebarCollapsed ? 'p-2.5' : ''
+            className={`rounded-xl bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] font-bold hover:bg-[#2A2E25] dark:hover:bg-white/90 transition-all flex items-center justify-center shadow-xs cursor-pointer ${
+              sidebarCollapsed
+                ? 'w-10 h-10 p-0'
+                : 'w-full py-2.5 px-3.5 text-xs gap-2'
             }`}
             title="Create New QR Code"
           >
@@ -370,7 +417,16 @@ export default function WorkspaceShell({
           </button>
 
           {/* Test / Preview Promo Modal Button */}
-          {!sidebarCollapsed && (
+          {sidebarCollapsed ? (
+            <button
+              type="button"
+              onClick={() => setShowPromoModalPreview(true)}
+              className="w-10 h-8 rounded-xl border border-dashed border-[#11140F]/20 dark:border-white/20 hover:border-emerald-500/50 bg-[#11140F]/[0.02] dark:bg-white/[0.02] flex items-center justify-center text-emerald-600 dark:text-emerald-400 hover:bg-[#11140F]/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+              title="Preview Promotional Popup Modal"
+            >
+              <Eye className="w-3.5 h-3.5" />
+            </button>
+          ) : (
             <button
               type="button"
               onClick={() => setShowPromoModalPreview(true)}
@@ -389,13 +445,17 @@ export default function WorkspaceShell({
         </div>
 
         {/* Scrollable Navigation List */}
-        <div className="flex-1 overflow-y-auto px-3 py-2 space-y-5 scrollbar-thin scrollbar-thumb-white/10">
+        <div className={`flex-1 overflow-y-auto space-y-4 scrollbar-thin scrollbar-thumb-white/10 ${
+          sidebarCollapsed ? 'px-2 py-2' : 'px-3 py-2'
+        }`}>
           {navSections.map((group, idx) => (
             <div key={idx} className="space-y-1">
-              {!sidebarCollapsed && (
+              {!sidebarCollapsed ? (
                 <div className="px-3 py-1 text-[10px] font-mono uppercase tracking-wider font-bold text-[#11140F]/40 dark:text-white/40">
                   {group.group}
                 </div>
+              ) : (
+                idx > 0 && <div className="w-7 h-px bg-[#11140F]/10 dark:bg-white/10 mx-auto my-2" />
               )}
               {group.items.map((item) => {
                 const Icon = item.icon;
@@ -405,12 +465,20 @@ export default function WorkspaceShell({
                     key={item.id}
                     type="button"
                     onClick={() => handleSelectSection(item.id)}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all cursor-pointer ${
-                      isActive
-                        ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] font-semibold shadow-xs'
-                        : 'text-[#11140F]/70 dark:text-white/70 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white'
+                    className={`relative rounded-xl text-xs font-medium transition-all cursor-pointer ${
+                      sidebarCollapsed
+                        ? `w-10 h-10 flex items-center justify-center mx-auto ${
+                            isActive
+                              ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] shadow-xs'
+                              : 'text-[#11140F]/70 dark:text-white/70 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white'
+                          }`
+                        : `w-full flex items-center gap-3 px-3 py-2.5 ${
+                            isActive
+                              ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] font-semibold shadow-xs'
+                              : 'text-[#11140F]/70 dark:text-white/70 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white'
+                          }`
                     }`}
-                    title={sidebarCollapsed ? item.label : undefined}
+                    title={item.label}
                   >
                     <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-emerald-400 dark:text-[#2F6B4F]' : ''}`} />
                     {!sidebarCollapsed && (
@@ -426,6 +494,9 @@ export default function WorkspaceShell({
                       >
                         {item.badge}
                       </span>
+                    )}
+                    {sidebarCollapsed && item.badge && (
+                      <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-[#0D0F0C]" />
                     )}
                   </button>
                 );
@@ -443,7 +514,11 @@ export default function WorkspaceShell({
 
             <Link
               href="/product-tour"
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-[#11140F]/70 dark:text-white/70 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white transition-all"
+              className={`rounded-xl text-xs font-medium transition-all ${
+                sidebarCollapsed
+                  ? 'w-10 h-10 flex items-center justify-center mx-auto text-[#11140F]/70 dark:text-white/70 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white'
+                  : 'w-full flex items-center gap-3 px-3 py-2.5 text-[#11140F]/70 dark:text-white/70 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white'
+              }`}
               title="Product Tour"
             >
               <Compass className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
@@ -452,7 +527,11 @@ export default function WorkspaceShell({
 
             <Link
               href="/pricing"
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-[#11140F]/70 dark:text-white/70 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white transition-all"
+              className={`rounded-xl text-xs font-medium transition-all ${
+                sidebarCollapsed
+                  ? 'w-10 h-10 flex items-center justify-center mx-auto text-[#11140F]/70 dark:text-white/70 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white'
+                  : 'w-full flex items-center gap-3 px-3 py-2.5 text-[#11140F]/70 dark:text-white/70 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white'
+              }`}
               title="Pricing Plans"
             >
               <CreditCard className="w-4 h-4 shrink-0" />
@@ -462,7 +541,11 @@ export default function WorkspaceShell({
             <button
               type="button"
               onClick={() => setShowBulkModal(true)}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-[#11140F]/70 dark:text-white/70 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white transition-all cursor-pointer"
+              className={`rounded-xl text-xs font-medium transition-all cursor-pointer ${
+                sidebarCollapsed
+                  ? 'w-10 h-10 flex items-center justify-center mx-auto text-[#11140F]/70 dark:text-white/70 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white'
+                  : 'w-full flex items-center gap-3 px-3 py-2.5 text-[#11140F]/70 dark:text-white/70 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white'
+              }`}
               title="Bulk Import (AI)"
             >
               <Layers className="w-4 h-4 shrink-0 text-purple-600 dark:text-purple-400" />
@@ -473,7 +556,11 @@ export default function WorkspaceShell({
               <>
                 <Link
                   href="/admin"
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 transition-all"
+                  className={`rounded-xl text-xs font-medium transition-all ${
+                    sidebarCollapsed
+                      ? 'w-10 h-10 flex items-center justify-center mx-auto text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10'
+                      : 'w-full flex items-center gap-3 px-3 py-2.5 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10'
+                  }`}
                   title="Admin Console"
                 >
                   <Shield className="w-4 h-4 shrink-0" />
@@ -482,7 +569,11 @@ export default function WorkspaceShell({
 
                 <Link
                   href="/admin/ai-usage"
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-purple-700 dark:text-purple-400 hover:bg-purple-500/10 transition-all"
+                  className={`rounded-xl text-xs font-medium transition-all ${
+                    sidebarCollapsed
+                      ? 'w-10 h-10 flex items-center justify-center mx-auto text-purple-700 dark:text-purple-400 hover:bg-purple-500/10'
+                      : 'w-full flex items-center gap-3 px-3 py-2.5 text-purple-700 dark:text-purple-400 hover:bg-purple-500/10'
+                  }`}
                   title="AI Telemetry"
                 >
                   <Activity className="w-4 h-4 shrink-0" />
@@ -493,16 +584,21 @@ export default function WorkspaceShell({
           </div>
         </div>
 
-        {/* User Profile Card (Bottom of Sidebar — Insp. from Healthy App) */}
+        {/* User Profile Card (Bottom of Sidebar) */}
         {user && (
-          <div className="p-3 border-t border-[#11140F]/10 dark:border-white/10 shrink-0 bg-white/50 dark:bg-[#0D0F0C]/50">
+          <div className="p-2 lg:p-3 border-t border-[#11140F]/10 dark:border-white/10 shrink-0 bg-white/50 dark:bg-[#0D0F0C]/50">
             {!sidebarCollapsed ? (
               <div className="flex items-center justify-between gap-2 p-1.5 rounded-xl bg-[#11140F]/[0.03] dark:bg-white/[0.03]">
                 {/* Avatar & User Details */}
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-600 to-[#11140F] text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-xs">
+                  <button
+                    type="button"
+                    onClick={() => setShowAccountModal(true)}
+                    className="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-600 to-[#11140F] text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-xs hover:ring-2 hover:ring-emerald-500/50 transition-all cursor-pointer"
+                    title="Account Settings"
+                  >
                     {userInitial}
-                  </div>
+                  </button>
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5">
                       <span className="text-xs font-bold text-[#11140F] dark:text-white truncate">
@@ -539,18 +635,33 @@ export default function WorkspaceShell({
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-600 to-[#11140F] text-white flex items-center justify-center text-xs font-bold">
-                  {userInitial}
-                </div>
+              <div className="flex flex-col items-center gap-2 py-1">
                 <button
                   type="button"
-                  onClick={() => signOut()}
-                  className="p-1.5 rounded-lg text-red-500 hover:bg-red-50"
-                  title="Log Out"
+                  onClick={() => setShowAccountModal(true)}
+                  className="w-9 h-9 rounded-full bg-gradient-to-tr from-emerald-600 to-[#11140F] text-white flex items-center justify-center text-xs font-bold hover:ring-2 hover:ring-emerald-500/50 transition-all cursor-pointer shadow-xs"
+                  title={`Signed in as ${userName} (${user.email}) - Account Settings`}
                 >
-                  <LogOut className="w-4 h-4" />
+                  {userInitial}
                 </button>
+                <div className="flex flex-col items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowAccountModal(true)}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white hover:bg-[#11140F]/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                    title="Account & Privacy Settings"
+                  >
+                    <Settings className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => signOut()}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
+                    title="Log Out"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -559,8 +670,14 @@ export default function WorkspaceShell({
 
       {/* 3. MOBILE SIDEBAR DRAWER (Full mobile navigation) */}
       {mobileDrawerOpen && (
-        <div className="fixed inset-0 z-50 md:hidden bg-black/60 backdrop-blur-xs flex">
-          <div className="w-72 bg-[#F4F5F1] dark:bg-[#0D0F0C] h-full shadow-2xl p-4 flex flex-col justify-between border-r border-[#11140F]/10 dark:border-white/10">
+        <div
+          className="fixed inset-0 z-50 md:hidden bg-black/60 backdrop-blur-xs flex animate-in fade-in duration-200"
+          onClick={() => setMobileDrawerOpen(false)}
+        >
+          <div
+            className="w-72 bg-[#F4F5F1] dark:bg-[#0D0F0C] h-full shadow-2xl p-4 flex flex-col justify-between border-r border-[#11140F]/10 dark:border-white/10 animate-in slide-in-from-left duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="space-y-4 flex-1 overflow-y-auto">
               <div className="flex items-center justify-between pb-3 border-b border-[#11140F]/10 dark:border-white/10">
                 <div className="flex items-center gap-2">
