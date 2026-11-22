@@ -53,6 +53,10 @@ interface MailingList {
   id: string;
   name: string;
   description: string | null;
+  badgeText?: string | null;
+  headline?: string | null;
+  ctaText?: string | null;
+  successMessage?: string | null;
   createdAt: string;
   _count: {
     contacts: number;
@@ -183,11 +187,19 @@ export default function CustomerMailingListManager({
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newListName, setNewListName] = useState('');
   const [newListDesc, setNewListDesc] = useState('');
+  const [newListBadge, setNewListBadge] = useState('VIP Subscriber Form');
+  const [newListHeadline, setNewListHeadline] = useState('');
+  const [newListCta, setNewListCta] = useState('Subscribe to Updates');
+  const [newListSuccessMsg, setNewListSuccessMsg] = useState('');
   const [creatingList, setCreatingList] = useState(false);
 
   const [showEditListModal, setShowEditListModal] = useState(false);
   const [editListName, setEditListName] = useState('');
   const [editListDesc, setEditListDesc] = useState('');
+  const [editListBadge, setEditListBadge] = useState('');
+  const [editListHeadline, setEditListHeadline] = useState('');
+  const [editListCta, setEditListCta] = useState('');
+  const [editListSuccessMsg, setEditListSuccessMsg] = useState('');
   const [updatingList, setUpdatingList] = useState(false);
   const [deletingList, setDeletingList] = useState(false);
 
@@ -326,13 +338,24 @@ export default function CustomerMailingListManager({
       const res = await fetch('/api/mailing-lists', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newListName.trim(), description: newListDesc.trim() }),
+        body: JSON.stringify({
+          name: newListName.trim(),
+          description: newListDesc.trim(),
+          badgeText: newListBadge.trim(),
+          headline: newListHeadline.trim(),
+          ctaText: newListCta.trim(),
+          successMessage: newListSuccessMsg.trim(),
+        }),
       });
       const data = await res.json();
       if (res.ok) {
         setShowCreateModal(false);
         setNewListName('');
         setNewListDesc('');
+        setNewListBadge('VIP Subscriber Form');
+        setNewListHeadline('');
+        setNewListCta('Subscribe to Updates');
+        setNewListSuccessMsg('');
         setFeedback({ type: 'success', message: 'Mailing list created successfully!' });
         await loadLists();
         setSelectedListId(data.list.id);
@@ -351,6 +374,10 @@ export default function CustomerMailingListManager({
     if (!selectedList) return;
     setEditListName(selectedList.name);
     setEditListDesc(selectedList.description || '');
+    setEditListBadge(selectedList.badgeText || 'VIP Subscriber Form');
+    setEditListHeadline(selectedList.headline || '');
+    setEditListCta(selectedList.ctaText || 'Subscribe to Updates');
+    setEditListSuccessMsg(selectedList.successMessage || '');
     setShowEditListModal(true);
   };
 
@@ -364,7 +391,14 @@ export default function CustomerMailingListManager({
       const res = await fetch(`/api/mailing-lists/${selectedListId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: editListName.trim(), description: editListDesc.trim() }),
+        body: JSON.stringify({
+          name: editListName.trim(),
+          description: editListDesc.trim(),
+          badgeText: editListBadge.trim(),
+          headline: editListHeadline.trim(),
+          ctaText: editListCta.trim(),
+          successMessage: editListSuccessMsg.trim(),
+        }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -1271,28 +1305,96 @@ export default function CustomerMailingListManager({
       {/* Modal 1: Create List */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white rounded-lg p-5 shadow-xl border border-[#11140F]/15 space-y-4">
-            <h4 className="text-sm font-bold text-[#11140F]">Create Mailing List</h4>
+          <div className="w-full max-w-lg bg-white rounded-lg p-5 shadow-xl border border-[#11140F]/15 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-2 border-b border-[#11140F]/10">
+              <h4 className="text-sm font-bold text-[#11140F]">Create Mailing List</h4>
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(false)}
+                className="text-[#11140F]/40 hover:text-[#11140F] p-1"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
             <form onSubmit={handleCreateList} className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-[#11140F] mb-1">List Name *</label>
+                <label className="block text-xs font-semibold text-[#11140F] mb-1">List Name *</label>
                 <input
                   type="text"
                   value={newListName}
                   onChange={(e) => setNewListName(e.target.value)}
-                  placeholder="e.g. VIP Customers, Friday Guests"
+                  placeholder="e.g. VIP Customers, Weekend Brunch Club"
                   required
                   className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
                 />
               </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-[#11140F] mb-1">
+                    Form Badge Tag
+                    <span className="text-[10px] text-[#11140F]/50 font-normal ml-1">(custom tag)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={newListBadge}
+                    onChange={(e) => setNewListBadge(e.target.value)}
+                    placeholder="e.g. VIP Subscriber Form, Scan to Join"
+                    className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-[#11140F] mb-1">
+                    Button CTA Text
+                    <span className="text-[10px] text-[#11140F]/50 font-normal ml-1">(submit label)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={newListCta}
+                    onChange={(e) => setNewListCta(e.target.value)}
+                    placeholder="e.g. Subscribe to Updates, Claim Perk"
+                    className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  />
+                </div>
+              </div>
+
               <div>
-                <label className="block text-xs font-medium text-[#11140F] mb-1">Description (optional)</label>
+                <label className="block text-xs font-semibold text-[#11140F] mb-1">
+                  Public Headline
+                  <span className="text-[10px] text-[#11140F]/50 font-normal ml-1">(optional, defaults to List Name)</span>
+                </label>
                 <input
                   type="text"
+                  value={newListHeadline}
+                  onChange={(e) => setNewListHeadline(e.target.value)}
+                  placeholder="e.g. Join The VIP Tasting Club & Get 15% Off"
+                  className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[#11140F] mb-1">Description / Subtitle</label>
+                <textarea
+                  rows={2}
                   value={newListDesc}
                   onChange={(e) => setNewListDesc(e.target.value)}
-                  placeholder="e.g. In-store table tent subscribers"
+                  placeholder="e.g. Scan to receive secret menus, weekly promotions, and member-only event invitations."
+                  className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[#11140F] mb-1">
+                  Custom Success Note
+                  <span className="text-[10px] text-[#11140F]/50 font-normal ml-1">(shown right after subscribing)</span>
+                </label>
+                <input
+                  type="text"
+                  value={newListSuccessMsg}
+                  onChange={(e) => setNewListSuccessMsg(e.target.value)}
+                  placeholder="e.g. You're on the list! Show this screen to your server for 10% off today."
                   className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
                 />
               </div>
@@ -1308,7 +1410,7 @@ export default function CustomerMailingListManager({
                 <button
                   type="submit"
                   disabled={creatingList}
-                  className="px-4 py-1.5 rounded-md bg-[#11140F] text-white text-xs font-medium hover:bg-[#2A2E25] transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-4 py-1.5 rounded-md bg-[#11140F] text-white text-xs font-semibold hover:bg-[#2A2E25] transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer shadow-xs"
                 >
                   {creatingList && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   <span>Create List</span>
@@ -1322,11 +1424,21 @@ export default function CustomerMailingListManager({
       {/* Modal: Edit List */}
       {showEditListModal && selectedList && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white rounded-lg p-5 shadow-xl border border-[#11140F]/15 space-y-4">
-            <h4 className="text-sm font-bold text-[#11140F]">Edit Mailing List</h4>
+          <div className="w-full max-w-lg bg-white rounded-lg p-5 shadow-xl border border-[#11140F]/15 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-2 border-b border-[#11140F]/10">
+              <h4 className="text-sm font-bold text-[#11140F]">Edit Mailing List Settings</h4>
+              <button
+                type="button"
+                onClick={() => setShowEditListModal(false)}
+                className="text-[#11140F]/40 hover:text-[#11140F] p-1"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
             <form onSubmit={handleUpdateList} className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-[#11140F] mb-1">List Name *</label>
+                <label className="block text-xs font-semibold text-[#11140F] mb-1">List Name *</label>
                 <input
                   type="text"
                   value={editListName}
@@ -1336,12 +1448,70 @@ export default function CustomerMailingListManager({
                 />
               </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-[#11140F] mb-1">
+                    Form Badge Tag
+                    <span className="text-[10px] text-[#11140F]/50 font-normal ml-1">(custom tag)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={editListBadge}
+                    onChange={(e) => setEditListBadge(e.target.value)}
+                    placeholder="e.g. VIP Subscriber Form, Scan to Join"
+                    className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-[#11140F] mb-1">
+                    Button CTA Text
+                    <span className="text-[10px] text-[#11140F]/50 font-normal ml-1">(submit label)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={editListCta}
+                    onChange={(e) => setEditListCta(e.target.value)}
+                    placeholder="e.g. Subscribe to Updates, Claim Perk"
+                    className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  />
+                </div>
+              </div>
+
               <div>
-                <label className="block text-xs font-medium text-[#11140F] mb-1">Description</label>
+                <label className="block text-xs font-semibold text-[#11140F] mb-1">
+                  Public Headline
+                  <span className="text-[10px] text-[#11140F]/50 font-normal ml-1">(optional, defaults to List Name)</span>
+                </label>
                 <input
                   type="text"
+                  value={editListHeadline}
+                  onChange={(e) => setEditListHeadline(e.target.value)}
+                  placeholder="e.g. Join Our VIP Tasting Club"
+                  className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[#11140F] mb-1">Description / Subtitle</label>
+                <textarea
+                  rows={2}
                   value={editListDesc}
                   onChange={(e) => setEditListDesc(e.target.value)}
+                  className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[#11140F] mb-1">
+                  Custom Success Note
+                  <span className="text-[10px] text-[#11140F]/50 font-normal ml-1">(shown right after subscribing)</span>
+                </label>
+                <input
+                  type="text"
+                  value={editListSuccessMsg}
+                  onChange={(e) => setEditListSuccessMsg(e.target.value)}
+                  placeholder="e.g. You're on the list! Show this screen to your server for 10% off today."
                   className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
                 />
               </div>
@@ -1357,7 +1527,7 @@ export default function CustomerMailingListManager({
                 <button
                   type="submit"
                   disabled={updatingList}
-                  className="px-4 py-1.5 rounded-md bg-[#11140F] text-white text-xs font-medium hover:bg-[#2A2E25] transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-4 py-1.5 rounded-md bg-[#11140F] text-white text-xs font-semibold hover:bg-[#2A2E25] transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer shadow-xs"
                 >
                   {updatingList && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   <span>Save Changes</span>
@@ -1976,9 +2146,9 @@ export default function CustomerMailingListManager({
           url={`${APP_URL}/join/${selectedList.id}`}
           userTier={quotas?.tier || 'free'}
           isAdmin={false}
-          defaultHeadline={`Join ${selectedList.name}`}
-          defaultHeaderTag="SCAN TO SUBSCRIBE"
-          defaultSubline="Enter your email for exclusive updates"
+          defaultHeadline={selectedList.headline || `Join ${selectedList.name}`}
+          defaultHeaderTag={selectedList.badgeText ? selectedList.badgeText.toUpperCase() : 'SCAN TO SUBSCRIBE'}
+          defaultSubline={selectedList.description || 'Enter your email for exclusive updates'}
           defaultFooterNote="Instant confirmation • Zero spam • Unsubscribe anytime"
           defaultTemplate="table-tent"
           featureBannerText="Print this QR code on retail counters, packaging, or table tents. When customers scan, they enter their email on a branded mobile form with automated double opt-in."

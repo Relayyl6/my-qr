@@ -51,6 +51,10 @@ export default async function CustomerJoinPage({
       listId={list.id}
       listName={list.name}
       listDescription={list.description}
+      badgeText={list.badgeText}
+      headline={list.headline}
+      ctaText={list.ctaText}
+      successMessage={list.successMessage}
       doubleOptIn={list.doubleOptIn}
       showBranding={isFree}
     />

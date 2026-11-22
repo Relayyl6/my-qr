@@ -9,6 +9,10 @@ interface CustomerJoinViewProps {
   listId: string;
   listName: string;
   listDescription: string | null;
+  badgeText?: string | null;
+  headline?: string | null;
+  ctaText?: string | null;
+  successMessage?: string | null;
   doubleOptIn: boolean;
   showBranding?: boolean;
 }
@@ -17,6 +21,10 @@ export default function CustomerJoinView({
   listId,
   listName,
   listDescription,
+  badgeText,
+  headline,
+  ctaText,
+  successMessage,
   doubleOptIn,
   showBranding = true,
 }: CustomerJoinViewProps) {
@@ -82,7 +90,11 @@ export default function CustomerJoinView({
                   You&apos;re on the list!
                 </h2>
                 <p className="text-[13.5px] text-white/60 leading-relaxed">
-                  Thank you for joining <strong className="text-white">{listName}</strong>. You are now subscribed to receive our latest updates and exclusive promotions.
+                  {successMessage || (
+                    <>
+                      Thank you for joining <strong className="text-white">{listName}</strong>. You are now subscribed to receive our latest updates and exclusive promotions.
+                    </>
+                  )}
                 </p>
               </div>
 
@@ -109,14 +121,14 @@ export default function CustomerJoinView({
               <div className="space-y-2 text-center sm:text-left">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[#34D399] font-mono text-[11px] font-semibold tracking-wider uppercase">
                   <Sparkles className="w-3.5 h-3.5" />
-                  VIP Subscriber Form
+                  <span>{badgeText || 'Subscriber Form'}</span>
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white leading-tight">
-                  {listName}
+                  {headline || listName}
                 </h1>
                 <p className="text-[13.5px] text-white/60 leading-relaxed">
                   {listDescription ||
-                    'Scan our table or counter card to join our VIP customer list for exclusive updates and promotions.'}
+                    'Scan our table or counter card to join our customer list for exclusive updates and promotions.'}
                 </p>
               </div>
 
@@ -173,7 +185,7 @@ export default function CustomerJoinView({
                   ) : (
                     <>
                       <Mail className="w-4 h-4 text-[#11140F]" />
-                      <span>Join VIP Mailing List</span>
+                      <span>{ctaText || 'Subscribe to Updates'}</span>
                     </>
                   )}
                 </button>

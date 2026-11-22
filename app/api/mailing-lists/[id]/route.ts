@@ -45,6 +45,10 @@ export async function PUT(
     const body = await req.json();
     const name = (body.name || "").toString().trim();
     const description = (body.description || "").toString().trim();
+    const badgeText = (body.badgeText || "").toString().trim();
+    const headline = (body.headline || "").toString().trim();
+    const ctaText = (body.ctaText || "").toString().trim();
+    const successMessage = (body.successMessage || "").toString().trim();
 
     if (!name) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
@@ -55,6 +59,10 @@ export async function PUT(
       data: {
         name,
         description: description || null,
+        badgeText: badgeText || "VIP Subscriber Form",
+        headline: headline || null,
+        ctaText: ctaText || "Subscribe to Updates",
+        successMessage: successMessage || null,
       },
     });
 

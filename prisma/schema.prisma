@@ -338,14 +338,18 @@ model PromoCode {
 
 // 5. Customer Multi-Tenant Mailing Lists (User Feature per Plan)
 model CustomerMailList {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name        String
-  description String?
-  doubleOptIn Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String
+  description    String?
+  badgeText      String?  @default("VIP Subscriber Form")
+  headline       String?
+  ctaText        String?  @default("Subscribe to Updates")
+  successMessage String?
+  doubleOptIn    Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   contacts    CustomerMailContact[]
   campaigns   CustomerMailCampaign[]
