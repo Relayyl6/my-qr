@@ -17,6 +17,7 @@ interface ModalConfig {
   requireEmail?: boolean;
   emailPlaceholder?: string;
   emailButtonText?: string;
+  updatedAt?: number;
 }
 
 const DEFAULT_MODAL: ModalConfig = {
@@ -49,7 +50,7 @@ export default function EntryPromoModal({ forceOpen = false, onClose }: EntryPro
   useEffect(() => {
     if (forceOpen) {
       setIsOpen(true);
-      fetch('/api/promo/config')
+      fetch('/api/promo/config', { cache: 'no-store' })
         .then((res) => (res.ok ? res.json() : null))
         .then((data) => {
           if (data && data.modal) {
@@ -72,10 +73,15 @@ export default function EntryPromoModal({ forceOpen = false, onClose }: EntryPro
     }
 
     // Fetch live config from server — strictly display what the admin set
-    fetch('/api/promo/config')
+    fetch('/api/promo/config', { cache: 'no-store' })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data && data.modal && data.modal.enabled && data.modal.headline?.trim()) {
+        if (
+          data &&
+          data.modal &&
+          data.modal.enabled &&
+          (data.modal.headline?.trim() || data.modal.badgeText?.trim() || data.modal.bodyText?.trim())
+        ) {
           setConfig(data.modal);
           checkFrequencyAndShow(data.modal);
         } else {
@@ -88,9 +94,10 @@ export default function EntryPromoModal({ forceOpen = false, onClose }: EntryPro
 
     function checkFrequencyAndShow(modalCfg: ModalConfig) {
       try {
-        const seenKey = `dynamicqr_promo_modal_seen_${modalCfg.promoCode || 'active'}`;
+        const promoSignature = `${modalCfg.promoCode || 'none'}_${modalCfg.headline || 'promo'}_${modalCfg.updatedAt || '0'}`;
+        const seenKey = `dynamicqr_promo_modal_seen_${promoSignature.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
         const lastDismissed = localStorage.getItem(seenKey);
-        if (lastDismissed) {
+        if (lastDismissed && (modalCfg.frequencyDays || 7) > 0) {
           const diffDays = (Date.now() - parseInt(lastDismissed, 10)) / (1000 * 60 * 60 * 24);
           if (diffDays < (modalCfg.frequencyDays || 7)) {
             return;
@@ -99,19 +106,20 @@ export default function EntryPromoModal({ forceOpen = false, onClose }: EntryPro
 
         const timer = setTimeout(() => {
           setIsOpen(true);
-        }, 2000);
+        }, 1200);
 
         return () => clearTimeout(timer);
       } catch (e) {}
     }
-  }, [pathname]);
+  }, [pathname, forceOpen]);
 
   const handleDismiss = () => {
     setIsOpen(false);
     onClose?.();
     if (!forceOpen) {
       try {
-        const seenKey = `dynamicqr_promo_modal_seen_${config.promoCode || 'active'}`;
+        const promoSignature = `${config.promoCode || 'none'}_${config.headline || 'promo'}_${config.updatedAt || '0'}`;
+        const seenKey = `dynamicqr_promo_modal_seen_${promoSignature.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
         localStorage.setItem(seenKey, Date.now().toString());
       } catch (e) {}
     }

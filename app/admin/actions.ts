@@ -286,9 +286,10 @@ export async function adminGetPromoConfig(): Promise<AdminPromoConfig> {
 export async function adminSavePromoConfig(config: Partial<AdminPromoConfig>) {
   const admin = await verifyAdmin();
   const current = await adminGetPromoConfig();
+  const now = Date.now();
   const updated: AdminPromoConfig = {
-    banner: { ...current.banner, ...(config.banner || {}) },
-    modal: { ...current.modal, ...(config.modal || {}) },
+    banner: { ...current.banner, ...(config.banner || {}), updatedAt: now },
+    modal: { ...current.modal, ...(config.modal || {}), updatedAt: now },
   };
 
   await prisma.aiCache.upsert({

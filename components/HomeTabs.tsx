@@ -62,11 +62,12 @@ export default function HomeTabs({
 
   return (
     <div className="w-full min-h-screen flex flex-col">
+      {/* Platform Announcement / Promo Bar: Renders atop both Workspace and Marketing tabs when active in Admin Console */}
+      <AnnouncementBar initialBanner={promoBanner} />
+
       {/* Sticky Top Header: ONLY shown on marketing/tour overview, NOT in dedicated workspace */}
       {activeTab !== 'workspace' && (
         <div className="sticky top-0 inset-x-0 z-50 w-full">
-          <AnnouncementBar initialBanner={promoBanner} />
-
           {/* Unified Top Navigation Bar */}
           <HeaderNav
             user={user}

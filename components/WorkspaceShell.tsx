@@ -318,15 +318,17 @@ export default function WorkspaceShell({
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setShowPromoModalPreview(true)}
-            className="p-1.5 rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#11140F] text-xs font-semibold text-[#11140F] dark:text-white flex items-center gap-1"
-            title="Preview Entry Promo Modal"
-          >
-            <Eye className="w-3.5 h-3.5 text-emerald-600" />
-            <span className="hidden sm:inline">Modal</span>
-          </button>
+          {isAdmin && (
+            <button
+              type="button"
+              onClick={() => setShowPromoModalPreview(true)}
+              className="p-1.5 rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#11140F] text-xs font-semibold text-[#11140F] dark:text-white flex items-center gap-1"
+              title="Preview Entry Promo Modal"
+            >
+              <Eye className="w-3.5 h-3.5 text-emerald-600" />
+              <span className="hidden sm:inline">Modal</span>
+            </button>
+          )}
           <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-500/20">
             {tierName}
           </span>
@@ -416,31 +418,33 @@ export default function WorkspaceShell({
             {!sidebarCollapsed && <span>New QR Code</span>}
           </button>
 
-          {/* Test / Preview Promo Modal Button */}
-          {sidebarCollapsed ? (
-            <button
-              type="button"
-              onClick={() => setShowPromoModalPreview(true)}
-              className="w-10 h-8 rounded-xl border border-dashed border-[#11140F]/20 dark:border-white/20 hover:border-emerald-500/50 bg-[#11140F]/[0.02] dark:bg-white/[0.02] flex items-center justify-center text-emerald-600 dark:text-emerald-400 hover:bg-[#11140F]/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
-              title="Preview Promotional Popup Modal"
-            >
-              <Eye className="w-3.5 h-3.5" />
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setShowPromoModalPreview(true)}
-              className="w-full py-2 px-3 rounded-xl border border-dashed border-[#11140F]/20 dark:border-white/20 hover:border-[#11140F]/40 dark:hover:border-white/40 bg-[#11140F]/[0.02] dark:bg-white/[0.02] text-xs font-semibold text-[#11140F]/80 dark:text-white/80 transition-colors flex items-center justify-between cursor-pointer"
-              title="Preview Promotional Popup Modal"
-            >
-              <div className="flex items-center gap-1.5">
-                <Eye className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                <span>Test Promo Modal</span>
-              </div>
-              <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 uppercase font-bold">
-                Preview
-              </span>
-            </button>
+          {/* Test / Preview Promo Modal Button (Admin only) */}
+          {isAdmin && (
+            sidebarCollapsed ? (
+              <button
+                type="button"
+                onClick={() => setShowPromoModalPreview(true)}
+                className="w-10 h-8 rounded-xl border border-dashed border-[#11140F]/20 dark:border-white/20 hover:border-emerald-500/50 bg-[#11140F]/[0.02] dark:bg-white/[0.02] flex items-center justify-center text-emerald-600 dark:text-emerald-400 hover:bg-[#11140F]/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                title="Preview Promotional Popup Modal"
+              >
+                <Eye className="w-3.5 h-3.5" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowPromoModalPreview(true)}
+                className="w-full py-2 px-3 rounded-xl border border-dashed border-[#11140F]/20 dark:border-white/20 hover:border-[#11140F]/40 dark:hover:border-white/40 bg-[#11140F]/[0.02] dark:bg-white/[0.02] text-xs font-semibold text-[#11140F]/80 dark:text-white/80 transition-colors flex items-center justify-between cursor-pointer"
+                title="Preview Promotional Popup Modal"
+              >
+                <div className="flex items-center gap-1.5">
+                  <Eye className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <span>Test Promo Modal</span>
+                </div>
+                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 uppercase font-bold">
+                  Preview
+                </span>
+              </button>
+            )
           )}
         </div>
 
@@ -705,22 +709,24 @@ export default function WorkspaceShell({
                 <span>New QR Code</span>
               </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setShowPromoModalPreview(true);
-                  setMobileDrawerOpen(false);
-                }}
-                className="w-full py-2 px-3 rounded-xl border border-dashed border-[#11140F]/20 dark:border-white/20 bg-white/50 text-xs font-semibold text-[#11140F] dark:text-white flex items-center justify-between"
-              >
-                <div className="flex items-center gap-1.5">
-                  <Eye className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Test Promo Modal</span>
-                </div>
-                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-700 uppercase font-bold">
-                  Preview
-                </span>
-              </button>
+              {isAdmin && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowPromoModalPreview(true);
+                    setMobileDrawerOpen(false);
+                  }}
+                  className="w-full py-2 px-3 rounded-xl border border-dashed border-[#11140F]/20 dark:border-white/20 bg-white/50 text-xs font-semibold text-[#11140F] dark:text-white flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <Eye className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Test Promo Modal</span>
+                  </div>
+                  <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-700 uppercase font-bold">
+                    Preview
+                  </span>
+                </button>
+              )}
 
               {navSections.map((group, idx) => (
                 <div key={idx} className="space-y-1">
@@ -821,16 +827,18 @@ export default function WorkspaceShell({
 
           {/* Top Quick Actions & Stat Pills (Insp. from Image 6 top pill cards) */}
           <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-            {/* Promo Modal Preview Trigger */}
-            <button
-              type="button"
-              onClick={() => setShowPromoModalPreview(true)}
-              className="px-3.5 py-1.5 rounded-xl border border-dashed border-[#11140F]/20 dark:border-white/20 bg-white/70 dark:bg-[#11140F] hover:bg-white text-xs font-semibold text-[#11140F] dark:text-white transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer"
-              title="Test Promotional Entry Popup"
-            >
-              <Eye className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Test Promo Modal</span>
-            </button>
+            {/* Promo Modal Preview Trigger (Admin only) */}
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => setShowPromoModalPreview(true)}
+                className="px-3.5 py-1.5 rounded-xl border border-dashed border-[#11140F]/20 dark:border-white/20 bg-white/70 dark:bg-[#11140F] hover:bg-white text-xs font-semibold text-[#11140F] dark:text-white transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer"
+                title="Test Promotional Entry Popup"
+              >
+                <Eye className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Test Promo Modal</span>
+              </button>
+            )}
 
             {/* Quick Create Button */}
             <button

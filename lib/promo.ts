@@ -6,6 +6,7 @@ export interface AdminPromoConfig {
     promoCode: string;
     ctaText: string;
     ctaUrl: string;
+    updatedAt?: number;
   };
   modal: {
     enabled: boolean;
@@ -19,6 +20,7 @@ export interface AdminPromoConfig {
     requireEmail?: boolean;
     emailPlaceholder?: string;
     emailButtonText?: string;
+    updatedAt?: number;
   };
 }
 
