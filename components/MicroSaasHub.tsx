@@ -29,6 +29,7 @@ import {
 import CustomerMailingListManager from '@/components/CustomerMailingListManager';
 import { PlanTier, PLANS } from '@/lib/plans';
 import PrintTemplateModal from '@/components/PrintTemplateModal';
+import { APP_URL } from '@/lib/config';
 
 interface MicroSaasHubProps {
   userTier: string;
@@ -2283,7 +2284,7 @@ export default function MicroSaasHub({
           onClose={() => setPrintVcard(null)}
           shortCode={printVcard.slug}
           label={printVcard.title}
-          url={`${typeof window !== 'undefined' ? window.location.origin : 'https://dynamicqr.co'}/c/${printVcard.slug}`}
+          url={`${typeof window !== 'undefined' ? window.location.origin : APP_URL}/c/${printVcard.slug}`}
           userTier={normalizedTier}
           isAdmin={isAdmin}
           defaultHeadline={printVcard.title}
@@ -2301,7 +2302,7 @@ export default function MicroSaasHub({
           onClose={() => setPrintLink(null)}
           shortCode={printLink.slug}
           label={printLink.title}
-          url={`${typeof window !== 'undefined' ? window.location.origin : 'https://dynamicqr.co'}/s/${printLink.slug}`}
+          url={`${typeof window !== 'undefined' ? window.location.origin : APP_URL}/s/${printLink.slug}`}
           userTier={normalizedTier}
           isAdmin={isAdmin}
           defaultHeadline={printLink.title}
@@ -2319,7 +2320,7 @@ export default function MicroSaasHub({
           onClose={() => setPrintMenu(null)}
           shortCode={printMenu.slug}
           label={printMenu.title}
-          url={`${typeof window !== 'undefined' ? window.location.origin : 'https://dynamicqr.co'}/m/${printMenu.slug}`}
+          url={`${typeof window !== 'undefined' ? window.location.origin : APP_URL}/m/${printMenu.slug}`}
           userTier={normalizedTier}
           isAdmin={isAdmin}
           defaultHeadline={printMenu.title}
@@ -2337,7 +2338,7 @@ export default function MicroSaasHub({
           onClose={() => setPrintWifi(null)}
           shortCode={printWifi.slug}
           label={printWifi.spec?.ssid || printWifi.title}
-          url={`${typeof window !== 'undefined' ? window.location.origin : 'https://dynamicqr.co'}/w/${printWifi.slug}`}
+          url={`${typeof window !== 'undefined' ? window.location.origin : APP_URL}/w/${printWifi.slug}`}
           userTier={normalizedTier}
           isAdmin={isAdmin}
           defaultHeadline="Connect to Guest Wi-Fi"

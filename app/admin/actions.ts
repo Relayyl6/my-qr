@@ -388,3 +388,79 @@ export async function adminDeletePromoCode(id: string) {
   revalidatePath('/admin');
   return { success: true };
 }
+
+// -------------------------------------------------------------
+// PLATFORM MAILING LIST (Newsletter Subscribers Sovereignty)
+// -------------------------------------------------------------
+
+export async function adminGetPlatformSubscribers(search?: string, statusFilter?: string) {
+  await verifyAdmin();
+  const where: any = {};
+  if (statusFilter && statusFilter !== 'all') {
+    where.status = statusFilter;
+  }
+  if (search && search.trim()) {
+    const q = search.trim();
+    where.OR = [
+      { email: { contains: q, mode: 'insensitive' } },
+      { firstName: { contains: q, mode: 'insensitive' } },
+    ];
+  }
+  const subscribers = await prisma.newsletterSubscriber.findMany({
+    where,
+    orderBy: { createdAt: 'desc' },
+    take: 200,
+  });
+  return subscribers;
+}
+
+export async function adminAddPlatformSubscriber(payload: { email: string; firstName?: string; status?: string }) {
+  const admin = await verifyAdmin();
+  const email = payload.email.trim().toLowerCase();
+  const crypto = await import('crypto');
+  const created = await prisma.newsletterSubscriber.upsert({
+    where: { email },
+    create: {
+      email,
+      firstName: payload.firstName?.trim() || null,
+      status: payload.status || 'active',
+      source: 'admin',
+      token: crypto.randomBytes(24).toString('hex'),
+      consentAt: new Date(),
+      confirmedAt: new Date(),
+    },
+    update: {
+      firstName: payload.firstName?.trim() || undefined,
+      status: payload.status || 'active',
+      confirmedAt: new Date(),
+    },
+  });
+  await logAdminAction(admin.email, `Added platform subscriber: ${email}`);
+  revalidatePath('/admin');
+  return { success: true, subscriber: created };
+}
+
+export async function adminUpdatePlatformSubscriber(payload: { id: string; email?: string; firstName?: string; status?: string }) {
+  const admin = await verifyAdmin();
+  const data: any = {};
+  if (payload.email) data.email = payload.email.trim().toLowerCase();
+  if (payload.firstName !== undefined) data.firstName = payload.firstName.trim() || null;
+  if (payload.status) data.status = payload.status;
+  const updated = await prisma.newsletterSubscriber.update({
+    where: { id: payload.id },
+    data,
+  });
+  await logAdminAction(admin.email, `Updated platform subscriber: ${updated.email}`);
+  revalidatePath('/admin');
+  return { success: true, subscriber: updated };
+}
+
+export async function adminDeletePlatformSubscriber(id: string) {
+  const admin = await verifyAdmin();
+  const deleted = await prisma.newsletterSubscriber.delete({
+    where: { id },
+  });
+  await logAdminAction(admin.email, `Deleted platform subscriber: ${deleted.email}`);
+  revalidatePath('/admin');
+  return { success: true };
+}

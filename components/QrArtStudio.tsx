@@ -23,6 +23,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { downloadSvgFile, extractCleanSvgMarkup } from '@/lib/qr/exportVector';
+import { APP_URL } from '@/lib/config';
 import AiProgressTracker from '@/components/AiProgressTracker';
 
 interface QrArtStudioProps {
@@ -231,7 +232,7 @@ export default function QrArtStudio({
 
   const qrUrl = typeof window !== 'undefined'
     ? `${window.location.origin}/id/${shortCode}`
-    : `https://dynamicqr.co/id/${shortCode}`;
+    : `${APP_URL}/id/${shortCode}`;
 
   const initialChar = (label?.trim() || shortCode).charAt(0).toUpperCase();
 

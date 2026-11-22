@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { PLANS, PlanTier } from "@/lib/plans";
 import crypto from "crypto";
-import { sendEmail, buildDoubleOptInEmailHtml } from "@/lib/email/send";
+import { sendEmail, buildCustomerSubscriptionConfirmedEmailHtml } from "@/lib/email/send";
+import { APP_URL } from "@/lib/config";
 
 export async function POST(
   req: NextRequest,
@@ -22,12 +23,29 @@ export async function POST(
     const list = await prisma.customerMailList.findUnique({
       where: { id: listId },
       include: {
-        user: { select: { id: true, tier: true } },
+        user: { select: { id: true, tier: true, email: true } },
       },
     });
 
     if (!list) {
       return NextResponse.json({ error: "Mailing list not found" }, { status: 404 });
+    }
+
+    // Check if contact already exists and is active
+    const existingContact = await prisma.customerMailContact.findUnique({
+      where: {
+        listId_email: {
+          listId,
+          email: rawEmail,
+        },
+      },
+    });
+
+    if (existingContact && existingContact.status === "active") {
+      return NextResponse.json({
+        success: true,
+        message: `You are already subscribed to ${list.name}!`,
+      });
     }
 
     const userTier = (list.user.tier || "free").toLowerCase() as PlanTier;
@@ -61,39 +79,39 @@ export async function POST(
         firstName: firstName || null,
         status: "active",
         token,
-        source: "qr_embed",
+        source: "qr_entry",
+        confirmedAt: new Date(),
       },
       update: {
         firstName: firstName || undefined,
         status: "active",
+        confirmedAt: new Date(),
       },
     });
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dynamicqr.co";
-    const confirmUrl = `${baseUrl}/api/mailing-lists/${listId}/confirm?token=${token}`;
-    const unsubscribeUrl = `${baseUrl}/api/mailing-lists/${listId}/unsubscribe?token=${token}`;
+    const unsubscribeUrl = `${APP_URL}/api/mailing-lists/${listId}/unsubscribe?token=${token}`;
 
-    const optInHtml = buildDoubleOptInEmailHtml({
-      confirmUrl,
-      unsubscribeUrl,
-      siteUrl: baseUrl,
+    const confirmationHtml = buildCustomerSubscriptionConfirmedEmailHtml({
       businessName: list.name,
+      unsubscribeUrl,
+      firstName: firstName || undefined,
     });
 
-    // Dispatch confirmation
+    // Dispatch instant subscription confirmation notice (no confirmation click required)
     await sendEmail({
       to: rawEmail,
-      subject: `Confirm subscription to ${list.name}`,
-      html: optInHtml,
+      subject: `You're subscribed to ${list.name}`,
+      html: confirmationHtml,
+      replyTo: list.user.email || process.env.EMAIL_REPLY_TO || "hello@dynamicqr.co",
       headers: {
         "List-Unsubscribe": `<${unsubscribeUrl}>`,
         "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
       },
-    });
+    }).catch((err) => console.error("[Customer Subscribe Email Error]:", err));
 
     return NextResponse.json({
       success: true,
-      message: "Please check your inbox to confirm your subscription.",
+      message: `You're subscribed to ${list.name}!`,
     });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || "Failed to subscribe" }, { status: 500 });

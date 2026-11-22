@@ -88,7 +88,7 @@ export default function WorkspaceShell({
   linkCreationAndList,
   activeLinksCount,
 }: WorkspaceShellProps) {
-  const [activeSection, setActiveSection] = useState<WorkspaceSection>('all');
+  const [activeSection, setActiveSection] = useState<WorkspaceSection>('links');
   const [microSaasTab, setMicroSaasTab] = useState<'mailing' | 'vcard' | 'shortener' | 'menu' | 'wifi'>('mailing');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);

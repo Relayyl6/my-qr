@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
-import { sendDoubleOptInEmail } from "@/lib/email/send";
+import { sendPlatformSubscriptionConfirmedEmail } from "@/lib/email/send";
 
 // Basic in-memory rate limiter per IP: max 5 requests per 10 minutes
 const ipRateLimits = new Map<string, { count: number; expiresAt: number }>();
@@ -43,16 +43,15 @@ export async function POST(req: NextRequest) {
     const userAgentHash = crypto.createHash("sha256").update(userAgent).digest("hex").slice(0, 16);
     const verificationToken = crypto.randomBytes(24).toString("hex");
 
-    // 3. Upsert subscriber as pending
+    // 3. Upsert subscriber directly as active (immediate subscription, zero confirmation friction)
     const existing = await prisma.newsletterSubscriber.findUnique({
       where: { email: rawEmail },
     });
 
     if (existing && existing.status === "active") {
-      // Compliance rule: never reveal whether an email already exists (show "Check your inbox" either way)
       return NextResponse.json({
         success: true,
-        message: "If that email is valid, a confirmation link has been sent to your inbox.",
+        message: "You're already subscribed to our updates!",
       });
     }
 
@@ -60,32 +59,33 @@ export async function POST(req: NextRequest) {
       where: { email: rawEmail },
       create: {
         email: rawEmail,
-        status: "pending",
+        status: "active",
         source,
         token: verificationToken,
         ipHash,
         userAgentHash,
         consentAt: new Date(),
+        confirmedAt: new Date(),
       },
       update: {
-        status: "pending",
+        status: "active",
         token: verificationToken,
         source,
         ipHash,
         userAgentHash,
-        consentAt: new Date(),
+        confirmedAt: new Date(),
       },
     });
 
-    // 4. Send Double Opt-In Email
-    await sendDoubleOptInEmail({
+    // 4. Send Welcome / Confirmed Email
+    await sendPlatformSubscriptionConfirmedEmail({
       email: rawEmail,
       token: verificationToken,
-    });
+    }).catch((err) => console.error("[Platform Subscribe Email Error]:", err));
 
     return NextResponse.json({
       success: true,
-      message: "Check your inbox! We sent you a confirmation link.",
+      message: "You're subscribed! Welcome to DynamicQR.",
     });
   } catch (err: any) {
     console.error("[Newsletter Subscribe Error]:", err);

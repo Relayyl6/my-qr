@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { APP_URL } from "@/lib/config";
 
 export async function GET(
   req: NextRequest,
@@ -24,7 +25,7 @@ export async function GET(
       .catch(() => {});
 
     const spec = (item.spec as any) || {};
-    let target = spec.destinationUrl || "https://dynamicqr.co";
+    let target = spec.destinationUrl || APP_URL;
 
     // 1. Device OS Routing
     const userAgent = (req.headers.get("user-agent") || "").toLowerCase();

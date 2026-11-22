@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Wifi, Copy, Check, Smartphone, Eye, EyeOff } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
+import { APP_URL } from '@/lib/config';
 
 export interface WifiProps {
   ssid: string;
@@ -39,14 +40,14 @@ export default function WifiInteractiveView({
       <div className="w-full max-w-md my-auto space-y-6">
         
         {/* Main Wi-Fi Card */}
-        <div className="bg-white rounded-3xl border border-[#11140F]/10 p-6 sm:p-8 shadow-xl space-y-6 relative overflow-hidden">
+        <div className="bg-white rounded-lg border border-[#11140F]/10 p-6 sm:p-8 shadow-md space-y-6 relative overflow-hidden">
           {/* Subtle Top Accent */}
-          <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#2F6B4F] to-[#11140F]" />
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#2F6B4F]" />
 
           {/* Header */}
           <div className="text-center space-y-2 pt-2">
-            <div className="w-14 h-14 mx-auto rounded-2xl bg-[#11140F] text-[#34D399] flex items-center justify-center shadow-md">
-              <Wifi className="w-7 h-7" />
+            <div className="w-12 h-12 mx-auto rounded-md bg-[#11140F] text-[#34D399] flex items-center justify-center shadow-xs">
+              <Wifi className="w-6 h-6" />
             </div>
 
             <div>
@@ -72,7 +73,7 @@ export default function WifiInteractiveView({
 
           {/* Camera Auto-Join QR Code */}
           <div className="text-center space-y-2">
-            <div className="p-4 bg-gray-50 rounded-2xl inline-block border border-gray-100 shadow-inner">
+            <div className="p-4 bg-gray-50 rounded-md inline-block border border-gray-100 shadow-inner">
               <QRCodeSVG value={wifiQrString} size={200} level="M" />
             </div>
             <p className="text-[11.5px] text-[#11140F]/50 font-mono">
@@ -82,7 +83,7 @@ export default function WifiInteractiveView({
 
           {/* Password & Copy Box */}
           {password && (
-            <div className="p-4 rounded-2xl bg-[#F7F8F5] border border-[#11140F]/8 space-y-2">
+            <div className="p-4 rounded-md bg-[#F7F8F5] border border-[#11140F]/8 space-y-2">
               <div className="flex items-center justify-between text-xs text-[#11140F]/60">
                 <span>Network Password:</span>
                 <button
@@ -133,14 +134,16 @@ export default function WifiInteractiveView({
         {/* Powered by DynamicQR Footer */}
         {showBranding && (
           <div className="text-center">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/70 border border-[#11140F]/8 text-[11px] text-[#11140F]/60 hover:text-[#11140F] transition-colors"
+            <a
+              href={APP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/70 border border-[#11140F]/8 text-[11px] text-[#11140F]/60 hover:text-[#11140F] transition-colors"
             >
               <span>Powered by</span>
-              <strong className="text-[#11140F]">DynamicQR</strong>
+              <strong className="text-[#11140F] underline">Dynamic QR</strong>
               <span>• Dynamic Wi-Fi Sharing</span>
-            </Link>
+            </a>
           </div>
         )}
 

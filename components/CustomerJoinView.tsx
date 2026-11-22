@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Mail, CheckCircle2, AlertCircle, Loader2, Sparkles, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
+import { APP_URL } from '@/lib/config';
 
 interface CustomerJoinViewProps {
   listId: string;
@@ -64,31 +65,28 @@ export default function CustomerJoinView({
 
       <div className="relative z-10 max-w-md w-full mx-auto my-auto py-8">
         {/* Card Box */}
-        <div className="rounded-3xl border border-white/10 bg-[#0E110C]/90 backdrop-blur-xl p-6 sm:p-8 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] space-y-6">
+        <div className="rounded-lg border border-white/10 bg-[#0E110C]/90 backdrop-blur-xl p-6 sm:p-8 shadow-md space-y-6">
           
           {submitted ? (
             /* Success State */
             <div className="text-center space-y-4 py-4 animate-in fade-in duration-300">
-              <div className="w-16 h-16 rounded-3xl bg-emerald-500/10 border border-emerald-500/30 text-[#34D399] flex items-center justify-center mx-auto shadow-[0_0_30px_rgba(52,211,153,0.2)]">
+              <div className="w-16 h-16 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-[#34D399] flex items-center justify-center mx-auto shadow-xs">
                 <CheckCircle2 className="w-8 h-8" />
               </div>
 
               <div className="space-y-1.5">
                 <span className="text-[11px] font-mono uppercase tracking-wider text-[#34D399] font-bold">
-                  {doubleOptIn ? 'CONFIRMATION DISPATCHED' : 'SUBSCRIPTION ACTIVE'}
+                  SUBSCRIPTION ACTIVE
                 </span>
                 <h2 className="text-2xl font-bold tracking-tight text-white">
                   You&apos;re on the list!
                 </h2>
                 <p className="text-[13.5px] text-white/60 leading-relaxed">
-                  Thank you for joining <strong className="text-white">{listName}</strong>.
-                  {doubleOptIn
-                    ? ' Please check your inbox to confirm your subscription.'
-                    : ' You will receive our latest promotions and updates directly.'}
+                  Thank you for joining <strong className="text-white">{listName}</strong>. You are now subscribed to receive our latest updates and exclusive promotions.
                 </p>
               </div>
 
-              <div className="p-3 rounded-2xl bg-white/[0.04] border border-white/10 text-xs font-mono text-white/50 text-center">
+              <div className="p-3 rounded-md bg-white/[0.04] border border-white/10 text-xs font-mono text-white/50 text-center">
                 Subscribed as: <span className="text-white font-medium">{email}</span>
               </div>
 
@@ -124,7 +122,7 @@ export default function CustomerJoinView({
 
               {/* Error Message */}
               {errorMsg && (
-                <div className="p-3.5 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2">
+                <div className="p-3.5 rounded-md bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 shrink-0" />
                   <span>{errorMsg}</span>
                 </div>
@@ -196,10 +194,16 @@ export default function CustomerJoinView({
 
       {/* Footer */}
       {showBranding && (
-        <div className="relative z-10 text-center text-[11px] font-mono text-white/30 pb-4">
-          <Link href="/" className="hover:text-white transition-colors">
-            Powered by DynamicQR
-          </Link>
+        <div className="relative z-10 text-center text-[11px] font-mono text-white/50 pb-4">
+          <span>Powered by </span>
+          <a
+            href={APP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-white transition-colors underline font-semibold"
+          >
+            Dynamic QR
+          </a>
         </div>
       )}
     </main>

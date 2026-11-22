@@ -1,6 +1,7 @@
 'use server';
 
 import { z } from 'zod';
+import crypto from 'crypto';
 import { prisma } from '@/lib/prisma';
 import { hashPassword, verifyPassword, createSession, destroySession } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
@@ -48,15 +49,34 @@ export async function signUp(prevState: AuthState, formData: FormData): Promise<
       },
     });
 
-    // Send welcome onboarding email asynchronously via Nodemailer
+    // Automatically enroll user in platform's own mailing list
+    await prisma.newsletterSubscriber.upsert({
+      where: { email },
+      create: {
+        email,
+        firstName: name || null,
+        status: 'active',
+        source: 'signup',
+        token: crypto.randomBytes(24).toString('hex'),
+        consentAt: new Date(),
+        confirmedAt: new Date(),
+      },
+      update: {
+        status: 'active',
+        firstName: name || undefined,
+        confirmedAt: new Date(),
+      },
+    }).catch((err) => console.error('[Platform Mailing List Auto-Enroll Error]:', err));
+
+    // Send registration confirmation email once on signup
     sendEmail({
       to: email,
-      subject: '🚀 Welcome to DynamicQR - One code, printed once',
+      subject: 'Welcome to DynamicQR — Your account is ready',
       html: buildWelcomeEmailHtml({
         email,
         name: user.name || undefined,
       }),
-    }).catch((err) => console.error('[Welcome Email Error]:', err));
+    }).catch((err) => console.error('[Registration Email Error]:', err));
 
     await createSession(user.id);
     revalidatePath('/');

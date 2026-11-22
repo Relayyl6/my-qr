@@ -19,6 +19,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
+import { APP_URL } from '@/lib/config';
 
 export interface VCardProps {
   slug: string;
@@ -78,7 +79,7 @@ export default function VCardInteractiveView({
     .slice(0, 2)
     .toUpperCase() || 'QR';
 
-  const cardUrl = typeof window !== 'undefined' ? window.location.href : `https://dynamicqr.co/c/${slug}`;
+  const cardUrl = typeof window !== 'undefined' ? window.location.href : `${APP_URL}/c/${slug}`;
 
   // Theme styling definitions
   const themeStyles: Record<string, { bg: string; cardBg: string; text: string; subtext: string; border: string; accent: string }> = {
@@ -168,13 +169,13 @@ export default function VCardInteractiveView({
       <div className="w-full max-w-md my-auto space-y-5">
         
         {/* Main Card */}
-        <div className={`${activeTheme.cardBg} rounded-3xl border ${activeTheme.border} p-6 sm:p-8 shadow-2xl space-y-6 relative overflow-hidden backdrop-blur-md`}>
+        <div className={`${activeTheme.cardBg} rounded-lg border ${activeTheme.border} p-6 sm:p-8 shadow-xl space-y-6 relative overflow-hidden backdrop-blur-md`}>
           
           {/* Top Actions: QR Share & Exchange */}
           <div className="flex items-center justify-between">
             <button
               onClick={() => setShowQrModal(true)}
-              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10 transition-colors flex items-center gap-1.5 text-xs font-mono cursor-pointer"
+              className="p-2 rounded-md bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10 transition-colors flex items-center gap-1.5 text-xs font-mono cursor-pointer"
             >
               <QrCode className="w-4 h-4" />
               <span>Share QR</span>
@@ -182,7 +183,7 @@ export default function VCardInteractiveView({
 
             <button
               onClick={() => setShowExchangeModal(true)}
-              className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-medium text-xs border border-white/15 transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+              className="px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/15 text-white font-medium text-xs border border-white/15 transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
             >
               <Sparkles className="w-3.5 h-3.5 text-[#34D399]" />
               <span>Exchange Info</span>
@@ -226,7 +227,7 @@ export default function VCardInteractiveView({
             <a
               href={`/api/vcard/${slug}/download`}
               style={{ backgroundColor: activeTheme.accent, color: theme === 'executive_white' ? '#fff' : '#000' }}
-              className="w-full py-3.5 px-6 rounded-2xl font-bold text-sm hover:opacity-90 transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-3 px-6 rounded-md font-bold text-sm hover:opacity-90 transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
             >
               <UserPlus className="w-4 h-4" />
               <span>Save Contact to Phone</span>
@@ -238,9 +239,9 @@ export default function VCardInteractiveView({
             {phone && (
               <a
                 href={`tel:${phone}`}
-                className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
+                className="p-3 rounded-md bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
               >
-                <div className="w-8 h-8 rounded-xl bg-white/10 mx-auto flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                <div className="w-8 h-8 rounded-md bg-white/10 mx-auto flex items-center justify-center text-white group-hover:scale-105 transition-transform">
                   <Phone className="w-4 h-4" />
                 </div>
                 <span className="text-[11px] font-semibold text-white/80 block mt-1.5">Call</span>
@@ -250,9 +251,9 @@ export default function VCardInteractiveView({
             {phone && (
               <a
                 href={`sms:${phone}`}
-                className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
+                className="p-3 rounded-md bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
               >
-                <div className="w-8 h-8 rounded-xl bg-white/10 mx-auto flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                <div className="w-8 h-8 rounded-md bg-white/10 mx-auto flex items-center justify-center text-white group-hover:scale-105 transition-transform">
                   <MessageSquare className="w-4 h-4" />
                 </div>
                 <span className="text-[11px] font-semibold text-white/80 block mt-1.5">SMS</span>
@@ -264,9 +265,9 @@ export default function VCardInteractiveView({
                 href={`https://wa.me/${whatsapp.replace(/[^0-9]/g, '')}`}
                 target="_blank"
                 rel="noreferrer"
-                className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
+                className="p-3 rounded-md bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
               >
-                <div className="w-8 h-8 rounded-xl bg-[#25D366]/20 mx-auto flex items-center justify-center text-[#25D366] group-hover:scale-110 transition-transform">
+                <div className="w-8 h-8 rounded-md bg-[#25D366]/20 mx-auto flex items-center justify-center text-[#25D366] group-hover:scale-105 transition-transform">
                   <MessageCircle className="w-4 h-4" />
                 </div>
                 <span className="text-[11px] font-semibold text-white/80 block mt-1.5">WhatsApp</span>
@@ -276,9 +277,9 @@ export default function VCardInteractiveView({
             {email && (
               <a
                 href={`mailto:${email}`}
-                className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
+                className="p-3 rounded-md bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
               >
-                <div className="w-8 h-8 rounded-xl bg-white/10 mx-auto flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                <div className="w-8 h-8 rounded-md bg-white/10 mx-auto flex items-center justify-center text-white group-hover:scale-105 transition-transform">
                   <Mail className="w-4 h-4" />
                 </div>
                 <span className="text-[11px] font-semibold text-white/80 block mt-1.5">Email</span>
@@ -290,9 +291,9 @@ export default function VCardInteractiveView({
                 href={`https://maps.google.com/?q=${encodeURIComponent(address)}`}
                 target="_blank"
                 rel="noreferrer"
-                className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
+                className="p-3 rounded-md bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
               >
-                <div className="w-8 h-8 rounded-xl bg-white/10 mx-auto flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                <div className="w-8 h-8 rounded-md bg-white/10 mx-auto flex items-center justify-center text-white group-hover:scale-105 transition-transform">
                   <MapPin className="w-4 h-4" />
                 </div>
                 <span className="text-[11px] font-semibold text-white/80 block mt-1.5">Directions</span>
@@ -304,9 +305,9 @@ export default function VCardInteractiveView({
                 href={website.startsWith('http') ? website : `https://${website}`}
                 target="_blank"
                 rel="noreferrer"
-                className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
+                className="p-3 rounded-md bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
               >
-                <div className="w-8 h-8 rounded-xl bg-white/10 mx-auto flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                <div className="w-8 h-8 rounded-md bg-white/10 mx-auto flex items-center justify-center text-white group-hover:scale-105 transition-transform">
                   <Globe className="w-4 h-4" />
                 </div>
                 <span className="text-[11px] font-semibold text-white/80 block mt-1.5">Website</span>
@@ -365,13 +366,15 @@ export default function VCardInteractiveView({
         {/* Powered by DynamicQR Footer Badge */}
         {showBranding && (
           <div className="text-center pt-1">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 border border-white/10 text-[11px] text-white/60 hover:text-white transition-colors"
+            <a
+              href={APP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/10 border border-white/10 text-[11px] text-white/60 hover:text-white transition-colors"
             >
               <span>Powered by</span>
-              <strong className="text-white">DynamicQR</strong>
-            </Link>
+              <strong className="text-white underline">Dynamic QR</strong>
+            </a>
           </div>
         )}
 
@@ -380,7 +383,7 @@ export default function VCardInteractiveView({
       {/* Modal 1: Fullscreen QR Share */}
       {showQrModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
-          <div className="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl text-center space-y-4 relative">
+          <div className="w-full max-w-sm bg-white rounded-lg p-6 shadow-2xl text-center space-y-4 relative">
             <button
               onClick={() => setShowQrModal(false)}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-900 p-1"
@@ -393,7 +396,7 @@ export default function VCardInteractiveView({
               <p className="text-xs text-gray-500">Scan to save contact directly to phone</p>
             </div>
 
-            <div className="p-4 bg-gray-50 rounded-2xl inline-block border border-gray-100 shadow-inner">
+            <div className="p-4 bg-gray-50 rounded-md inline-block border border-gray-100 shadow-inner">
               <QRCodeSVG value={cardUrl} size={220} level="M" />
             </div>
 
@@ -405,7 +408,7 @@ export default function VCardInteractiveView({
       {/* Modal 2: Exchange Contact Lead Capture Form */}
       {showExchangeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
-          <div className="w-full max-w-md bg-[#121411] text-white border border-white/15 rounded-3xl p-6 sm:p-7 shadow-2xl space-y-4 relative">
+          <div className="w-full max-w-md bg-[#121411] text-white border border-white/15 rounded-lg p-6 sm:p-7 shadow-2xl space-y-4 relative">
             <button
               onClick={() => setShowExchangeModal(false)}
               className="absolute top-4 right-4 text-white/50 hover:text-white p-1"
@@ -424,7 +427,7 @@ export default function VCardInteractiveView({
             </div>
 
             {exchangeSuccess ? (
-              <div className="p-4 rounded-2xl bg-[#2F6B4F]/20 border border-[#34D399]/30 text-[#34D399] text-center text-sm font-semibold flex items-center justify-center gap-2">
+              <div className="p-4 rounded-md bg-[#2F6B4F]/20 border border-[#34D399]/30 text-[#34D399] text-center text-sm font-semibold flex items-center justify-center gap-2">
                 <Check className="w-4 h-4" />
                 Contact info sent successfully!
               </div>

@@ -7,6 +7,7 @@ import { Download, ChevronDown, FileImage, FileCode, Printer, Sliders, Crop } fr
 import { downloadSvgFile } from '@/lib/qr/exportVector';
 import PrintTemplateModal from '@/components/PrintTemplateModal';
 import ExportCustomizerModal from '@/components/ExportCustomizerModal';
+import { APP_URL } from '@/lib/config';
 
 interface Props {
   shortCode: string;
@@ -45,7 +46,7 @@ export default function QrCodeCard({
 
   const url = customDomain
     ? `https://${customDomain}/id/${shortCode}`
-    : (origin ? `${origin}/id/${shortCode}` : `https://dynamicqr.co/id/${shortCode}`);
+    : (origin ? `${origin}/id/${shortCode}` : `${APP_URL}/id/${shortCode}`);
   const safeName = (label || shortCode).toLowerCase().replace(/[^a-z0-9]/g, '-');
   const canExportSvg = isAdmin || ['plus', 'ultra'].includes(userTier.toLowerCase());
 

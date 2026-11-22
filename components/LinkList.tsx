@@ -9,6 +9,7 @@ import QrArtStudio from './QrArtStudio';
 import LandingPageEditor from './LandingPageEditor';
 import { Sparkles, Compass, Palette, Smartphone, Activity, CheckCircle2, AlertTriangle, Download, ExternalLink, Clock } from 'lucide-react';
 import { revertLandingPageAction } from '@/lib/ai/features/landing-page-builder';
+import { APP_URL } from '@/lib/config';
 
 interface QrLink {
   id: string;
@@ -166,12 +167,12 @@ export default function LinkList({
           filteredLinks.map((link) => {
             const shortUrl = link.customDomain?.domain
               ? `https://${link.customDomain.domain}/id/${link.shortCode}`
-              : `${origin || 'https://dynamicqr.co'}/id/${link.shortCode}`;
+              : `${origin || APP_URL}/id/${link.shortCode}`;
 
             return (
               <div
                 key={link.id}
-                className={`w-full min-w-0 rounded-2xl border p-4 sm:p-5 transition-all shadow-xs ${
+                className={`w-full min-w-0 rounded-lg border p-4 sm:p-5 transition-all shadow-xs ${
                   link.isArchived
                     ? 'border-[#11140F]/10 dark:border-white/10 bg-[#11140F]/[0.02] dark:bg-white/[0.02] opacity-80'
                     : 'border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#161A13] hover:border-[#11140F]/30 dark:hover:border-white/30 text-[#11140F] dark:text-white'

@@ -5,6 +5,7 @@ import { createLink } from '@/app/actions';
 import { useState, useEffect, useRef } from 'react';
 import { enrichUrlAction, EnrichedUrlResult } from '@/lib/ai/features/url-enricher';
 import { Sparkles, AlertTriangle, CheckCircle2, Loader2 } from 'lucide-react';
+import { APP_URL } from '@/lib/config';
 
 function SubmitBtn() {
   const { pending } = useFormStatus();
@@ -253,7 +254,7 @@ export default function LinkForm({ customDomains = [] }: LinkFormProps) {
           Preview: <span className="text-[#11140F]/80 dark:text-emerald-400 font-medium break-all">
             {selectedDomainId !== 'default'
               ? `https://${customDomains.find((d) => d.id === selectedDomainId)?.domain || 'qr.yourbrand.com'}`
-              : (origin || 'https://dynamicqr.co')}/id/{shortCode || 'promo-2024'}
+              : (origin || APP_URL)}/id/{shortCode || 'promo-2024'}
           </span>
         </p>
         {state.errors?.shortCode && (

@@ -20,6 +20,7 @@ import {
   Share2,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
+import { APP_URL } from "@/lib/config";
 
 export function normalizeLandingUrl(url?: string | null, fallbackUrl?: string | null): string {
   if (!url || url.trim() === "" || url.trim() === "#") {
@@ -81,7 +82,7 @@ export function RenderLandingPage({
     }
   }, []);
 
-  const pageUrl = currentUrl || (shortCode ? `https://dynamicqr.co/page/${shortCode}` : 'https://dynamicqr.co');
+  const pageUrl = currentUrl || (shortCode ? `${APP_URL}/page/${shortCode}` : APP_URL);
 
   const handleCopyLink = () => {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {

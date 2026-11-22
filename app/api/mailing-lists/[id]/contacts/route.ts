@@ -101,16 +101,30 @@ export async function DELETE(
 
     const { id } = await params;
     const contactId = req.nextUrl.searchParams.get("contactId");
+    let contactIds: string[] = [];
 
-    if (!contactId) {
-      return NextResponse.json({ error: "contactId is required" }, { status: 400 });
+    if (contactId) {
+      contactIds = contactId.split(",").map((s) => s.trim()).filter(Boolean);
+    } else {
+      try {
+        const body = await req.json();
+        if (Array.isArray(body.contactIds)) {
+          contactIds = body.contactIds;
+        } else if (body.contactId) {
+          contactIds = [body.contactId];
+        }
+      } catch {}
     }
 
-    await prisma.customerMailContact.deleteMany({
-      where: { id: contactId, listId: id, userId: user.id },
+    if (contactIds.length === 0) {
+      return NextResponse.json({ error: "contactId or contactIds array is required" }, { status: 400 });
+    }
+
+    const result = await prisma.customerMailContact.deleteMany({
+      where: { id: { in: contactIds }, listId: id, userId: user.id },
     });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, count: result.count });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

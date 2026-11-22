@@ -83,7 +83,7 @@ export default function Footer({ theme = 'dark', className = '' }: FooterProps) 
 
       if (res.ok) {
         setStatus('success');
-        setMessage(data.message || 'Check your inbox for confirmation!');
+        setMessage(data.message || 'You are now subscribed!');
         setEmail('');
       } else {
         setStatus('error');

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Mail,
   Users,
@@ -25,9 +25,29 @@ import {
   Printer,
   QrCode,
   ExternalLink,
+  Search,
+  Download,
+  Bold,
+  Italic,
+  Underline as UnderlineIcon,
+  Heading2,
+  Heading3,
+  Link as LinkIcon,
+  Image as ImageIcon,
+  MousePointerClick,
+  List as ListIcon,
+  Minus,
+  History,
+  X,
+  XCircle,
+  Clock,
+  CheckSquare,
+  Square,
+  Upload,
 } from 'lucide-react';
 import Link from 'next/link';
 import PrintTemplateModal from './PrintTemplateModal';
+import { APP_URL } from '@/lib/config';
 
 interface MailingList {
   id: string;
@@ -45,6 +65,26 @@ interface Contact {
   email: string;
   firstName: string | null;
   status: string;
+  source?: string;
+  createdAt: string;
+}
+
+interface CampaignRecipient {
+  email: string;
+  status: string;
+  error?: string;
+  sentAt?: string;
+}
+
+interface CampaignItem {
+  id: string;
+  subject: string;
+  bodyHtml: string;
+  status: string;
+  sentAt: string | null;
+  sentCount: number;
+  recipientCount: number;
+  recipients?: CampaignRecipient[];
   createdAt: string;
 }
 
@@ -59,72 +99,54 @@ interface Quotas {
   hasBrandedFooter: boolean;
 }
 
-// 4 Prebuilt Designer Templates
+// Prebuilt Templates
 const TEMPLATES = [
   {
     id: 'modern_welcome',
     name: 'Modern Welcome',
     subject: 'Welcome to {{list_name}}!',
-    body: `<h2 style="font-size:22px;color:#11140F;margin:0 0 16px;font-weight:700;">Welcome to {{list_name}}!</h2>
-<p style="color:#374151;font-size:15px;line-height:1.6;margin:0 0 16px;">
+    body: `<h2 style="font-size:20px;color:#11140F;margin:0 0 14px;font-weight:700;">Welcome to {{list_name}}!</h2>
+<p style="color:#374151;font-size:14px;line-height:1.6;margin:0 0 16px;">
   Hi {{first_name}}, thank you for scanning our QR code and connecting with us. We are delighted to have you as part of our community.
 </p>
-<p style="color:#374151;font-size:15px;line-height:1.6;margin:0 0 24px;">
-  You will be the first to receive special promotions, secret releases, and priority invitations.
-</p>
-<div style="text-align:left;margin:24px 0;">
-  <a href="{{site_url}}" style="display:inline-block;background:#11140F;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 24px;border-radius:8px;">
-    Visit Our Website &rarr;
-  </a>
+<div style="background:#F7F8F5;border-left:4px solid #2F6B4F;padding:14px 18px;border-radius:0 6px 6px 0;margin:18px 0;">
+  <p style="color:#11140F;font-weight:600;font-size:13.5px;margin:0 0 4px;">Exclusive Updates Ahead</p>
+  <p style="color:#4B5563;font-size:13px;margin:0;line-height:1.5;">You'll receive early access to promotions, seasonal menus, and VIP community events.</p>
+</div>
+<div style="text-align:center;margin:22px 0;">
+  <a href="#" style="background:#11140F;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:6px;font-size:13px;font-weight:600;display:inline-block;">Visit Our Store</a>
 </div>`,
   },
   {
     id: 'promotional_sale',
     name: 'Flash Sale Promo',
-    subject: 'Exclusive Offer: Save Today at {{list_name}}',
-    body: `<div style="background:#2F6B4F;color:#ffffff;padding:24px;border-radius:10px;text-align:center;margin-bottom:20px;">
-  <div style="font-size:12px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;opacity:0.9;">Limited Time Special</div>
-  <h2 style="font-size:26px;font-weight:800;margin:8px 0;color:#ffffff;">Special Discount Just For You</h2>
-  <div style="font-size:14px;opacity:0.95;">Thank you for being a valued customer!</div>
+    subject: 'Special Offer: Save Today at {{list_name}}',
+    body: `<div style="background:#2F6B4F;color:#ffffff;padding:20px;border-radius:8px;text-align:center;margin-bottom:18px;">
+  <div style="font-size:11px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;opacity:0.9;">Limited Time Special</div>
+  <h2 style="font-size:22px;font-weight:800;margin:6px 0;color:#ffffff;">Special Discount Just For You</h2>
+  <div style="font-size:13px;opacity:0.95;">Thank you for being a valued customer!</div>
 </div>
-<p style="color:#374151;font-size:15px;line-height:1.6;margin:0 0 16px;">
-  Hi {{first_name}}, show this email on your next visit or use the discount code below online:
+<p style="color:#374151;font-size:14px;line-height:1.6;margin:0 0 16px;">
+  Hi {{first_name}}, show this email on your next visit or use the discount code below:
 </p>
-<div style="background:#F7F8F5;border:2px dashed #2F6B4F;border-radius:8px;padding:16px;text-align:center;margin:20px 0;">
+<div style="background:#F7F8F5;border:2px dashed #2F6B4F;border-radius:6px;padding:14px;text-align:center;margin:18px 0;">
   <span style="font-size:11px;color:#6B7280;text-transform:uppercase;font-weight:600;letter-spacing:1px;display:block;">Discount Code</span>
-  <strong style="font-size:24px;color:#11140F;font-family:monospace;letter-spacing:2px;">VIPGUEST20</strong>
+  <strong style="font-size:22px;color:#11140F;font-family:monospace;letter-spacing:2px;">VIPGUEST20</strong>
 </div>`,
   },
   {
     id: 'event_invite',
     name: 'VIP Event Invite',
     subject: "You're Invited: Special Gathering at {{list_name}}",
-    body: `<h2 style="font-size:22px;color:#11140F;margin:0 0 12px;font-weight:700;">You're Invited: Exclusive Gathering</h2>
-<p style="color:#374151;font-size:15px;line-height:1.6;margin:0 0 20px;">
-  Hi {{first_name}}, we're hosting an exclusive event for our loyal community members and would love to see you there.
+    body: `<h2 style="font-size:20px;color:#11140F;margin:0 0 12px;font-weight:700;">You're Invited: Exclusive Gathering</h2>
+<p style="color:#374151;font-size:14px;line-height:1.6;margin:0 0 16px;">
+  Hi {{first_name}}, we are hosting an exclusive gathering for our community members and would love to see you there.
 </p>
-<div style="background:#F7F8F5;border-left:4px solid #2F6B4F;padding:16px 20px;border-radius:0 8px 8px 0;margin:20px 0;">
-  <div style="font-size:14px;font-weight:bold;color:#11140F;margin-bottom:4px;">📅 Date & Time</div>
-  <div style="font-size:14px;color:#4B5563;margin-bottom:12px;">This Friday at 7:00 PM</div>
-  <div style="font-size:14px;font-weight:bold;color:#11140F;margin-bottom:4px;">📍 Location</div>
-  <div style="font-size:14px;color:#4B5563;">Main Venue Hall</div>
-</div>`,
-  },
-  {
-    id: 'weekly_digest',
-    name: 'Community Digest',
-    subject: 'The Latest News & Updates from {{list_name}}',
-    body: `<h2 style="font-size:22px;color:#11140F;margin:0 0 16px;font-weight:700;">What's New at {{list_name}}</h2>
-<p style="color:#374151;font-size:15px;line-height:1.6;margin:0 0 20px;">
-  Hi {{first_name}}, here are this week's highlights and behind-the-scenes updates:
-</p>
-<div style="margin-bottom:16px;">
-  <strong style="color:#11140F;font-size:15px;">✨ 1. New Seasonal Releases</strong>
-  <p style="color:#4B5563;font-size:14px;line-height:1.5;margin:4px 0 0;">We've added brand new items curated specifically for this week.</p>
-</div>
-<div style="margin-bottom:16px;">
-  <strong style="color:#11140F;font-size:15px;">🚀 2. Extended Weekend Hours</strong>
-  <p style="color:#4B5563;font-size:14px;line-height:1.5;margin:4px 0 0;">We'll be open late until 11:00 PM every Friday and Saturday.</p>
+<div style="background:#F7F8F5;border-left:4px solid #2F6B4F;padding:14px 18px;border-radius:0 6px 6px 0;margin:18px 0;">
+  <div style="font-size:13px;font-weight:bold;color:#11140F;margin-bottom:4px;">Date & Time</div>
+  <div style="font-size:13px;color:#4B5563;margin-bottom:10px;">This Friday at 7:00 PM</div>
+  <div style="font-size:13px;font-weight:bold;color:#11140F;margin-bottom:4px;">Location</div>
+  <div style="font-size:13px;color:#4B5563;">Main Venue Hall</div>
 </div>`,
   },
 ];
@@ -143,13 +165,26 @@ export default function CustomerMailingListManager({
   const [loading, setLoading] = useState(true);
   const [loadingContacts, setLoadingContacts] = useState(false);
 
+  // Sub-tabs: 'contacts' | 'history'
+  const [listSubTab, setListSubTab] = useState<'contacts' | 'history'>('contacts');
+
+  // Contact search & filtering
+  const [contactSearch, setContactSearch] = useState('');
+  const [contactStatusFilter, setContactStatusFilter] = useState<'all' | 'active' | 'unsubscribed' | 'pending'>('all');
+  const [selectedContactIds, setSelectedContactIds] = useState<string[]>([]);
+  const [deletingBulk, setDeletingBulk] = useState(false);
+
+  // Broadcast campaign history
+  const [campaigns, setCampaigns] = useState<CampaignItem[]>([]);
+  const [loadingCampaigns, setLoadingCampaigns] = useState(false);
+  const [inspectingCampaign, setInspectingCampaign] = useState<CampaignItem | null>(null);
+
   // Modals
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newListName, setNewListName] = useState('');
   const [newListDesc, setNewListDesc] = useState('');
   const [creatingList, setCreatingList] = useState(false);
 
-  // Edit List Modal
   const [showEditListModal, setShowEditListModal] = useState(false);
   const [editListName, setEditListName] = useState('');
   const [editListDesc, setEditListDesc] = useState('');
@@ -161,7 +196,6 @@ export default function CustomerMailingListManager({
   const [newContactName, setNewContactName] = useState('');
   const [addingContact, setAddingContact] = useState(false);
 
-  // Edit Contact Modal
   const [showEditContactModal, setShowEditContactModal] = useState(false);
   const [editingContactId, setEditingContactId] = useState<string | null>(null);
   const [editContactEmail, setEditContactEmail] = useState('');
@@ -169,7 +203,6 @@ export default function CustomerMailingListManager({
   const [editContactStatus, setEditContactStatus] = useState('active');
   const [updatingContact, setUpdatingContact] = useState(false);
 
-  // CSV Bulk Import Modal
   const [showCsvModal, setShowCsvModal] = useState(false);
   const [csvText, setCsvText] = useState('');
   const [importingCsv, setImportingCsv] = useState(false);
@@ -184,23 +217,30 @@ export default function CustomerMailingListManager({
 
   // Embed Studio
   const [showEmbedModal, setShowEmbedModal] = useState(false);
-  const [showPrintModal, setShowPrintModal] = useState(false);
-  const [embedStyle, setEmbedStyle] = useState<'inline' | 'floating_pill' | 'card'>('inline');
+  const [embedStyle, setEmbedStyle] = useState<'inline' | 'floating_pill' | 'minimal'>('inline');
   const [embedAccent, setEmbedAccent] = useState('#2F6B4F');
   const [copiedEmbed, setCopiedEmbed] = useState(false);
 
+  // Print Template Modal
+  const [showPrintModal, setShowPrintModal] = useState(false);
+
+  // Feedback notifications
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
-  // Load lists
+  // Textarea ref for rich text toolbar insertion
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const origin = typeof window !== 'undefined' ? window.location.origin : APP_URL;
+
+  // 1. Initial Load of Lists & Quotas
   const loadLists = async () => {
     try {
-      setLoading(true);
       const res = await fetch('/api/mailing-lists');
       const data = await res.json();
       if (res.ok) {
         setLists(data.lists || []);
         setQuotas(data.quotas || null);
-        if (data.lists?.length > 0 && !selectedListId) {
+        if (data.lists && data.lists.length > 0 && !selectedListId) {
           setSelectedListId(data.lists[0].id);
         }
       }
@@ -215,30 +255,67 @@ export default function CustomerMailingListManager({
     loadLists();
   }, []);
 
-  // Load contacts
+  // 2. Load Contacts and Campaigns when selectedListId changes
+  const loadContacts = async () => {
+    if (!selectedListId) return;
+    try {
+      setLoadingContacts(true);
+      const res = await fetch(`/api/mailing-lists/${selectedListId}/contacts`);
+      const data = await res.json();
+      if (res.ok) {
+        setContacts(data.contacts || []);
+        setSelectedContactIds([]);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingContacts(false);
+    }
+  };
+
+  const loadCampaigns = async () => {
+    if (!selectedListId) return;
+    try {
+      setLoadingCampaigns(true);
+      const res = await fetch(`/api/mailing-lists/${selectedListId}/campaigns`);
+      const data = await res.json();
+      if (res.ok) {
+        setCampaigns(data.campaigns || []);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingCampaigns(false);
+    }
+  };
+
   useEffect(() => {
     if (!selectedListId) {
       setContacts([]);
+      setCampaigns([]);
       return;
     }
-    const loadContacts = async () => {
-      try {
-        setLoadingContacts(true);
-        const res = await fetch(`/api/mailing-lists/${selectedListId}/contacts`);
-        const data = await res.json();
-        if (res.ok) {
-          setContacts(data.contacts || []);
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoadingContacts(false);
-      }
-    };
     loadContacts();
+    loadCampaigns();
   }, [selectedListId]);
 
-  // Handle Create List
+  // Insert Rich Text Snippet at Cursor Position
+  const insertSnippet = (before: string, after: string = '', defaultText: string = '') => {
+    if (!textareaRef.current) return;
+    const textarea = textareaRef.current;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selected = broadcastBody.substring(start, end) || defaultText;
+    const replacement = `${before}${selected}${after}`;
+    const newBody = broadcastBody.substring(0, start) + replacement + broadcastBody.substring(end);
+    setBroadcastBody(newBody);
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + before.length, start + before.length + selected.length);
+    }, 10);
+  };
+
+  // Create List
   const handleCreateList = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newListName.trim()) return;
@@ -249,7 +326,7 @@ export default function CustomerMailingListManager({
       const res = await fetch('/api/mailing-lists', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newListName, description: newListDesc }),
+        body: JSON.stringify({ name: newListName.trim(), description: newListDesc.trim() }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -269,7 +346,7 @@ export default function CustomerMailingListManager({
     }
   };
 
-  // Open Edit List Modal
+  // Edit List
   const handleOpenEditList = () => {
     if (!selectedList) return;
     setEditListName(selectedList.name);
@@ -277,7 +354,6 @@ export default function CustomerMailingListManager({
     setShowEditListModal(true);
   };
 
-  // Submit Update List
   const handleUpdateList = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedListId || !editListName.trim()) return;
@@ -308,10 +384,7 @@ export default function CustomerMailingListManager({
   // Delete List
   const handleDeleteList = async () => {
     if (!selectedList || !selectedListId) return;
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete the mailing list "${selectedList.name}" and all of its contacts? This action cannot be undone.`
-    );
-    if (!confirmDelete) return;
+    if (!window.confirm(`Delete list "${selectedList.name}" and all contacts? This cannot be undone.`)) return;
 
     setDeletingList(true);
     setFeedback(null);
@@ -336,7 +409,7 @@ export default function CustomerMailingListManager({
     }
   };
 
-  // Open Edit Contact Modal
+  // Contact Single Edit
   const handleOpenEditContact = (contact: Contact) => {
     setEditingContactId(contact.id);
     setEditContactEmail(contact.email);
@@ -345,7 +418,6 @@ export default function CustomerMailingListManager({
     setShowEditContactModal(true);
   };
 
-  // Submit Update Contact
   const handleUpdateContact = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedListId || !editingContactId || !editContactEmail.trim()) return;
@@ -367,9 +439,7 @@ export default function CustomerMailingListManager({
       if (res.ok) {
         setShowEditContactModal(false);
         setFeedback({ type: 'success', message: 'Contact updated successfully!' });
-        const cRes = await fetch(`/api/mailing-lists/${selectedListId}/contacts`);
-        const cData = await cRes.json();
-        setContacts(cData.contacts || []);
+        await loadContacts();
       } else {
         setFeedback({ type: 'error', message: data.error || 'Failed to update contact' });
       }
@@ -380,7 +450,7 @@ export default function CustomerMailingListManager({
     }
   };
 
-  // Handle Single Add Contact
+  // Single Add Contact
   const handleAddContact = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedListId || !newContactEmail.trim()) return;
@@ -391,7 +461,7 @@ export default function CustomerMailingListManager({
       const res = await fetch(`/api/mailing-lists/${selectedListId}/contacts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: newContactEmail, firstName: newContactName }),
+        body: JSON.stringify({ email: newContactEmail.trim(), firstName: newContactName.trim() || undefined }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -399,9 +469,7 @@ export default function CustomerMailingListManager({
         setNewContactEmail('');
         setNewContactName('');
         setFeedback({ type: 'success', message: 'Contact added to list!' });
-        const cRes = await fetch(`/api/mailing-lists/${selectedListId}/contacts`);
-        const cData = await cRes.json();
-        setContacts(cData.contacts || []);
+        await loadContacts();
         await loadLists();
       } else {
         setFeedback({ type: 'error', message: data.error || 'Failed to add contact' });
@@ -413,7 +481,7 @@ export default function CustomerMailingListManager({
     }
   };
 
-  // Handle CSV Bulk Import
+  // CSV Bulk Import
   const handleCsvImport = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedListId || !csvText.trim()) return;
@@ -423,45 +491,40 @@ export default function CustomerMailingListManager({
 
     try {
       const lines = csvText.split('\n').filter((l) => l.trim().length > 0);
-      let successCount = 0;
-      let lastError = '';
-
+      const parsedContacts: { email: string; firstName?: string }[] = [];
       for (const line of lines) {
         const parts = line.split(',');
         const email = parts[0]?.trim();
         const firstName = parts[1]?.trim() || '';
-
         if (email && email.includes('@')) {
-          const res = await fetch(`/api/mailing-lists/${selectedListId}/contacts`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, firstName }),
-          });
-          if (res.ok) {
-            successCount++;
-          } else {
-            const data = await res.json();
-            lastError = data.error;
-            break;
-          }
+          parsedContacts.push({ email, firstName: firstName || undefined });
         }
       }
 
-      setShowCsvModal(false);
-      setCsvText('');
-      if (successCount > 0) {
-        setFeedback({
-          type: 'success',
-          message: `Imported ${successCount} contacts successfully!${lastError ? ` (${lastError})` : ''}`,
-        });
-      } else if (lastError) {
-        setFeedback({ type: 'error', message: lastError });
+      if (parsedContacts.length === 0) {
+        setFeedback({ type: 'error', message: 'No valid email rows found in CSV text.' });
+        setImportingCsv(false);
+        return;
       }
 
-      const cRes = await fetch(`/api/mailing-lists/${selectedListId}/contacts`);
-      const cData = await cRes.json();
-      setContacts(cData.contacts || []);
-      await loadLists();
+      const res = await fetch(`/api/mailing-lists/${selectedListId}/contacts/import`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contacts: parsedContacts }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setShowCsvModal(false);
+        setCsvText('');
+        setFeedback({
+          type: 'success',
+          message: `Imported ${data.importedCount} contacts successfully!`,
+        });
+        await loadContacts();
+        await loadLists();
+      } else {
+        setFeedback({ type: 'error', message: data.error || 'Import failed.' });
+      }
     } catch (err: any) {
       setFeedback({ type: 'error', message: err.message });
     } finally {
@@ -469,7 +532,40 @@ export default function CustomerMailingListManager({
     }
   };
 
-  // Handle Delete Contact
+  // Handle CSV file upload
+  const handleCsvFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      if (text) setCsvText(text);
+    };
+    reader.readAsText(file);
+  };
+
+  // Export Contacts to CSV
+  const handleExportCsv = () => {
+    if (!selectedList || filteredContacts.length === 0) return;
+    const headers = ['Email', 'First Name', 'Status', 'Date Added'];
+    const rows = filteredContacts.map((c) => [
+      `"${c.email}"`,
+      `"${c.firstName || ''}"`,
+      `"${c.status}"`,
+      `"${new Date(c.createdAt).toLocaleDateString()}"`,
+    ]);
+    const csv = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `subscribers_${selectedList.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  // Single Delete Contact
   const handleDeleteContact = async (contactId: string) => {
     if (!selectedListId) return;
     try {
@@ -478,6 +574,7 @@ export default function CustomerMailingListManager({
       });
       if (res.ok) {
         setContacts((prev) => prev.filter((c) => c.id !== contactId));
+        setSelectedContactIds((prev) => prev.filter((id) => id !== contactId));
         await loadLists();
       }
     } catch (err) {
@@ -485,7 +582,50 @@ export default function CustomerMailingListManager({
     }
   };
 
-  // Handle Broadcast Send
+  // Bulk Delete Selected Contacts
+  const handleBulkDelete = async () => {
+    if (!selectedListId || selectedContactIds.length === 0) return;
+    if (!window.confirm(`Delete ${selectedContactIds.length} selected contacts? This cannot be undone.`)) return;
+
+    setDeletingBulk(true);
+    try {
+      const res = await fetch(`/api/mailing-lists/${selectedListId}/contacts`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contactIds: selectedContactIds }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setFeedback({ type: 'success', message: `Deleted ${data.count || selectedContactIds.length} contacts.` });
+        setSelectedContactIds([]);
+        await loadContacts();
+        await loadLists();
+      } else {
+        setFeedback({ type: 'error', message: data.error || 'Failed to delete contacts' });
+      }
+    } catch (err: any) {
+      setFeedback({ type: 'error', message: err.message });
+    } finally {
+      setDeletingBulk(false);
+    }
+  };
+
+  // Select all / Deselect all
+  const handleToggleSelectAll = () => {
+    if (selectedContactIds.length === filteredContacts.length) {
+      setSelectedContactIds([]);
+    } else {
+      setSelectedContactIds(filteredContacts.map((c) => c.id));
+    }
+  };
+
+  const handleToggleSelectOne = (id: string) => {
+    setSelectedContactIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  // Send Broadcast Campaign
   const handleBroadcast = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedListId || !broadcastSubject.trim() || !broadcastBody.trim()) return;
@@ -496,7 +636,7 @@ export default function CustomerMailingListManager({
       const res = await fetch(`/api/mailing-lists/${selectedListId}/broadcast`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subject: broadcastSubject, bodyHtml: broadcastBody }),
+        body: JSON.stringify({ subject: broadcastSubject.trim(), bodyHtml: broadcastBody.trim() }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -505,9 +645,10 @@ export default function CustomerMailingListManager({
         setBroadcastBody('');
         setFeedback({
           type: 'success',
-          message: `Broadcast delivered to ${data.sentCount} recipients via Gmail Nodemailer!`,
+          message: `Broadcast delivered to ${data.sentCount} recipients via Gmail!`,
         });
         await loadLists();
+        await loadCampaigns();
       } else {
         setFeedback({ type: 'error', message: data.error || 'Broadcast failed' });
       }
@@ -520,119 +661,129 @@ export default function CustomerMailingListManager({
 
   const selectedList = lists.find((l) => l.id === selectedListId);
 
-  // Dynamic Embed Code Snippet Generator
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://dynamicqr.co';
-  const embedCodeSnippet = selectedListId
-    ? embedStyle === 'inline'
-      ? `<!-- DynamicQR Mailing List Embed Form -->\n<form action="${origin}/api/mailing-lists/${selectedListId}/subscribe" method="POST" style="display:flex;gap:8px;max-width:400px;font-family:sans-serif;">\n  <input type="email" name="email" placeholder="Enter your email" required style="flex:1;padding:10px 14px;border:1px solid #ccc;border-radius:8px;font-size:14px;" />\n  <button type="submit" style="background:${embedAccent};color:#fff;border:none;padding:10px 18px;border-radius:8px;font-weight:600;cursor:pointer;">Subscribe</button>\n</form>`
+  // Filtered contacts list
+  const filteredContacts = contacts.filter((c) => {
+    const matchesFilter = contactStatusFilter === 'all' || c.status === contactStatusFilter;
+    const query = contactSearch.trim().toLowerCase();
+    const matchesSearch =
+      !query ||
+      c.email.toLowerCase().includes(query) ||
+      (c.firstName && c.firstName.toLowerCase().includes(query));
+    return matchesFilter && matchesSearch;
+  });
+
+  // Embed Snippet Generator
+  const embedCodeSnippet =
+    embedStyle === 'inline'
+      ? `<!-- DynamicQR Inline Subscriber Box -->\n<div style="max-width:400px;background:#ffffff;border:1px solid #e5e7eb;border-radius:8px;padding:20px;font-family:sans-serif;">\n  <h4 style="margin:0 0 8px;font-size:16px;color:#11140F;font-weight:700;">Join ${selectedList?.name || 'Our Community'}</h4>\n  <p style="margin:0 0 14px;font-size:12px;color:#6b7280;">${selectedList?.description || 'Get exclusive updates straight to your inbox.'}</p>\n  <form action="${origin}/api/mailing-lists/${selectedListId}/subscribe" method="POST" style="display:flex;flex-direction:column;gap:8px;">\n    <input type="text" name="firstName" placeholder="First Name (optional)" style="padding:10px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;" />\n    <input type="email" name="email" placeholder="Enter your email" required style="padding:10px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;outline:none;" />\n    <button type="submit" style="background:${embedAccent};color:#ffffff;border:none;padding:10px 14px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;">Subscribe</button>\n  </form>\n</div>`
       : embedStyle === 'floating_pill'
-      ? `<!-- DynamicQR Floating Subscription Pill -->\n<div style="position:fixed;bottom:20px;right:20px;background:#fff;padding:12px 16px;border-radius:30px;box-shadow:0 8px 30px rgba(0,0,0,0.12);display:flex;align-items:center;gap:10px;font-family:sans-serif;z-index:9999;">\n  <form action="${origin}/api/mailing-lists/${selectedListId}/subscribe" method="POST" style="display:flex;gap:8px;margin:0;">\n    <input type="email" name="email" placeholder="Get newsletter" required style="padding:8px 12px;border:1px solid #ddd;border-radius:20px;font-size:13px;outline:none;" />\n    <button type="submit" style="background:${embedAccent};color:#fff;border:none;padding:8px 14px;border-radius:20px;font-size:13px;font-weight:bold;cursor:pointer;">Join</button>\n  </form>\n</div>`
-      : `<!-- DynamicQR Slide-In Card -->\n<div style="max-width:320px;background:#fff;border:1px solid #eaeaea;border-radius:16px;padding:20px;box-shadow:0 10px 25px rgba(0,0,0,0.05);font-family:sans-serif;">\n  <h4 style="margin:0 0 6px;font-size:16px;color:#111;">Join our updates</h4>\n  <p style="margin:0 0 14px;font-size:13px;color:#666;">Subscribe to get early discounts and announcements.</p>\n  <form action="${origin}/api/mailing-lists/${selectedListId}/subscribe" method="POST" style="display:flex;flex-direction:column;gap:10px;">\n    <input type="email" name="email" placeholder="Your email address" required style="padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px;" />\n    <button type="submit" style="background:${embedAccent};color:#fff;border:none;padding:10px;border-radius:8px;font-weight:bold;cursor:pointer;">Subscribe Now</button>\n  </form>\n</div>`
-    : '';
+      ? `<!-- DynamicQR Floating Pill -->\n<div style="position:fixed;bottom:20px;right:20px;background:#ffffff;padding:10px 14px;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.15);display:flex;align-items:center;gap:8px;font-family:sans-serif;z-index:9999;">\n  <form action="${origin}/api/mailing-lists/${selectedListId}/subscribe" method="POST" style="display:flex;gap:6px;margin:0;">\n    <input type="email" name="email" placeholder="Enter email" required style="padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:12px;outline:none;" />\n    <button type="submit" style="background:${embedAccent};color:#ffffff;border:none;padding:8px 12px;border-radius:6px;font-size:12px;font-weight:bold;cursor:pointer;">Join</button>\n  </form>\n</div>`
+      : `<!-- DynamicQR Minimal Link -->\n<a href="${origin}/join/${selectedListId}" target="_blank" style="display:inline-block;background:${embedAccent};color:#ffffff;text-decoration:none;padding:10px 18px;border-radius:6px;font-size:13px;font-weight:600;font-family:sans-serif;">Subscribe to ${selectedList?.name || 'Updates'} &rarr;</a>`;
 
   return (
-    <div className="rounded-2xl border border-[#11140F]/10 bg-white p-5 sm:p-7 shadow-xs space-y-6">
-      
-      {/* 1. Header & Live Quota Counters */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#11140F]/10">
-        <div className="space-y-1">
+    <div className="space-y-6">
+      {/* Top Banner & Quotas */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-lg border border-[#11140F]/10 shadow-xs">
+        <div>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[#2F6B4F]/10 text-[#2F6B4F] flex items-center justify-center">
-              <Mail className="w-4 h-4" />
-            </div>
-            <h3 className="text-lg font-bold text-[#11140F] tracking-tight">
+            <Mail className="w-4 h-4 text-[#2F6B4F]" />
+            <h3 className="text-base font-bold text-[#11140F]">
               Customer Mailing Lists & Campaigns
             </h3>
-            <span className="text-[11px] font-mono uppercase px-2 py-0.5 rounded-full bg-[#11140F]/5 text-[#11140F]/70 font-semibold">
+            <span className="text-[11px] font-mono uppercase px-2 py-0.5 rounded-md bg-[#11140F]/5 text-[#11140F]/70 font-semibold">
               {quotas?.tier || userTier.toUpperCase()}
             </span>
           </div>
-          <p className="text-xs sm:text-[13px] text-[#11140F]/60">
-            Collect subscriber contacts via your printed QR codes and dispatch email broadcasts using dedicated Gmail Nodemailer delivery.
+          <p className="text-xs text-[#11140F]/60 mt-0.5">
+            Collect subscriber contacts via your printed QR codes and dispatch email broadcasts using dedicated Gmail delivery.
           </p>
         </div>
 
-        {/* Quota Progress Pills calibrated strictly to 10, 50, 100, 500 limits */}
+        {/* Quota Progress Pills */}
         {quotas && (
-          <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
-            <div className="px-3 py-1.5 rounded-xl bg-[#F7F8F5] border border-[#11140F]/8 flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="px-3 py-1.5 rounded-md bg-[#F7F8F5] border border-[#11140F]/10 text-xs flex items-center gap-1.5 font-mono">
               <span className="text-[#11140F]/50">Lists:</span>
               <strong className="text-[#11140F]">{quotas.listsUsed} / {quotas.listsMax}</strong>
             </div>
-            <div className="px-3 py-1.5 rounded-xl bg-[#F7F8F5] border border-[#11140F]/8 flex items-center gap-1.5">
-              <span className="text-[#11140F]/50">Contacts:</span>
+            <div className="px-3 py-1.5 rounded-md bg-[#F7F8F5] border border-[#11140F]/10 text-xs flex items-center gap-1.5 font-mono">
+              <span className="text-[#11140F]/50">Subscribers:</span>
               <strong className="text-[#11140F]">{quotas.contactsUsed} / {quotas.contactsMax}</strong>
             </div>
-            <div className="px-3 py-1.5 rounded-xl bg-[#F7F8F5] border border-[#11140F]/8 flex items-center gap-1.5">
-              <span className="text-[#11140F]/50">Campaigns:</span>
+            <div className="px-3 py-1.5 rounded-md bg-[#F7F8F5] border border-[#11140F]/10 text-xs flex items-center gap-1.5 font-mono">
+              <span className="text-[#11140F]/50">Broadcasts:</span>
               <strong className="text-[#11140F]">{quotas.campaignsUsedThisMonth} / {quotas.campaignsMaxPerMonth} mo</strong>
             </div>
           </div>
         )}
       </div>
 
-      {/* Global Feedback Banner */}
+      {/* Global Feedback Alert */}
       {feedback && (
         <div
-          className={`p-3.5 rounded-xl text-xs sm:text-sm font-medium flex items-center gap-2.5 ${
+          className={`p-3.5 rounded-md border text-xs flex items-center justify-between gap-2 ${
             feedback.type === 'success'
-              ? 'bg-[#2F6B4F]/10 text-[#2F6B4F] border border-[#2F6B4F]/20'
-              : 'bg-red-50 text-red-700 border border-red-200'
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+              : 'bg-red-50 border-red-200 text-red-800'
           }`}
         >
-          {feedback.type === 'success' ? (
-            <CheckCircle2 className="w-4 h-4 shrink-0" />
-          ) : (
-            <AlertCircle className="w-4 h-4 shrink-0" />
-          )}
-          <span>{feedback.message}</span>
+          <div className="flex items-center gap-2">
+            {feedback.type === 'success' ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+            )}
+            <span>{feedback.message}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setFeedback(null)}
+            className="text-xs opacity-60 hover:opacity-100"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
         </div>
       )}
 
-      {/* 2. Lists Selector & Actions */}
       {loading ? (
-        <div className="py-12 text-center text-sm text-[#11140F]/50 flex items-center justify-center gap-2">
-          <Loader2 className="w-4 h-4 animate-spin" />
-          Loading mailing lists...
+        <div className="p-12 text-center text-xs text-[#11140F]/50 flex items-center justify-center gap-2">
+          <Loader2 className="w-4 h-4 animate-spin text-[#2F6B4F]" />
+          <span>Loading customer lists...</span>
         </div>
       ) : lists.length === 0 ? (
-        <div className="text-center py-12 px-4 rounded-xl border border-dashed border-[#11140F]/20 space-y-4">
-          <div className="w-12 h-12 rounded-2xl bg-[#11140F]/5 mx-auto flex items-center justify-center text-[#11140F]/60">
-            <Mail className="w-6 h-6" />
-          </div>
-          <div className="space-y-1">
-            <h4 className="text-base font-bold text-[#11140F]">No mailing lists yet</h4>
-            <p className="text-xs sm:text-sm text-[#11140F]/60 max-w-sm mx-auto">
-              Create your first customer list to start collecting emails directly from your printed flyers and dynamic QR codes.
-            </p>
-          </div>
+        <div className="p-8 text-center bg-white rounded-lg border border-[#11140F]/10 space-y-3">
+          <Mail className="w-8 h-8 text-[#2F6B4F] mx-auto opacity-70" />
+          <h4 className="text-sm font-bold text-[#11140F]">No Customer Mailing Lists Yet</h4>
+          <p className="text-xs text-[#11140F]/60 max-w-sm mx-auto">
+            Create your first mailing list to collect customer emails via QR signs, retail counter tents, and online widgets.
+          </p>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="px-5 py-2.5 rounded-xl bg-[#11140F] text-white text-xs font-semibold hover:bg-[#2A2E25] transition-colors inline-flex items-center gap-2 cursor-pointer"
+            className="px-4 py-2 rounded-md bg-[#11140F] text-white text-xs font-semibold hover:bg-[#2A2E25] transition-colors inline-flex items-center gap-1.5 cursor-pointer"
           >
-            <Plus className="w-4 h-4" />
-            Create First Mailing List
+            <Plus className="w-3.5 h-3.5" />
+            <span>Create First List</span>
           </button>
         </div>
       ) : (
-        <div className="space-y-6">
-          {/* List selection tabs & Add button */}
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-2">
+        <div className="space-y-4">
+          {/* List Selector Navigation Bar */}
+          <div className="flex items-center justify-between border-b border-[#11140F]/10 pb-3 gap-2 overflow-x-auto">
+            <div className="flex items-center gap-2">
               {lists.map((l) => (
                 <button
                   key={l.id}
                   onClick={() => setSelectedListId(l.id)}
-                  className={`px-4 py-2 rounded-xl text-xs sm:text-[13px] font-medium transition-all cursor-pointer flex items-center gap-2 ${
+                  className={`px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-colors flex items-center gap-1.5 cursor-pointer ${
                     selectedListId === l.id
                       ? 'bg-[#11140F] text-white shadow-xs'
-                      : 'bg-[#F7F8F5] text-[#11140F]/70 hover:bg-[#11140F]/5 hover:text-[#11140F]'
+                      : 'bg-white border border-[#11140F]/10 text-[#11140F]/70 hover:bg-[#F7F8F5]'
                   }`}
                 >
                   <span>{l.name}</span>
                   <span
-                    className={`px-1.5 py-0.5 rounded-md text-[10.5px] font-mono ${
-                      selectedListId === l.id ? 'bg-white/20 text-white' : 'bg-[#11140F]/10 text-[#11140F]/60'
+                    className={`text-[10px] px-1.5 py-0.2 rounded-md font-mono ${
+                      selectedListId === l.id ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600'
                     }`}
                   >
                     {l._count.contacts}
@@ -641,31 +792,23 @@ export default function CustomerMailingListManager({
               ))}
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={() => setShowCreateModal(true)}
                 disabled={quotas ? quotas.listsUsed >= quotas.listsMax : false}
-                className="px-3.5 py-2 rounded-xl border border-[#11140F]/15 bg-white text-[#11140F] text-xs font-semibold hover:bg-[#F7F8F5] transition-colors flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                className="px-3 py-1.5 rounded-md bg-white border border-[#11140F]/15 text-[#11140F] text-xs font-semibold hover:bg-gray-50 transition-colors flex items-center gap-1 cursor-pointer disabled:opacity-40"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>New List</span>
               </button>
-
-              {quotas && quotas.listsUsed >= quotas.listsMax && (
-                <Link
-                  href="/pricing"
-                  className="text-[11px] font-mono text-[#2F6B4F] hover:underline"
-                >
-                  Upgrade limit
-                </Link>
-              )}
             </div>
           </div>
 
           {/* Active List Panel */}
           {selectedList && (
-            <div className="space-y-4 pt-2">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#F7F8F5] p-4 rounded-xl border border-[#11140F]/8">
+            <div className="space-y-4 pt-1">
+              {/* Header Action Bar */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#F7F8F5] p-4 rounded-lg border border-[#11140F]/8">
                 <div>
                   <div className="flex items-center gap-2">
                     <h4 className="text-sm font-bold text-[#11140F]">{selectedList.name}</h4>
@@ -673,7 +816,7 @@ export default function CustomerMailingListManager({
                       type="button"
                       onClick={handleOpenEditList}
                       className="p-1 rounded-md text-[#11140F]/40 hover:text-[#11140F] hover:bg-white transition-colors cursor-pointer"
-                      title="Edit mailing list name & description"
+                      title="Edit mailing list"
                     >
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
@@ -688,7 +831,7 @@ export default function CustomerMailingListManager({
                     </button>
                   </div>
                   <p className="text-xs text-[#11140F]/60 mt-0.5">
-                    {selectedList.description || 'Double opt-in customer subscriber list.'}
+                    {selectedList.description || 'Customer subscriber list.'}
                   </p>
                 </div>
 
@@ -696,74 +839,76 @@ export default function CustomerMailingListManager({
                   <button
                     onClick={() => setShowAddContactModal(true)}
                     disabled={quotas ? quotas.contactsUsed >= quotas.contactsMax : false}
-                    className="px-3.5 py-2 rounded-lg bg-white border border-[#11140F]/15 text-[#11140F] text-xs font-semibold hover:bg-gray-50 transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
+                    className="px-3 py-1.5 rounded-md bg-white border border-[#11140F]/15 text-[#11140F] text-xs font-semibold hover:bg-gray-50 transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
                   >
                     <Plus className="w-3.5 h-3.5" />
-                    Add Contact
+                    <span>Add Subscriber</span>
                   </button>
 
                   <button
                     onClick={() => setShowCsvModal(true)}
                     disabled={quotas ? quotas.contactsUsed >= quotas.contactsMax : false}
-                    className="px-3.5 py-2 rounded-lg bg-white border border-[#11140F]/15 text-[#11140F] text-xs font-semibold hover:bg-gray-50 transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
+                    className="px-3 py-1.5 rounded-md bg-white border border-[#11140F]/15 text-[#11140F] text-xs font-semibold hover:bg-gray-50 transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
                   >
                     <FileSpreadsheet className="w-3.5 h-3.5 text-[#2F6B4F]" />
-                    Import CSV
+                    <span>Import CSV</span>
+                  </button>
+
+                  <button
+                    onClick={handleExportCsv}
+                    disabled={filteredContacts.length === 0}
+                    className="px-3 py-1.5 rounded-md bg-white border border-[#11140F]/15 text-[#11140F] text-xs font-semibold hover:bg-gray-50 transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Export CSV</span>
                   </button>
 
                   <button
                     onClick={() => setShowEmbedModal(true)}
-                    className="px-3.5 py-2 rounded-lg bg-white border border-[#11140F]/15 text-[#11140F] text-xs font-semibold hover:bg-gray-50 transition-colors flex items-center gap-1.5 cursor-pointer"
+                    className="px-3 py-1.5 rounded-md bg-white border border-[#11140F]/15 text-[#11140F] text-xs font-semibold hover:bg-gray-50 transition-colors flex items-center gap-1.5 cursor-pointer"
                   >
                     <Code className="w-3.5 h-3.5 text-blue-600" />
-                    Embed Studio
+                    <span>Embed Form</span>
                   </button>
 
                   <button
                     onClick={() => setShowPrintModal(true)}
-                    className="px-3.5 py-2 rounded-lg bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-semibold hover:bg-emerald-100 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                    className="px-3 py-1.5 rounded-md bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-semibold hover:bg-emerald-100 transition-colors flex items-center gap-1.5 cursor-pointer"
                   >
                     <Printer className="w-3.5 h-3.5 text-[#2F6B4F]" />
-                    Print QR Sign / Tent
+                    <span>Print QR Displays</span>
                   </button>
 
                   <button
                     onClick={() => setShowBroadcastModal(true)}
                     disabled={contacts.filter((c) => c.status === 'active').length === 0}
-                    className="px-4 py-2 rounded-lg bg-[#2F6B4F] text-white text-xs font-semibold hover:bg-[#25553E] transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer disabled:opacity-40"
+                    className="px-3.5 py-1.5 rounded-md bg-[#2F6B4F] text-white text-xs font-semibold hover:bg-[#25553E] transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer disabled:opacity-40"
                   >
                     <Send className="w-3.5 h-3.5" />
-                    Compose Broadcast
+                    <span>Compose Broadcast</span>
                   </button>
                 </div>
               </div>
 
               {/* Physical Print & Retail Setup Banner */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#2F6B4F]/10 via-[#2F6B4F]/5 to-transparent border border-[#2F6B4F]/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                <div className="flex items-start gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-[#2F6B4F] text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5">
-                    <Printer className="w-5 h-5" />
+              <div className="p-4 rounded-lg bg-[#2F6B4F]/5 border border-[#2F6B4F]/15 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <Printer className="w-4 h-4 text-[#2F6B4F]" />
+                    <h5 className="text-xs font-bold text-[#11140F] uppercase tracking-wide">
+                      Counter Cards, Packaging & Table Tents
+                    </h5>
                   </div>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h5 className="text-xs font-bold text-[#11140F] uppercase tracking-wide">
-                        Retail Counters, Packaging &amp; Table Tents
-                      </h5>
-                      <span className="px-2 py-0.5 rounded-full bg-[#2F6B4F]/20 text-[#2F6B4F] text-[10px] font-mono font-bold">
-                        300 DPI PRINT READY
-                      </span>
-                    </div>
-                    <p className="text-xs text-[#11140F]/70 max-w-xl leading-relaxed">
-                      Print QR codes on retail counters, packaging, or table tents. When customers scan, they enter their email on a branded mobile form with automated double opt-in. Dispatch broadcast campaigns straight from your workspace using native Gmail delivery.
-                    </p>
-                  </div>
+                  <p className="text-xs text-[#11140F]/70 leading-relaxed">
+                    Print QR codes for your venue or packages. Customers scan and join immediately. Broadcast updates to them via Gmail.
+                  </p>
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
                   <Link
                     href={`/join/${selectedList.id}`}
                     target="_blank"
-                    className="px-3.5 py-2 rounded-xl border border-[#11140F]/15 bg-white text-[#11140F] text-xs font-semibold hover:bg-gray-50 transition-colors flex items-center gap-1.5"
+                    className="px-3 py-1.5 rounded-md border border-[#11140F]/15 bg-white text-[#11140F] text-xs font-medium hover:bg-gray-50 transition-colors flex items-center gap-1.5"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
                     <span>Test Form</span>
@@ -771,134 +916,402 @@ export default function CustomerMailingListManager({
                   <button
                     type="button"
                     onClick={() => setShowPrintModal(true)}
-                    className="px-4 py-2 rounded-xl bg-[#2F6B4F] text-white text-xs font-semibold hover:bg-[#25553E] transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
+                    className="px-3.5 py-1.5 rounded-md bg-[#2F6B4F] text-white text-xs font-medium hover:bg-[#25553E] transition-colors flex items-center gap-1.5 cursor-pointer"
                   >
                     <Printer className="w-3.5 h-3.5" />
-                    <span>Print Displays</span>
+                    <span>Print Studio</span>
                   </button>
                 </div>
               </div>
 
-              {/* Contacts Table */}
-              <div className="rounded-xl border border-[#11140F]/10 overflow-hidden">
-                <div className="px-4 py-3 bg-gray-50/50 border-b border-[#11140F]/8 flex items-center justify-between text-xs font-semibold text-[#11140F]/70">
-                  <span>Contacts ({contacts.length})</span>
-                  <span className="text-[11px] text-[#11140F]/50 font-mono">
-                    Tier max: {quotas?.contactsMax || 10} contacts
-                  </span>
+              {/* Sub-Tab Navigation: Subscribers vs Broadcast History */}
+              <div className="flex items-center justify-between border-b border-[#11140F]/10 pb-2">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setListSubTab('contacts')}
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
+                      listSubTab === 'contacts'
+                        ? 'bg-[#11140F] text-white shadow-xs'
+                        : 'text-[#11140F]/60 hover:text-[#11140F] hover:bg-gray-100'
+                    }`}
+                  >
+                    <Users className="w-3.5 h-3.5" />
+                    <span>Subscribers ({contacts.length})</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setListSubTab('history')}
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
+                      listSubTab === 'history'
+                        ? 'bg-[#11140F] text-white shadow-xs'
+                        : 'text-[#11140F]/60 hover:text-[#11140F] hover:bg-gray-100'
+                    }`}
+                  >
+                    <History className="w-3.5 h-3.5" />
+                    <span>Broadcast History ({campaigns.length})</span>
+                  </button>
                 </div>
 
-                {loadingContacts ? (
-                  <div className="p-8 text-center text-xs text-[#11140F]/50">
-                    Loading contacts...
-                  </div>
-                ) : contacts.length === 0 ? (
-                  <div className="p-8 text-center text-xs text-[#11140F]/50">
-                    No subscribers in this list yet. Share your QR code or use &quot;Add Contact&quot; or &quot;Import CSV&quot; above.
-                  </div>
-                ) : (
-                  <div className="divide-y divide-[#11140F]/5 max-h-72 overflow-y-auto">
-                    {contacts.map((c) => (
-                      <div
-                        key={c.id}
-                        className="px-4 py-3 flex items-center justify-between gap-4 text-xs hover:bg-[#F7F8F5]/60 transition-colors"
-                      >
-                        <div className="space-y-0.5">
-                          <div className="font-medium text-[#11140F] flex items-center gap-2">
-                            <span>{c.email}</span>
-                            {c.firstName && (
-                              <span className="text-[#11140F]/50 font-normal">
-                                ({c.firstName})
-                              </span>
-                            )}
-                          </div>
-                          <div className="text-[11px] text-[#11140F]/40 font-mono">
-                            Added {new Date(c.createdAt).toLocaleDateString()}
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-1.5">
-                          <span
-                            className={`px-2 py-0.5 rounded-full text-[10.5px] font-mono font-semibold ${
-                              c.status === 'active'
-                                ? 'bg-[#2F6B4F]/10 text-[#2F6B4F]'
-                                : 'bg-gray-100 text-gray-500'
-                            }`}
-                          >
-                            {c.status}
-                          </span>
-
-                          <button
-                            type="button"
-                            onClick={() => handleOpenEditContact(c)}
-                            className="text-[#11140F]/40 hover:text-[#11140F] hover:bg-gray-100 rounded-md transition-colors p-1 cursor-pointer"
-                            title="Edit contact"
-                          >
-                            <Pencil className="w-3.5 h-3.5" />
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteContact(c.id)}
-                            className="text-[#11140F]/40 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors p-1 cursor-pointer"
-                            title="Remove contact"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                {listSubTab === 'contacts' && selectedContactIds.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleBulkDelete}
+                    disabled={deletingBulk}
+                    className="px-3 py-1 rounded-md bg-red-600 text-white text-xs font-semibold hover:bg-red-700 transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  >
+                    {deletingBulk ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+                    <span>Delete ({selectedContactIds.length}) Selected</span>
+                  </button>
                 )}
               </div>
+
+              {/* SUB-TAB 1: SUBSCRIBERS */}
+              {listSubTab === 'contacts' && (
+                <div className="rounded-lg border border-[#11140F]/10 bg-white overflow-hidden shadow-xs space-y-0">
+                  {/* Search and Filters */}
+                  <div className="p-3 bg-[#F7F8F5] border-b border-[#11140F]/8 flex flex-col sm:flex-row items-center justify-between gap-2.5">
+                    <div className="relative w-full sm:w-64">
+                      <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-[#11140F]/40" />
+                      <input
+                        type="text"
+                        value={contactSearch}
+                        onChange={(e) => setContactSearch(e.target.value)}
+                        placeholder="Search subscriber email or name..."
+                        className="w-full pl-8 pr-3 py-1.5 rounded-md border border-[#11140F]/15 bg-white text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-1 w-full sm:w-auto">
+                      {(['all', 'active', 'unsubscribed', 'pending'] as const).map((st) => (
+                        <button
+                          key={st}
+                          type="button"
+                          onClick={() => setContactStatusFilter(st)}
+                          className={`px-2.5 py-1 rounded-md text-[11px] font-medium capitalize transition-colors cursor-pointer ${
+                            contactStatusFilter === st
+                              ? 'bg-[#11140F] text-white'
+                              : 'text-[#11140F]/60 hover:text-[#11140F] hover:bg-white'
+                          }`}
+                        >
+                          {st}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {loadingContacts ? (
+                    <div className="p-8 text-center text-xs text-[#11140F]/50">
+                      Loading contacts...
+                    </div>
+                  ) : filteredContacts.length === 0 ? (
+                    <div className="p-8 text-center text-xs text-[#11140F]/50">
+                      {contacts.length === 0
+                        ? 'No subscribers in this list yet. Share your QR code or use "Add Subscriber" above.'
+                        : 'No subscribers match your search filter.'}
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse text-xs">
+                        <thead>
+                          <tr className="border-b border-[#11140F]/8 bg-white text-[11px] uppercase font-semibold text-[#11140F]/50 tracking-wider">
+                            <th className="py-2.5 px-3 w-8">
+                              <button
+                                type="button"
+                                onClick={handleToggleSelectAll}
+                                className="text-[#11140F]/60 hover:text-[#11140F] cursor-pointer"
+                              >
+                                {selectedContactIds.length === filteredContacts.length && filteredContacts.length > 0 ? (
+                                  <CheckSquare className="w-4 h-4 text-[#2F6B4F]" />
+                                ) : (
+                                  <Square className="w-4 h-4" />
+                                )}
+                              </button>
+                            </th>
+                            <th className="py-2.5 px-3">Subscriber</th>
+                            <th className="py-2.5 px-3">Status</th>
+                            <th className="py-2.5 px-3">Date Added</th>
+                            <th className="py-2.5 px-3 text-right">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-[#11140F]/5">
+                          {filteredContacts.map((c) => {
+                            const isSelected = selectedContactIds.includes(c.id);
+                            return (
+                              <tr key={c.id} className="hover:bg-[#F7F8F5]/60 transition-colors">
+                                <td className="py-2.5 px-3">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleToggleSelectOne(c.id)}
+                                    className="cursor-pointer"
+                                  >
+                                    {isSelected ? (
+                                      <CheckSquare className="w-4 h-4 text-[#2F6B4F]" />
+                                    ) : (
+                                      <Square className="w-4 h-4 text-[#11140F]/30" />
+                                    )}
+                                  </button>
+                                </td>
+                                <td className="py-2.5 px-3">
+                                  <div className="font-medium text-[#11140F]">{c.email}</div>
+                                  {c.firstName && (
+                                    <div className="text-[11px] text-[#11140F]/50">{c.firstName}</div>
+                                  )}
+                                </td>
+                                <td className="py-2.5 px-3">
+                                  {c.status === 'active' && (
+                                    <span className="inline-flex items-center gap-1 text-[10.5px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                                      <CheckCircle2 className="w-3 h-3" />
+                                      Active
+                                    </span>
+                                  )}
+                                  {c.status === 'unsubscribed' && (
+                                    <span className="inline-flex items-center gap-1 text-[10.5px] font-medium text-gray-600 bg-gray-100 px-2 py-0.5 rounded-md">
+                                      <XCircle className="w-3 h-3" />
+                                      Unsubscribed
+                                    </span>
+                                  )}
+                                  {c.status === 'pending' && (
+                                    <span className="inline-flex items-center gap-1 text-[10.5px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+                                      <Clock className="w-3 h-3" />
+                                      Pending
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="py-2.5 px-3 text-[11px] text-[#11140F]/50 font-mono">
+                                  {new Date(c.createdAt).toLocaleDateString()}
+                                </td>
+                                <td className="py-2.5 px-3 text-right">
+                                  <div className="inline-flex items-center gap-1">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleOpenEditContact(c)}
+                                      className="p-1 rounded-md text-[#11140F]/50 hover:text-[#11140F] hover:bg-gray-100 transition-colors cursor-pointer"
+                                      title="Edit contact"
+                                    >
+                                      <Pencil className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDeleteContact(c.id)}
+                                      className="p-1 rounded-md text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors cursor-pointer"
+                                      title="Remove contact"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* SUB-TAB 2: BROADCAST HISTORY */}
+              {listSubTab === 'history' && (
+                <div className="rounded-lg border border-[#11140F]/10 bg-white overflow-hidden shadow-xs">
+                  <div className="p-3 bg-[#F7F8F5] border-b border-[#11140F]/8 flex items-center justify-between">
+                    <span className="text-xs font-semibold text-[#11140F]">
+                      Recorded Email Broadcasts ({campaigns.length})
+                    </span>
+                    <button
+                      type="button"
+                      onClick={loadCampaigns}
+                      className="text-[11px] text-[#2F6B4F] hover:underline flex items-center gap-1"
+                    >
+                      Refresh Logs
+                    </button>
+                  </div>
+
+                  {loadingCampaigns ? (
+                    <div className="p-8 text-center text-xs text-[#11140F]/50">
+                      Loading broadcast logs...
+                    </div>
+                  ) : campaigns.length === 0 ? (
+                    <div className="p-8 text-center text-xs text-[#11140F]/50 space-y-1">
+                      <p className="font-semibold text-[#11140F]">No broadcasts dispatched yet.</p>
+                      <p>Send your first broadcast using &quot;Compose Broadcast&quot; above to see delivery telemetry.</p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse text-xs">
+                        <thead>
+                          <tr className="border-b border-[#11140F]/8 bg-white text-[11px] uppercase font-semibold text-[#11140F]/50 tracking-wider">
+                            <th className="py-2.5 px-4">Subject</th>
+                            <th className="py-2.5 px-4">Delivery Status</th>
+                            <th className="py-2.5 px-4">Delivered</th>
+                            <th className="py-2.5 px-4">Sent Date</th>
+                            <th className="py-2.5 px-4 text-right">Details</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-[#11140F]/5">
+                          {campaigns.map((camp) => (
+                            <tr key={camp.id} className="hover:bg-[#F7F8F5]/60 transition-colors">
+                              <td className="py-3 px-4 font-medium text-[#11140F] max-w-xs truncate">
+                                {camp.subject}
+                              </td>
+                              <td className="py-3 px-4">
+                                <span className="inline-flex items-center gap-1 text-[10.5px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                                  <CheckCircle2 className="w-3 h-3" />
+                                  Sent
+                                </span>
+                              </td>
+                              <td className="py-3 px-4 font-mono text-[11px] text-[#11140F]">
+                                {camp.sentCount} / {camp.recipientCount || camp.sentCount} recipients
+                              </td>
+                              <td className="py-3 px-4 text-[11px] text-[#11140F]/50">
+                                {camp.sentAt ? new Date(camp.sentAt).toLocaleString() : '—'}
+                              </td>
+                              <td className="py-3 px-4 text-right">
+                                <button
+                                  type="button"
+                                  onClick={() => setInspectingCampaign(camp)}
+                                  className="px-2.5 py-1 rounded-md border border-[#11140F]/15 bg-white text-[11px] font-medium hover:bg-gray-50 transition-colors cursor-pointer"
+                                >
+                                  View Log
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
+        </div>
+      )}
+
+      {/* MODAL: Campaign Inspection Detail */}
+      {inspectingCampaign && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+          <div className="w-full max-w-2xl bg-white rounded-lg p-6 shadow-xl border border-[#11140F]/15 max-h-[85vh] overflow-y-auto space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#11140F]/10">
+              <div>
+                <h4 className="font-bold text-sm text-[#11140F]">{inspectingCampaign.subject}</h4>
+                <p className="text-xs text-[#11140F]/60 mt-0.5">
+                  Dispatched on {inspectingCampaign.sentAt ? new Date(inspectingCampaign.sentAt).toLocaleString() : '—'} • {inspectingCampaign.sentCount} delivered
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setInspectingCampaign(null)}
+                className="text-[#11140F]/40 hover:text-[#11140F] p-1"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Recipients Delivery Log Table */}
+            <div>
+              <h5 className="text-xs font-semibold text-[#11140F] mb-2">Recipient Delivery Status:</h5>
+              {inspectingCampaign.recipients && inspectingCampaign.recipients.length > 0 ? (
+                <div className="rounded-md border border-[#11140F]/10 max-h-48 overflow-y-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="bg-gray-50 border-b border-[#11140F]/8 text-[10.5px] uppercase text-[#11140F]/50">
+                        <th className="py-2 px-3">Email</th>
+                        <th className="py-2 px-3">Status</th>
+                        <th className="py-2 px-3">Timestamp</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#11140F]/5">
+                      {inspectingCampaign.recipients.map((rec, i) => (
+                        <tr key={i} className="hover:bg-gray-50">
+                          <td className="py-2 px-3 font-mono text-[11px]">{rec.email}</td>
+                          <td className="py-2 px-3">
+                            {rec.status === 'sent' ? (
+                              <span className="text-emerald-700 font-semibold text-[10.5px]">Delivered</span>
+                            ) : (
+                              <span className="text-red-600 font-semibold text-[10.5px]">{rec.error || 'Failed'}</span>
+                            )}
+                          </td>
+                          <td className="py-2 px-3 text-[10.5px] text-[#11140F]/40 font-mono">
+                            {rec.sentAt ? new Date(rec.sentAt).toLocaleTimeString() : '—'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="text-xs text-[#11140F]/50 italic">Delivered to active subscriber list.</p>
+              )}
+            </div>
+
+            {/* Email Body Preview */}
+            <div className="pt-2">
+              <h5 className="text-xs font-semibold text-[#11140F] mb-2">Dispatched Message Content:</h5>
+              <div
+                className="p-4 rounded-md border border-[#11140F]/10 bg-gray-50 text-xs leading-relaxed max-h-56 overflow-y-auto"
+                dangerouslySetInnerHTML={{ __html: inspectingCampaign.bodyHtml }}
+              />
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                type="button"
+                onClick={() => setInspectingCampaign(null)}
+                className="px-4 py-1.5 rounded-md bg-[#11140F] text-white text-xs font-semibold hover:bg-[#2A2E25]"
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Modal 1: Create List */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white rounded-2xl p-6 shadow-xl border border-[#11140F]/15 space-y-4">
-            <h4 className="text-base font-bold text-[#11140F]">Create Mailing List</h4>
-            <form onSubmit={handleCreateList} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#11140F]">List Name</label>
+          <div className="w-full max-w-md bg-white rounded-lg p-5 shadow-xl border border-[#11140F]/15 space-y-4">
+            <h4 className="text-sm font-bold text-[#11140F]">Create Mailing List</h4>
+            <form onSubmit={handleCreateList} className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-[#11140F] mb-1">List Name *</label>
                 <input
                   type="text"
                   value={newListName}
                   onChange={(e) => setNewListName(e.target.value)}
-                  placeholder="e.g. VIP Customers, Event Attendees"
+                  placeholder="e.g. VIP Customers, Friday Guests"
                   required
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#11140F]">Description (optional)</label>
+              <div>
+                <label className="block text-xs font-medium text-[#11140F] mb-1">Description (optional)</label>
                 <input
                   type="text"
                   value={newListDesc}
                   onChange={(e) => setNewListDesc(e.target.value)}
-                  placeholder="e.g. In-store flyer scan subscribers"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  placeholder="e.g. In-store table tent subscribers"
+                  className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#11140F]/10">
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-[#11140F]/60 hover:text-[#11140F]"
+                  className="px-3 py-1.5 text-xs font-medium text-[#11140F]/60 hover:text-[#11140F]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={creatingList}
-                  className="px-5 py-2 rounded-xl bg-[#11140F] text-white text-xs font-semibold hover:bg-[#2A2E25] transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-4 py-1.5 rounded-md bg-[#11140F] text-white text-xs font-medium hover:bg-[#2A2E25] transition-colors flex items-center gap-1.5 disabled:opacity-50"
                 >
-                  {creatingList ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Create List'}
+                  {creatingList && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  <span>Create List</span>
                 </button>
               </div>
             </form>
@@ -906,58 +1319,48 @@ export default function CustomerMailingListManager({
         </div>
       )}
 
-      {/* Modal 1B: Edit List */}
-      {showEditListModal && (
+      {/* Modal: Edit List */}
+      {showEditListModal && selectedList && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white rounded-2xl p-6 shadow-xl border border-[#11140F]/15 space-y-4">
-            <div className="flex items-center justify-between">
-              <h4 className="text-base font-bold text-[#11140F]">Edit Mailing List</h4>
-              <button
-                type="button"
-                onClick={() => setShowEditListModal(false)}
-                className="text-xs text-[#11140F]/50 hover:text-[#11140F] cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-            <form onSubmit={handleUpdateList} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#11140F]">List Name *</label>
+          <div className="w-full max-w-md bg-white rounded-lg p-5 shadow-xl border border-[#11140F]/15 space-y-4">
+            <h4 className="text-sm font-bold text-[#11140F]">Edit Mailing List</h4>
+            <form onSubmit={handleUpdateList} className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-[#11140F] mb-1">List Name *</label>
                 <input
                   type="text"
                   value={editListName}
                   onChange={(e) => setEditListName(e.target.value)}
-                  placeholder="e.g. VIP Customers, Event Attendees"
                   required
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#11140F]">Description (optional)</label>
+              <div>
+                <label className="block text-xs font-medium text-[#11140F] mb-1">Description</label>
                 <input
                   type="text"
                   value={editListDesc}
                   onChange={(e) => setEditListDesc(e.target.value)}
-                  placeholder="e.g. In-store flyer scan subscribers"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#11140F]/10">
                 <button
                   type="button"
                   onClick={() => setShowEditListModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-[#11140F]/60 hover:text-[#11140F] cursor-pointer"
+                  className="px-3 py-1.5 text-xs font-medium text-[#11140F]/60 hover:text-[#11140F]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={updatingList}
-                  className="px-5 py-2 rounded-xl bg-[#11140F] text-white text-xs font-semibold hover:bg-[#2A2E25] transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                  className="px-4 py-1.5 rounded-md bg-[#11140F] text-white text-xs font-medium hover:bg-[#2A2E25] transition-colors flex items-center gap-1.5 disabled:opacity-50"
                 >
-                  {updatingList ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Save Changes'}
+                  {updatingList && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  <span>Save Changes</span>
                 </button>
               </div>
             </form>
@@ -965,49 +1368,50 @@ export default function CustomerMailingListManager({
         </div>
       )}
 
-      {/* Modal 2: Add Contact */}
+      {/* Modal: Add Subscriber */}
       {showAddContactModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white rounded-2xl p-6 shadow-xl border border-[#11140F]/15 space-y-4">
-            <h4 className="text-base font-bold text-[#11140F]">Add Single Contact</h4>
-            <form onSubmit={handleAddContact} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#11140F]">Email Address</label>
+          <div className="w-full max-w-md bg-white rounded-lg p-5 shadow-xl border border-[#11140F]/15 space-y-4">
+            <h4 className="text-sm font-bold text-[#11140F]">Add Subscriber to {selectedList?.name}</h4>
+            <form onSubmit={handleAddContact} className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-[#11140F] mb-1">Email Address *</label>
                 <input
                   type="email"
                   value={newContactEmail}
                   onChange={(e) => setNewContactEmail(e.target.value)}
-                  placeholder="customer@example.com"
+                  placeholder="subscriber@example.com"
                   required
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#11140F]">First Name (optional)</label>
+              <div>
+                <label className="block text-xs font-medium text-[#11140F] mb-1">First Name (optional)</label>
                 <input
                   type="text"
                   value={newContactName}
                   onChange={(e) => setNewContactName(e.target.value)}
-                  placeholder="John"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  placeholder="e.g. Alex"
+                  className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#11140F]/10">
                 <button
                   type="button"
                   onClick={() => setShowAddContactModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-[#11140F]/60 hover:text-[#11140F]"
+                  className="px-3 py-1.5 text-xs font-medium text-[#11140F]/60 hover:text-[#11140F]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={addingContact}
-                  className="px-5 py-2 rounded-xl bg-[#11140F] text-white text-xs font-semibold hover:bg-[#2A2E25] transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-4 py-1.5 rounded-md bg-[#11140F] text-white text-xs font-medium hover:bg-[#2A2E25] transition-colors flex items-center gap-1.5 disabled:opacity-50"
                 >
-                  {addingContact ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Save Contact'}
+                  {addingContact && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  <span>Add Subscriber</span>
                 </button>
               </div>
             </form>
@@ -1015,71 +1419,61 @@ export default function CustomerMailingListManager({
         </div>
       )}
 
-      {/* Modal 2B: Edit Contact */}
+      {/* Modal: Edit Subscriber */}
       {showEditContactModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white rounded-2xl p-6 shadow-xl border border-[#11140F]/15 space-y-4">
-            <div className="flex items-center justify-between">
-              <h4 className="text-base font-bold text-[#11140F]">Edit Contact Details</h4>
-              <button
-                type="button"
-                onClick={() => setShowEditContactModal(false)}
-                className="text-xs text-[#11140F]/50 hover:text-[#11140F] cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-            <form onSubmit={handleUpdateContact} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#11140F]">Email Address *</label>
+          <div className="w-full max-w-md bg-white rounded-lg p-5 shadow-xl border border-[#11140F]/15 space-y-4">
+            <h4 className="text-sm font-bold text-[#11140F]">Edit Subscriber</h4>
+            <form onSubmit={handleUpdateContact} className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-[#11140F] mb-1">Email Address *</label>
                 <input
                   type="email"
                   value={editContactEmail}
                   onChange={(e) => setEditContactEmail(e.target.value)}
-                  placeholder="customer@example.com"
                   required
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#11140F]">First Name</label>
+              <div>
+                <label className="block text-xs font-medium text-[#11140F] mb-1">First Name</label>
                 <input
                   type="text"
                   value={editContactName}
                   onChange={(e) => setEditContactName(e.target.value)}
-                  placeholder="John"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#11140F]">Subscription Status</label>
+              <div>
+                <label className="block text-xs font-medium text-[#11140F] mb-1">Status</label>
                 <select
                   value={editContactStatus}
                   onChange={(e) => setEditContactStatus(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#11140F]/15 text-xs text-[#11140F] bg-white focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] bg-white focus:outline-none focus:border-[#2F6B4F]"
                 >
                   <option value="active">Active (Receives broadcasts)</option>
                   <option value="unsubscribed">Unsubscribed (Suppressed)</option>
-                  <option value="pending">Pending Confirmation</option>
+                  <option value="pending">Pending</option>
                 </select>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#11140F]/10">
                 <button
                   type="button"
                   onClick={() => setShowEditContactModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-[#11140F]/60 hover:text-[#11140F] cursor-pointer"
+                  className="px-3 py-1.5 text-xs font-medium text-[#11140F]/60 hover:text-[#11140F]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={updatingContact}
-                  className="px-5 py-2 rounded-xl bg-[#11140F] text-white text-xs font-semibold hover:bg-[#2A2E25] transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                  className="px-4 py-1.5 rounded-md bg-[#11140F] text-white text-xs font-medium hover:bg-[#2A2E25] transition-colors flex items-center gap-1.5 disabled:opacity-50"
                 >
-                  {updatingContact ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Update Contact'}
+                  {updatingContact && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  <span>Update</span>
                 </button>
               </div>
             </form>
@@ -1087,24 +1481,42 @@ export default function CustomerMailingListManager({
         </div>
       )}
 
-      {/* Modal 3: CSV Bulk Import */}
+      {/* Modal: CSV Bulk Import */}
       {showCsvModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-          <div className="w-full max-w-lg bg-white rounded-2xl p-6 shadow-xl border border-[#11140F]/15 space-y-4">
-            <div>
-              <h4 className="text-base font-bold text-[#11140F] flex items-center gap-2">
+          <div className="w-full max-w-lg bg-white rounded-lg p-5 shadow-xl border border-[#11140F]/15 space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-[#11140F]/10">
+              <h4 className="text-sm font-bold text-[#11140F] flex items-center gap-1.5">
                 <FileSpreadsheet className="w-4 h-4 text-[#2F6B4F]" />
                 CSV Bulk Import
               </h4>
-              <p className="text-xs text-[#11140F]/60">
-                Paste comma-separated email lines below. Duplicates are filtered automatically.
-              </p>
+              <button
+                type="button"
+                onClick={() => setShowCsvModal(false)}
+                className="text-[#11140F]/40 hover:text-[#11140F]"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
 
-            <form onSubmit={handleCsvImport} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#11140F]">
-                  CSV Lines (format: <code>email, first_name</code>)
+            <p className="text-xs text-[#11140F]/60">
+              Upload a .csv file or paste lines below in format: <code>email, first_name</code>.
+            </p>
+
+            <form onSubmit={handleCsvImport} className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-[#11140F] mb-1">Upload CSV File</label>
+                <input
+                  type="file"
+                  accept=".csv,.txt"
+                  onChange={handleCsvFileUpload}
+                  className="w-full text-xs text-[#11140F]/70 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#11140F]/10 file:text-[#11140F] hover:file:bg-[#11140F]/20 cursor-pointer"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[#11140F] mb-1">
+                  Or Paste CSV Content
                 </label>
                 <textarea
                   rows={6}
@@ -1112,29 +1524,25 @@ export default function CustomerMailingListManager({
                   onChange={(e) => setCsvText(e.target.value)}
                   placeholder="alice@example.com, Alice&#10;bob@example.com, Bob&#10;charlie@example.com, Charlie"
                   required
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#11140F]/15 text-xs font-mono text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2 rounded-md border border-[#11140F]/15 text-xs font-mono text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
                 />
               </div>
 
-              <div className="p-3 rounded-xl bg-gray-50 border border-gray-200 text-[11px] text-gray-600 flex items-center justify-between">
-                <span>Total contacts capacity on your plan:</span>
-                <strong className="font-mono text-gray-900">{quotas?.contactsMax || 10} contacts max</strong>
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-2">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#11140F]/10">
                 <button
                   type="button"
                   onClick={() => setShowCsvModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-[#11140F]/60 hover:text-[#11140F]"
+                  className="px-3 py-1.5 text-xs font-medium text-[#11140F]/60 hover:text-[#11140F]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={importingCsv}
-                  className="px-5 py-2 rounded-xl bg-[#2F6B4F] text-white text-xs font-semibold hover:bg-[#25553E] transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                  className="px-4 py-1.5 rounded-md bg-[#11140F] text-white text-xs font-medium hover:bg-[#2A2E25] transition-colors flex items-center gap-1.5 disabled:opacity-50"
                 >
-                  {importingCsv ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Start Import'}
+                  {importingCsv && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  <span>Import Subscribers</span>
                 </button>
               </div>
             </form>
@@ -1142,42 +1550,44 @@ export default function CustomerMailingListManager({
         </div>
       )}
 
-      {/* Modal 4: Broadcast Composer with Prebuilt Templates & Live Preview */}
+      {/* Modal: Broadcast Composer with Rich Text Toolbar & Live Preview */}
       {showBroadcastModal && selectedList && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="w-full max-w-4xl bg-white rounded-3xl p-6 sm:p-7 shadow-2xl border border-[#11140F]/15 max-h-[90vh] overflow-y-auto space-y-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+          <div className="w-full max-w-4xl bg-white rounded-lg p-5 shadow-xl border border-[#11140F]/15 max-h-[90vh] overflow-y-auto space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-[#11140F]/10">
               <div>
-                <h4 className="text-base font-bold text-[#11140F]">
+                <h4 className="text-sm font-bold text-[#11140F]">
                   Broadcast to {selectedList.name}
                 </h4>
                 <p className="text-xs text-[#11140F]/60">
-                  Delivering to {contacts.filter((c) => c.status === 'active').length} active recipients strictly via personal Gmail Nodemailer.
+                  Delivering to {contacts.filter((c) => c.status === 'active').length} active recipients via personal Gmail.
                 </p>
               </div>
-
-              {/* Live Preview Toggle */}
-              <button
-                type="button"
-                onClick={() => setShowPreview(!showPreview)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${
-                  showPreview
-                    ? 'bg-[#11140F] text-white'
-                    : 'bg-[#F7F8F5] text-[#11140F] border border-[#11140F]/15'
-                }`}
-              >
-                <Eye className="w-3.5 h-3.5" />
-                {showPreview ? 'Hide Preview' : 'Live Preview'}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowPreview(!showPreview)}
+                  className="px-2.5 py-1 rounded-md border border-[#11140F]/15 text-xs font-medium text-[#11140F] hover:bg-gray-50 transition-colors flex items-center gap-1"
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                  <span>{showPreview ? 'Hide Preview' : 'Show Preview'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowBroadcastModal(false)}
+                  className="text-[#11140F]/40 hover:text-[#11140F] p-1"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             </div>
 
             {/* Quick Template Picker */}
             <div className="space-y-1.5">
-              <div className="text-xs font-bold text-[#11140F] flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-[#2F6B4F]" />
-                Load Pre-Built Designer Template:
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <span className="text-[11px] font-semibold text-[#11140F]/60 uppercase tracking-wider block">
+                Load Ready Template:
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {TEMPLATES.map((tmpl) => (
                   <button
                     key={tmpl.id}
@@ -1186,232 +1596,371 @@ export default function CustomerMailingListManager({
                       setBroadcastSubject(tmpl.subject.replace('{{list_name}}', selectedList.name));
                       setBroadcastBody(tmpl.body.replace(/{{list_name}}/g, selectedList.name));
                     }}
-                    className="p-2.5 rounded-xl border border-[#11140F]/10 bg-[#F7F8F5] hover:border-[#2F6B4F] text-left text-xs font-medium text-[#11140F] transition-all cursor-pointer"
+                    className="p-2 rounded-md border border-[#11140F]/10 bg-[#F7F8F5] hover:border-[#2F6B4F] text-left text-xs font-medium text-[#11140F] transition-all cursor-pointer"
                   >
                     <span className="block font-semibold">{tmpl.name}</span>
-                    <span className="text-[10.5px] text-[#11140F]/50">Click to apply</span>
+                    <span className="text-[10px] text-[#11140F]/50">Click to apply</span>
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Editor vs Preview Split */}
-            <div className={`grid gap-6 ${showPreview ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'}`}>
-              
-              {/* Form Input */}
-              <form onSubmit={handleBroadcast} className="space-y-4">
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">Subject Line</label>
-                  <input
-                    type="text"
-                    value={broadcastSubject}
-                    onChange={(e) => setBroadcastSubject(e.target.value)}
-                    placeholder="e.g. Exclusive Friday Announcement"
-                    required
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
-                  />
+            <form onSubmit={handleBroadcast} className="space-y-3 pt-1">
+              <div>
+                <label className="block text-xs font-medium text-[#11140F] mb-1">Subject Line *</label>
+                <input
+                  type="text"
+                  value={broadcastSubject}
+                  onChange={(e) => setBroadcastSubject(e.target.value)}
+                  placeholder="e.g. Exclusive Friday Announcement"
+                  required
+                  className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                />
+              </div>
+
+              {/* Rich Text Toolbar */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-medium text-[#11140F]">Email Body (HTML &amp; Rich Text) *</label>
+                  <div className="flex items-center gap-1 text-[11px] text-[#11140F]/50">
+                    <span>Tags:</span>
+                    <button
+                      type="button"
+                      onClick={() => insertSnippet('{{first_name}}')}
+                      className="px-1.5 py-0.5 rounded bg-gray-100 hover:bg-gray-200 text-[#11140F] font-mono text-[10px]"
+                    >
+                      +First Name
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => insertSnippet('{{list_name}}')}
+                      className="px-1.5 py-0.5 rounded bg-gray-100 hover:bg-gray-200 text-[#11140F] font-mono text-[10px]"
+                    >
+                      +List Name
+                    </button>
+                  </div>
                 </div>
 
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-[#11140F]">Email Body (HTML supported)</label>
-                    <span className="text-[11px] text-[#11140F]/50 font-mono">
-                      Tags: <code>{'{{first_name}}'}</code>, <code>{'{{list_name}}'}</code>
-                    </span>
-                  </div>
-                  <textarea
-                    rows={8}
-                    value={broadcastBody}
-                    onChange={(e) => setBroadcastBody(e.target.value)}
-                    placeholder="Hello {{first_name}},\n\nWe are excited to share..."
-                    required
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#11140F]/15 text-xs text-[#11140F] font-sans focus:outline-none focus:border-[#2F6B4F]"
-                  />
-                </div>
-
-                {quotas?.hasBrandedFooter && (
-                  <div className="p-2.5 rounded-lg bg-gray-50 border border-gray-200 text-[11px] text-gray-600">
-                    <strong>Free Plan Notice:</strong> Your broadcast includes a subtle &quot;Powered by DynamicQR&quot; badge in the footer.
-                  </div>
-                )}
-
-                <div className="flex items-center justify-end gap-2 pt-2">
+                {/* Toolbar Controls */}
+                <div className="flex flex-wrap items-center gap-1 p-1.5 bg-[#F7F8F5] border border-b-0 border-[#11140F]/15 rounded-t-md text-xs">
                   <button
                     type="button"
-                    onClick={() => setShowBroadcastModal(false)}
-                    className="px-4 py-2 rounded-xl text-xs font-semibold text-[#11140F]/60 hover:text-[#11140F]"
+                    onClick={() => insertSnippet('<strong>', '</strong>', 'bold text')}
+                    className="p-1 rounded hover:bg-white text-[#11140F] transition-colors"
+                    title="Bold"
                   >
-                    Cancel
+                    <Bold className="w-3.5 h-3.5" />
                   </button>
                   <button
-                    type="submit"
-                    disabled={broadcasting}
-                    className="px-5 py-2 rounded-xl bg-[#2F6B4F] text-white text-xs font-semibold hover:bg-[#25553E] transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                    type="button"
+                    onClick={() => insertSnippet('<em>', '</em>', 'italic text')}
+                    className="p-1 rounded hover:bg-white text-[#11140F] transition-colors"
+                    title="Italic"
                   >
-                    {broadcasting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Send Broadcast via Gmail'}
+                    <Italic className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertSnippet('<u>', '</u>', 'underlined text')}
+                    className="p-1 rounded hover:bg-white text-[#11140F] transition-colors"
+                    title="Underline"
+                  >
+                    <UnderlineIcon className="w-3.5 h-3.5" />
+                  </button>
+
+                  <span className="w-px h-4 bg-[#11140F]/10 mx-0.5" />
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      insertSnippet(
+                        '<h2 style="font-size:18px;font-weight:700;color:#11140F;margin:16px 0 8px;">',
+                        '</h2>',
+                        'Section Heading'
+                      )
+                    }
+                    className="p-1 rounded hover:bg-white text-[#11140F] transition-colors font-bold text-[11px]"
+                    title="Heading 2"
+                  >
+                    <Heading2 className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      insertSnippet(
+                        '<h3 style="font-size:15px;font-weight:600;color:#11140F;margin:12px 0 6px;">',
+                        '</h3>',
+                        'Subheading'
+                      )
+                    }
+                    className="p-1 rounded hover:bg-white text-[#11140F] transition-colors font-bold text-[11px]"
+                    title="Heading 3"
+                  >
+                    <Heading3 className="w-3.5 h-3.5" />
+                  </button>
+
+                  <span className="w-px h-4 bg-[#11140F]/10 mx-0.5" />
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const url = prompt('Enter link URL:', 'https://');
+                      if (url) {
+                        const text = prompt('Enter link text:', 'Click here') || 'Click here';
+                        insertSnippet(
+                          `<a href="${url}" style="color:#2F6B4F;text-decoration:underline;">${text}</a>`
+                        );
+                      }
+                    }}
+                    className="p-1 rounded hover:bg-white text-[#11140F] transition-colors"
+                    title="Insert Link"
+                  >
+                    <LinkIcon className="w-3.5 h-3.5" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const url = prompt('Enter image URL:', 'https://');
+                      if (url) {
+                        const alt = prompt('Enter image description/alt text:', 'Image') || '';
+                        insertSnippet(
+                          `<img src="${url}" alt="${alt}" style="max-width:100%;height:auto;border-radius:6px;margin:14px 0;" />`
+                        );
+                      }
+                    }}
+                    className="p-1 rounded hover:bg-white text-[#11140F] transition-colors"
+                    title="Insert Image"
+                  >
+                    <ImageIcon className="w-3.5 h-3.5" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const text = prompt('Enter button label:', 'Claim Offer') || 'Click here';
+                      const url = prompt('Enter button link:', 'https://') || '#';
+                      insertSnippet(
+                        `<div style="text-align:center;margin:20px 0;"><a href="${url}" style="background:#11140F;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:6px;font-size:13px;font-weight:600;display:inline-block;">${text}</a></div>`
+                      );
+                    }}
+                    className="p-1 rounded hover:bg-white text-[#11140F] transition-colors flex items-center gap-1 text-[11px]"
+                    title="Insert CTA Button"
+                  >
+                    <MousePointerClick className="w-3.5 h-3.5" />
+                    <span>Button</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      insertSnippet(
+                        '<ul style="margin:12px 0;padding-left:20px;color:#374151;">\n  <li>First point</li>\n  <li>Second point</li>\n</ul>\n'
+                      )
+                    }
+                    className="p-1 rounded hover:bg-white text-[#11140F] transition-colors"
+                    title="Bullet List"
+                  >
+                    <ListIcon className="w-3.5 h-3.5" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      insertSnippet('\n<hr style="border:none;border-top:1px solid #e5e7eb;margin:18px 0;" />\n')
+                    }
+                    className="p-1 rounded hover:bg-white text-[#11140F] transition-colors"
+                    title="Divider"
+                  >
+                    <Minus className="w-3.5 h-3.5" />
                   </button>
                 </div>
-              </form>
 
-              {/* Live Preview Panel */}
-              {showPreview && (
-                <div className="rounded-2xl border border-[#11140F]/15 bg-gray-100 p-4 space-y-3">
-                  <div className="flex items-center justify-between text-xs text-[#11140F]/60">
-                    <span>Live Simulation</span>
-                    <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-[#11140F]/10">
-                      <button
-                        type="button"
-                        onClick={() => setPreviewDevice('desktop')}
-                        className={`p-1 rounded ${previewDevice === 'desktop' ? 'bg-[#11140F] text-white' : 'text-[#11140F]/60'}`}
-                      >
-                        <Monitor className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setPreviewDevice('mobile')}
-                        className={`p-1 rounded ${previewDevice === 'mobile' ? 'bg-[#11140F] text-white' : 'text-[#11140F]/60'}`}
-                      >
-                        <Smartphone className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
+                <textarea
+                  ref={textareaRef}
+                  rows={8}
+                  value={broadcastBody}
+                  onChange={(e) => setBroadcastBody(e.target.value)}
+                  placeholder="Hello {{first_name}},\n\nWrite your announcement or promo here..."
+                  required
+                  className="w-full px-3 py-2 rounded-b-md border border-[#11140F]/15 text-xs font-mono text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                />
+              </div>
+
+              {/* Branding notification */}
+              <div className="p-2.5 rounded-md bg-gray-50 border border-gray-200 text-[11px] text-gray-600">
+                Email footer includes <strong>Powered by Dynamic QR</strong> (clickable to main site) and your business unsubscribe link.
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-1 border-t border-[#11140F]/10">
+                <button
+                  type="button"
+                  onClick={() => setShowBroadcastModal(false)}
+                  className="px-3 py-1.5 text-xs font-medium text-[#11140F]/60 hover:text-[#11140F]"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={broadcasting}
+                  className="px-4 py-1.5 rounded-md bg-[#2F6B4F] text-white text-xs font-medium hover:bg-[#25553E] transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                >
+                  {broadcasting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                  <span>{broadcasting ? 'Sending...' : 'Send Broadcast via Gmail'}</span>
+                </button>
+              </div>
+            </form>
+
+            {/* Live Preview Panel */}
+            {showPreview && (
+              <div className="rounded-lg border border-[#11140F]/15 bg-gray-100 p-4 space-y-3">
+                <div className="flex items-center justify-between text-xs text-[#11140F]/60">
+                  <span className="font-semibold text-[#11140F]">Live Email Preview:</span>
+                  <div className="flex items-center gap-1 bg-white p-0.5 rounded-md border border-[#11140F]/10">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewDevice('desktop')}
+                      className={`p-1 rounded ${previewDevice === 'desktop' ? 'bg-[#11140F] text-white' : 'text-[#11140F]/60'}`}
+                    >
+                      <Monitor className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewDevice('mobile')}
+                      className={`p-1 rounded ${previewDevice === 'mobile' ? 'bg-[#11140F] text-white' : 'text-[#11140F]/60'}`}
+                    >
+                      <Smartphone className="w-3.5 h-3.5" />
+                    </button>
                   </div>
+                </div>
 
-                  <div className={`mx-auto bg-white rounded-xl border border-gray-200 shadow-sm p-4 overflow-hidden text-xs leading-relaxed ${previewDevice === 'mobile' ? 'max-w-xs' : 'w-full'}`}>
-                    <div className="font-bold text-sm text-[#11140F] pb-2 border-b border-gray-100">
-                      {broadcastSubject ? broadcastSubject.replace('{{first_name}}', 'Alex').replace('{{list_name}}', selectedList.name) : 'Subject preview...'}
+                <div className={`mx-auto bg-white rounded-md border border-gray-200 shadow-xs p-4 overflow-hidden text-xs leading-relaxed ${previewDevice === 'mobile' ? 'max-w-xs' : 'w-full'}`}>
+                  <div className="font-bold text-sm text-[#11140F] pb-2 border-b border-gray-100">
+                    {broadcastSubject ? broadcastSubject.replace('{{first_name}}', 'Alex').replace('{{list_name}}', selectedList.name) : 'Subject line preview...'}
+                  </div>
+                  <div
+                    className="py-3 text-gray-800"
+                    dangerouslySetInnerHTML={{
+                      __html: broadcastBody
+                        ? broadcastBody
+                            .replace(/{{first_name}}/g, 'Alex')
+                            .replace(/{{list_name}}/g, selectedList.name)
+                            .replace(/{{site_url}}/g, '#')
+                        : '<p class="text-gray-400 italic">Body preview will appear here...</p>',
+                    }}
+                  />
+                  <div className="pt-3 border-t border-gray-100 text-[11px] text-gray-500 text-center font-medium">
+                    <div>
+                      <span>Powered by </span>
+                      <a href={APP_URL} target="_blank" rel="noopener noreferrer" className="font-bold underline text-gray-800">
+                        Dynamic QR
+                      </a>
                     </div>
-                    <div
-                      className="py-3 text-gray-800"
-                      dangerouslySetInnerHTML={{
-                        __html: broadcastBody
-                          ? broadcastBody
-                              .replace(/{{first_name}}/g, 'Alex')
-                              .replace(/{{list_name}}/g, selectedList.name)
-                              .replace(/{{site_url}}/g, '#')
-                          : '<p class="text-gray-400">Body preview will appear here...</p>',
-                      }}
-                    />
-                    <div className="pt-3 border-t border-gray-100 text-[10px] text-gray-400 text-center">
-                      {quotas?.hasBrandedFooter && (
-                        <div className="pb-1 text-gray-500 font-semibold">
-                          Powered by DynamicQR
-                        </div>
-                      )}
-                      Sent to alex@example.com • <span className="underline">Unsubscribe</span>
+                    <div className="text-[10px] text-gray-400 mt-0.5">
+                      You are receiving this update from {selectedList.name}. • <span className="underline">Unsubscribe</span>
                     </div>
                   </div>
                 </div>
-              )}
-
-            </div>
+              </div>
+            )}
           </div>
         </div>
       )}
 
-      {/* Modal 5: Interactive Embed Widget Studio */}
+      {/* Modal: Interactive Embed Widget Studio */}
       {showEmbedModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="w-full max-w-2xl bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-[#11140F]/15 space-y-6">
-            <div>
-              <h4 className="text-lg font-bold text-[#11140F] flex items-center gap-2">
-                <Code className="w-5 h-5 text-[#2F6B4F]" />
-                Embeddable Signup Form Studio
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+          <div className="w-full max-w-2xl bg-white rounded-lg p-5 shadow-xl border border-[#11140F]/15 space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-[#11140F]/10">
+              <h4 className="text-sm font-bold text-[#11140F] flex items-center gap-1.5">
+                <Code className="w-4 h-4 text-[#2F6B4F]" />
+                Embeddable Subscriber Form
               </h4>
-              <p className="text-xs text-[#11140F]/60">
-                Choose a widget style to capture subscribers on your website or blog. Subscribers feed straight into {selectedList?.name}.
-              </p>
+              <button
+                type="button"
+                onClick={() => setShowEmbedModal(false)}
+                className="text-[#11140F]/40 hover:text-[#11140F]"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
+
+            <p className="text-xs text-[#11140F]/60">
+              Paste this HTML snippet on your website to capture subscribers directly into {selectedList?.name}.
+            </p>
 
             {/* Style Selector Tabs */}
             <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
                 onClick={() => setEmbedStyle('inline')}
-                className={`p-3 rounded-xl border text-left transition-all ${
+                className={`p-2.5 rounded-md border text-left transition-all cursor-pointer ${
                   embedStyle === 'inline'
                     ? 'border-[#2F6B4F] bg-[#2F6B4F]/5'
                     : 'border-[#11140F]/10 hover:bg-[#F7F8F5]'
                 }`}
               >
                 <span className="block text-xs font-bold text-[#11140F]">1. Inline Box</span>
-                <span className="text-[11px] text-[#11140F]/50">For blog footers & sidebars</span>
+                <span className="text-[10px] text-[#11140F]/50">Blog footers &amp; sidebars</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setEmbedStyle('floating_pill')}
-                className={`p-3 rounded-xl border text-left transition-all ${
+                className={`p-2.5 rounded-md border text-left transition-all cursor-pointer ${
                   embedStyle === 'floating_pill'
                     ? 'border-[#2F6B4F] bg-[#2F6B4F]/5'
                     : 'border-[#11140F]/10 hover:bg-[#F7F8F5]'
                 }`}
               >
                 <span className="block text-xs font-bold text-[#11140F]">2. Floating Pill</span>
-                <span className="text-[11px] text-[#11140F]/50">Fixed bottom-right corner</span>
+                <span className="text-[10px] text-[#11140F]/50">Fixed corner popup</span>
               </button>
 
               <button
                 type="button"
-                onClick={() => setEmbedStyle('card')}
-                className={`p-3 rounded-xl border text-left transition-all ${
-                  embedStyle === 'card'
+                onClick={() => setEmbedStyle('minimal')}
+                className={`p-2.5 rounded-md border text-left transition-all cursor-pointer ${
+                  embedStyle === 'minimal'
                     ? 'border-[#2F6B4F] bg-[#2F6B4F]/5'
                     : 'border-[#11140F]/10 hover:bg-[#F7F8F5]'
                 }`}
               >
-                <span className="block text-xs font-bold text-[#11140F]">3. Card Box</span>
-                <span className="text-[11px] text-[#11140F]/50">With headline & description</span>
+                <span className="block text-xs font-bold text-[#11140F]">3. Minimal Button</span>
+                <span className="text-[10px] text-[#11140F]/50">Direct link to hosted form</span>
               </button>
             </div>
 
-            {/* Accent Color Picker */}
-            <div className="flex items-center gap-3">
-              <span className="text-xs font-semibold text-[#11140F]">Button Accent:</span>
-              <div className="flex items-center gap-2">
-                {['#2F6B4F', '#11140F', '#2563EB', '#D97706', '#7C3AED'].map((color) => (
-                  <button
-                    key={color}
-                    type="button"
-                    onClick={() => setEmbedAccent(color)}
-                    style={{ backgroundColor: color }}
-                    className={`w-6 h-6 rounded-full border-2 transition-transform ${
-                      embedAccent === color ? 'scale-125 border-black' : 'border-transparent'
-                    }`}
-                  />
-                ))}
-              </div>
+            {/* Code Snippet Box */}
+            <div className="relative">
+              <textarea
+                readOnly
+                rows={6}
+                value={embedCodeSnippet}
+                className="w-full px-3 py-2 rounded-md bg-[#11140F] text-emerald-400 font-mono text-xs focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(embedCodeSnippet);
+                  setCopiedEmbed(true);
+                  setTimeout(() => setCopiedEmbed(false), 2000);
+                }}
+                className="absolute top-2.5 right-2.5 px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-white text-[11px] font-semibold transition-colors flex items-center gap-1"
+              >
+                <Copy className="w-3 h-3" />
+                <span>{copiedEmbed ? 'Copied!' : 'Copy Snippet'}</span>
+              </button>
             </div>
 
-            {/* Code Output */}
-            <pre className="p-4 rounded-xl bg-gray-900 text-gray-100 text-xs font-mono overflow-x-auto whitespace-pre-wrap select-all max-h-48">
-              {embedCodeSnippet}
-            </pre>
-
-            <div className="flex items-center justify-between pt-2">
-              <span className="text-xs text-[#2F6B4F] font-medium">
-                {copiedEmbed ? '✓ HTML snippet copied to clipboard!' : ''}
-              </span>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowEmbedModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-[#11140F]/60 hover:text-[#11140F]"
-                >
-                  Close
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    navigator.clipboard.writeText(embedCodeSnippet);
-                    setCopiedEmbed(true);
-                    setTimeout(() => setCopiedEmbed(false), 2000);
-                  }}
-                  className="px-5 py-2 rounded-xl bg-[#11140F] text-white text-xs font-semibold hover:bg-[#2A2E25] transition-colors flex items-center gap-1.5"
-                >
-                  <Copy className="w-3.5 h-3.5" />
-                  Copy Snippet
-                </button>
-              </div>
+            <div className="flex justify-end pt-2 border-t border-[#11140F]/10">
+              <button
+                type="button"
+                onClick={() => setShowEmbedModal(false)}
+                className="px-4 py-1.5 rounded-md bg-[#11140F] text-white text-xs font-medium hover:bg-[#2A2E25]"
+              >
+                Done
+              </button>
             </div>
           </div>
         </div>
@@ -1424,18 +1973,17 @@ export default function CustomerMailingListManager({
           onClose={() => setShowPrintModal(false)}
           shortCode={selectedList.id.slice(-8)}
           label={selectedList.name}
-          url={`${typeof window !== 'undefined' ? window.location.origin : 'https://dynamicqr.co'}/join/${selectedList.id}`}
+          url={`${APP_URL}/join/${selectedList.id}`}
           userTier={quotas?.tier || 'free'}
           isAdmin={false}
           defaultHeadline={`Join ${selectedList.name}`}
           defaultHeaderTag="SCAN TO SUBSCRIBE"
           defaultSubline="Enter your email for exclusive updates"
-          defaultFooterNote="Double opt-in • Zero spam • Unsubscribe anytime"
+          defaultFooterNote="Instant confirmation • Zero spam • Unsubscribe anytime"
           defaultTemplate="table-tent"
           featureBannerText="Print this QR code on retail counters, packaging, or table tents. When customers scan, they enter their email on a branded mobile form with automated double opt-in."
         />
       )}
-
     </div>
   );
 }

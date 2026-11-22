@@ -4,11 +4,12 @@ import { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Sparkles, ArrowRight, ShieldCheck, Lock, QrCode } from 'lucide-react';
 import AuthModal from './AuthModal';
+import { APP_URL } from '@/lib/config';
 
 export default function WorkspaceLocked() {
   const [authOpen, setAuthOpen] = useState(false);
   const [authTab, setAuthTab] = useState<'login' | 'signup'>('signup');
-  const [demoUrl, setDemoUrl] = useState('https://dynamicqr.co/demo');
+  const [demoUrl, setDemoUrl] = useState(`${APP_URL}/demo`);
   const [qrColor, setQrColor] = useState('#11140F');
 
   const openAuth = (tab: 'login' | 'signup') => {
@@ -18,7 +19,7 @@ export default function WorkspaceLocked() {
 
   return (
     <>
-      <div className="w-full rounded-3xl border border-[#11140F]/15 dark:border-white/10 bg-white dark:bg-[#11140F] shadow-xs overflow-hidden transition-colors duration-200">
+      <div className="w-full rounded-lg border border-[#11140F]/15 dark:border-white/10 bg-white dark:bg-[#11140F] shadow-xs overflow-hidden transition-colors duration-200">
         {/* Top Header */}
         <div className="bg-[#11140F] dark:bg-[#161B13] text-white p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b dark:border-white/10">
           <div className="space-y-1">
@@ -102,7 +103,7 @@ export default function WorkspaceLocked() {
             </div>
 
             {/* Comparison Callout */}
-            <div className="rounded-2xl border border-amber-200/80 dark:border-amber-500/30 bg-amber-50/70 dark:bg-amber-950/20 p-4 space-y-2 text-[13px] text-amber-950 dark:text-amber-200">
+            <div className="rounded-lg border border-amber-200/80 dark:border-amber-500/30 bg-amber-50/70 dark:bg-amber-950/20 p-4 space-y-2 text-[13px] text-amber-950 dark:text-amber-200">
               <div className="flex items-center gap-2 font-semibold text-amber-900 dark:text-amber-300">
                 <Lock className="w-4 h-4 text-amber-700 dark:text-amber-400 shrink-0" />
                 The Physical Flyer Dilemma:
@@ -136,10 +137,10 @@ export default function WorkspaceLocked() {
           </div>
 
           {/* Live Interactive QR Code Canvas */}
-          <div className="flex flex-col items-center justify-center bg-white dark:bg-[#161B13] rounded-2xl border border-[#11140F]/10 dark:border-white/10 p-6 sm:p-8 space-y-4 shadow-xs text-center">
-            <div className="p-4 rounded-xl border border-[#11140F]/10 dark:border-white/15 bg-white shadow-xs inline-block">
+          <div className="flex flex-col items-center justify-center bg-white dark:bg-[#161B13] rounded-lg border border-[#11140F]/10 dark:border-white/10 p-6 sm:p-8 space-y-4 shadow-xs text-center">
+            <div className="p-4 rounded-md border border-[#11140F]/10 dark:border-white/15 bg-white shadow-xs inline-block">
               <QRCodeSVG
-                value={demoUrl || 'https://dynamicqr.co'}
+                value={demoUrl || APP_URL}
                 size={200}
                 fgColor={qrColor}
                 bgColor="#FFFFFF"

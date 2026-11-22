@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Search, UtensilsCrossed, Sparkles } from 'lucide-react';
+import { APP_URL } from '@/lib/config';
 
 export interface MenuItem {
   id: string;
@@ -63,7 +64,7 @@ export default function MenuInteractiveView({
     <div className="min-h-screen bg-[#F7F7F5] text-[#11140F] flex flex-col justify-between selection:bg-[#2F6B4F] selection:text-white pb-12">
       {/* Top Banner / Hero */}
       <header className="bg-[#11140F] text-white pt-10 pb-8 px-4 sm:px-6 shadow-md text-center space-y-2 sticky top-0 z-30">
-        <div className="w-10 h-10 rounded-2xl bg-white/10 mx-auto flex items-center justify-center text-[#34D399] mb-2 border border-white/10">
+        <div className="w-10 h-10 rounded-lg bg-white/10 mx-auto flex items-center justify-center text-[#34D399] mb-2 border border-white/10">
           <UtensilsCrossed className="w-5 h-5" />
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight font-sans">
@@ -158,7 +159,7 @@ export default function MenuInteractiveView({
 
         {/* Menu Sections & Items */}
         {filteredSections.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-2xl border border-[#11140F]/10 p-6 space-y-2">
+          <div className="text-center py-16 bg-white rounded-lg border border-[#11140F]/10 p-6 space-y-2">
             <p className="text-sm font-semibold text-[#11140F]">No items found matching your criteria</p>
             <p className="text-xs text-[#11140F]/50">Try clearing your search query or dietary filters.</p>
           </div>
@@ -176,7 +177,7 @@ export default function MenuInteractiveView({
                 {section.items.map((item) => (
                   <div
                     key={item.id}
-                    className={`bg-white rounded-2xl border p-4 shadow-xs flex flex-col justify-between transition-all ${
+                    className={`bg-white rounded-lg border p-4 shadow-xs flex flex-col justify-between transition-all ${
                       item.isSoldOut
                         ? 'border-gray-200 opacity-60 bg-gray-50'
                         : 'border-[#11140F]/8 hover:border-[#11140F]/20'
@@ -234,14 +235,16 @@ export default function MenuInteractiveView({
       {/* Powered by DynamicQR Footer */}
       {showBranding && (
         <footer className="text-center pt-8">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[#11140F]/10 text-[11px] text-[#11140F]/60 hover:text-[#11140F] shadow-xs transition-colors"
+          <a
+            href={APP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white border border-[#11140F]/10 text-[11px] text-[#11140F]/60 hover:text-[#11140F] shadow-xs transition-colors"
           >
             <span>Powered by</span>
-            <strong className="text-[#11140F]">DynamicQR</strong>
+            <strong className="text-[#11140F] underline">Dynamic QR</strong>
             <span>• Contactless Dining</span>
-          </Link>
+          </a>
         </footer>
       )}
     </div>

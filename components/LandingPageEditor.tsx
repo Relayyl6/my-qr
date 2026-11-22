@@ -9,6 +9,7 @@ import {
 } from '@/lib/ai/features/landing-page-builder';
 import { LandingPageSpec, LandingBlock } from '@/lib/landing/types';
 import { RenderLandingPage } from '@/lib/landing/render';
+import { APP_URL } from '@/lib/config';
 import {
   Sparkles,
   Loader2,
@@ -841,7 +842,7 @@ export default function LandingPageEditor({
                       <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
                     </div>
                     <div className="flex-1 max-w-sm mx-auto bg-slate-900/80 rounded-md px-3 py-0.5 text-[11px] font-mono text-slate-300 truncate text-center">
-                      https://dynamicqr.co/page/{shortCode}
+                      {APP_URL}/page/{shortCode}
                     </div>
                   </div>
                   <div className="max-h-[550px] overflow-y-auto">

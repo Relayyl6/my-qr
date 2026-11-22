@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer";
 import { prisma } from "@/lib/prisma";
 import { PLANS, PlanTier } from "@/lib/plans";
+import { APP_URL } from "@/lib/config";
 
 export interface EmailPayload {
   to: string;
@@ -131,12 +132,61 @@ export async function sendEmail({
 }
 
 /**
- * Builds HTML template for Newsletter Double Opt-In Verification (Spec Section 3)
+ * Builds HTML template for immediate Customer Mailing List Subscription (no confirmation click required).
+ * Carries customer's business name and content, with stout "Powered by Dynamic QR" mention (NO link to our platform).
+ */
+export function buildCustomerSubscriptionConfirmedEmailHtml({
+  businessName,
+  unsubscribeUrl,
+  firstName,
+}: {
+  businessName: string;
+  unsubscribeUrl: string;
+  firstName?: string;
+}): string {
+  const greeting = firstName ? `Hi ${firstName},` : "Hello,";
+  return `<!doctype html>
+<html>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+    <tr><td align="center" style="padding:24px 12px;">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0"
+             style="max-width:600px;width:100%;background:#ffffff;border-radius:8px;border:1px solid #e5e7eb;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+        <tr><td style="padding:28px 28px 12px;color:#11140f;">
+          <div style="font-size:18px;font-weight:700;color:#11140f;margin-bottom:16px;">
+            ${businessName}
+          </div>
+          <h1 style="font-size:20px;font-weight:700;color:#11140f;margin:0 0 12px;">
+            You're subscribed
+          </h1>
+          <p style="color:#374151;font-size:14px;line-height:1.6;margin:0 0 16px;">
+            ${greeting} you are now subscribed to receive updates, exclusive offers, and announcements from <strong>${businessName}</strong>.
+          </p>
+          <p style="color:#6b7280;font-size:13px;line-height:1.5;margin:0;">
+            No further action is required — you are fully confirmed.
+          </p>
+        </td></tr>
+        <tr><td style="padding:20px 28px;font-size:12px;line-height:1.5;color:#666666;border-top:1px solid #eeeeee;background:#fafafa;">
+          <div style="font-weight:700;color:#374151;margin-bottom:8px;font-size:11px;letter-spacing:0.5px;">
+            Powered by <a href="${APP_URL}" target="_blank" rel="noopener noreferrer" style="color:#11140f;text-decoration:underline;font-weight:700;">Dynamic QR</a>
+          </div>
+          You are receiving this email because you subscribed to updates from ${businessName}.<br>
+          <a href="${unsubscribeUrl}" style="color:#666666;text-decoration:underline;">Unsubscribe</a>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
+/**
+ * Builds HTML template for Newsletter Double Opt-In Verification (Legacy fallback)
  */
 export function buildDoubleOptInEmailHtml({
   confirmUrl,
   unsubscribeUrl,
-  siteUrl = "https://dynamicqr.co",
+  siteUrl = APP_URL,
   businessName = "DynamicQR",
   businessAddress = "San Francisco, CA & Lagos, NG",
 }: {
@@ -148,33 +198,27 @@ export function buildDoubleOptInEmailHtml({
 }): string {
   return `<!doctype html>
 <html>
-<body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,Helvetica,sans-serif;">
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
     <tr><td align="center" style="padding:24px 12px;">
       <table role="presentation" width="600" cellpadding="0" cellspacing="0"
-             style="max-width:600px;width:100%;background:#ffffff;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.03);">
-        <tr><td style="padding:32px 32px 12px;font-size:16px;line-height:1.6;color:#111111;">
-          <div style="font-size:20px;font-weight:800;color:#11140f;letter-spacing:-0.5px;margin-bottom:20px;">
+             style="max-width:600px;width:100%;background:#ffffff;border-radius:8px;border:1px solid #e5e7eb;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.03);">
+        <tr><td style="padding:28px 28px 12px;font-size:15px;line-height:1.6;color:#111111;">
+          <div style="font-size:18px;font-weight:800;color:#11140f;margin-bottom:16px;">
             ${businessName}
           </div>
-          <h1 style="font-size:20px;font-weight:700;color:#11140f;margin:0 0 16px;">
-            Confirm your subscription
+          <h1 style="font-size:20px;font-weight:700;color:#11140f;margin:0 0 14px;">
+            Subscription Confirmed
           </h1>
-          <p style="color:#374151;font-size:15px;line-height:1.6;margin:0 0 24px;">
-            Please confirm your email address to receive updates and exclusive announcements.
-          </p>
-          <div style="text-align:left;margin:28px 0;">
-            <a href="${confirmUrl}" style="background:#11140F;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:14px 28px;border-radius:8px;display:inline-block;">
-              Confirm My Subscription &rarr;
-            </a>
-          </div>
-          <p style="color:#6b7280;font-size:13px;line-height:1.5;margin:20px 0 0;">
-            This single-use confirmation link will expire in 72 hours. If you did not sign up, you can safely ignore this message.
+          <p style="color:#374151;font-size:14px;line-height:1.6;margin:0 0 20px;">
+            You are now subscribed to receive updates from ${businessName}.
           </p>
         </td></tr>
-        <tr><td style="padding:24px 32px;font-size:12px;line-height:1.5;color:#666666;border-top:1px solid #eeeeee;background:#fafafa;">
-          You're receiving this because you subscribed at <a href="${siteUrl}" style="color:#666666;">${siteUrl}</a>.<br>
-          ${businessName}, ${businessAddress}<br>
+        <tr><td style="padding:20px 28px;font-size:12px;line-height:1.5;color:#666666;border-top:1px solid #eeeeee;background:#fafafa;">
+          <div style="margin-bottom:10px;font-size:11px;font-weight:700;color:#374151;letter-spacing:0.5px;">
+            Powered by <a href="${APP_URL}" target="_blank" rel="noopener noreferrer" style="color:#11140f;text-decoration:underline;font-weight:700;">Dynamic QR</a>
+          </div>
+          You're receiving this because you subscribed to ${businessName}.<br>
           <a href="${unsubscribeUrl}" style="color:#666666;text-decoration:underline;">Unsubscribe</a>
         </td></tr>
       </table>
@@ -185,15 +229,18 @@ export function buildDoubleOptInEmailHtml({
 }
 
 /**
- * Builds standard 600px table layout for broadcast campaigns (Spec Section 3)
+ * Builds standard 600px table layout for broadcast campaigns.
+ * For customer campaigns: carries customer name + stout "Powered by Dynamic QR" mention (NO link to platform).
+ * For platform campaigns: standard DynamicQR header and links to APP_URL.
  */
 export function buildBroadcastEmailHtml({
   body,
   unsubscribeUrl,
-  siteUrl = "https://dynamicqr.co",
+  siteUrl = APP_URL,
   businessName = "DynamicQR",
   businessAddress = "San Francisco, CA & Lagos, NG",
   showPoweredBy = false,
+  isCustomerBroadcast = false,
 }: {
   body: string;
   unsubscribeUrl: string;
@@ -201,27 +248,30 @@ export function buildBroadcastEmailHtml({
   businessName?: string;
   businessAddress?: string;
   showPoweredBy?: boolean;
+  isCustomerBroadcast?: boolean;
 }): string {
+  const isCustomer = isCustomerBroadcast || showPoweredBy || (businessName !== "DynamicQR" && businessName !== "");
+
   return `<!doctype html>
 <html>
-<body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,Helvetica,sans-serif;">
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
     <tr><td align="center" style="padding:24px 12px;">
       <table role="presentation" width="600" cellpadding="0" cellspacing="0"
-             style="max-width:600px;width:100%;background:#ffffff;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden;">
-        <tr><td style="padding:32px 32px 8px;font-size:16px;line-height:1.6;color:#111111;">
+             style="max-width:600px;width:100%;background:#ffffff;border-radius:8px;border:1px solid #e5e7eb;overflow:hidden;">
+        <tr><td style="padding:28px 28px 8px;font-size:15px;line-height:1.6;color:#111111;">
           ${body}
         </td></tr>
-        <tr><td style="padding:24px 32px;font-size:12px;line-height:1.5;color:#666666;border-top:1px solid #eeeeee;background:#fafafa;">
+        <tr><td style="padding:20px 28px;font-size:12px;line-height:1.5;color:#666666;border-top:1px solid #eeeeee;background:#fafafa;">
           ${
-            showPoweredBy
-              ? `<div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #eeeeee;font-size:11.5px;color:#888888;text-align:center;">
-                   Powered by <a href="https://dynamicqr.co" style="color:#11140F;font-weight:bold;text-decoration:none;">DynamicQR</a> — Smart Dynamic QR & Micro-SaaS
-                 </div>`
-              : ""
+            isCustomer
+              ? `<div style="margin-bottom:10px;font-size:11px;font-weight:700;color:#374151;letter-spacing:0.5px;">
+                   Powered by <a href="${APP_URL}" target="_blank" rel="noopener noreferrer" style="color:#11140f;text-decoration:underline;font-weight:700;">Dynamic QR</a>
+                 </div>
+                 You are receiving this update from ${businessName}.<br>`
+              : `You are receiving this update from <a href="${siteUrl}" style="color:#666666;">DynamicQR</a>.<br>
+                 DynamicQR, ${businessAddress}<br>`
           }
-          You're receiving this because you subscribed at <a href="${siteUrl}" style="color:#666666;">${siteUrl}</a>.<br>
-          ${businessName}, ${businessAddress}<br>
           <a href="${unsubscribeUrl}" style="color:#666666;text-decoration:underline;">Unsubscribe</a>
         </td></tr>
       </table>
@@ -310,28 +360,53 @@ export const PREBUILT_EMAIL_TEMPLATES = {
 };
 
 /**
- * Dispatches double opt-in confirmation email to a new subscriber.
+ * Dispatches welcome / subscription confirmed email to a new platform subscriber.
+ * Confirmed immediately with zero confirmation friction.
  */
-export async function sendDoubleOptInEmail({
+export async function sendPlatformSubscriptionConfirmedEmail({
   email,
   token,
 }: {
   email: string;
   token: string;
 }): Promise<{ success: boolean; error?: string }> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dynamicqr.co";
-  const confirmUrl = `${baseUrl}/api/newsletter/confirm?token=${token}`;
-  const unsubscribeUrl = `${baseUrl}/api/newsletter/unsubscribe?token=${token}`;
+  const unsubscribeUrl = `${APP_URL}/api/newsletter/unsubscribe?token=${token}`;
 
-  const html = buildDoubleOptInEmailHtml({
-    confirmUrl,
-    unsubscribeUrl,
-    siteUrl: baseUrl,
-  });
+  const html = `<!doctype html>
+<html>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+    <tr><td align="center" style="padding:24px 12px;">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0"
+             style="max-width:600px;width:100%;background:#ffffff;border-radius:8px;border:1px solid #e5e7eb;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+        <tr><td style="padding:28px 28px 12px;color:#11140f;">
+          <div style="font-size:18px;font-weight:700;color:#11140f;margin-bottom:14px;">
+            DynamicQR
+          </div>
+          <h1 style="font-size:20px;font-weight:700;color:#11140f;margin:0 0 12px;">
+            Welcome to DynamicQR
+          </h1>
+          <p style="color:#374151;font-size:14px;line-height:1.6;margin:0 0 16px;">
+            You are now subscribed to receive DynamicQR product announcements, dynamic routing insights, and feature updates.
+          </p>
+          <div style="margin:20px 0;">
+            <a href="${APP_URL}/product-tour" style="background:#11140F;color:#ffffff;text-decoration:none;font-size:13px;font-weight:600;padding:12px 24px;border-radius:6px;display:inline-block;">
+              Explore Features &rarr;
+            </a>
+          </div>
+        </td></tr>
+        <tr><td style="padding:18px 28px;font-size:12px;line-height:1.5;color:#666666;border-top:1px solid #eeeeee;background:#fafafa;">
+          DynamicQR • Sent to ${email} • <a href="${unsubscribeUrl}" style="color:#666666;text-decoration:underline;">Unsubscribe</a>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
 
   return await sendEmail({
     to: email,
-    subject: "Confirm your subscription to DynamicQR",
+    subject: "Welcome to DynamicQR",
     html,
     headers: {
       "List-Unsubscribe": `<${unsubscribeUrl}>`,
@@ -341,15 +416,29 @@ export async function sendDoubleOptInEmail({
 }
 
 /**
+ * Dispatches double opt-in confirmation email to a new subscriber (legacy fallback).
+ */
+export async function sendDoubleOptInEmail({
+  email,
+  token,
+}: {
+  email: string;
+  token: string;
+}): Promise<{ success: boolean; error?: string }> {
+  return await sendPlatformSubscriptionConfirmedEmail({ email, token });
+}
+
+/**
  * Broadcasts Platform Newsletter strictly via Gmail Nodemailer:
  * - Stays strictly within Gmail's 500/day limit (with a 490 safe ceiling)
  * - Emits List-Unsubscribe & List-Unsubscribe-Post headers
+ * - Logs per-recipient delivery status
  */
 export async function broadcastNewsletterCampaign({
   campaignId,
   subject,
   bodyHtml,
-  siteUrl = "https://dynamicqr.co",
+  siteUrl = APP_URL,
 }: {
   campaignId: string;
   subject: string;
@@ -385,6 +474,8 @@ export async function broadcastNewsletterCampaign({
   }
 
   let sentCount = 0;
+  const recipientLogs: { email: string; status: 'sent' | 'failed'; error?: string; sentAt: string }[] = [];
+
   for (const subscriber of subscribers) {
     const unsubUrl = `${siteUrl}/api/newsletter/unsubscribe?token=${subscriber.token}`;
     const personalizedBody = bodyHtml
@@ -396,6 +487,8 @@ export async function broadcastNewsletterCampaign({
       body: personalizedBody,
       unsubscribeUrl: unsubUrl,
       siteUrl,
+      businessName: "DynamicQR",
+      isCustomerBroadcast: false,
     });
 
     const res = await sendEmail({
@@ -408,7 +501,13 @@ export async function broadcastNewsletterCampaign({
         "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
       },
     });
-    if (res.success) sentCount++;
+
+    if (res.success) {
+      sentCount++;
+      recipientLogs.push({ email: subscriber.email, status: 'sent', sentAt: new Date().toISOString() });
+    } else {
+      recipientLogs.push({ email: subscriber.email, status: 'failed', error: res.error, sentAt: new Date().toISOString() });
+    }
   }
 
   await prisma.newsletterCampaign.update({
@@ -417,6 +516,7 @@ export async function broadcastNewsletterCampaign({
       status: "sent",
       sentAt: new Date(),
       recipientCount: sentCount,
+      recipients: recipientLogs,
       sentVia: "gmail",
     },
   });
@@ -428,14 +528,15 @@ export async function broadcastNewsletterCampaign({
  * Broadcasts Customer Mailing List campaign strictly via Gmail Nodemailer:
  * - Free tier: max 10 contacts, Pro: 50, Plus: 100, Ultra: 500 (Gmail ceiling)
  * - Checks daily Gmail 490 ceiling across the entire system
- * - Adds "Powered by DynamicQR" footer badge for Free tier
+ * - Adds stout "Powered by Dynamic QR" footer without links to platform
+ * - Saves each broadcast with recipient log details
  */
 export async function broadcastCustomerMailCampaign({
   userId,
   listId,
   subject,
   bodyHtml,
-  siteUrl = "https://dynamicqr.co",
+  siteUrl = APP_URL,
 }: {
   userId: string;
   listId: string;
@@ -450,7 +551,7 @@ export async function broadcastCustomerMailCampaign({
   // 1. Fetch user & verify tier entitlements
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { id: true, email: true, tier: true },
+    select: { id: true, email: true, tier: true, name: true },
   });
 
   if (!user) {
@@ -466,7 +567,7 @@ export async function broadcastCustomerMailCampaign({
     include: {
       contacts: {
         where: { status: "active" },
-        take: entitlements.subscribers_max, // Strictly enforce tier contact cap: 10, 50, 100, 500
+        take: entitlements.subscribers_max,
       },
     },
   });
@@ -525,6 +626,8 @@ export async function broadcastCustomerMailCampaign({
   });
 
   let sentCount = 0;
+  const recipientLogs: { email: string; status: 'sent' | 'failed'; error?: string; sentAt: string }[] = [];
+
   for (const contact of list.contacts) {
     const unsubUrl = `${siteUrl}/api/mailing-lists/${listId}/unsubscribe?token=${contact.token}`;
     const personalizedBody = bodyHtml
@@ -538,30 +641,37 @@ export async function broadcastCustomerMailCampaign({
       unsubscribeUrl: unsubUrl,
       siteUrl,
       businessName: list.name,
-      showPoweredBy: entitlements.branded_footer,
+      isCustomerBroadcast: true,
     });
 
     const res = await sendEmail({
       to: contact.email,
       subject,
       html: fullHtml,
-      replyTo: process.env.EMAIL_REPLY_TO || "hello@dynamicqr.co",
+      replyTo: user.email || process.env.EMAIL_REPLY_TO || "hello@dynamicqr.co",
       headers: {
         "List-Unsubscribe": `<${unsubUrl}>`,
         "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
       },
     });
 
-    if (res.success) sentCount++;
+    if (res.success) {
+      sentCount++;
+      recipientLogs.push({ email: contact.email, status: 'sent', sentAt: new Date().toISOString() });
+    } else {
+      recipientLogs.push({ email: contact.email, status: 'failed', error: res.error, sentAt: new Date().toISOString() });
+    }
   }
 
-  // 6. Finalize campaign record
+  // 6. Finalize campaign record with recipient logs
   await prisma.customerMailCampaign.update({
     where: { id: campaign.id },
     data: {
       status: "sent",
       sentAt: new Date(),
       sentCount,
+      recipientCount: list.contacts.length,
+      recipients: recipientLogs,
     },
   });
 
@@ -639,14 +749,14 @@ export function buildLimitWarningEmailHtml({
       </p>
 
       <div style="text-align: center;">
-        <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://dynamicqr.co"}/pricing" style="display: inline-block; background: #11140F; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 14px 28px; border-radius: 12px;">
+        <a href="${APP_URL}/pricing" style="display: inline-block; background: #11140F; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 14px 28px; border-radius: 8px;">
           View Upgrade Options &rarr;
         </a>
       </div>
     </div>
 
     <div style="background: #FAFAFA; border-top: 1px solid #EEEEEE; padding: 18px 30px; text-align: center; font-size: 12px; color: #9CA3AF;">
-      DynamicQR • Sent to ${email} • <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://dynamicqr.co"}/pricing" style="color: #6B7280;">Manage Plan</a>
+      DynamicQR • Sent to ${email} • <a href="${APP_URL}/pricing" style="color: #6B7280;">Manage Plan</a>
     </div>
   </div>
 </body>
@@ -714,7 +824,7 @@ export function buildWeeklyDigestEmailHtml({
       }
 
       <div style="text-align: center; padding-top: 8px;">
-        <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://dynamicqr.co"}/#workspace" style="display: inline-block; background: #11140F; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 14px 28px; border-radius: 12px;">
+        <a href="${APP_URL}/#workspace" style="display: inline-block; background: #11140F; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 14px 28px; border-radius: 8px;">
           Open DynamicQR Workspace &rarr;
         </a>
       </div>
@@ -776,14 +886,14 @@ export function buildMonthlyResetEmailHtml({
       </p>
 
       <div style="text-align: center;">
-        <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://dynamicqr.co"}/#workspace" style="display: inline-block; background: #11140F; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 14px 28px; border-radius: 12px;">
+        <a href="${APP_URL}/#workspace" style="display: inline-block; background: #11140F; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 14px 28px; border-radius: 8px;">
           Go to Workspace &rarr;
         </a>
       </div>
     </div>
 
     <div style="background: #FAFAFA; border-top: 1px solid #EEEEEE; padding: 18px 30px; text-align: center; font-size: 12px; color: #9CA3AF;">
-      DynamicQR • Sent to ${email} • <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://dynamicqr.co"}/pricing" style="color: #6B7280;">Manage Subscription</a>
+      DynamicQR • Sent to ${email} • <a href="${APP_URL}/pricing" style="color: #6B7280;">Manage Subscription</a>
     </div>
   </div>
 </body>
@@ -841,14 +951,14 @@ export function buildWelcomeEmailHtml({
       </div>
 
       <div style="text-align: center; margin-top: 28px;">
-        <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://dynamicqr.co"}/#workspace" style="display: inline-block; background: #11140F; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 14px 28px; border-radius: 12px;">
+        <a href="${APP_URL}/#workspace" style="display: inline-block; background: #11140F; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 14px 28px; border-radius: 8px;">
           Open Your Workspace &rarr;
         </a>
       </div>
     </div>
 
     <div style="background: #FAFAFA; border-top: 1px solid #EEEEEE; padding: 18px 30px; text-align: center; font-size: 12px; color: #9CA3AF;">
-      DynamicQR • Sent to ${email} • <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://dynamicqr.co"}/privacy" style="color: #6B7280;">Privacy Policy</a>
+      DynamicQR • Sent to ${email} • <a href="${APP_URL}/privacy" style="color: #6B7280;">Privacy Policy</a>
     </div>
   </div>
 </body>

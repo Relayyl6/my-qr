@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { broadcastCustomerMailCampaign } from "@/lib/email/send";
+import { APP_URL } from "@/lib/config";
 
 export async function POST(
   req: NextRequest,
@@ -24,7 +25,7 @@ export async function POST(
       listId,
       subject,
       bodyHtml,
-      siteUrl: process.env.NEXT_PUBLIC_APP_URL || "https://dynamicqr.co",
+      siteUrl: APP_URL,
     });
 
     if (!result.success) {
