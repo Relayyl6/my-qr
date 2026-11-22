@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from 'react';
 import { enrichUrlAction, EnrichedUrlResult } from '@/lib/ai/features/url-enricher';
 import { Sparkles, AlertTriangle, CheckCircle2, Loader2 } from 'lucide-react';
 import { APP_URL } from '@/lib/config';
+import { playAudioClick } from '@/lib/theme';
 
 function SubmitBtn() {
   const { pending } = useFormStatus();
@@ -43,6 +44,7 @@ export default function LinkForm({ customDomains = [] }: LinkFormProps) {
 
   useEffect(() => {
     if (state.success) {
+      playAudioClick();
       formRef.current?.reset();
       setShortCode('');
       setDestinationUrl('');

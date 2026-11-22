@@ -5,6 +5,7 @@ import HeaderNav from './HeaderNav';
 import Footer from './Footer';
 import AnnouncementBar from './AnnouncementBar';
 import { ChevronRight } from 'lucide-react';
+import { getStoredPreferences } from '@/lib/theme';
 
 interface HomeTabsProps {
   user: {
@@ -28,12 +29,11 @@ export default function HomeTabs({
   announcementBanner,
   promoBanner,
 }: HomeTabsProps) {
-  // If user is logged in, default directly to the dedicated Workspace tab; otherwise Overview tour
-  const [activeTab, setActiveTab] = useState<'workspace' | 'overview'>(
-    user ? 'workspace' : 'overview'
-  );
+  // Respect user preference for default landing tab (Workspace vs Tour overview)
+  const [activeTab, setActiveTab] = useState<'workspace' | 'overview'>('overview');
 
   useEffect(() => {
+    const prefs = getStoredPreferences();
     const handleHash = () => {
       const hash = window.location.hash.toLowerCase();
       if (
@@ -52,13 +52,33 @@ export default function HomeTabs({
         hash === '#top'
       ) {
         setActiveTab('overview');
+      } else {
+        // No hash in URL: Apply user's defaultLanding preference
+        if (prefs.defaultLanding === 'overview') {
+          setActiveTab('overview');
+        } else if (prefs.defaultLanding === 'workspace') {
+          setActiveTab('workspace');
+        } else {
+          setActiveTab(user ? 'workspace' : 'overview');
+        }
       }
     };
 
     handleHash();
     window.addEventListener('hashchange', handleHash);
-    return () => window.removeEventListener('hashchange', handleHash);
-  }, []);
+
+    const handlePrefChange = (e: any) => {
+      if (e.detail?.defaultLanding && !window.location.hash) {
+        setActiveTab(e.detail.defaultLanding);
+      }
+    };
+    window.addEventListener('dynamicqr-preferences-change', handlePrefChange);
+
+    return () => {
+      window.removeEventListener('hashchange', handleHash);
+      window.removeEventListener('dynamicqr-preferences-change', handlePrefChange);
+    };
+  }, [user]);
 
   return (
     <div className="w-full min-h-screen flex flex-col">

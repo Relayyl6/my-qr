@@ -34,6 +34,7 @@ import AccountSettingsModal from './AccountSettingsModal';
 import EntryPromoModal from './EntryPromoModal';
 import MicroSaasHub from './MicroSaasHub';
 import { signOut } from '@/app/auth-actions';
+import { getStoredPreferences } from '@/lib/theme';
 
 export type WorkspaceSection =
   | 'all'
@@ -108,6 +109,7 @@ export default function WorkspaceShell({
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [showAccountModal, setShowAccountModal] = useState(false);
   const [showPromoModalPreview, setShowPromoModalPreview] = useState(false);
+  const [density, setDensity] = useState<'comfortable' | 'compact'>('comfortable');
 
   const storageSectionKey = user?.id ? `dynamicqr_workspace_section_${user.id}` : 'dynamicqr_workspace_section';
   const storageTabKey = user?.id ? `dynamicqr_microsaas_tab_${user.id}` : 'dynamicqr_microsaas_tab';
@@ -115,6 +117,20 @@ export default function WorkspaceShell({
   // Restore remembered section & subtab on mount/refresh
   useEffect(() => {
     if (typeof window === 'undefined') return;
+
+    try {
+      const prefs = getStoredPreferences();
+      if (prefs.analyticsDensity) {
+        setDensity(prefs.analyticsDensity);
+      }
+    } catch (e) {}
+
+    const handlePrefChange = (e: any) => {
+      if (e.detail?.analyticsDensity) {
+        setDensity(e.detail.analyticsDensity);
+      }
+    };
+    window.addEventListener('dynamicqr-preferences-change', handlePrefChange);
 
     try {
       const savedCollapsed = localStorage.getItem('dynamicqr_sidebar_collapsed');
@@ -168,6 +184,10 @@ export default function WorkspaceShell({
     } else if (targetMicroTab) {
       setMicroSaasTab(targetMicroTab);
     }
+
+    return () => {
+      window.removeEventListener('dynamicqr-preferences-change', handlePrefChange);
+    };
   }, [storageSectionKey, storageTabKey]);
 
   const handleSelectSection = (section: WorkspaceSection) => {
@@ -802,7 +822,13 @@ export default function WorkspaceShell({
       )}
 
       {/* 4. MAIN WORKSPACE CONTENT AREA (Inspired by Healthy Dashboard) */}
-      <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 space-y-6">
+      <main
+        className={`flex-1 min-w-0 transition-all duration-150 ${
+          density === 'compact'
+            ? 'p-3 sm:p-4 lg:p-6 space-y-4'
+            : 'p-4 sm:p-6 lg:p-8 space-y-6'
+        }`}
+      >
         {/* Main Header Row (Insp. from "Welcome, Diana!" row in Image 6) */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-[#11140F]/10 dark:border-white/10">
           <div>

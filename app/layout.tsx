@@ -3,6 +3,7 @@ import { Inter, Playfair_Display } from 'next/font/google';
 import { Suspense } from 'react';
 import SiteVisitorTracker from '@/components/SiteVisitorTracker';
 import EntryPromoModal from '@/components/EntryPromoModal';
+import ThemeProvider from '@/components/ThemeProvider';
 import './globals.css';
 
 const inter = Inter({ 
@@ -51,6 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className={`${inter.variable} ${playfair.variable} font-sans bg-[#F7F7F5] dark:bg-[#080907] min-h-screen text-gray-900 dark:text-[#EEF0EA] transition-colors duration-200`}>
+        <ThemeProvider />
         <Suspense fallback={null}>
           <EntryPromoModal />
           <SiteVisitorTracker />

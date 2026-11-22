@@ -11,6 +11,7 @@ import LandingPageEditor from './LandingPageEditor';
 import { Sparkles, Compass, Palette, Smartphone, Activity, CheckCircle2, AlertTriangle, Download, ExternalLink, Clock } from 'lucide-react';
 import { revertLandingPageAction } from '@/lib/ai/features/landing-page-builder';
 import { APP_URL } from '@/lib/config';
+import { playAudioClick } from '@/lib/theme';
 
 interface QrLink {
   id: string;
@@ -95,6 +96,7 @@ export default function LinkList({
   };
 
   const handleCopy = (id: string, shortUrl: string) => {
+    playAudioClick();
     navigator.clipboard.writeText(shortUrl);
     setCopiedId(id);
     setTimeout(() => setCopiedId((current) => (current === id ? null : current)), 1800);

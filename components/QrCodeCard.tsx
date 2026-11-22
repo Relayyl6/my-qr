@@ -8,6 +8,7 @@ import { downloadSvgFile } from '@/lib/qr/exportVector';
 import PrintTemplateModal from '@/components/PrintTemplateModal';
 import ExportCustomizerModal from '@/components/ExportCustomizerModal';
 import { APP_URL } from '@/lib/config';
+import { getStoredPreferences, playAudioClick } from '@/lib/theme';
 
 interface Props {
   shortCode: string;
@@ -53,9 +54,11 @@ export default function QrCodeCard({
   // 0. Quick Raw Zero-Margin PNG (pure die-cut QR code, zero padding, zero text)
   const handleDownloadRawPng = async () => {
     setIsMenuOpen(false);
+    playAudioClick();
+    const precision = getStoredPreferences().qrPrecision || 'H';
     try {
       const dataUrl = await QRCode.toDataURL(url, {
-        errorCorrectionLevel: 'H',
+        errorCorrectionLevel: precision,
         margin: 0,
         width: 1024,
       });
@@ -119,7 +122,8 @@ export default function QrCodeCard({
     ctx.shadowColor = 'transparent';
 
     // Direct mathematical QR bit matrix rendering (Zero DOM dependency)
-    const qr = QRCode.create(url, { errorCorrectionLevel: 'H' });
+    const precision = getStoredPreferences().qrPrecision || 'H';
+    const qr = QRCode.create(url, { errorCorrectionLevel: precision });
     const numModules = qr.modules.size;
     const moduleSize = qrSize / numModules;
 
@@ -185,9 +189,11 @@ export default function QrCodeCard({
       return;
     }
     try {
+      playAudioClick();
+      const precision = getStoredPreferences().qrPrecision || 'H';
       const svgString = await QRCode.toString(url, {
         type: 'svg',
-        errorCorrectionLevel: 'H',
+        errorCorrectionLevel: precision,
         margin: 2,
         color: { dark: '#11140F', light: '#FFFFFF' },
       });
