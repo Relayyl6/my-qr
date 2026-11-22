@@ -239,6 +239,23 @@ export default function WorkspaceShell({
   const userInitial = (user?.name || user?.email || 'U').charAt(0).toUpperCase();
   const tierName = (user?.tier || 'free').toUpperCase();
 
+  const [userAvatar, setUserAvatar] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const cached = localStorage.getItem('dynamicqr_user_avatar');
+      if (cached) setUserAvatar(cached);
+    } catch (e) {}
+
+    const handleAvatarChange = (e: any) => {
+      if (e.detail?.avatarUrl !== undefined) {
+        setUserAvatar(e.detail.avatarUrl);
+      }
+    };
+    window.addEventListener('dynamicqr-avatar-change', handleAvatarChange);
+    return () => window.removeEventListener('dynamicqr-avatar-change', handleAvatarChange);
+  }, []);
+
   const navSections = [
     {
       group: 'MAIN WORKSPACE',
@@ -357,6 +374,20 @@ export default function WorkspaceShell({
           <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-500/20">
             {tierName}
           </span>
+          {user && (
+            <button
+              type="button"
+              onClick={() => setShowAccountModal(true)}
+              className="w-7 h-7 rounded-full overflow-hidden bg-gradient-to-tr from-emerald-600 to-[#11140F] text-white flex items-center justify-center text-[11px] font-bold shrink-0 shadow-xs ring-1 ring-[#11140F]/10 dark:ring-white/10 cursor-pointer"
+              title="Account Settings"
+            >
+              {userAvatar ? (
+                <img src={userAvatar} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                userInitial
+              )}
+            </button>
+          )}
         </div>
       </div>
 
@@ -627,10 +658,14 @@ export default function WorkspaceShell({
                   <button
                     type="button"
                     onClick={() => setShowAccountModal(true)}
-                    className="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-600 to-[#11140F] text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-xs hover:ring-2 hover:ring-emerald-500/50 transition-all cursor-pointer"
+                    className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-tr from-emerald-600 to-[#11140F] text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-xs hover:ring-2 hover:ring-emerald-500/50 transition-all cursor-pointer"
                     title="Account Settings"
                   >
-                    {userInitial}
+                    {userAvatar ? (
+                      <img src={userAvatar} alt="Profile" className="w-full h-full object-cover" />
+                    ) : (
+                      userInitial
+                    )}
                   </button>
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5">
@@ -672,10 +707,14 @@ export default function WorkspaceShell({
                 <button
                   type="button"
                   onClick={() => setShowAccountModal(true)}
-                  className="w-9 h-9 rounded-full bg-gradient-to-tr from-emerald-600 to-[#11140F] text-white flex items-center justify-center text-xs font-bold hover:ring-2 hover:ring-emerald-500/50 transition-all cursor-pointer shadow-xs"
+                  className="w-9 h-9 rounded-full overflow-hidden bg-gradient-to-tr from-emerald-600 to-[#11140F] text-white flex items-center justify-center text-xs font-bold hover:ring-2 hover:ring-emerald-500/50 transition-all cursor-pointer shadow-xs"
                   title={`Signed in as ${userName} (${user.email}) - Account Settings`}
                 >
-                  {userInitial}
+                  {userAvatar ? (
+                    <img src={userAvatar} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    userInitial
+                  )}
                 </button>
                 <div className="flex flex-col items-center gap-1">
                   <button
@@ -812,13 +851,29 @@ export default function WorkspaceShell({
 
             {user && (
               <div className="pt-3 border-t border-[#11140F]/10 dark:border-white/10 flex items-center justify-between">
-                <div className="text-xs font-bold text-[#11140F] dark:text-white truncate">
-                  {userName}
-                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileDrawerOpen(false);
+                    setShowAccountModal(true);
+                  }}
+                  className="flex items-center gap-2 min-w-0 cursor-pointer text-left"
+                >
+                  <div className="w-7 h-7 rounded-full overflow-hidden bg-gradient-to-tr from-emerald-600 to-[#11140F] text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-xs">
+                    {userAvatar ? (
+                      <img src={userAvatar} alt="Profile" className="w-full h-full object-cover" />
+                    ) : (
+                      userInitial
+                    )}
+                  </div>
+                  <div className="text-xs font-bold text-[#11140F] dark:text-white truncate">
+                    {userName}
+                  </div>
+                </button>
                 <button
                   type="button"
                   onClick={() => signOut()}
-                  className="p-1 text-xs font-medium text-red-500 flex items-center gap-1"
+                  className="p-1 text-xs font-medium text-red-500 flex items-center gap-1 cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" />
                   <span>Log out</span>

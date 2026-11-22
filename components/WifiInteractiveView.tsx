@@ -12,6 +12,8 @@ export interface WifiProps {
   authType: string;
   welcomeMessage?: string;
   location?: string;
+  bannerUrl?: string;
+  logoUrl?: string;
   wifiQrString: string;
   showBranding: boolean;
 }
@@ -22,6 +24,8 @@ export default function WifiInteractiveView({
   authType = 'WPA',
   welcomeMessage,
   location,
+  bannerUrl,
+  logoUrl,
   wifiQrString,
   showBranding = true,
 }: WifiProps) {
@@ -40,15 +44,29 @@ export default function WifiInteractiveView({
       <div className="w-full max-w-md my-auto space-y-6">
         
         {/* Main Wi-Fi Card */}
-        <div className="bg-white rounded-lg border border-[#11140F]/10 p-6 sm:p-8 shadow-md space-y-6 relative overflow-hidden">
-          {/* Subtle Top Accent */}
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#2F6B4F]" />
+        <div className="bg-white rounded-2xl border border-[#11140F]/10 p-6 sm:p-8 shadow-md space-y-6 relative overflow-hidden">
+          {/* Banner Image */}
+          {bannerUrl ? (
+            <div className="-mx-6 -mt-6 sm:-mx-8 sm:-mt-8 mb-4 h-36 w-[calc(100%+3rem)] sm:w-[calc(100%+4rem)] overflow-hidden relative">
+              <img src={bannerUrl} alt={ssid} className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+            </div>
+          ) : (
+            /* Subtle Top Accent */
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#2F6B4F]" />
+          )}
 
           {/* Header */}
           <div className="text-center space-y-2 pt-2">
-            <div className="w-12 h-12 mx-auto rounded-md bg-[#11140F] text-[#34D399] flex items-center justify-center shadow-xs">
-              <Wifi className="w-6 h-6" />
-            </div>
+            {logoUrl ? (
+              <div className="w-14 h-14 mx-auto rounded-xl bg-white p-1.5 shadow-sm border border-[#11140F]/10 flex items-center justify-center">
+                <img src={logoUrl} alt={ssid} className="w-full h-full object-contain" />
+              </div>
+            ) : (
+              <div className="w-12 h-12 mx-auto rounded-xl bg-[#11140F] text-[#34D399] flex items-center justify-center shadow-xs">
+                <Wifi className="w-6 h-6" />
+              </div>
+            )}
 
             <div>
               <span className="text-[11px] font-mono uppercase tracking-wider text-[#2F6B4F] font-bold">

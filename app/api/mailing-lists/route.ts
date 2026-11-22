@@ -44,8 +44,23 @@ export async function GET(req: NextRequest) {
       },
     });
 
+    const listIds = lists.map((l) => `maillist_meta_${l.id}`);
+    const metaRecords = await prisma.aiCache.findMany({
+      where: { key: { in: listIds } },
+    }).catch(() => []);
+    const metaMap = new Map(metaRecords.map((r) => [r.key, (r.value as any) || {}]));
+
+    const enrichedLists = lists.map((l) => {
+      const meta = metaMap.get(`maillist_meta_${l.id}`) || {};
+      return {
+        ...l,
+        logoUrl: meta.logoUrl || null,
+        bannerUrl: meta.bannerUrl || null,
+      };
+    });
+
     return NextResponse.json({
-      lists,
+      lists: enrichedLists,
       quotas: {
         tier: entitlements.name,
         listsUsed: lists.length,
@@ -111,7 +126,28 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({ success: true, list: created });
+    if (body.logoUrl || body.bannerUrl) {
+      await prisma.aiCache.upsert({
+        where: { key: `maillist_meta_${created.id}` },
+        create: {
+          key: `maillist_meta_${created.id}`,
+          value: { logoUrl: body.logoUrl || null, bannerUrl: body.bannerUrl || null },
+          expiresAt: new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000),
+        },
+        update: {
+          value: { logoUrl: body.logoUrl || null, bannerUrl: body.bannerUrl || null },
+        },
+      }).catch(() => {});
+    }
+
+    return NextResponse.json({
+      success: true,
+      list: {
+        ...created,
+        logoUrl: body.logoUrl || null,
+        bannerUrl: body.bannerUrl || null,
+      },
+    });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || "Failed to create mailing list" }, { status: 500 });
   }

@@ -226,3 +226,44 @@ export async function deleteSelfAccount(confirmationText: string): Promise<{ suc
     return { error: err.message || 'Failed to delete account. Please try again.' };
   }
 }
+
+export async function updateUserProfileAvatar(avatarUrl: string): Promise<{ success: boolean; avatarUrl?: string; error?: string }> {
+  try {
+    const { getCurrentUser } = await import('@/lib/auth');
+    const user = await getCurrentUser();
+    if (!user) return { success: false, error: 'Not authenticated' };
+
+    // Store in AiCache key-value store in Postgres (zero schema migration required)
+    await prisma.aiCache.upsert({
+      where: { key: `user_avatar_${user.id}` },
+      create: {
+        key: `user_avatar_${user.id}`,
+        value: { avatarUrl },
+        expiresAt: new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000),
+      },
+      update: {
+        value: { avatarUrl },
+      },
+    });
+
+    revalidatePath('/');
+    return { success: true, avatarUrl };
+  } catch (err: any) {
+    return { success: false, error: err.message || 'Failed to update avatar' };
+  }
+}
+
+export async function getUserProfileAvatar(): Promise<string | null> {
+  try {
+    const { getCurrentUser } = await import('@/lib/auth');
+    const user = await getCurrentUser();
+    if (!user) return null;
+
+    const record = await prisma.aiCache.findUnique({
+      where: { key: `user_avatar_${user.id}` },
+    });
+    return (record?.value as any)?.avatarUrl || null;
+  } catch {
+    return null;
+  }
+}

@@ -1,7 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { deactivateSelfAccount, reactivateSelfAccount, deleteSelfAccount } from '@/app/auth-actions';
+import {
+  deactivateSelfAccount,
+  reactivateSelfAccount,
+  deleteSelfAccount,
+  updateUserProfileAvatar,
+  getUserProfileAvatar,
+} from '@/app/auth-actions';
+import ImageUploadField from './ImageUploadField';
 import {
   User,
   Shield,
@@ -54,9 +61,38 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
   // User experience preferences
   const [preferences, setPreferences] = useState<UserExperienceSettings>(() => getStoredPreferences());
 
+  // Profile avatar state
+  const [avatarUrl, setAvatarUrl] = useState<string>('');
+  const [avatarMsg, setAvatarMsg] = useState<string | null>(null);
+
   useEffect(() => {
     setPreferences(getStoredPreferences());
+    const cached = typeof window !== 'undefined' ? localStorage.getItem('dynamicqr_user_avatar') : null;
+    if (cached) setAvatarUrl(cached);
+
+    getUserProfileAvatar().then((url) => {
+      if (url) {
+        setAvatarUrl(url);
+        if (typeof window !== 'undefined') localStorage.setItem('dynamicqr_user_avatar', url);
+      }
+    });
   }, []);
+
+  const handleAvatarChange = async (newUrl: string) => {
+    setAvatarUrl(newUrl);
+    setAvatarMsg(null);
+    try {
+      await updateUserProfileAvatar(newUrl);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('dynamicqr_user_avatar', newUrl);
+        window.dispatchEvent(new CustomEvent('dynamicqr-avatar-change', { detail: { avatarUrl: newUrl } }));
+      }
+      setAvatarMsg('Profile photo updated!');
+      setTimeout(() => setAvatarMsg(null), 3000);
+    } catch {
+      setAvatarMsg('Failed to save avatar');
+    }
+  };
 
   const handleThemeChange = (newTheme: ThemeMode) => {
     const updated = saveStoredPreferences({ theme: newTheme });
@@ -436,6 +472,28 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
           {/* TAB 2: ACCOUNT OVERVIEW */}
           {activeTab === 'profile' && (
             <div className="space-y-4 text-[13px]">
+              {/* Profile Avatar Card */}
+              <div className="p-4 rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5] dark:bg-white/[0.04] space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wide text-[#11140F]/70 dark:text-emerald-400">
+                    Profile Avatar
+                  </span>
+                  {avatarMsg && (
+                    <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                      {avatarMsg}
+                    </span>
+                  )}
+                </div>
+                <ImageUploadField
+                  label="Profile Picture / Headshot"
+                  aspectRatio="avatar"
+                  value={avatarUrl}
+                  onChange={handleAvatarChange}
+                  recommendedDimensions="500x500 JPG/PNG/WebP"
+                  helpText="Displayed on your workspace badges, mobile header, and team card."
+                />
+              </div>
+
               <div className="p-4 rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5] dark:bg-white/[0.04] space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-[#11140F]/50 dark:text-[#D1D5DB]">Email Address:</span>

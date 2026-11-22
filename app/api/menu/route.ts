@@ -66,6 +66,8 @@ export async function POST(req: NextRequest) {
 
     const specPayload = {
       currency,
+      bannerUrl: body.bannerUrl || null,
+      logoUrl: body.logoUrl || null,
       sections: sections.length > 0 ? sections : [
         {
           name: "Starters & Appetizers",

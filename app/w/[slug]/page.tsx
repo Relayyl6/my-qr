@@ -56,6 +56,8 @@ export default async function WifiPublicPage({
       authType={spec.authType || 'WPA'}
       welcomeMessage={spec.welcomeMessage}
       location={spec.location}
+      bannerUrl={spec.bannerUrl || ''}
+      logoUrl={spec.logoUrl || ''}
       wifiQrString={spec.wifiQrString || `WIFI:T:${spec.authType || 'WPA'};S:${spec.ssid || item.title};P:${spec.password || ''};;`}
       showBranding={spec.showBranding !== false}
     />

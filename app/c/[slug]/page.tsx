@@ -63,6 +63,9 @@ export default async function VCardPublicPage({
       theme={spec.theme || 'minimal_dark'}
       accentColor={spec.accentColor}
       showBranding={spec.showBranding !== false}
+      avatarUrl={spec.avatarUrl || ''}
+      logoUrl={spec.logoUrl || ''}
+      bannerUrl={spec.bannerUrl || ''}
       socials={{
         linkedin: spec.linkedin,
         twitter: spec.twitter,

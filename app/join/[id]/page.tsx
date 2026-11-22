@@ -46,6 +46,11 @@ export default async function CustomerJoinPage({
 
   const isFree = !list.user?.tier || list.user.tier.toLowerCase() === 'free';
 
+  const metaRecord = await prisma.aiCache.findUnique({
+    where: { key: `maillist_meta_${list.id}` },
+  }).catch(() => null);
+  const meta = (metaRecord?.value as any) || {};
+
   return (
     <CustomerJoinView
       listId={list.id}
@@ -55,6 +60,8 @@ export default async function CustomerJoinPage({
       headline={list.headline}
       ctaText={list.ctaText}
       successMessage={list.successMessage}
+      logoUrl={meta.logoUrl || null}
+      bannerUrl={meta.bannerUrl || null}
       doubleOptIn={list.doubleOptIn}
       showBranding={isFree}
     />

@@ -77,6 +77,8 @@ export async function POST(req: NextRequest) {
       isHidden,
       location: location || null,
       welcomeMessage: welcomeMessage || "Welcome! Scan or copy password below to connect to guest Wi-Fi.",
+      bannerUrl: body.bannerUrl || null,
+      logoUrl: body.logoUrl || null,
       wifiQrString,
       showBranding: entitlements.branded_footer,
     };

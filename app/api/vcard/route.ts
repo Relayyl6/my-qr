@@ -89,6 +89,8 @@ export async function POST(req: NextRequest) {
       twitter: twitter || "",
       instagram: instagram || "",
       avatarUrl: body.avatarUrl || null,
+      logoUrl: body.logoUrl || null,
+      bannerUrl: body.bannerUrl || null,
       showBranding: entitlements.branded_footer,
     };
 

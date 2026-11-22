@@ -48,6 +48,7 @@ import {
 import Link from 'next/link';
 import PrintTemplateModal from './PrintTemplateModal';
 import ConfirmModal from './ConfirmModal';
+import ImageUploadField from './ImageUploadField';
 import { APP_URL } from '@/lib/config';
 
 interface MailingList {
@@ -58,6 +59,8 @@ interface MailingList {
   headline?: string | null;
   ctaText?: string | null;
   successMessage?: string | null;
+  logoUrl?: string | null;
+  bannerUrl?: string | null;
   createdAt: string;
   _count: {
     contacts: number;
@@ -192,6 +195,8 @@ export default function CustomerMailingListManager({
   const [newListHeadline, setNewListHeadline] = useState('');
   const [newListCta, setNewListCta] = useState('Subscribe to Updates');
   const [newListSuccessMsg, setNewListSuccessMsg] = useState('');
+  const [newListLogo, setNewListLogo] = useState('');
+  const [newListBanner, setNewListBanner] = useState('');
   const [creatingList, setCreatingList] = useState(false);
 
   const [showEditListModal, setShowEditListModal] = useState(false);
@@ -201,6 +206,8 @@ export default function CustomerMailingListManager({
   const [editListHeadline, setEditListHeadline] = useState('');
   const [editListCta, setEditListCta] = useState('');
   const [editListSuccessMsg, setEditListSuccessMsg] = useState('');
+  const [editListLogo, setEditListLogo] = useState('');
+  const [editListBanner, setEditListBanner] = useState('');
   const [updatingList, setUpdatingList] = useState(false);
   const [deletingList, setDeletingList] = useState(false);
 
@@ -355,6 +362,8 @@ export default function CustomerMailingListManager({
           headline: newListHeadline.trim(),
           ctaText: newListCta.trim(),
           successMessage: newListSuccessMsg.trim(),
+          logoUrl: newListLogo.trim(),
+          bannerUrl: newListBanner.trim(),
         }),
       });
       const data = await res.json();
@@ -366,6 +375,8 @@ export default function CustomerMailingListManager({
         setNewListHeadline('');
         setNewListCta('Subscribe to Updates');
         setNewListSuccessMsg('');
+        setNewListLogo('');
+        setNewListBanner('');
         setFeedback({ type: 'success', message: 'Mailing list created successfully!' });
         await loadLists();
         setSelectedListId(data.list.id);
@@ -388,6 +399,8 @@ export default function CustomerMailingListManager({
     setEditListHeadline(selectedList.headline || '');
     setEditListCta(selectedList.ctaText || 'Subscribe to Updates');
     setEditListSuccessMsg(selectedList.successMessage || '');
+    setEditListLogo(selectedList.logoUrl || '');
+    setEditListBanner(selectedList.bannerUrl || '');
     setShowEditListModal(true);
   };
 
@@ -408,6 +421,8 @@ export default function CustomerMailingListManager({
           headline: editListHeadline.trim(),
           ctaText: editListCta.trim(),
           successMessage: editListSuccessMsg.trim(),
+          logoUrl: editListLogo.trim(),
+          bannerUrl: editListBanner.trim(),
         }),
       });
       const data = await res.json();
@@ -1449,6 +1464,22 @@ export default function CustomerMailingListManager({
                 />
               </div>
 
+              {/* Brand Logo & Hero Banner */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <ImageUploadField
+                  value={newListLogo}
+                  onChange={setNewListLogo}
+                  label="Brand / Venue Logo"
+                  variant="logo"
+                />
+                <ImageUploadField
+                  value={newListBanner}
+                  onChange={setNewListBanner}
+                  label="Hero Cover Banner"
+                  variant="banner"
+                />
+              </div>
+
               <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#11140F]/10">
                 <button
                   type="button"
@@ -1563,6 +1594,22 @@ export default function CustomerMailingListManager({
                   onChange={(e) => setEditListSuccessMsg(e.target.value)}
                   placeholder="e.g. You're on the list! Show this screen to your server for 10% off today."
                   className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                />
+              </div>
+
+              {/* Brand Logo & Hero Banner */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <ImageUploadField
+                  value={editListLogo}
+                  onChange={setEditListLogo}
+                  label="Brand / Venue Logo"
+                  variant="logo"
+                />
+                <ImageUploadField
+                  value={editListBanner}
+                  onChange={setEditListBanner}
+                  label="Hero Cover Banner"
+                  variant="banner"
                 />
               </div>
 

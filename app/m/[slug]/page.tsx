@@ -52,6 +52,8 @@ export default async function MenuPublicPage({
       title={item.title}
       currency={spec.currency || '$'}
       sections={spec.sections || []}
+      bannerUrl={spec.bannerUrl || ''}
+      logoUrl={spec.logoUrl || ''}
       showBranding={spec.showBranding !== false}
     />
   );

@@ -13,6 +13,8 @@ interface CustomerJoinViewProps {
   headline?: string | null;
   ctaText?: string | null;
   successMessage?: string | null;
+  logoUrl?: string | null;
+  bannerUrl?: string | null;
   doubleOptIn: boolean;
   showBranding?: boolean;
 }
@@ -25,6 +27,8 @@ export default function CustomerJoinView({
   headline,
   ctaText,
   successMessage,
+  logoUrl,
+  bannerUrl,
   doubleOptIn,
   showBranding = true,
 }: CustomerJoinViewProps) {
@@ -73,7 +77,13 @@ export default function CustomerJoinView({
 
       <div className="relative z-10 max-w-md w-full mx-auto my-auto py-8">
         {/* Card Box */}
-        <div className="rounded-lg border border-white/10 bg-[#0E110C]/90 backdrop-blur-xl p-6 sm:p-8 shadow-md space-y-6">
+        <div className="rounded-2xl border border-white/10 bg-[#0E110C]/90 backdrop-blur-xl p-6 sm:p-8 shadow-2xl space-y-6 relative overflow-hidden">
+          {bannerUrl && (
+            <div className="-mx-6 -mt-6 sm:-mx-8 sm:-mt-8 mb-4 h-32 w-[calc(100%+3rem)] sm:w-[calc(100%+4rem)] overflow-hidden relative">
+              <img src={bannerUrl} alt={listName} className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0E110C] via-transparent to-transparent" />
+            </div>
+          )}
           
           {submitted ? (
             /* Success State */
@@ -118,10 +128,17 @@ export default function CustomerJoinView({
             /* Subscription Form */
             <div className="space-y-6">
               {/* Header */}
-              <div className="space-y-2 text-center sm:text-left">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[#34D399] font-mono text-[11px] font-semibold tracking-wider uppercase">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>{badgeText || 'Subscriber Form'}</span>
+              <div className="space-y-3 text-center sm:text-left">
+                {logoUrl && (
+                  <div className="w-14 h-14 rounded-2xl bg-white p-2 border border-white/20 shadow-md inline-flex items-center justify-center">
+                    <img src={logoUrl} alt={listName} className="w-full h-full object-contain" />
+                  </div>
+                )}
+                <div className="block">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[#34D399] font-mono text-[11px] font-semibold tracking-wider uppercase">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>{badgeText || 'Subscriber Form'}</span>
+                  </div>
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white leading-tight">
                   {headline || listName}

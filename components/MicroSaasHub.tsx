@@ -25,11 +25,15 @@ import {
   Share2,
   Pencil,
   Printer,
+  Users,
+  FileSpreadsheet,
+  Download,
 } from 'lucide-react';
 import CustomerMailingListManager from '@/components/CustomerMailingListManager';
 import { PlanTier, PLANS } from '@/lib/plans';
 import PrintTemplateModal from '@/components/PrintTemplateModal';
 import ConfirmModal from '@/components/ConfirmModal';
+import ImageUploadField from '@/components/ImageUploadField';
 import { APP_URL } from '@/lib/config';
 
 interface MicroSaasHubProps {
@@ -94,6 +98,7 @@ export default function MicroSaasHub({
   const [printMenu, setPrintMenu] = useState<MicroItem | null>(null);
   const [printWifi, setPrintWifi] = useState<MicroItem | null>(null);
   const [deleteConfirmTarget, setDeleteConfirmTarget] = useState<{ id: string; title: string } | null>(null);
+  const [leadsModalCard, setLeadsModalCard] = useState<MicroItem | null>(null);
 
   // Edit form states
   const [editVcardForm, setEditVcardForm] = useState({
@@ -105,6 +110,9 @@ export default function MicroSaasHub({
     email: '',
     website: '',
     bio: '',
+    avatarUrl: '',
+    logoUrl: '',
+    bannerUrl: '',
   });
 
   const [editShortenerForm, setEditShortenerForm] = useState({
@@ -115,11 +123,15 @@ export default function MicroSaasHub({
     utmCampaign: '',
     iosUrl: '',
     androidUrl: '',
+    avatarUrl: '',
+    bannerUrl: '',
   });
 
   const [editMenuForm, setEditMenuForm] = useState<{
     title: string;
     currency: string;
+    bannerUrl?: string;
+    logoUrl?: string;
     sections: {
       name: string;
       items: {
@@ -128,11 +140,14 @@ export default function MicroSaasHub({
         description: string;
         price: string;
         isSoldOut: boolean;
+        imageUrl?: string;
       }[];
     }[];
   }>({
     title: '',
     currency: '$',
+    bannerUrl: '',
+    logoUrl: '',
     sections: [],
   });
 
@@ -143,6 +158,8 @@ export default function MicroSaasHub({
     isHidden: false,
     location: '',
     welcomeMessage: '',
+    bannerUrl: '',
+    logoUrl: '',
   });
 
   // Form states
@@ -156,6 +173,9 @@ export default function MicroSaasHub({
     website: '',
     bio: '',
     slug: '',
+    avatarUrl: '',
+    logoUrl: '',
+    bannerUrl: '',
   });
 
   const [shortenerForm, setShortenerForm] = useState({
@@ -167,12 +187,16 @@ export default function MicroSaasHub({
     utmCampaign: '',
     iosUrl: '',
     androidUrl: '',
+    avatarUrl: '',
+    bannerUrl: '',
   });
 
   const [menuForm, setMenuForm] = useState({
     title: '',
     currency: '$',
     slug: '',
+    bannerUrl: '',
+    logoUrl: '',
   });
 
   const [wifiForm, setWifiForm] = useState({
@@ -182,7 +206,28 @@ export default function MicroSaasHub({
     location: '',
     welcomeMessage: '',
     slug: '',
+    bannerUrl: '',
+    logoUrl: '',
   });
+
+  const exportLeadsCsv = (card: MicroItem) => {
+    const leads = Array.isArray(card.spec?.leads) ? card.spec.leads : [];
+    const headers = ['Full Name', 'Email', 'Phone', 'Exchanged At'];
+    const rows = leads.map((l: any) => [
+      `"${(l.fullName || '').replace(/"/g, '""')}"`,
+      `"${(l.email || '').replace(/"/g, '""')}"`,
+      `"${(l.phone || '').replace(/"/g, '""')}"`,
+      `"${new Date(l.createdAt || Date.now()).toLocaleString()}"`,
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r: any) => r.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `${card.slug || 'vcard'}-exchanged-leads.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const normalizedTier = (userTier || 'free').toLowerCase() as PlanTier;
   const entitlements = PLANS[normalizedTier] || PLANS.free;
@@ -260,7 +305,7 @@ export default function MicroSaasHub({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to create digital vCard');
       setShowVCardModal(false);
-      setVcardForm({ firstName: '', lastName: '', title: '', company: '', phone: '', email: '', website: '', bio: '', slug: '' });
+      setVcardForm({ firstName: '', lastName: '', title: '', company: '', phone: '', email: '', website: '', bio: '', slug: '', avatarUrl: '', logoUrl: '', bannerUrl: '' });
       setSuccessMsg('Digital vCard created successfully!');
       setTimeout(() => setSuccessMsg(null), 3000);
       fetchItems();
@@ -284,7 +329,7 @@ export default function MicroSaasHub({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to create short link');
       setShowShortenerModal(false);
-      setShortenerForm({ title: '', destinationUrl: '', slug: '', utmSource: '', utmMedium: '', utmCampaign: '', iosUrl: '', androidUrl: '' });
+      setShortenerForm({ title: '', destinationUrl: '', slug: '', utmSource: '', utmMedium: '', utmCampaign: '', iosUrl: '', androidUrl: '', avatarUrl: '', bannerUrl: '' });
       setSuccessMsg('Short link generated successfully!');
       setTimeout(() => setSuccessMsg(null), 3000);
       fetchItems();
@@ -308,7 +353,7 @@ export default function MicroSaasHub({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to create digital menu');
       setShowMenuModal(false);
-      setMenuForm({ title: '', currency: '$', slug: '' });
+      setMenuForm({ title: '', currency: '$', slug: '', bannerUrl: '', logoUrl: '' });
       setSuccessMsg('Contactless restaurant menu created successfully!');
       setTimeout(() => setSuccessMsg(null), 3000);
       fetchItems();
@@ -332,7 +377,7 @@ export default function MicroSaasHub({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to create Wi-Fi network QR');
       setShowWifiModal(false);
-      setWifiForm({ ssid: '', password: '', authType: 'WPA', location: '', welcomeMessage: '', slug: '' });
+      setWifiForm({ ssid: '', password: '', authType: 'WPA', location: '', welcomeMessage: '', slug: '', bannerUrl: '', logoUrl: '' });
       setSuccessMsg('Wi-Fi access card created successfully!');
       setTimeout(() => setSuccessMsg(null), 3000);
       fetchItems();
@@ -358,6 +403,9 @@ export default function MicroSaasHub({
       email: spec.email || '',
       website: spec.website || '',
       bio: spec.bio || '',
+      avatarUrl: spec.avatarUrl || '',
+      logoUrl: spec.logoUrl || '',
+      bannerUrl: spec.bannerUrl || '',
     });
     setShowEditModal('vcard');
   };
@@ -404,6 +452,8 @@ export default function MicroSaasHub({
       utmCampaign: spec.utmCampaign || '',
       iosUrl: spec.iosUrl || '',
       androidUrl: spec.androidUrl || '',
+      avatarUrl: spec.avatarUrl || '',
+      bannerUrl: spec.bannerUrl || '',
     });
     setShowEditModal('shortener');
   };
@@ -445,6 +495,8 @@ export default function MicroSaasHub({
     setEditMenuForm({
       title: item.title || '',
       currency: spec.currency || '$',
+      bannerUrl: spec.bannerUrl || '',
+      logoUrl: spec.logoUrl || '',
       sections: spec.sections ? JSON.parse(JSON.stringify(spec.sections)) : [],
     });
     setShowEditModal('menu');
@@ -458,6 +510,7 @@ export default function MicroSaasHub({
       description: 'Fresh ingredients',
       price: '15',
       isSoldOut: false,
+      imageUrl: '',
     });
     setEditMenuForm({ ...editMenuForm, sections: updated });
   };
@@ -507,6 +560,8 @@ export default function MicroSaasHub({
           spec: {
             ...editingItem.spec,
             currency: editMenuForm.currency,
+            bannerUrl: editMenuForm.bannerUrl,
+            logoUrl: editMenuForm.logoUrl,
             sections: editMenuForm.sections,
           },
         }),
@@ -535,6 +590,8 @@ export default function MicroSaasHub({
       isHidden: Boolean(spec.isHidden),
       location: spec.location || '',
       welcomeMessage: spec.welcomeMessage || '',
+      bannerUrl: spec.bannerUrl || '',
+      logoUrl: spec.logoUrl || '',
     });
     setShowEditModal('wifi');
   };
@@ -697,11 +754,26 @@ export default function MicroSaasHub({
                   >
                     <div className="space-y-3">
                       <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <h4 className="text-sm font-bold text-[#11140F]">{card.title}</h4>
-                          <p className="text-xs text-[#2F6B4F] font-medium">{spec.title || 'Professional'} {spec.company ? `• ${spec.company}` : ''}</p>
+                        <div className="flex items-center gap-3 min-w-0">
+                          {spec.avatarUrl ? (
+                            <img
+                              src={spec.avatarUrl}
+                              alt={card.title}
+                              className="w-10 h-10 rounded-full object-cover border-2 border-emerald-500/20 shadow-2xs shrink-0"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-emerald-700 to-[#11140F] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+                              {card.title.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <h4 className="text-sm font-bold text-[#11140F] truncate">{card.title}</h4>
+                            <p className="text-xs text-[#2F6B4F] font-medium truncate">
+                              {spec.title || 'Professional'} {spec.company ? `• ${spec.company}` : ''}
+                            </p>
+                          </div>
                         </div>
-                        <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
                           {card.scansCount} scans
                         </span>
                       </div>
@@ -709,6 +781,29 @@ export default function MicroSaasHub({
                       <div className="space-y-1 text-xs text-[#11140F]/70">
                         {spec.email && <div className="truncate">📧 {spec.email}</div>}
                         {spec.phone && <div className="truncate">📞 {spec.phone}</div>}
+                        
+                        {/* Exchanged Leads Button / Counter */}
+                        {Array.isArray(spec.leads) && spec.leads.length > 0 ? (
+                          <button
+                            type="button"
+                            onClick={() => setLeadsModalCard(card)}
+                            className="w-full mt-2 py-1.5 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100/80 text-emerald-800 text-xs font-semibold border border-emerald-200/80 transition-colors flex items-center justify-between cursor-pointer group"
+                          >
+                            <span className="flex items-center gap-1.5">
+                              <Users className="w-3.5 h-3.5 text-emerald-600" />
+                              <span>{spec.leads.length} Contact{spec.leads.length === 1 ? '' : 's'} Exchanged</span>
+                            </span>
+                            <span className="text-[10px] font-mono font-bold text-emerald-700 group-hover:translate-x-0.5 transition-transform">
+                              View Leads →
+                            </span>
+                          </button>
+                        ) : (
+                          <div className="pt-1 flex items-center gap-1.5 text-[11px] text-[#11140F]/45">
+                            <Users className="w-3 h-3 text-[#11140F]/40" />
+                            <span>0 contacts exchanged yet</span>
+                          </div>
+                        )}
+
                         <div className="flex items-center gap-1.5 pt-1 flex-wrap">
                           {entitlements.branded_footer ? (
                             <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 font-mono">
@@ -1415,6 +1510,33 @@ export default function MicroSaasHub({
                 </div>
               </div>
 
+              {/* Media & Image Uploads */}
+              <div className="pt-2 border-t border-[#11140F]/10 space-y-3">
+                <span className="text-[11px] font-bold text-[#11140F] uppercase tracking-wider block">
+                  Media & Visual Branding (Optional)
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <ImageUploadField
+                    label="Profile Photo / Headshot"
+                    value={vcardForm.avatarUrl}
+                    onChange={(url) => setVcardForm({ ...vcardForm, avatarUrl: url })}
+                    variant="avatar"
+                  />
+                  <ImageUploadField
+                    label="Company / Brand Logo"
+                    value={vcardForm.logoUrl}
+                    onChange={(url) => setVcardForm({ ...vcardForm, logoUrl: url })}
+                    variant="logo"
+                  />
+                </div>
+                <ImageUploadField
+                  label="Cover Header Banner"
+                  value={vcardForm.bannerUrl}
+                  onChange={(url) => setVcardForm({ ...vcardForm, bannerUrl: url })}
+                  variant="banner"
+                />
+              </div>
+
               <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10">
                 <button
                   type="button"
@@ -1546,6 +1668,27 @@ export default function MicroSaasHub({
                 </div>
               </div>
 
+              {/* Profile & Header Banner */}
+              <div className="pt-2 border-t border-[#11140F]/10 space-y-3">
+                <span className="text-[11px] font-bold text-[#11140F] uppercase tracking-wider block">
+                  Profile & Header Branding (Optional)
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <ImageUploadField
+                    label="Profile / Brand Icon"
+                    value={shortenerForm.avatarUrl}
+                    onChange={(url) => setShortenerForm({ ...shortenerForm, avatarUrl: url })}
+                    variant="avatar"
+                  />
+                  <ImageUploadField
+                    label="Header Banner"
+                    value={shortenerForm.bannerUrl}
+                    onChange={(url) => setShortenerForm({ ...shortenerForm, bannerUrl: url })}
+                    variant="banner"
+                  />
+                </div>
+              </div>
+
               <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10">
                 <button
                   type="button"
@@ -1633,6 +1776,27 @@ export default function MicroSaasHub({
               <p className="text-[11px] text-[#11140F]/60 bg-[#F7F8F5] p-3 rounded-xl border border-[#11140F]/5">
                 ✨ Includes pre-configured sample sections (Starters, Mains, Drinks) with vegetarian, gluten-free, and spicy badges. You can immediately preview or customize the live menu.
               </p>
+
+              {/* Restaurant Branding Images */}
+              <div className="pt-2 border-t border-[#11140F]/10 space-y-3">
+                <span className="text-[11px] font-bold text-[#11140F] uppercase tracking-wider block">
+                  Restaurant Visual Branding (Optional)
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <ImageUploadField
+                    label="Restaurant Logo / Badge"
+                    value={menuForm.logoUrl}
+                    onChange={(url) => setMenuForm({ ...menuForm, logoUrl: url })}
+                    variant="logo"
+                  />
+                  <ImageUploadField
+                    label="Hero Cover Banner"
+                    value={menuForm.bannerUrl}
+                    onChange={(url) => setMenuForm({ ...menuForm, bannerUrl: url })}
+                    variant="banner"
+                  />
+                </div>
+              </div>
 
               <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10">
                 <button
@@ -1732,6 +1896,27 @@ export default function MicroSaasHub({
                     onChange={(e) => setWifiForm({ ...wifiForm, slug: e.target.value })}
                     placeholder="guest-lounge"
                     className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                  />
+                </div>
+              </div>
+
+              {/* Wi-Fi Venue Branding Images */}
+              <div className="pt-2 border-t border-[#11140F]/10 space-y-3">
+                <span className="text-[11px] font-bold text-[#11140F] uppercase tracking-wider block">
+                  Venue Visual Branding (Optional)
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <ImageUploadField
+                    label="Venue Logo / Badge"
+                    value={wifiForm.logoUrl}
+                    onChange={(url) => setWifiForm({ ...wifiForm, logoUrl: url })}
+                    variant="logo"
+                  />
+                  <ImageUploadField
+                    label="Welcome Cover Banner"
+                    value={wifiForm.bannerUrl}
+                    onChange={(url) => setWifiForm({ ...wifiForm, bannerUrl: url })}
+                    variant="banner"
                   />
                 </div>
               </div>
@@ -1861,6 +2046,33 @@ export default function MicroSaasHub({
                 />
               </div>
 
+              {/* Media & Image Uploads */}
+              <div className="pt-2 border-t border-[#11140F]/10 space-y-3">
+                <span className="text-[11px] font-bold text-[#11140F] uppercase tracking-wider block">
+                  Media & Visual Branding
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <ImageUploadField
+                    label="Profile Photo / Headshot"
+                    value={editVcardForm.avatarUrl}
+                    onChange={(url) => setEditVcardForm({ ...editVcardForm, avatarUrl: url })}
+                    variant="avatar"
+                  />
+                  <ImageUploadField
+                    label="Company / Brand Logo"
+                    value={editVcardForm.logoUrl}
+                    onChange={(url) => setEditVcardForm({ ...editVcardForm, logoUrl: url })}
+                    variant="logo"
+                  />
+                </div>
+                <ImageUploadField
+                  label="Cover Header Banner"
+                  value={editVcardForm.bannerUrl}
+                  onChange={(url) => setEditVcardForm({ ...editVcardForm, bannerUrl: url })}
+                  variant="banner"
+                />
+              </div>
+
               <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10">
                 <button
                   type="button"
@@ -1973,6 +2185,27 @@ export default function MicroSaasHub({
                 </div>
               </div>
 
+              {/* Profile & Header Banner */}
+              <div className="pt-2 border-t border-[#11140F]/10 space-y-3">
+                <span className="text-[11px] font-bold text-[#11140F] uppercase tracking-wider block">
+                  Profile & Header Branding
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <ImageUploadField
+                    label="Profile / Brand Icon"
+                    value={editShortenerForm.avatarUrl}
+                    onChange={(url) => setEditShortenerForm({ ...editShortenerForm, avatarUrl: url })}
+                    variant="avatar"
+                  />
+                  <ImageUploadField
+                    label="Header Banner"
+                    value={editShortenerForm.bannerUrl}
+                    onChange={(url) => setEditShortenerForm({ ...editShortenerForm, bannerUrl: url })}
+                    variant="banner"
+                  />
+                </div>
+              </div>
+
               <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10">
                 <button
                   type="button"
@@ -2040,6 +2273,22 @@ export default function MicroSaasHub({
                 </div>
               </div>
 
+              {/* Restaurant Branding Images */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <ImageUploadField
+                  label="Restaurant Logo / Badge"
+                  value={editMenuForm.logoUrl}
+                  onChange={(url) => setEditMenuForm({ ...editMenuForm, logoUrl: url })}
+                  variant="logo"
+                />
+                <ImageUploadField
+                  label="Hero Cover Banner"
+                  value={editMenuForm.bannerUrl}
+                  onChange={(url) => setEditMenuForm({ ...editMenuForm, bannerUrl: url })}
+                  variant="banner"
+                />
+              </div>
+
               {/* Sections & Items Management */}
               <div className="space-y-4 pt-1">
                 <div className="flex items-center justify-between">
@@ -2094,64 +2343,80 @@ export default function MicroSaasHub({
                       {section.items.map((dish, dIdx) => (
                         <div
                           key={dish.id || dIdx}
-                          className="p-2.5 bg-white rounded-xl border border-[#11140F]/8 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                          className="p-3 bg-white rounded-xl border border-[#11140F]/8 space-y-2.5"
                         >
-                          <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2">
-                            <input
-                              type="text"
-                              value={dish.title}
-                              onChange={(e) => {
-                                const updated = [...editMenuForm.sections];
-                                updated[sIdx].items[dIdx].title = e.target.value;
-                                setEditMenuForm({ ...editMenuForm, sections: updated });
-                              }}
-                              placeholder="Dish name"
-                              className="text-xs font-semibold px-2 py-1 rounded border border-[#11140F]/10"
-                            />
-                            <input
-                              type="text"
-                              value={dish.price}
-                              onChange={(e) => {
-                                const updated = [...editMenuForm.sections];
-                                updated[sIdx].items[dIdx].price = e.target.value;
-                                setEditMenuForm({ ...editMenuForm, sections: updated });
-                              }}
-                              placeholder="Price"
-                              className="text-xs px-2 py-1 rounded border border-[#11140F]/10 font-mono"
-                            />
-                            <input
-                              type="text"
-                              value={dish.description}
-                              onChange={(e) => {
-                                const updated = [...editMenuForm.sections];
-                                updated[sIdx].items[dIdx].description = e.target.value;
-                                setEditMenuForm({ ...editMenuForm, sections: updated });
-                              }}
-                              placeholder="Description"
-                              className="text-xs px-2 py-1 rounded border border-[#11140F]/10 text-gray-600"
-                            />
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                              <input
+                                type="text"
+                                value={dish.title}
+                                onChange={(e) => {
+                                  const updated = [...editMenuForm.sections];
+                                  updated[sIdx].items[dIdx].title = e.target.value;
+                                  setEditMenuForm({ ...editMenuForm, sections: updated });
+                                }}
+                                placeholder="Dish name"
+                                className="text-xs font-semibold px-2 py-1 rounded border border-[#11140F]/10"
+                              />
+                              <input
+                                type="text"
+                                value={dish.price}
+                                onChange={(e) => {
+                                  const updated = [...editMenuForm.sections];
+                                  updated[sIdx].items[dIdx].price = e.target.value;
+                                  setEditMenuForm({ ...editMenuForm, sections: updated });
+                                }}
+                                placeholder="Price"
+                                className="text-xs px-2 py-1 rounded border border-[#11140F]/10 font-mono"
+                              />
+                              <input
+                                type="text"
+                                value={dish.description}
+                                onChange={(e) => {
+                                  const updated = [...editMenuForm.sections];
+                                  updated[sIdx].items[dIdx].description = e.target.value;
+                                  setEditMenuForm({ ...editMenuForm, sections: updated });
+                                }}
+                                placeholder="Description"
+                                className="text-xs px-2 py-1 rounded border border-[#11140F]/10 text-gray-600"
+                              />
+                            </div>
+
+                            <div className="flex items-center gap-2 shrink-0">
+                              <label className="flex items-center gap-1 text-[11px] font-mono cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={dish.isSoldOut}
+                                  onChange={() => handleToggleSoldOut(sIdx, dIdx)}
+                                  className="rounded text-red-600 cursor-pointer"
+                                />
+                                <span className={dish.isSoldOut ? 'text-red-600 font-bold' : 'text-gray-500'}>
+                                  {dish.isSoldOut ? 'Sold Out' : 'Available'}
+                                </span>
+                              </label>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveDish(sIdx, dIdx)}
+                                className="p-1 text-red-400 hover:text-red-700 cursor-pointer"
+                                title="Delete Dish"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
                           </div>
 
-                          <div className="flex items-center gap-2 shrink-0">
-                            <label className="flex items-center gap-1 text-[11px] font-mono cursor-pointer">
-                              <input
-                                type="checkbox"
-                                checked={dish.isSoldOut}
-                                onChange={() => handleToggleSoldOut(sIdx, dIdx)}
-                                className="rounded text-red-600 cursor-pointer"
-                              />
-                              <span className={dish.isSoldOut ? 'text-red-600 font-bold' : 'text-gray-500'}>
-                                {dish.isSoldOut ? 'Sold Out' : 'Available'}
-                              </span>
-                            </label>
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveDish(sIdx, dIdx)}
-                              className="p-1 text-red-400 hover:text-red-700 cursor-pointer"
-                              title="Delete Dish"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
+                          {/* Dish Photo Uploader */}
+                          <div className="pt-2 border-t border-gray-100">
+                            <ImageUploadField
+                              label={`Dish Photo (${dish.title || 'Item'})`}
+                              value={dish.imageUrl || ''}
+                              onChange={(url) => {
+                                const updated = [...editMenuForm.sections];
+                                updated[sIdx].items[dIdx].imageUrl = url;
+                                setEditMenuForm({ ...editMenuForm, sections: updated });
+                              }}
+                              variant="dish"
+                            />
                           </div>
                         </div>
                       ))}
@@ -2256,6 +2521,27 @@ export default function MicroSaasHub({
                   placeholder="Welcome message displayed on mobile"
                   className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
                 />
+              </div>
+
+              {/* Wi-Fi Venue Branding Images */}
+              <div className="pt-2 border-t border-[#11140F]/10 space-y-3">
+                <span className="text-[11px] font-bold text-[#11140F] uppercase tracking-wider block">
+                  Venue Visual Branding
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <ImageUploadField
+                    label="Venue Logo / Badge"
+                    value={editWifiForm.logoUrl}
+                    onChange={(url) => setEditWifiForm({ ...editWifiForm, logoUrl: url })}
+                    variant="logo"
+                  />
+                  <ImageUploadField
+                    label="Welcome Cover Banner"
+                    value={editWifiForm.bannerUrl}
+                    onChange={(url) => setEditWifiForm({ ...editWifiForm, bannerUrl: url })}
+                    variant="banner"
+                  />
+                </div>
               </div>
 
               <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10">
@@ -2368,6 +2654,108 @@ export default function MicroSaasHub({
         isDestructive={true}
         loading={actionLoading}
       />
+
+      {/* VCARD EXCHANGED LEADS MODAL */}
+      {leadsModalCard && (
+        <div className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl border border-[#11140F]/10 shadow-2xl max-w-xl w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between border-b border-[#11140F]/10 pb-4 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-center">
+                  <Users className="w-5 h-5 text-emerald-600" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-[#11140F]">
+                    Exchanged Contacts & Leads
+                  </h3>
+                  <p className="text-xs text-[#11140F]/60">
+                    Contacts captured via &ldquo;{leadsModalCard.title}&rdquo; (/c/{leadsModalCard.slug})
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setLeadsModalCard(null)}
+                className="text-[#11140F]/50 hover:text-[#11140F] text-sm font-bold p-1 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-3">
+              {Array.isArray(leadsModalCard.spec?.leads) && leadsModalCard.spec.leads.length > 0 ? (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between pb-1">
+                    <span className="text-xs font-semibold text-[#11140F]">
+                      {leadsModalCard.spec.leads.length} Contact{leadsModalCard.spec.leads.length === 1 ? '' : 's'} Captured
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => exportLeadsCsv(leadsModalCard)}
+                      className="px-3 py-1.5 rounded-xl bg-[#11140F] hover:bg-[#2A2E25] text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Export CSV</span>
+                    </button>
+                  </div>
+
+                  <div className="divide-y divide-gray-100 border border-gray-200 rounded-2xl overflow-hidden">
+                    {leadsModalCard.spec.leads.map((lead: any, idx: number) => (
+                      <div key={idx} className="p-3.5 bg-white hover:bg-gray-50/80 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div className="space-y-0.5">
+                          <div className="text-xs font-bold text-[#11140F] flex items-center gap-2">
+                            <span>{lead.fullName}</span>
+                            <span className="text-[10px] font-mono text-gray-400 font-normal">
+                              {new Date(lead.createdAt || Date.now()).toLocaleDateString(undefined, {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </span>
+                          </div>
+                          <div className="text-xs text-gray-600 flex items-center gap-3 flex-wrap">
+                            <span>📧 {lead.email}</span>
+                            {lead.phone && <span>📞 {lead.phone}</span>}
+                          </div>
+                        </div>
+                        <a
+                          href={`mailto:${lead.email}?subject=Nice to connect!`}
+                          className="px-2.5 py-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg shrink-0 self-start sm:self-auto"
+                        >
+                          Send Email
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="py-12 text-center border-2 border-dashed border-[#11140F]/10 rounded-2xl p-6 space-y-2">
+                  <Users className="w-8 h-8 mx-auto text-[#11140F]/30" />
+                  <div className="text-xs font-semibold text-[#11140F]">No Contacts Exchanged Yet</div>
+                  <p className="text-xs text-[#11140F]/60 max-w-sm mx-auto">
+                    When someone views your digital vCard and taps &ldquo;Exchange Contact Info&rdquo;, their contact details are saved here and instant emails are automatically sent to both of you.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="pt-3 border-t border-[#11140F]/10 flex items-center justify-between gap-2 shrink-0">
+              <span className="text-[11px] text-[#11140F]/50">
+                Connected via two-way instant notification
+              </span>
+              <button
+                type="button"
+                onClick={() => setLeadsModalCard(null)}
+                className="px-4 py-2 text-xs font-semibold rounded-xl bg-gray-100 hover:bg-gray-200 text-[#11140F] cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -36,6 +36,9 @@ export interface VCardProps {
   theme?: string;
   accentColor?: string;
   showBranding: boolean;
+  avatarUrl?: string;
+  logoUrl?: string;
+  bannerUrl?: string;
   socials: {
     linkedin?: string;
     twitter?: string;
@@ -60,6 +63,9 @@ export default function VCardInteractiveView({
   theme = 'minimal_dark',
   accentColor,
   showBranding,
+  avatarUrl,
+  logoUrl,
+  bannerUrl,
   socials,
 }: VCardProps) {
   const [showQrModal, setShowQrModal] = useState(false);
@@ -169,13 +175,20 @@ export default function VCardInteractiveView({
       <div className="w-full max-w-md my-auto space-y-5">
         
         {/* Main Card */}
-        <div className={`${activeTheme.cardBg} rounded-lg border ${activeTheme.border} p-6 sm:p-8 shadow-xl space-y-6 relative overflow-hidden backdrop-blur-md`}>
-          
+        <div className={`${activeTheme.cardBg} rounded-2xl border ${activeTheme.border} p-6 sm:p-8 shadow-xl space-y-6 relative overflow-hidden backdrop-blur-md`}>
+          {/* Cover Banner */}
+          {bannerUrl && (
+            <div className="-mx-6 -mt-6 sm:-mx-8 sm:-mt-8 mb-4 h-36 w-[calc(100%+3rem)] sm:w-[calc(100%+4rem)] overflow-hidden relative">
+              <img src={bannerUrl} alt="Cover Banner" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+            </div>
+          )}
+
           {/* Top Actions: QR Share & Exchange */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between relative z-10">
             <button
               onClick={() => setShowQrModal(true)}
-              className="p-2 rounded-md bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10 transition-colors flex items-center gap-1.5 text-xs font-mono cursor-pointer"
+              className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white/90 hover:text-white border border-white/15 transition-colors flex items-center gap-1.5 text-xs font-mono cursor-pointer backdrop-blur-xs shadow-xs"
             >
               <QrCode className="w-4 h-4" />
               <span>Share QR</span>
@@ -183,7 +196,7 @@ export default function VCardInteractiveView({
 
             <button
               onClick={() => setShowExchangeModal(true)}
-              className="px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/15 text-white font-medium text-xs border border-white/15 transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+              className="px-3 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-white font-medium text-xs border border-white/20 transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs backdrop-blur-xs"
             >
               <Sparkles className="w-3.5 h-3.5 text-[#34D399]" />
               <span>Exchange Info</span>
@@ -192,12 +205,21 @@ export default function VCardInteractiveView({
 
           {/* Profile Details */}
           <div className="text-center space-y-3 pt-1">
-            <div
-              style={{ borderColor: activeTheme.accent }}
-              className="w-24 h-24 mx-auto rounded-full bg-black/40 text-white flex items-center justify-center text-3xl font-extrabold tracking-wider shadow-lg border-2"
-            >
-              {initials}
-            </div>
+            {avatarUrl ? (
+              <div
+                style={{ borderColor: activeTheme.accent }}
+                className="w-24 h-24 mx-auto rounded-full overflow-hidden shadow-xl border-2 ring-4 ring-white/10 shrink-0"
+              >
+                <img src={avatarUrl} alt={fullName} className="w-full h-full object-cover" />
+              </div>
+            ) : (
+              <div
+                style={{ borderColor: activeTheme.accent }}
+                className="w-24 h-24 mx-auto rounded-full bg-black/40 text-white flex items-center justify-center text-3xl font-extrabold tracking-wider shadow-lg border-2"
+              >
+                {initials}
+              </div>
+            )}
 
             <div>
               <h1 className={`text-2xl font-black ${activeTheme.text} tracking-tight`}>
@@ -209,9 +231,14 @@ export default function VCardInteractiveView({
                 </p>
               )}
               {company && (
-                <p className={`text-xs font-bold uppercase tracking-wider ${activeTheme.subtext} mt-0.5`}>
-                  {company}
-                </p>
+                <div className="flex items-center justify-center gap-1.5 mt-0.5">
+                  {logoUrl && (
+                    <img src={logoUrl} alt={company} className="w-4 h-4 rounded object-contain shrink-0" />
+                  )}
+                  <p className={`text-xs font-bold uppercase tracking-wider ${activeTheme.subtext}`}>
+                    {company}
+                  </p>
+                </div>
               )}
             </div>
 

@@ -27,7 +27,18 @@ export async function GET(
       return NextResponse.json({ error: "Mailing list not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ list });
+    const metaRecord = await prisma.aiCache.findUnique({
+      where: { key: `maillist_meta_${list.id}` },
+    }).catch(() => null);
+    const meta = (metaRecord?.value as any) || {};
+
+    return NextResponse.json({
+      list: {
+        ...list,
+        logoUrl: meta.logoUrl || null,
+        bannerUrl: meta.bannerUrl || null,
+      },
+    });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
@@ -68,6 +79,31 @@ export async function PUT(
 
     if (updated.count === 0) {
       return NextResponse.json({ error: "Mailing list not found" }, { status: 404 });
+    }
+
+    if (body.logoUrl !== undefined || body.bannerUrl !== undefined) {
+      const currentRecord = await prisma.aiCache.findUnique({
+        where: { key: `maillist_meta_${id}` },
+      }).catch(() => null);
+      const currentVal = (currentRecord?.value as any) || {};
+
+      await prisma.aiCache.upsert({
+        where: { key: `maillist_meta_${id}` },
+        create: {
+          key: `maillist_meta_${id}`,
+          value: {
+            logoUrl: body.logoUrl !== undefined ? body.logoUrl : currentVal.logoUrl || null,
+            bannerUrl: body.bannerUrl !== undefined ? body.bannerUrl : currentVal.bannerUrl || null,
+          },
+          expiresAt: new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000),
+        },
+        update: {
+          value: {
+            logoUrl: body.logoUrl !== undefined ? body.logoUrl : currentVal.logoUrl || null,
+            bannerUrl: body.bannerUrl !== undefined ? body.bannerUrl : currentVal.bannerUrl || null,
+          },
+        },
+      }).catch(() => {});
     }
 
     return NextResponse.json({ success: true });
