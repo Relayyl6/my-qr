@@ -102,7 +102,7 @@ export default function Footer({ theme = 'dark', className = '' }: FooterProps) 
     >
       {/* 1. TOP SECTION: 5-Column Navigation & Newsletter Signup */}
       <div className="max-w-[1280px] w-full mx-auto px-6 sm:px-8 pt-4 sm:pt-6 md:pt-7 pb-2 relative z-10 shrink-0">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
           
           {/* Column 1: Brand & Bio (4 cols) */}
           <div className="lg:col-span-4 space-y-3">
@@ -158,134 +158,137 @@ export default function Footer({ theme = 'dark', className = '' }: FooterProps) 
             </div>
           </div>
 
-          {/* Column 2: Product (2 cols) */}
-          <div className="lg:col-span-2 space-y-3.5">
-            <h4 className="text-[13.5px] font-semibold text-white tracking-wide">Product</h4>
-            <ul className="space-y-2.5 text-[13px] text-[#E5E7EB]/75">
-              <li>
-                <Link href="/product-tour" className="hover:text-white transition-colors">
-                  Preview
-                </Link>
-              </li>
-              <li>
-                <Link href="/pricing" className="hover:text-white transition-colors">
-                  Features
-                </Link>
-              </li>
-              <li>
-                <Link href="/#workspace" className="hover:text-white transition-colors">
-                  How it works
-                </Link>
-              </li>
-              <li>
-                <Link href="/pricing#matrix" className="hover:text-white transition-colors">
-                  Micro-SaaS Suite
-                </Link>
-              </li>
-            </ul>
-          </div>
+          {/* Navigation & Newsletter: 2 columns on mobile (grid-cols-2), 4 columns on tablet & desktop */}
+          <div className="lg:col-span-8 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-6 lg:gap-6">
+            {/* Column 2: Product */}
+            <div className="space-y-3.5">
+              <h4 className="text-[13.5px] font-semibold text-white tracking-wide">Product</h4>
+              <ul className="space-y-2.5 text-[13px] text-[#E5E7EB]/75">
+                <li>
+                  <Link href="/product-tour" className="hover:text-white transition-colors">
+                    Preview
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/pricing" className="hover:text-white transition-colors">
+                    Features
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/#workspace" className="hover:text-white transition-colors">
+                    How it works
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/pricing#matrix" className="hover:text-white transition-colors">
+                    Micro-SaaS Suite
+                  </Link>
+                </li>
+              </ul>
+            </div>
 
-          {/* Column 3: Resources (2 cols) */}
-          <div className="lg:col-span-2 space-y-3.5">
-            <h4 className="text-[13.5px] font-semibold text-white tracking-wide">Resources</h4>
-            <ul className="space-y-2.5 text-[13px] text-[#E5E7EB]/75">
-              <li>
-                <Link href="/pricing" className="hover:text-white transition-colors">
-                  Pricing Plans
-                </Link>
-              </li>
-              <li>
-                <Link href="/#workspace" className="hover:text-white transition-colors">
-                  Documentation
-                </Link>
-              </li>
-              <li>
-                <Link href="/product-tour" className="hover:text-white transition-colors">
-                  Video Guides
-                </Link>
-              </li>
-              <li>
-                <Link href="/pricing#matrix" className="hover:text-white transition-colors">
-                  Community
-                </Link>
-              </li>
-            </ul>
-          </div>
+            {/* Column 3: Resources */}
+            <div className="space-y-3.5">
+              <h4 className="text-[13.5px] font-semibold text-white tracking-wide">Resources</h4>
+              <ul className="space-y-2.5 text-[13px] text-[#E5E7EB]/75">
+                <li>
+                  <Link href="/pricing" className="hover:text-white transition-colors">
+                    Pricing Plans
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/#workspace" className="hover:text-white transition-colors">
+                    Documentation
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/product-tour" className="hover:text-white transition-colors">
+                    Video Guides
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/pricing#matrix" className="hover:text-white transition-colors">
+                    Community
+                  </Link>
+                </li>
+              </ul>
+            </div>
 
-          {/* Column 4: Company (2 cols) */}
-          <div className="lg:col-span-2 space-y-3.5">
-            <h4 className="text-[13.5px] font-semibold text-white tracking-wide">Company</h4>
-            <ul className="space-y-2.5 text-[13px] text-[#E5E7EB]/75">
-              <li>
-                <a href="mailto:hello@dynamicqr.co" className="hover:text-white transition-colors">
-                  Contact
-                </a>
-              </li>
-              <li>
-                <Link href="/privacy" className="hover:text-white transition-colors">
-                  Privacy
-                </Link>
-              </li>
-              <li>
-                <Link href="/terms" className="hover:text-white transition-colors">
-                  Terms of Service
-                </Link>
-              </li>
-              <li>
-                <Link href="/refund" className="hover:text-white transition-colors">
-                  Refund Policy
-                </Link>
-              </li>
-            </ul>
-          </div>
+            {/* Column 4: Company */}
+            <div className="space-y-3.5">
+              <h4 className="text-[13.5px] font-semibold text-white tracking-wide">Company</h4>
+              <ul className="space-y-2.5 text-[13px] text-[#E5E7EB]/75">
+                <li>
+                  <a href="mailto:hello@dynamicqr.co" className="hover:text-white transition-colors">
+                    Contact
+                  </a>
+                </li>
+                <li>
+                  <Link href="/privacy" className="hover:text-white transition-colors">
+                    Privacy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/terms" className="hover:text-white transition-colors">
+                    Terms of Service
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/refund" className="hover:text-white transition-colors">
+                    Refund Policy
+                  </Link>
+                </li>
+              </ul>
+            </div>
 
-          {/* Column 5: Newsletter Form (2 cols) */}
-          <div className="lg:col-span-2 space-y-3.5">
-            <h4 className="text-[13.5px] font-semibold text-white tracking-wide">
-              Subscribe to our newsletter
-            </h4>
+            {/* Column 5: Newsletter Form */}
+            <div className="space-y-3.5">
+              <h4 className="text-[13.5px] font-semibold text-white tracking-wide">
+                Subscribe to our newsletter
+              </h4>
 
-            <form onSubmit={handleSubscribe} className="space-y-2">
-              <div className="relative flex items-center bg-white/[0.08] border border-white/20 rounded-xl p-1 focus-within:border-white/40 focus-within:bg-white/[0.12] transition-all shadow-[inset_0_1px_2px_rgba(255,255,255,0.06)]">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="johndoe@gmail.com"
-                  required
-                  disabled={status === 'loading'}
-                  className="bg-transparent text-[13px] text-white placeholder-white/40 px-3 py-1.5 outline-none w-full min-w-0"
-                />
-                <button
-                  type="submit"
-                  disabled={status === 'loading'}
-                  aria-label="Subscribe to newsletter"
-                  className="h-8 w-8 rounded-lg bg-gradient-to-b from-white/30 to-white/15 border border-white/30 flex items-center justify-center text-white hover:border-white/50 hover:bg-white/25 shadow-xs transition-all shrink-0 cursor-pointer disabled:opacity-50"
-                >
-                  {status === 'loading' ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : status === 'success' ? (
-                    <Check className="w-3.5 h-3.5 text-[#34D399]" />
-                  ) : (
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  )}
-                </button>
-              </div>
+              <form onSubmit={handleSubscribe} className="space-y-2">
+                <div className="relative flex items-center bg-white/[0.08] border border-white/20 rounded-xl p-1 focus-within:border-white/40 focus-within:bg-white/[0.12] transition-all shadow-[inset_0_1px_2px_rgba(255,255,255,0.06)]">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="johndoe@gmail.com"
+                    required
+                    disabled={status === 'loading'}
+                    className="bg-transparent text-[12px] sm:text-[13px] text-white placeholder-white/40 px-2.5 py-1.5 outline-none w-full min-w-0"
+                  />
+                  <button
+                    type="submit"
+                    disabled={status === 'loading'}
+                    aria-label="Subscribe to newsletter"
+                    className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-gradient-to-b from-white/30 to-white/15 border border-white/30 flex items-center justify-center text-white hover:border-white/50 hover:bg-white/25 shadow-xs transition-all shrink-0 cursor-pointer disabled:opacity-50"
+                  >
+                    {status === 'loading' ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : status === 'success' ? (
+                      <Check className="w-3.5 h-3.5 text-[#34D399]" />
+                    ) : (
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    )}
+                  </button>
+                </div>
 
-              {message ? (
-                <p
-                  className={`text-[11.5px] leading-tight ${
-                    status === 'success' ? 'text-[#34D399]' : 'text-red-400'
-                  }`}
-                >
-                  {message}
-                </p>
-              ) : (
-                <p className="text-[11.5px] text-[#E5E7EB]/60">
-                  Unsubscribe anytime
-                </p>
-              )}
-            </form>
+                {message ? (
+                  <p
+                    className={`text-[11.5px] leading-tight ${
+                      status === 'success' ? 'text-[#34D399]' : 'text-red-400'
+                    }`}
+                  >
+                    {message}
+                  </p>
+                ) : (
+                  <p className="text-[11px] text-[#E5E7EB]/60">
+                    Unsubscribe anytime
+                  </p>
+                )}
+              </form>
+            </div>
           </div>
 
         </div>

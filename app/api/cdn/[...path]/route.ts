@@ -9,10 +9,15 @@ const ENDPOINT = process.env.AWS_ENDPOINT_URL_S3;
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> | { path: string[] } }
 ) {
   try {
-    const rawPath = params.path ? params.path.join('/') : '';
+    const resolvedParams = await Promise.resolve(params);
+    const rawPath = Array.isArray(resolvedParams?.path)
+      ? resolvedParams.path.join('/')
+      : typeof (resolvedParams as any)?.path === 'string'
+      ? (resolvedParams as any).path
+      : '';
     if (!rawPath) {
       return new NextResponse('Asset path required', { status: 400 });
     }
