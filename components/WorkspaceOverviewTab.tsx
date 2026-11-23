@@ -368,11 +368,16 @@ export default function WorkspaceOverviewTab({
       statusColor: string;
       title: string;
       meta: string;
+      tooltip?: string;
     }> = [];
 
     // Real Subscriber Contacts from DB
     customerContacts.forEach((contact: any) => {
       const d = contact.createdAt ? new Date(contact.createdAt) : new Date();
+      const contactName = contact.firstName
+        ? (contact.lastName ? `${contact.firstName} ${contact.lastName}` : contact.firstName)
+        : contact.email.split('@')[0];
+      const fullDetail = contact.firstName ? `${contact.firstName} (${contact.email})` : contact.email;
       events.push({
         id: `contact-${contact.id}`,
         date: d,
@@ -380,8 +385,9 @@ export default function WorkspaceOverviewTab({
         subtext: 'VIP Lead',
         status: contact.status === 'active' ? 'Active' : 'Captured',
         statusColor: '#10B981',
-        title: contact.firstName ? `${contact.firstName} (${contact.email})` : contact.email,
-        meta: contact.list?.name || 'VIP Mailing List',
+        title: contactName,
+        tooltip: `${fullDetail} • ${contact.list?.name || 'VIP Mailing List'}`,
+        meta: contact.list?.name || 'VIP Lead',
       });
     });
 
@@ -1253,32 +1259,43 @@ export default function WorkspaceOverviewTab({
             {filteredFeed.map((row) => (
               <div
                 key={row.id}
-                className="flex items-center justify-between text-xs p-1.5 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors"
+                className="grid grid-cols-[72px_68px_1fr_auto] items-center gap-2.5 text-xs p-2 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors"
               >
-                <div className="leading-tight">
-                  <span className="text-[11px] font-semibold text-white block truncate max-w-[90px]">
+                {/* Col 1: Time & subtext */}
+                <div className="leading-tight truncate">
+                  <span className="text-[11px] font-semibold text-white block truncate">
                     {row.time}
                   </span>
-                  <span className="text-[9px] text-white/40">{row.subtext}</span>
+                  <span className="text-[9px] text-white/40 block truncate">{row.subtext}</span>
                 </div>
-                <div className="flex items-center gap-1.5">
+
+                {/* Col 2: Status with indicator dot */}
+                <div className="flex items-center gap-1.5 shrink-0 overflow-hidden">
                   <span
-                    className="w-1.5 h-1.5 rounded-full"
+                    className="w-1.5 h-1.5 rounded-full shrink-0"
                     style={{ backgroundColor: row.statusColor }}
                   />
                   <span
-                    className="text-[10px] font-medium"
+                    className="text-[10px] font-medium truncate"
                     style={{ color: row.statusColor }}
                   >
                     {row.status}
                   </span>
                 </div>
-                <span className="text-[11px] text-white/80 font-medium truncate max-w-[110px]" title={row.title}>
-                  {row.title}
-                </span>
-                <span className="text-[10.5px] font-mono text-white/50 shrink-0">
-                  {row.meta}
-                </span>
+
+                {/* Col 3: Title / Name */}
+                <div className="min-w-0 flex-1">
+                  <span className="text-[11px] text-white/90 font-medium truncate block" title={row.tooltip || row.title}>
+                    {row.title}
+                  </span>
+                </div>
+
+                {/* Col 4: Meta / Location / List Name */}
+                <div className="shrink-0 text-right max-w-[85px] sm:max-w-[110px]">
+                  <span className="text-[10px] font-mono text-white/50 truncate block" title={row.meta}>
+                    {row.meta}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
