@@ -910,50 +910,31 @@ export default function WorkspaceOverviewTab({
               </div>
 
               <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                {/* Arc 1: Dynamic QR Links */}
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="36"
-                  stroke="#4E82EE"
-                  strokeWidth="11"
-                  strokeDasharray="65 161"
-                  strokeDashoffset="0"
-                  fill="none"
-                />
-                {/* Arc 2: Shorteners */}
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="36"
-                  stroke="#F5B938"
-                  strokeWidth="11"
-                  strokeDasharray="45 181"
-                  strokeDashoffset="-68"
-                  fill="none"
-                />
-                {/* Arc 3: vCards */}
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="36"
-                  stroke="#2EC4B6"
-                  strokeWidth="11"
-                  strokeDasharray="35 191"
-                  strokeDashoffset="-115"
-                  fill="none"
-                />
-                {/* Arc 4: Mailing Leads */}
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="36"
-                  stroke="#34D399"
-                  strokeWidth="11"
-                  strokeDasharray="30 196"
-                  strokeDashoffset="-152"
-                  fill="none"
-                />
+                {donutArcs.length === 0 ? (
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="36"
+                    stroke="#1C1F2B"
+                    strokeWidth="11"
+                    fill="none"
+                  />
+                ) : (
+                  donutArcs.map((arc) => (
+                    <circle
+                      key={arc.code}
+                      cx="50"
+                      cy="50"
+                      r="36"
+                      stroke={arc.color}
+                      strokeWidth="11"
+                      strokeDasharray={arc.dashArray}
+                      strokeDashoffset={arc.dashOffset}
+                      fill="none"
+                      className="transition-all duration-500"
+                    />
+                  ))
+                )}
               </svg>
 
               {/* Center Metrics: Total Real Assets */}
@@ -996,7 +977,7 @@ export default function WorkspaceOverviewTab({
           <div className="pt-1.5 border-t border-white/5 flex items-start gap-1 text-[9px] text-white/40 leading-snug shrink-0">
             <Info className="w-3 h-3 text-white/40 shrink-0 mt-0.5" />
             <span>
-              Dynamic QR Links and Branded Shorteners drive 92% of all {totalScansVolume} scans recorded across your endpoints.
+              {distributionData[0]?.name || 'Dynamic QR Links'} and {distributionData[1]?.name || 'Branded Shorteners'} drive {topTwoServicesPct}% of all {totalScansVolume} scans recorded across your endpoints.
             </span>
           </div>
 
@@ -1028,17 +1009,20 @@ export default function WorkspaceOverviewTab({
               Routing Health Score
             </span>
             <div className="flex items-center gap-0.5 flex-1 max-w-[140px] px-2">
-              {Array.from({ length: 22 }).map((_, i) => (
-                <div
-                  key={i}
-                  className={`flex-1 h-3 rounded-xs ${
-                    i < 20 ? 'bg-[#10B981]' : 'bg-white/10'
-                  }`}
-                />
-              ))}
+              {Array.from({ length: 22 }).map((_, i) => {
+                const activeTicks = Math.round((healthScore / 100) * 22);
+                return (
+                  <div
+                    key={i}
+                    className={`flex-1 h-3 rounded-xs ${
+                      i < activeTicks ? 'bg-[#10B981]' : 'bg-white/10'
+                    }`}
+                  />
+                );
+              })}
             </div>
             <span className="text-xs font-bold text-emerald-400 font-mono">
-              98%
+              {healthScore}%
             </span>
           </div>
 
