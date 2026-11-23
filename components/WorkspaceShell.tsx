@@ -344,7 +344,7 @@ export default function WorkspaceShell({
   ];
 
   return (
-    <div className="w-full min-h-screen bg-[#F4F5F1] dark:bg-[#080907] text-[#11140F] dark:text-[#EEF0EA] flex flex-col md:flex-row relative">
+    <div className={`w-full min-h-screen ${activeSection === 'overview' ? 'bg-[#090A0E] text-white' : 'bg-[#F4F5F1] dark:bg-[#080907] text-[#11140F] dark:text-[#EEF0EA]'} flex flex-col md:flex-row relative transition-colors duration-200`}>
       {/* 1. MOBILE TOP HEADER (Phones & Tablets only) */}
       <div
         style={{
@@ -927,7 +927,7 @@ export default function WorkspaceShell({
       <main
         className={`flex-1 min-w-0 transition-all duration-150 ${
           activeSection === 'overview'
-            ? 'p-2 sm:p-3 lg:p-4 h-[calc(100vh-var(--announcement-bar-height,0px))] overflow-y-auto lg:overflow-hidden flex flex-col justify-between'
+            ? 'p-2 sm:p-3 lg:p-4 h-[calc(100vh-var(--announcement-bar-height,0px))] overflow-y-auto lg:overflow-hidden flex flex-col justify-between bg-[#090A0E] text-white'
             : density === 'compact'
             ? 'p-3 sm:p-4 lg:p-6 space-y-4'
             : 'p-4 sm:p-6 lg:p-8 space-y-6'
