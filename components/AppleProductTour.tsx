@@ -311,7 +311,7 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
       {/* 1. Finora-Inspired Hero: Glowing Neon Circle Arc & Dashboard */}
       {/* (1:1 Faithful Reproduction of User Reference in Dark Green)  */}
       {/* ============================================================ */}
-      <section className="relative pt-16 pb-20 md:pt-24 md:pb-28 px-4 sm:px-6 md:px-8 max-w-[1360px] mx-auto overflow-hidden">
+      <section className="relative pt-8 sm:pt-14 md:pt-20 pb-12 sm:pb-20 md:pb-24 px-3 sm:px-6 md:px-8 max-w-[1360px] mx-auto overflow-hidden">
         {/* Subtle Cyber Grid Lines (Echoing Reference Mockup) */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:52px_52px] pointer-events-none -z-20" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,#11140F_85%)] pointer-events-none -z-10" />
@@ -337,66 +337,72 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
         </div>
 
         {/* Section Headline Inside/Above the Glowing Circle Arc */}
-        <div className="text-center max-w-5xl xl:max-w-6xl mx-auto space-y-4 sm:space-y-5 relative z-10 mb-10 sm:mb-14">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/80 text-[12px] font-mono tracking-wide shadow-md backdrop-blur-md">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            Your Operations, Fully Under Control
+        <div className="text-center max-w-5xl xl:max-w-6xl mx-auto space-y-3.5 sm:space-y-4 md:space-y-5 relative z-10 mb-6 sm:mb-10 md:mb-14">
+          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-1 sm:py-1.5 rounded-full bg-white/5 border border-white/10 text-white/80 text-[11px] sm:text-[12px] font-mono tracking-wide shadow-md backdrop-blur-md">
+            <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+            <span>Your Operations, Fully Under Control</span>
           </div>
 
           <h1
-            className="flex flex-col items-center text-center"
+            className="flex flex-col items-center text-center px-1"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            <span className="block whitespace-normal md:whitespace-nowrap text-2xl sm:text-3xl md:text-[2.2rem] lg:text-[2.6rem] xl:text-[3rem] font-bold tracking-tight text-white leading-tight">
+            <span className="block text-[1.8rem] xs:text-[2.2rem] sm:text-[2.75rem] md:text-[3.1rem] lg:text-[3.4rem] xl:text-[3.6rem] font-bold tracking-tight text-white leading-[1.12]">
               Next-Gen Dynamic QR Codes
             </span>
-            <span className="inline-flex flex-wrap items-baseline justify-center gap-x-2 sm:gap-x-3 text-3xl sm:text-5xl md:text-[3.5rem] lg:text-[4.6rem] xl:text-[5.2rem] tracking-tight leading-tight overflow-visible -mt-1 sm:-mt-2 md:-mt-3">
-              <span className="inline-block text-[0.75em] sm:text-[0.78em] font-medium text-white/85">
+            <span className="inline-flex flex-wrap items-baseline justify-center gap-x-2 sm:gap-x-3 text-[2.35rem] xs:text-[2.85rem] sm:text-[3.8rem] md:text-[4.6rem] lg:text-[5.2rem] xl:text-[5.6rem] tracking-tight leading-[1.08] overflow-visible -mt-0.5 sm:-mt-1 md:-mt-2">
+              <span className="inline-block text-[0.68em] sm:text-[0.72em] font-medium text-white/85">
                 With Powerful
               </span>
-              <span className="inline-block font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-emerald-400 pt-1 pb-2 px-1 overflow-visible">
+              <span className="inline-block font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-emerald-400 pt-0.5 pb-2 px-1 overflow-visible">
                 DynamicQR
               </span>
             </span>
           </h1>
 
-          <p className="text-[15.5px] sm:text-[17.5px] md:text-[19px] text-white/70 max-w-[62ch] mx-auto leading-relaxed font-normal pt-1">
+          <p className="text-[13.5px] xs:text-[14.5px] sm:text-[16.5px] md:text-[18px] text-white/70 max-w-[62ch] mx-auto leading-relaxed font-normal pt-1 px-2">
             Manage, route, and scale your dynamic QR codes and turnkey micro-apps with smart tools designed for sub-10ms speed, zero reprint costs, and infinite scalability.
           </p>
 
-          {/* Action CTAs */}
-          <div className="pt-2 flex flex-wrap items-center justify-center gap-4">
+          {/* Action CTAs - Responsive Side-by-Side Lockup */}
+          <div className="pt-2 flex flex-row items-center justify-center gap-2.5 sm:gap-4 max-w-full px-2">
             <button
               onClick={handleOpenWorkspace}
-              className="rounded-2xl bg-white px-8 py-4 text-[15px] font-semibold text-[#11140F] hover:bg-[#EEF0EA] transition-all duration-200 flex items-center gap-2 shadow-xl shadow-white/10 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+              className="rounded-full sm:rounded-2xl bg-white px-4.5 xs:px-6 sm:px-8 py-2.5 sm:py-3.5 text-[13px] sm:text-[15px] font-semibold text-[#11140F] hover:bg-[#EEF0EA] transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 shadow-xl shadow-white/10 cursor-pointer hover:scale-[1.02] active:scale-[0.98] shrink-0"
             >
-              Try for free
-              <ArrowRight className="w-4 h-4 text-[#11140F]" />
+              <span>Try for free</span>
+              <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#11140F]" />
             </button>
             <a
               href="#microsaas"
-              className="rounded-2xl border border-white/15 bg-white/[0.05] backdrop-blur-md px-7 py-4 text-[15px] font-medium text-white/85 hover:text-white hover:border-emerald-500/40 hover:bg-emerald-500/10 transition-all flex items-center gap-2"
+              className="rounded-full sm:rounded-2xl border border-white/15 bg-white/[0.05] backdrop-blur-md px-3.5 xs:px-5 sm:px-7 py-2.5 sm:py-3.5 text-[13px] sm:text-[15px] font-medium text-white/85 hover:text-white hover:border-emerald-500/40 hover:bg-emerald-500/10 transition-all flex items-center justify-center gap-1.5 sm:gap-2 shrink-0"
             >
-              <Layers className="w-4 h-4 text-emerald-400" />
-              Explore Consolidated Apps
+              <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400" />
+              <span className="hidden xs:inline">Explore Consolidated Apps</span>
+              <span className="xs:hidden">Explore Apps</span>
             </a>
           </div>
 
-          <div className="pt-2 flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-[12px] sm:text-[12.5px] text-white/50 font-mono">
-            <span className="flex items-center gap-1.5 text-emerald-400">
-              <Check className="w-3.5 h-3.5" /> Sub-10ms 307 Ingress
+          {/* Clean Feature Checklist (2x2 Grid on Mobile, Inline with Dots on Tablet & Desktop) */}
+          <div className="pt-2 grid grid-cols-2 sm:flex sm:flex-wrap items-center justify-center gap-x-4 sm:gap-x-6 md:gap-x-8 gap-y-2 text-[11px] xs:text-[12px] sm:text-[12.5px] text-white/50 font-mono max-w-sm xs:max-w-md sm:max-w-none mx-auto">
+            <span className="flex items-center gap-1.5 text-emerald-400 justify-start sm:justify-center">
+              <Check className="w-3.5 h-3.5 shrink-0" />
+              <span>Sub-10ms 307 Ingress</span>
             </span>
-            <span className="text-white/20">•</span>
-            <span className="flex items-center gap-1.5 text-emerald-400">
-              <Check className="w-3.5 h-3.5" /> 300 DPI Vector Math
+            <span className="hidden sm:inline text-white/20">•</span>
+            <span className="flex items-center gap-1.5 text-emerald-400 justify-start sm:justify-center">
+              <Check className="w-3.5 h-3.5 shrink-0" />
+              <span>300 DPI Vector Math</span>
             </span>
-            <span className="text-white/20">•</span>
-            <span className="flex items-center gap-1.5 text-emerald-400">
-              <Check className="w-3.5 h-3.5" /> 5 Turnkey Micro-Apps
+            <span className="hidden sm:inline text-white/20">•</span>
+            <span className="flex items-center gap-1.5 text-emerald-400 justify-start sm:justify-center">
+              <Check className="w-3.5 h-3.5 shrink-0" />
+              <span>5 Turnkey Micro-Apps</span>
             </span>
-            <span className="text-white/20">•</span>
-            <span className="flex items-center gap-1.5 text-emerald-400">
-              <Check className="w-3.5 h-3.5" /> Zero Reprint Guarantee
+            <span className="hidden sm:inline text-white/20">•</span>
+            <span className="flex items-center gap-1.5 text-emerald-400 justify-start sm:justify-center">
+              <Check className="w-3.5 h-3.5 shrink-0" />
+              <span>Zero Reprint Guarantee</span>
             </span>
           </div>
         </div>
