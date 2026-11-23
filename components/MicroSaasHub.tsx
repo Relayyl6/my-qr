@@ -745,7 +745,7 @@ export default function MicroSaasHub({
                 return (
                   <div
                     key={card.id}
-                    className="p-5 rounded-2xl border border-[#11140F]/10 bg-white hover:border-[#11140F]/20 transition-all space-y-4 shadow-xs flex flex-col justify-between"
+                    className="p-5 rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#0E1017] hover:border-[#11140F]/20 dark:hover:border-white/20 transition-all space-y-4 shadow-xs flex flex-col justify-between"
                   >
                     <div className="space-y-3">
                       <div className="flex items-start justify-between gap-2">
@@ -764,18 +764,18 @@ export default function MicroSaasHub({
                             </div>
                           )}
                           <div className="min-w-0">
-                            <h4 className="text-sm font-bold text-[#11140F] truncate">{card.title}</h4>
-                            <p className="text-xs text-[#2F6B4F] font-medium truncate">
+                            <h4 className="text-sm font-bold text-[#11140F] dark:text-white truncate">{card.title}</h4>
+                            <p className="text-xs text-[#2F6B4F] dark:text-emerald-400 font-medium truncate">
                               {spec.title || 'Professional'} {spec.company ? `• ${spec.company}` : ''}
                             </p>
                           </div>
                         </div>
-                        <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                        <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 shrink-0">
                           {card.scansCount} scans
                         </span>
                       </div>
 
-                      <div className="space-y-1 text-xs text-[#11140F]/70">
+                      <div className="space-y-1 text-xs text-[#11140F]/70 dark:text-white/70">
                         {spec.email && <div className="truncate">📧 {spec.email}</div>}
                         {spec.phone && <div className="truncate">📞 {spec.phone}</div>}
                         
@@ -795,8 +795,8 @@ export default function MicroSaasHub({
                             </span>
                           </button>
                         ) : (
-                          <div className="pt-1 flex items-center gap-1.5 text-[11px] text-[#11140F]/45">
-                            <Users className="w-3 h-3 text-[#11140F]/40" />
+                          <div className="pt-1 flex items-center gap-1.5 text-[11px] text-[#11140F]/45 dark:text-white/40">
+                            <Users className="w-3 h-3 text-[#11140F]/40 dark:text-white/40" />
                             <span>0 contacts exchanged yet</span>
                           </div>
                         )}
@@ -817,18 +817,18 @@ export default function MicroSaasHub({
                             </span>
                           )}
                         </div>
-                        <div className="truncate text-[#11140F]/50 font-mono text-[11px] pt-0.5">
+                        <div className="truncate text-[#11140F]/50 dark:text-white/50 font-mono text-[11px] pt-0.5">
                           URL: /c/{card.slug}
                         </div>
                       </div>
                     </div>
 
-                    <div className="pt-3 border-t border-[#11140F]/5 flex items-center justify-between gap-2">
+                    <div className="pt-3 border-t border-[#11140F]/5 dark:border-white/10 flex items-center justify-between gap-2">
                       <div className="flex items-center gap-1.5">
                         <Link
                           href={`/c/${card.slug}`}
                           target="_blank"
-                          className="p-2 rounded-lg bg-[#F7F8F5] hover:bg-[#EEF0EA] text-[#11140F] text-xs font-semibold flex items-center gap-1 transition-colors"
+                          className="p-2 rounded-lg bg-[#F7F8F5] dark:bg-white/10 hover:bg-[#EEF0EA] dark:hover:bg-white/20 text-[#11140F] dark:text-white text-xs font-semibold flex items-center gap-1 transition-colors border border-transparent dark:border-white/10"
                           title="Open Live Card"
                         >
                           <Eye className="w-3.5 h-3.5" />
@@ -837,7 +837,7 @@ export default function MicroSaasHub({
                         <button
                           type="button"
                           onClick={() => handleCopyLink(`/c/${card.slug}`, card.id)}
-                          className="p-2 rounded-lg bg-[#F7F8F5] hover:bg-[#EEF0EA] text-[#11140F] text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                          className="p-2 rounded-lg bg-[#F7F8F5] dark:bg-white/10 hover:bg-[#EEF0EA] dark:hover:bg-white/20 text-[#11140F] dark:text-white text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer border border-transparent dark:border-white/10"
                           title="Copy Link"
                         >
                           {copiedId === card.id ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
@@ -846,7 +846,7 @@ export default function MicroSaasHub({
                         <button
                           type="button"
                           onClick={() => handleOpenEditVcard(card)}
-                          className="p-2 rounded-lg bg-[#F7F8F5] hover:bg-[#EEF0EA] text-[#11140F] text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                          className="p-2 rounded-lg bg-[#F7F8F5] dark:bg-white/10 hover:bg-[#EEF0EA] dark:hover:bg-white/20 text-[#11140F] dark:text-white text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer border border-transparent dark:border-white/10"
                           title="Edit vCard"
                         >
                           <Pencil className="w-3.5 h-3.5" />
@@ -855,7 +855,7 @@ export default function MicroSaasHub({
                         <button
                           type="button"
                           onClick={() => setPrintVcard(card)}
-                          className="p-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                          className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer border border-emerald-200 dark:border-emerald-500/30"
                           title="Print QR Card"
                         >
                           <Printer className="w-3.5 h-3.5" />
@@ -867,7 +867,7 @@ export default function MicroSaasHub({
                         type="button"
                         onClick={() => setDeleteConfirmTarget({ id: card.id, title: card.title || 'Digital Card' })}
                         disabled={actionLoading}
-                        className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                        className="p-2 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
                         title="Delete Card"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -1035,12 +1035,12 @@ export default function MicroSaasHub({
       {/* TAB 4: RESTAURANT MENU */}
       {activeTab === 'menu' && (
         <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#F7F8F5] p-4 rounded-xl border border-[#11140F]/5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#F7F8F5] dark:bg-[#0E1017] p-4 rounded-xl border border-[#11140F]/5 dark:border-white/10">
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold text-[#11140F]">Contactless Restaurant Menus</h3>
+                <h3 className="text-sm font-bold text-[#11140F] dark:text-white">Contactless Restaurant Menus</h3>
                 {entitlements.microsaas.menu > 0 ? (
-                  <span className="text-xs font-mono font-medium text-[#11140F]/60">
+                  <span className="text-xs font-mono font-medium text-[#11140F]/60 dark:text-white/60">
                     ({menus.length} / {entitlements.microsaas.menu} used)
                   </span>
                 ) : (
@@ -1049,7 +1049,7 @@ export default function MicroSaasHub({
                   </span>
                 )}
               </div>
-              <p className="text-xs text-[#11140F]/60 mt-0.5">
+              <p className="text-xs text-[#11140F]/60 dark:text-white/60 mt-0.5">
                 Digital menus for table QR codes. Instant price updates, live 86&apos;d sold-out toggles, and dietary tags.
               </p>
             </div>
@@ -1059,7 +1059,7 @@ export default function MicroSaasHub({
                 <button
                   type="button"
                   onClick={() => setShowMenuModal(true)}
-                  className="py-2 px-4 rounded-xl bg-[#11140F] text-white text-xs font-semibold hover:bg-[#2A2E25] transition-all flex items-center gap-1.5 shrink-0 cursor-pointer shadow-xs"
+                  className="py-2 px-4 rounded-xl bg-[#11140F] dark:bg-emerald-600 text-white text-xs font-semibold hover:bg-[#2A2E25] dark:hover:bg-emerald-500 transition-all flex items-center gap-1.5 shrink-0 cursor-pointer shadow-xs"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Create Menu</span>
@@ -1102,21 +1102,21 @@ export default function MicroSaasHub({
               </Link>
             </div>
           ) : loading ? (
-            <div className="py-12 text-center text-xs text-[#11140F]/50 flex items-center justify-center gap-2">
-              <RefreshCw className="w-4 h-4 animate-spin text-[#2F6B4F]" />
+            <div className="py-12 text-center text-xs text-[#11140F]/50 dark:text-white/50 flex items-center justify-center gap-2">
+              <RefreshCw className="w-4 h-4 animate-spin text-[#2F6B4F] dark:text-emerald-400" />
               <span>Loading digital menus...</span>
             </div>
           ) : menus.length === 0 ? (
-            <div className="py-12 text-center border-2 border-dashed border-[#11140F]/10 rounded-2xl p-6 space-y-3">
-              <Utensils className="w-8 h-8 mx-auto text-[#11140F]/30" />
-              <div className="text-sm font-semibold text-[#11140F]">No Digital Menus Created Yet</div>
-              <p className="text-xs text-[#11140F]/60 max-w-sm mx-auto">
+            <div className="py-12 text-center border-2 border-dashed border-[#11140F]/10 dark:border-white/10 rounded-2xl p-6 space-y-3">
+              <Utensils className="w-8 h-8 mx-auto text-[#11140F]/30 dark:text-white/30" />
+              <div className="text-sm font-semibold text-[#11140F] dark:text-white">No Digital Menus Created Yet</div>
+              <p className="text-xs text-[#11140F]/60 dark:text-white/60 max-w-sm mx-auto">
                 Create a contactless menu. Organize dishes by sections (Starters, Mains, Drinks) with real-time sold-out toggles.
               </p>
               <button
                 type="button"
                 onClick={() => setShowMenuModal(true)}
-                className="py-2 px-4 rounded-xl bg-[#11140F] text-white text-xs font-semibold hover:bg-[#2A2E25] inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
+                className="py-2 px-4 rounded-xl bg-[#11140F] dark:bg-emerald-600 text-white text-xs font-semibold hover:bg-[#2A2E25] dark:hover:bg-emerald-500 inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Create Your First Menu</span>
@@ -1130,20 +1130,20 @@ export default function MicroSaasHub({
                 return (
                   <div
                     key={menu.id}
-                    className="p-5 rounded-2xl border border-[#11140F]/10 bg-white hover:border-[#11140F]/20 transition-all space-y-4 shadow-xs flex flex-col justify-between"
+                    className="p-5 rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#0E1017] hover:border-[#11140F]/20 dark:hover:border-white/20 transition-all space-y-4 shadow-xs flex flex-col justify-between"
                   >
                     <div className="space-y-3">
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <h4 className="text-sm font-bold text-[#11140F]">{menu.title}</h4>
-                          <p className="text-xs text-[#2F6B4F] font-medium">{sectionsCount} Menu Categories • Currency: {spec.currency || '$'}</p>
+                          <h4 className="text-sm font-bold text-[#11140F] dark:text-white">{menu.title}</h4>
+                          <p className="text-xs text-[#2F6B4F] dark:text-emerald-400 font-medium">{sectionsCount} Menu Categories • Currency: {spec.currency || '$'}</p>
                         </div>
                         <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
                           {menu.scansCount} table scans
                         </span>
                       </div>
 
-                      <div className="space-y-1 text-xs text-[#11140F]/70">
+                      <div className="space-y-1 text-xs text-[#11140F]/70 dark:text-white/70">
                         <div className="flex items-center gap-1.5 pt-0.5 flex-wrap">
                           <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono">
                             ✓ Pro Contactless Menu
@@ -1160,12 +1160,12 @@ export default function MicroSaasHub({
                       </div>
                     </div>
 
-                    <div className="pt-3 border-t border-[#11140F]/5 flex items-center justify-between gap-2">
+                    <div className="pt-3 border-t border-[#11140F]/5 dark:border-white/10 flex items-center justify-between gap-2">
                       <div className="flex items-center gap-1.5">
                         <Link
                           href={`/m/${menu.slug}`}
                           target="_blank"
-                          className="p-2 rounded-lg bg-[#F7F8F5] hover:bg-[#EEF0EA] text-[#11140F] text-xs font-semibold flex items-center gap-1 transition-colors"
+                          className="p-2 rounded-lg bg-[#F7F8F5] dark:bg-white/10 hover:bg-[#EEF0EA] dark:hover:bg-white/20 text-[#11140F] dark:text-white text-xs font-semibold flex items-center gap-1 transition-colors border border-transparent dark:border-white/10"
                           title="Open Live Menu"
                         >
                           <Eye className="w-3.5 h-3.5" />
@@ -1174,7 +1174,7 @@ export default function MicroSaasHub({
                         <button
                           type="button"
                           onClick={() => handleCopyLink(`/m/${menu.slug}`, menu.id)}
-                          className="p-2 rounded-lg bg-[#F7F8F5] hover:bg-[#EEF0EA] text-[#11140F] text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                          className="p-2 rounded-lg bg-[#F7F8F5] dark:bg-white/10 hover:bg-[#EEF0EA] dark:hover:bg-white/20 text-[#11140F] dark:text-white text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer border border-transparent dark:border-white/10"
                           title="Copy Link"
                         >
                           {copiedId === menu.id ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
@@ -1183,7 +1183,7 @@ export default function MicroSaasHub({
                         <button
                           type="button"
                           onClick={() => handleOpenEditMenu(menu)}
-                          className="p-2 rounded-lg bg-[#F7F8F5] hover:bg-[#EEF0EA] text-[#11140F] text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                          className="p-2 rounded-lg bg-[#F7F8F5] dark:bg-white/10 hover:bg-[#EEF0EA] dark:hover:bg-white/20 text-[#11140F] dark:text-white text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer border border-transparent dark:border-white/10"
                           title="Edit Menu & Dishes"
                         >
                           <Pencil className="w-3.5 h-3.5" />
@@ -1192,7 +1192,7 @@ export default function MicroSaasHub({
                         <button
                           type="button"
                           onClick={() => setPrintMenu(menu)}
-                          className="p-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                          className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer border border-emerald-200 dark:border-emerald-500/30"
                           title="Print Table Tent QR"
                         >
                           <Printer className="w-3.5 h-3.5" />
@@ -1204,7 +1204,7 @@ export default function MicroSaasHub({
                         type="button"
                         onClick={() => setDeleteConfirmTarget({ id: menu.id, title: menu.title || 'Restaurant Menu' })}
                         disabled={actionLoading}
-                        className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                        className="p-2 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
                         title="Delete Menu"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -1221,15 +1221,15 @@ export default function MicroSaasHub({
       {/* TAB 5: DYNAMIC WI-FI */}
       {activeTab === 'wifi' && (
         <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#F7F8F5] p-4 rounded-xl border border-[#11140F]/5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#F7F8F5] dark:bg-[#0E1017] p-4 rounded-xl border border-[#11140F]/5 dark:border-white/10">
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold text-[#11140F]">Dynamic Guest Wi-Fi Sharing</h3>
-                <span className="text-xs font-mono font-medium text-[#11140F]/60">
+                <h3 className="text-sm font-bold text-[#11140F] dark:text-white">Dynamic Guest Wi-Fi Sharing</h3>
+                <span className="text-xs font-mono font-medium text-[#11140F]/60 dark:text-white/60">
                   ({wifis.length} / {entitlements.microsaas.wifi} used)
                 </span>
               </div>
-              <p className="text-xs text-[#11140F]/60 mt-0.5">
+              <p className="text-xs text-[#11140F]/60 dark:text-white/60 mt-0.5">
                 Camera auto-connect QR codes for cafes, hotels, and offices. Update network passwords without reprinting physical flyers.
               </p>
             </div>
@@ -1237,7 +1237,7 @@ export default function MicroSaasHub({
               <button
                 type="button"
                 onClick={() => setShowWifiModal(true)}
-                className="py-2 px-4 rounded-xl bg-[#11140F] text-white text-xs font-semibold hover:bg-[#2A2E25] transition-all flex items-center gap-1.5 shrink-0 cursor-pointer shadow-xs"
+                className="py-2 px-4 rounded-xl bg-[#11140F] dark:bg-emerald-600 text-white text-xs font-semibold hover:bg-[#2A2E25] dark:hover:bg-emerald-500 transition-all flex items-center gap-1.5 shrink-0 cursor-pointer shadow-xs"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Create Wi-Fi QR</span>
@@ -1254,21 +1254,21 @@ export default function MicroSaasHub({
           </div>
 
           {loading ? (
-            <div className="py-12 text-center text-xs text-[#11140F]/50 flex items-center justify-center gap-2">
-              <RefreshCw className="w-4 h-4 animate-spin text-[#2F6B4F]" />
+            <div className="py-12 text-center text-xs text-[#11140F]/50 dark:text-white/50 flex items-center justify-center gap-2">
+              <RefreshCw className="w-4 h-4 animate-spin text-[#2F6B4F] dark:text-emerald-400" />
               <span>Loading Wi-Fi cards...</span>
             </div>
           ) : wifis.length === 0 ? (
-            <div className="py-12 text-center border-2 border-dashed border-[#11140F]/10 rounded-2xl p-6 space-y-3">
-              <Wifi className="w-8 h-8 mx-auto text-[#11140F]/30" />
-              <div className="text-sm font-semibold text-[#11140F]">No Wi-Fi Cards Created Yet</div>
-              <p className="text-xs text-[#11140F]/60 max-w-sm mx-auto">
+            <div className="py-12 text-center border-2 border-dashed border-[#11140F]/10 dark:border-white/10 rounded-2xl p-6 space-y-3">
+              <Wifi className="w-8 h-8 mx-auto text-[#11140F]/30 dark:text-white/30" />
+              <div className="text-sm font-semibold text-[#11140F] dark:text-white">No Wi-Fi Cards Created Yet</div>
+              <p className="text-xs text-[#11140F]/60 dark:text-white/60 max-w-sm mx-auto">
                 Generate an instant-join QR code for guests and customers. Phones connect directly with one tap from the Camera app.
               </p>
               <button
                 type="button"
                 onClick={() => setShowWifiModal(true)}
-                className="py-2 px-4 rounded-xl bg-[#11140F] text-white text-xs font-semibold hover:bg-[#2A2E25] inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
+                className="py-2 px-4 rounded-xl bg-[#11140F] dark:bg-emerald-600 text-white text-xs font-semibold hover:bg-[#2A2E25] dark:hover:bg-emerald-500 inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Create Wi-Fi QR</span>
@@ -1281,54 +1281,54 @@ export default function MicroSaasHub({
                 return (
                   <div
                     key={wifi.id}
-                    className="p-5 rounded-2xl border border-[#11140F]/10 bg-white hover:border-[#11140F]/20 transition-all space-y-4 shadow-xs flex flex-col justify-between"
+                    className="p-5 rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#0E1017] hover:border-[#11140F]/20 dark:hover:border-white/20 transition-all space-y-4 shadow-xs flex flex-col justify-between"
                   >
                     <div className="space-y-3">
                       <div className="flex items-start justify-between gap-2">
                         <div>
                           <div className="flex items-center gap-1.5">
-                            <Wifi className="w-4 h-4 text-[#2F6B4F]" />
-                            <h4 className="text-sm font-bold text-[#11140F]">{spec.ssid || wifi.title}</h4>
+                            <Wifi className="w-4 h-4 text-[#2F6B4F] dark:text-emerald-400" />
+                            <h4 className="text-sm font-bold text-[#11140F] dark:text-white">{spec.ssid || wifi.title}</h4>
                           </div>
                           {spec.location && (
-                            <p className="text-xs text-[#11140F]/60 mt-0.5">📍 {spec.location}</p>
+                            <p className="text-xs text-[#11140F]/60 dark:text-white/60 mt-0.5">📍 {spec.location}</p>
                           )}
                         </div>
-                        <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                        <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30">
                           {spec.authType || 'WPA'}
                         </span>
                       </div>
 
-                      <div className="p-2.5 rounded-xl bg-[#F7F8F5] border border-[#11140F]/5 text-xs space-y-1">
-                        <div className="text-[11px] text-[#11140F]/60">Password:</div>
-                        <div className="font-mono font-bold text-[#11140F] select-all">
+                      <div className="p-2.5 rounded-xl bg-[#F7F8F5] dark:bg-white/[0.04] border border-[#11140F]/5 dark:border-white/10 text-xs space-y-1">
+                        <div className="text-[11px] text-[#11140F]/60 dark:text-white/60">Password:</div>
+                        <div className="font-mono font-bold text-[#11140F] dark:text-white select-all">
                           {spec.password ? '••••••••••••' : '(No Password / Open)'}
                         </div>
                       </div>
 
                       <div className="flex items-center gap-1.5 pt-0.5 flex-wrap">
                         {entitlements.branded_footer ? (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 font-mono">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30 font-mono">
                             Free: DynamicQR Watermark
                           </span>
                         ) : (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 font-mono">
                             ✓ White-Label Clean
                           </span>
                         )}
                       </div>
 
-                      <div className="text-xs text-[#11140F]/50 font-mono pt-1">
+                      <div className="text-xs text-[#11140F]/50 dark:text-white/50 font-mono pt-1">
                         URL: /w/{wifi.slug}
                       </div>
                     </div>
 
-                    <div className="pt-3 border-t border-[#11140F]/5 flex items-center justify-between gap-2">
+                    <div className="pt-3 border-t border-[#11140F]/5 dark:border-white/10 flex items-center justify-between gap-2">
                       <div className="flex items-center gap-1.5">
                         <Link
                           href={`/w/${wifi.slug}`}
                           target="_blank"
-                          className="p-2 rounded-lg bg-[#F7F8F5] hover:bg-[#EEF0EA] text-[#11140F] text-xs font-semibold flex items-center gap-1 transition-colors"
+                          className="p-2 rounded-lg bg-[#F7F8F5] dark:bg-white/10 hover:bg-[#EEF0EA] dark:hover:bg-white/20 text-[#11140F] dark:text-white text-xs font-semibold flex items-center gap-1 transition-colors border border-transparent dark:border-white/10"
                           title="Open Wi-Fi Page"
                         >
                           <Eye className="w-3.5 h-3.5" />
@@ -1337,7 +1337,7 @@ export default function MicroSaasHub({
                         <button
                           type="button"
                           onClick={() => handleCopyLink(`/w/${wifi.slug}`, wifi.id)}
-                          className="p-2 rounded-lg bg-[#F7F8F5] hover:bg-[#EEF0EA] text-[#11140F] text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                          className="p-2 rounded-lg bg-[#F7F8F5] dark:bg-white/10 hover:bg-[#EEF0EA] dark:hover:bg-white/20 text-[#11140F] dark:text-white text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer border border-transparent dark:border-white/10"
                           title="Copy Link"
                         >
                           {copiedId === wifi.id ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
@@ -1346,7 +1346,7 @@ export default function MicroSaasHub({
                         <button
                           type="button"
                           onClick={() => handleOpenEditWifi(wifi)}
-                          className="p-2 rounded-lg bg-[#F7F8F5] hover:bg-[#EEF0EA] text-[#11140F] text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                          className="p-2 rounded-lg bg-[#F7F8F5] dark:bg-white/10 hover:bg-[#EEF0EA] dark:hover:bg-white/20 text-[#11140F] dark:text-white text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer border border-transparent dark:border-white/10"
                           title="Edit Wi-Fi Network"
                         >
                           <Pencil className="w-3.5 h-3.5" />
@@ -1355,7 +1355,7 @@ export default function MicroSaasHub({
                         <button
                           type="button"
                           onClick={() => setPrintWifi(wifi)}
-                          className="p-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                          className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer border border-emerald-200 dark:border-emerald-500/30"
                           title="Print Wi-Fi QR Card"
                         >
                           <Printer className="w-3.5 h-3.5" />
@@ -1367,7 +1367,7 @@ export default function MicroSaasHub({
                         type="button"
                         onClick={() => setDeleteConfirmTarget({ id: wifi.id, title: wifi.title || 'Wi-Fi Network' })}
                         disabled={actionLoading}
-                        className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                        className="p-2 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
                         title="Delete Network"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
