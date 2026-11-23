@@ -16,16 +16,28 @@ export async function GET(
       return NextResponse.redirect(new URL("/?error=link_not_found", req.url));
     }
 
-    // Increment scan / click count asynchronously
+    const spec = (item.spec as any) || {};
+    let target = spec.destinationUrl || APP_URL;
+
+    // Guard against self-redirect loops
+    try {
+      const targetUrl = new URL(target);
+      const reqUrl = new URL(req.url);
+      if (
+        (targetUrl.hostname === reqUrl.hostname || targetUrl.hostname.includes('vercel.app')) &&
+        (targetUrl.pathname === `/s/${slug}` || targetUrl.pathname === `/s/${slug}/`)
+      ) {
+        return NextResponse.redirect(new URL("/?error=self_redirect_prevented", req.url));
+      }
+    } catch (e) {}
+
+    // Increment scan / click count asynchronously only after validating target is not looping
     prisma.microSaasItem
       .update({
         where: { id: item.id },
         data: { scansCount: { increment: 1 } },
       })
       .catch(() => {});
-
-    const spec = (item.spec as any) || {};
-    let target = spec.destinationUrl || APP_URL;
 
     // 1. Device OS Routing
     const userAgent = (req.headers.get("user-agent") || "").toLowerCase();

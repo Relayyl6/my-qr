@@ -884,15 +884,15 @@ export default function MicroSaasHub({
       {/* TAB 3: LINK SHORTENER */}
       {activeTab === 'shortener' && (
         <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#F7F8F5] p-4 rounded-xl border border-[#11140F]/5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#F7F8F5] dark:bg-[#0E1017] p-4 rounded-xl border border-[#11140F]/5 dark:border-white/10">
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold text-[#11140F]">Branded Link Shortener (307 Engine)</h3>
-                <span className="text-xs font-mono font-medium text-[#11140F]/60">
+                <h3 className="text-sm font-bold text-[#11140F] dark:text-white">Branded Link Shortener (307 Engine)</h3>
+                <span className="text-xs font-mono font-medium text-[#11140F]/60 dark:text-white/60">
                   ({shorteners.length} / {entitlements.microsaas.shortener} used)
                 </span>
               </div>
-              <p className="text-xs text-[#11140F]/60 mt-0.5">
+              <p className="text-xs text-[#11140F]/60 dark:text-white/60 mt-0.5">
                 Bitly-style high-speed redirects. Supports UTM campaign auto-tagging and device OS routing (iOS vs Android).
               </p>
             </div>
@@ -900,7 +900,7 @@ export default function MicroSaasHub({
               <button
                 type="button"
                 onClick={() => setShowShortenerModal(true)}
-                className="py-2 px-4 rounded-xl bg-[#11140F] text-white text-xs font-semibold hover:bg-[#2A2E25] transition-all flex items-center gap-1.5 shrink-0 cursor-pointer shadow-xs"
+                className="py-2 px-4 rounded-xl bg-[#11140F] dark:bg-emerald-600 text-white text-xs font-semibold hover:bg-[#2A2E25] dark:hover:bg-emerald-500 transition-all flex items-center gap-1.5 shrink-0 cursor-pointer shadow-xs"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Create Short Link</span>
@@ -917,21 +917,21 @@ export default function MicroSaasHub({
           </div>
 
           {loading ? (
-            <div className="py-12 text-center text-xs text-[#11140F]/50 flex items-center justify-center gap-2">
-              <RefreshCw className="w-4 h-4 animate-spin text-[#2F6B4F]" />
+            <div className="py-12 text-center text-xs text-[#11140F]/50 dark:text-white/50 flex items-center justify-center gap-2">
+              <RefreshCw className="w-4 h-4 animate-spin text-[#2F6B4F] dark:text-emerald-400" />
               <span>Loading short links...</span>
             </div>
           ) : shorteners.length === 0 ? (
-            <div className="py-12 text-center border-2 border-dashed border-[#11140F]/10 rounded-2xl p-6 space-y-3">
-              <Link2 className="w-8 h-8 mx-auto text-[#11140F]/30" />
-              <div className="text-sm font-semibold text-[#11140F]">No Short Links Created Yet</div>
-              <p className="text-xs text-[#11140F]/60 max-w-sm mx-auto">
+            <div className="py-12 text-center border-2 border-dashed border-[#11140F]/10 dark:border-white/10 rounded-2xl p-6 space-y-3">
+              <Link2 className="w-8 h-8 mx-auto text-[#11140F]/30 dark:text-white/30" />
+              <div className="text-sm font-semibold text-[#11140F] dark:text-white">No Short Links Created Yet</div>
+              <p className="text-xs text-[#11140F]/60 dark:text-white/60 max-w-sm mx-auto">
                 Shorten long URLs with custom vanity slugs, UTM analytics tags, and smart device OS routing.
               </p>
               <button
                 type="button"
                 onClick={() => setShowShortenerModal(true)}
-                className="py-2 px-4 rounded-xl bg-[#11140F] text-white text-xs font-semibold hover:bg-[#2A2E25] inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
+                className="py-2 px-4 rounded-xl bg-[#11140F] dark:bg-emerald-600 text-white text-xs font-semibold hover:bg-[#2A2E25] dark:hover:bg-emerald-500 inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Create Short Link</span>
@@ -941,7 +941,7 @@ export default function MicroSaasHub({
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-[#11140F]/10 text-[#11140F]/50 uppercase tracking-wider font-mono">
+                  <tr className="border-b border-[#11140F]/10 dark:border-white/10 text-[#11140F]/50 dark:text-white/40 uppercase tracking-wider font-mono">
                     <th className="pb-3 font-semibold">Title / Short Link</th>
                     <th className="pb-3 font-semibold">Destination URL</th>
                     <th className="pb-3 font-semibold">Features</th>
@@ -949,33 +949,33 @@ export default function MicroSaasHub({
                     <th className="pb-3 font-semibold text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#11140F]/5">
+                <tbody className="divide-y divide-[#11140F]/5 dark:divide-white/5">
                   {shorteners.map((link) => {
                     const spec = link.spec || {};
                     return (
-                      <tr key={link.id} className="hover:bg-[#F7F8F5]/60 transition-colors">
-                        <td className="py-3.5 font-medium text-[#11140F]">
-                          <div className="font-bold">{link.title}</div>
-                          <div className="font-mono text-[11px] text-[#2F6B4F]">/s/{link.slug}</div>
+                      <tr key={link.id} className="hover:bg-[#F7F8F5]/60 dark:hover:bg-white/[0.04] transition-colors">
+                        <td className="py-3.5 font-medium text-[#11140F] dark:text-white">
+                          <div className="font-bold text-sm">{link.title}</div>
+                          <div className="font-mono text-xs text-[#2F6B4F] dark:text-emerald-400 font-semibold tracking-tight">/s/{link.slug}</div>
                         </td>
-                        <td className="py-3.5 max-w-xs truncate text-[#11140F]/70">
+                        <td className="py-3.5 max-w-xs truncate text-[#11140F]/70 dark:text-white/70 font-mono text-[11px]">
                           {spec.destinationUrl}
                         </td>
                         <td className="py-3.5">
                           <div className="flex items-center gap-1.5">
                             {spec.utmCampaign && (
-                              <span className="text-[10px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded font-mono">
+                              <span className="text-[10px] bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-mono border border-transparent dark:border-blue-500/20">
                                 UTM
                               </span>
                             )}
                             {(spec.iosUrl || spec.androidUrl) && (
-                              <span className="text-[10px] bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded font-mono flex items-center gap-0.5">
+                              <span className="text-[10px] bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 px-1.5 py-0.5 rounded font-mono flex items-center gap-0.5 border border-transparent dark:border-purple-500/20">
                                 <Smartphone className="w-2.5 h-2.5" /> OS Route
                               </span>
                             )}
                           </div>
                         </td>
-                        <td className="py-3.5 text-right font-mono font-bold text-[#11140F]">
+                        <td className="py-3.5 text-right font-mono font-bold text-sm text-[#11140F] dark:text-white">
                           {link.scansCount}
                         </td>
                         <td className="py-3.5 text-right">
@@ -983,15 +983,15 @@ export default function MicroSaasHub({
                             <button
                               type="button"
                               onClick={() => handleCopyLink(`/s/${link.slug}`, link.id)}
-                              className="p-1.5 rounded-lg bg-[#F7F8F5] hover:bg-[#EEF0EA] text-[#11140F] transition-colors cursor-pointer"
+                              className="p-1.5 rounded-lg bg-[#F7F8F5] dark:bg-white/10 hover:bg-[#EEF0EA] dark:hover:bg-white/20 text-[#11140F] dark:text-white transition-colors cursor-pointer border border-transparent dark:border-white/10"
                               title="Copy Short URL"
                             >
-                              {copiedId === link.id ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                              {copiedId === link.id ? <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                             </button>
                             <Link
                               href={`/s/${link.slug}`}
                               target="_blank"
-                              className="p-1.5 rounded-lg bg-[#F7F8F5] hover:bg-[#EEF0EA] text-[#11140F] transition-colors"
+                              className="p-1.5 rounded-lg bg-[#F7F8F5] dark:bg-white/10 hover:bg-[#EEF0EA] dark:hover:bg-white/20 text-[#11140F] dark:text-white transition-colors border border-transparent dark:border-white/10"
                               title="Test Redirect"
                             >
                               <ExternalLink className="w-3.5 h-3.5" />
@@ -999,7 +999,7 @@ export default function MicroSaasHub({
                             <button
                               type="button"
                               onClick={() => handleOpenEditShortener(link)}
-                              className="p-1.5 rounded-lg bg-[#F7F8F5] hover:bg-[#EEF0EA] text-[#11140F] transition-colors cursor-pointer"
+                              className="p-1.5 rounded-lg bg-[#F7F8F5] dark:bg-white/10 hover:bg-[#EEF0EA] dark:hover:bg-white/20 text-[#11140F] dark:text-white transition-colors cursor-pointer border border-transparent dark:border-white/10"
                               title="Edit Short Link"
                             >
                               <Pencil className="w-3.5 h-3.5" />
@@ -1007,7 +1007,7 @@ export default function MicroSaasHub({
                             <button
                               type="button"
                               onClick={() => setPrintLink(link)}
-                              className="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 transition-colors cursor-pointer"
+                              className="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 transition-colors cursor-pointer border border-transparent dark:border-emerald-500/20"
                               title="Print QR Sign"
                             >
                               <Printer className="w-3.5 h-3.5" />
@@ -1015,7 +1015,7 @@ export default function MicroSaasHub({
                             <button
                               type="button"
                               onClick={() => setDeleteConfirmTarget({ id: link.id, title: link.title || 'Short Link' })}
-                              className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                              className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer"
                               title="Delete Link"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
