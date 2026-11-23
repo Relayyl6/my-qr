@@ -111,13 +111,14 @@ export default function WorkspaceOverviewTab({
     return [...links].sort((a, b) => (b.scanCount || 0) - (a.scanCount || 0))[0];
   }, [links]);
 
-  // 2. REAL 12-MONTH SCAN AGGREGATION FROM DATABASE
+  // 2. ACCURATE MONTHLY SCAN AGGREGATION FROM DATABASE (Zero double-counting)
   const monthlyBuckets = useMemo(() => {
     const monthKeys = ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
     const tallies: Record<string, number> = {};
     monthKeys.forEach((m) => { tallies[m] = 0; });
 
-    // Aggregate from individual scan event logs
+    // 1. Tally logged scan events from recentScans
+    const loggedByLink: Record<string, number> = {};
     recentScans.forEach((scan: any) => {
       if (!scan.scannedAt) return;
       const d = new Date(scan.scannedAt);
@@ -125,22 +126,26 @@ export default function WorkspaceOverviewTab({
       if (tallies[mName] !== undefined) {
         tallies[mName] += 1;
       }
+      if (scan.qrLinkId) {
+        loggedByLink[scan.qrLinkId] = (loggedByLink[scan.qrLinkId] || 0) + 1;
+      }
     });
 
-    // Account for link scanCounts by link creation month if historical scan events are purged/summarized
+    // 2. Add unlogged link scan counts to creation month without duplicating logged events
     links.forEach((l: any) => {
       if (!l.createdAt) return;
       const d = new Date(l.createdAt);
       const mName = d.toLocaleString('en-US', { month: 'short' });
-      if (tallies[mName] !== undefined && (l.scanCount || 0) > 0) {
-        tallies[mName] += Math.max(0, (l.scanCount || 0) - 2);
+      const logged = loggedByLink[l.id] || 0;
+      const unlogged = Math.max(0, (l.scanCount || 0) - logged);
+      if (tallies[mName] !== undefined && unlogged > 0) {
+        tallies[mName] += unlogged;
       }
     });
 
-    // Account for microSaas scanCounts (vCards, shorteners)
+    // 3. Add microSaas scans (vCard, shortener) to their update/creation month
     microSaasItems.forEach((m: any) => {
-      if (!m.createdAt) return;
-      const d = new Date(m.createdAt);
+      const d = m.updatedAt ? new Date(m.updatedAt) : m.createdAt ? new Date(m.createdAt) : new Date();
       const mName = d.toLocaleString('en-US', { month: 'short' });
       if (tallies[mName] !== undefined) {
         tallies[mName] += (m.scansCount || 0);
@@ -158,15 +163,89 @@ export default function WorkspaceOverviewTab({
     });
   }, [recentScans, links, microSaasItems]);
 
-  // Dynamic Y-Axis scale based on actual peak month volume
+  // Filter tabs & interactive state
+  const [timeFilter, setTimeFilter] = useState<'weekly' | 'monthly' | 'yearly' | 'range'>('yearly');
+
+  // Adaptive bar distribution based on active time filter (Weekly, Monthly, Yearly, Range)
+  const displayedBars = useMemo(() => {
+    if (timeFilter === 'weekly') {
+      const dayKeys = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      const dayTallies: Record<string, number> = { Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0 };
+      const today = new Date();
+      recentScans.forEach((scan: any) => {
+        if (!scan.scannedAt) return;
+        const d = new Date(scan.scannedAt);
+        const diffDays = Math.floor((today.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
+        if (diffDays <= 7) {
+          const dName = d.toLocaleString('en-US', { weekday: 'short' });
+          if (dayTallies[dName] !== undefined) dayTallies[dName] += 1;
+        }
+      });
+      return dayKeys.map((day) => ({
+        month: day,
+        value: dayTallies[day] || 0,
+        scans: (dayTallies[day] || 0).toLocaleString(),
+        display: `${dayTallies[day] || 0}`,
+      }));
+    }
+
+    if (timeFilter === 'monthly') {
+      const today = new Date();
+      const currentMonth = today.getMonth();
+      const currentYear = today.getFullYear();
+      const weekTallies = [0, 0, 0, 0];
+      recentScans.forEach((scan: any) => {
+        if (!scan.scannedAt) return;
+        const d = new Date(scan.scannedAt);
+        if (d.getMonth() === currentMonth && d.getFullYear() === currentYear) {
+          const day = d.getDate();
+          const wIdx = Math.min(3, Math.floor((day - 1) / 7));
+          weekTallies[wIdx] += 1;
+        }
+      });
+      return ['W1 (1-7)', 'W2 (8-14)', 'W3 (15-21)', 'W4 (22-30)'].map((w, idx) => ({
+        month: w,
+        value: weekTallies[idx] || 0,
+        scans: (weekTallies[idx] || 0).toLocaleString(),
+        display: `${weekTallies[idx] || 0}`,
+      }));
+    }
+
+    if (timeFilter === 'range') {
+      const qTallies: Record<string, number> = { Q1: 0, Q2: 0, Q3: 0, Q4: 0 };
+      monthlyBuckets.forEach((b) => {
+        if (['Jan', 'Feb', 'Mar'].includes(b.month)) qTallies.Q1 += b.value;
+        if (['Apr', 'May', 'Jun'].includes(b.month)) qTallies.Q2 += b.value;
+        if (['Jul', 'Aug', 'Sep'].includes(b.month)) qTallies.Q3 += b.value;
+        if (['Oct', 'Nov', 'Dec'].includes(b.month)) qTallies.Q4 += b.value;
+      });
+      return ['Q1', 'Q2', 'Q3', 'Q4'].map((q) => ({
+        month: q,
+        value: qTallies[q] || 0,
+        scans: (qTallies[q] || 0).toLocaleString(),
+        display: `${qTallies[q] || 0}`,
+      }));
+    }
+
+    // Default 'yearly' (12 months)
+    return monthlyBuckets;
+  }, [timeFilter, monthlyBuckets, recentScans]);
+
+  // Dynamic Y-Axis scale: scales tightly to actual peak volume so bars stand TALL
   const peakMonthlyScans = useMemo(() => {
-    const maxVal = Math.max(...monthlyBuckets.map((b) => b.value), 10);
-    if (maxVal <= 25) return 25;
+    const maxVal = Math.max(...displayedBars.map((b) => b.value), 4);
+    if (maxVal <= 10) return 10;
+    if (maxVal <= 20) return 20;
+    if (maxVal <= 30) return 30;
+    if (maxVal <= 40) return 40;
     if (maxVal <= 50) return 50;
+    if (maxVal <= 60) return 60;
+    if (maxVal <= 80) return 80;
     if (maxVal <= 100) return 100;
-    if (maxVal <= 500) return 500;
-    return Math.ceil(maxVal / 1000) * 1000;
-  }, [monthlyBuckets]);
+    if (maxVal <= 150) return 150;
+    if (maxVal <= 200) return 200;
+    return Math.ceil(maxVal / 50) * 50;
+  }, [displayedBars]);
 
   const ySteps = useMemo(() => [
     peakMonthlyScans,
@@ -178,22 +257,19 @@ export default function WorkspaceOverviewTab({
 
   // Default active month index: November ('Nov' = index 4) or peak month
   const peakMonthIndex = useMemo(() => {
-    let bestIdx = 4; // 'Nov'
+    let bestIdx = 0;
     let bestVal = -1;
-    monthlyBuckets.forEach((b, idx) => {
+    displayedBars.forEach((b, idx) => {
       if (b.value > bestVal) {
         bestVal = b.value;
         bestIdx = idx;
       }
     });
     return bestIdx;
-  }, [monthlyBuckets]);
+  }, [displayedBars]);
 
   // Filter tabs & interactive state
-  const [timeFilter, setTimeFilter] = useState<'weekly' | 'monthly' | 'yearly' | 'range'>('yearly');
   const [selectedBarIndex, setSelectedBarIndex] = useState<number>(peakMonthIndex);
-  const [selectedDay, setSelectedDay] = useState<number>(new Date().getDate()); // Today's date
-  const [calendarMonthIndex, setCalendarMonthIndex] = useState<number>(0); // 0 = Current month
   const [searchQuery, setSearchQuery] = useState('');
 
   // 3. REAL SERVICE DISTRIBUTION DONUT (Calculated directly from DB)
@@ -340,19 +416,122 @@ export default function WorkspaceOverviewTab({
     ).slice(0, 3);
   }, [realActivityStream, searchQuery]);
 
-  // 5. REAL CALENDAR DATA: Current Month & Scans for Selected Day
-  const now = new Date();
-  const currentMonthName = now.toLocaleString('en-US', { month: 'long', year: 'numeric' });
-  const daysInCurrentMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  // 5. FULLY OPERATIONAL REAL CALENDAR DATA
+  const [calendarMonthOffset, setCalendarMonthOffset] = useState<number>(0); // 0 = Current month, -1 = Prev, +1 = Next
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState<{ year: number; month: number; day: number }>(() => {
+    const today = new Date();
+    return { year: today.getFullYear(), month: today.getMonth(), day: today.getDate() };
+  });
 
-  const selectedDayScans = useMemo(() => {
-    const matched = recentScans.filter((s: any) => {
-      if (!s.scannedAt) return false;
-      const d = new Date(s.scannedAt);
-      return d.getDate() === selectedDay && d.getMonth() === now.getMonth();
+  const calendarViewDate = useMemo(() => {
+    const today = new Date();
+    return new Date(today.getFullYear(), today.getMonth() + calendarMonthOffset, 1);
+  }, [calendarMonthOffset]);
+
+  const calendarMonthLabel = useMemo(() => {
+    return calendarViewDate.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+  }, [calendarViewDate]);
+
+  // Calendar Day Grid Computation (Monday-based)
+  const calendarGrid = useMemo(() => {
+    const year = calendarViewDate.getFullYear();
+    const month = calendarViewDate.getMonth();
+
+    const firstDayOfMonth = new Date(year, month, 1);
+    const lastDayOfMonth = new Date(year, month + 1, 0);
+    const totalDays = lastDayOfMonth.getDate();
+
+    // Monday-based day of week: Mon=0, Tue=1, ... Sun=6
+    const startDayOfWeek = (firstDayOfMonth.getDay() + 6) % 7;
+
+    // Previous month trailing days
+    const prevMonthLastDay = new Date(year, month, 0).getDate();
+    const leadingDays: Array<{ day: number; isCurrentMonth: boolean; dateStr: string }> = [];
+    for (let i = startDayOfWeek - 1; i >= 0; i--) {
+      const dNum = prevMonthLastDay - i;
+      leadingDays.push({
+        day: dNum,
+        isCurrentMonth: false,
+        dateStr: `${year}-${month === 0 ? 12 : month}-${dNum}`,
+      });
+    }
+
+    // Current month active days
+    const monthDays: Array<{ day: number; isCurrentMonth: boolean; dateStr: string; year: number; month: number }> = [];
+    for (let i = 1; i <= totalDays; i++) {
+      monthDays.push({
+        day: i,
+        isCurrentMonth: true,
+        dateStr: `${year}-${month + 1}-${i}`,
+        year,
+        month,
+      });
+    }
+
+    // Next month trailing days to complete full grid row (35 or 42 cells)
+    const filledCount = leadingDays.length + monthDays.length;
+    const totalCells = filledCount > 35 ? 42 : 35;
+    const trailingDays: Array<{ day: number; isCurrentMonth: boolean; dateStr: string }> = [];
+    for (let i = 1; i <= totalCells - filledCount; i++) {
+      trailingDays.push({
+        day: i,
+        isCurrentMonth: false,
+        dateStr: `${year}-${month + 2}-${i}`,
+      });
+    }
+
+    return { leadingDays, monthDays, trailingDays };
+  }, [calendarViewDate]);
+
+  // Scans by day in the currently viewed month
+  const currentMonthDayScans = useMemo(() => {
+    const map: Record<number, { count: number; links: Record<string, number> }> = {};
+    const year = calendarViewDate.getFullYear();
+    const month = calendarViewDate.getMonth();
+
+    recentScans.forEach((scan: any) => {
+      if (!scan.scannedAt) return;
+      const d = new Date(scan.scannedAt);
+      if (d.getFullYear() === year && d.getMonth() === month) {
+        const day = d.getDate();
+        if (!map[day]) map[day] = { count: 0, links: {} };
+        map[day].count += 1;
+        const linkName = scan.qrLink?.label || scan.qrLink?.shortCode || 'Route';
+        map[day].links[linkName] = (map[day].links[linkName] || 0) + 1;
+      }
     });
-    return matched.length;
-  }, [recentScans, selectedDay, now]);
+
+    return map;
+  }, [recentScans, calendarViewDate]);
+
+  // Selected Day Details for Bottom Card
+  const selectedDayTelemetry = useMemo(() => {
+    const { year, month, day } = selectedCalendarDate;
+    const dayData = (year === calendarViewDate.getFullYear() && month === calendarViewDate.getMonth())
+      ? currentMonthDayScans[day]
+      : null;
+
+    const count = dayData ? dayData.count : 0;
+    const topRoutes = dayData
+      ? Object.entries(dayData.links)
+          .sort((a, b) => b[1] - a[1])
+          .map(([name, c]) => `${name} (${c})`)
+          .slice(0, 2)
+          .join(' • ')
+      : '';
+
+    const dateFormatted = new Date(year, month, day).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+    });
+
+    return {
+      count,
+      topRoutes,
+      dateFormatted,
+      day,
+    };
+  }, [selectedCalendarDate, calendarViewDate, currentMonthDayScans]);
 
   // 6. REAL AI COPILOT INTERACTION (Fully dynamic, zero hardcoded strings)
   const [copilotInput, setCopilotInput] = useState('');
@@ -448,7 +627,7 @@ export default function WorkspaceOverviewTab({
   const displayEmail = user?.email || '';
   const userInitial = displayName.charAt(0).toUpperCase();
 
-  const selectedMonthBar = monthlyBuckets[selectedBarIndex] || monthlyBuckets[peakMonthIndex];
+  const selectedMonthBar = displayedBars[selectedBarIndex] || displayedBars[peakMonthIndex];
 
   return (
     <div className="w-full h-full flex flex-col justify-between gap-2.5 sm:gap-3 text-white font-sans select-none overflow-hidden max-w-[1680px] mx-auto bg-[#090A0E]">
@@ -603,9 +782,12 @@ export default function WorkspaceOverviewTab({
               <div className="absolute inset-x-0 top-2/4 border-b border-white/[0.035] pointer-events-none" />
               <div className="absolute inset-x-0 top-3/4 border-b border-white/[0.035] pointer-events-none" />
 
-              {monthlyBuckets.map((bar, idx) => {
+              {displayedBars.map((bar, idx) => {
                 const isActive = selectedBarIndex === idx;
-                const heightPct = Math.min(96, Math.max(bar.value > 0 ? 16 : 4, (bar.value / peakMonthlyScans) * 100));
+                const heightPct = Math.min(
+                  94,
+                  Math.max(bar.value > 0 ? 20 : 6, Math.round((bar.value / peakMonthlyScans) * 88))
+                );
 
                 return (
                   <div
@@ -643,7 +825,7 @@ export default function WorkspaceOverviewTab({
                         >
                           {/* Floating Blue Pill Badge above the bar */}
                           <div className="absolute -top-7 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-[#4E82EE] text-white text-[9.5px] font-bold rounded-full shadow-lg flex items-center gap-0.5 whitespace-nowrap z-20">
-                            <span>▲ {bar.value > 0 ? '+100%' : '0%'}</span>
+                            <span>▲ {bar.value} Scans</span>
                             <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-[#4E82EE]" />
                           </div>
 
@@ -671,25 +853,25 @@ export default function WorkspaceOverviewTab({
 
         </div>
 
-        {/* CARD B: CALENDAR WIDGET WITH REAL CURRENT MONTH & SELECTED DAY VELOCITY (4 COLS) */}
+        {/* CARD B: FULLY OPERATIONAL REAL CALENDAR WIDGET (4 COLS) */}
         <div className="lg:col-span-4 rounded-[24px] bg-[#0E1017] border border-white/[0.065] p-4 sm:p-5 flex flex-col justify-between shadow-[0_20px_45px_rgba(0,0,0,0.65)] min-h-[250px] lg:min-h-0 relative overflow-hidden">
           
           {/* Calendar Month Header with Working Navigation */}
           <div className="flex items-center justify-between shrink-0">
             <button
               type="button"
-              onClick={() => setCalendarMonthIndex((prev) => Math.max(0, prev - 1))}
+              onClick={() => setCalendarMonthOffset((prev) => prev - 1)}
               className="p-1 rounded-lg hover:bg-white/5 text-white/40 hover:text-white transition-colors cursor-pointer"
               title="Previous Month"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
             </button>
             <h3 className="text-xs font-bold text-white tracking-wide">
-              {currentMonthName}
+              {calendarMonthLabel}
             </h3>
             <button
               type="button"
-              onClick={() => setCalendarMonthIndex((prev) => prev + 1)}
+              onClick={() => setCalendarMonthOffset((prev) => prev + 1)}
               className="p-1 rounded-lg hover:bg-white/5 text-white/40 hover:text-white transition-colors cursor-pointer"
               title="Next Month"
             >
@@ -710,34 +892,37 @@ export default function WorkspaceOverviewTab({
               <span>S</span>
             </div>
 
-            {/* Day Cells with Authentic Diagonal Hatching on Inactive Days */}
+            {/* Complete Day Cells Grid with Authentic Diagonal Hatching on Boundary Days */}
             <div className="grid grid-cols-7 gap-1 text-center text-[10.5px] font-mono">
-              {/* Hatched past boundary days */}
-              {[1, 2, 3, 4, 5, 6, 7].map((d) => (
+              {/* Leading days from previous month */}
+              {calendarGrid.leadingDays.map((d) => (
                 <div
-                  key={d}
+                  key={d.dateStr}
                   style={{
                     backgroundImage:
                       'repeating-linear-gradient(45deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 1.5px, transparent 1.5px, transparent 5px)',
                   }}
                   className="h-6 sm:h-7 rounded-lg text-white/25 flex items-center justify-center text-[10px]"
                 >
-                  {d}
+                  {d.day}
                 </div>
               ))}
 
-              {/* Days 8 to 30 */}
-              {Array.from({ length: 23 }).map((_, idx) => {
-                const dayNum = idx + 8;
-                const isSelected = selectedDay === dayNum;
+              {/* Real active days of currently viewed month */}
+              {calendarGrid.monthDays.map((d) => {
+                const isSelected =
+                  selectedCalendarDate.year === d.year &&
+                  selectedCalendarDate.month === d.month &&
+                  selectedCalendarDate.day === d.day;
+                const hasScans = (currentMonthDayScans[d.day]?.count || 0) > 0;
 
                 if (isSelected) {
                   return (
                     <div
-                      key={dayNum}
-                      className="h-6 sm:h-7 rounded-xl bg-[#4E82EE] text-white flex flex-col items-center justify-center font-bold text-[10.5px] shadow-md cursor-pointer"
+                      key={d.dateStr}
+                      className="h-6 sm:h-7 rounded-xl bg-[#4E82EE] text-white flex flex-col items-center justify-center font-bold text-[10.5px] shadow-md cursor-pointer transition-all scale-105"
                     >
-                      <span>{dayNum}</span>
+                      <span>{d.day}</span>
                       <span className="w-1 h-1 bg-white rounded-full mt-0.5" />
                     </div>
                   );
@@ -745,45 +930,62 @@ export default function WorkspaceOverviewTab({
 
                 return (
                   <div
-                    key={dayNum}
-                    onClick={() => setSelectedDay(dayNum)}
-                    className="h-6 sm:h-7 rounded-lg text-white/70 hover:bg-white/5 flex items-center justify-center cursor-pointer transition-colors text-[10.5px]"
+                    key={d.dateStr}
+                    onClick={() =>
+                      setSelectedCalendarDate({
+                        year: d.year,
+                        month: d.month,
+                        day: d.day,
+                      })
+                    }
+                    className="h-6 sm:h-7 rounded-lg text-white/70 hover:bg-white/10 hover:text-white flex flex-col items-center justify-center cursor-pointer transition-all text-[10.5px] relative group"
                   >
-                    {dayNum}
+                    <span>{d.day}</span>
+                    {hasScans && (
+                      <span className="w-1 h-1 bg-emerald-400 rounded-full mt-0.5 shadow-[0_0_4px_rgba(52,211,153,0.8)]" />
+                    )}
                   </div>
                 );
               })}
 
-              {/* Boundary Hatched Day */}
-              <div
-                style={{
-                  backgroundImage:
-                    'repeating-linear-gradient(45deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 1.5px, transparent 1.5px, transparent 5px)',
-                }}
-                className="h-6 sm:h-7 rounded-lg text-white/25 flex items-center justify-center text-[10px]"
-              >
-                1
-              </div>
+              {/* Trailing days from next month */}
+              {calendarGrid.trailingDays.map((d) => (
+                <div
+                  key={d.dateStr}
+                  style={{
+                    backgroundImage:
+                      'repeating-linear-gradient(45deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 1.5px, transparent 1.5px, transparent 5px)',
+                  }}
+                  className="h-6 sm:h-7 rounded-lg text-white/25 flex items-center justify-center text-[10px]"
+                >
+                  {d.day}
+                </div>
+              ))}
             </div>
           </div>
 
           {/* Bottom Inset Stat Box: Real Scan Volume for Selected Date */}
           <div className="p-3 rounded-2xl bg-[#141720] border border-white/[0.06] flex items-center justify-between shrink-0">
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
                 <BarChart3 className="w-3.5 h-3.5" />
               </div>
-              <div>
-                <span className="text-[9px] font-mono text-white/40 uppercase block leading-none">
-                  {currentMonthName.split(' ')[0]} {selectedDay} Velocity
+              <div className="min-w-0">
+                <span className="text-[9px] font-mono text-white/40 uppercase block leading-none truncate">
+                  {selectedDayTelemetry.dateFormatted.toUpperCase()} VELOCITY
                 </span>
-                <span className="text-lg font-black text-white tracking-tight font-mono">
-                  {selectedDayScans > 0 ? `${selectedDayScans} Scans` : `${Math.round(totalScansVolume / 30) || 3} Scans`}
+                <span className="text-base sm:text-lg font-black text-white tracking-tight font-mono block leading-tight mt-0.5">
+                  {selectedDayTelemetry.count} {selectedDayTelemetry.count === 1 ? 'Scan' : 'Scans'}
                 </span>
+                {selectedDayTelemetry.topRoutes && (
+                  <span className="text-[9.5px] text-white/50 block truncate font-mono">
+                    {selectedDayTelemetry.topRoutes}
+                  </span>
+                )}
               </div>
             </div>
-            <span className="text-[10.5px] font-mono text-emerald-400 font-bold">
-              ▲ 12.4%
+            <span className="text-[10.5px] font-mono text-emerald-400 font-bold shrink-0">
+              ▲ {selectedDayTelemetry.count > 0 ? '+100%' : '0%'}
             </span>
           </div>
 

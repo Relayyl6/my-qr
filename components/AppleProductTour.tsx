@@ -344,13 +344,13 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
           </div>
 
           <h1
-            className="text-3xl sm:text-4xl md:text-[2.75rem] lg:text-[3.6rem] xl:text-[4.2rem] font-bold tracking-tight leading-[1.12] text-white"
+            className="text-3xl sm:text-4xl md:text-[2.6rem] lg:text-[3.4rem] xl:text-[4.1rem] font-bold tracking-tight leading-[1.24] text-white flex flex-col items-center gap-2.5 sm:gap-4"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            <span className="block whitespace-normal md:whitespace-nowrap">
+            <span className="block whitespace-normal md:whitespace-nowrap pb-0.5">
               Consolidate All Your Micro-SaaS Apps
             </span>
-            <span className="block whitespace-normal md:whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-emerald-400">
+            <span className="block whitespace-normal md:whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-emerald-400 pt-0.5">
               With Powerful DynamicQR
             </span>
           </h1>
@@ -435,7 +435,7 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
       {/* 3. The Ancient Bridge Section: Physical-to-Digital Durability */}
       {/* (Featuring Image 3 as Background: ancient-bridge-landscape.jpg) */}
       {/* ============================================================ */}
-      <section className="relative py-24 md:py-36 px-5 md:px-8 max-w-[1280px] mx-auto my-12 rounded-3xl overflow-hidden border border-white/15 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.95)]">
+      <section className="relative py-12 md:py-16 px-5 md:px-8 max-w-[1240px] mx-auto my-8 rounded-3xl overflow-hidden border border-white/15 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.9)]">
         {/* Image 3 as Background */}
         <div className="absolute inset-0 -z-20">
           <img
@@ -449,65 +449,64 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
         <div className="absolute inset-0 bg-gradient-to-t from-[#11140F] via-[#11140F]/80 to-[#11140F]/90 -z-10" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(17,20,15,0.65)_0%,rgba(17,20,15,0.95)_100%)] -z-10" />
 
-        <div className="relative z-10 max-w-4xl mx-auto text-center space-y-6">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[11.5px] font-mono tracking-wider uppercase backdrop-blur-md shadow-md">
+        <div className="relative z-10 max-w-4xl mx-auto text-center space-y-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[11px] font-mono tracking-wider uppercase backdrop-blur-md shadow-md">
             <Building2 className="w-3.5 h-3.5 text-emerald-400" />
             Architectural Longevity · Zero Reprint Guarantee
           </div>
 
           <h2
-            className="text-[2.2rem] sm:text-[3.2rem] md:text-[3.8rem] font-bold tracking-tight text-white leading-tight"
+            className="text-xl sm:text-2xl md:text-[2rem] lg:text-[2.35rem] font-bold tracking-tight text-white leading-snug max-w-3xl mx-auto"
             style={{ fontFamily: 'var(--font-display)' }}
           >
             Built to last generations.{' '}
-            <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-emerald-400">
               The indestructible bridge between physical media and digital intelligence.
             </span>
           </h2>
 
-          <p className="text-[15.5px] sm:text-[18px] text-white/75 max-w-[58ch] mx-auto leading-relaxed">
+          <p className="text-[13.5px] sm:text-[15px] text-white/70 max-w-[56ch] mx-auto leading-relaxed">
             Physical signage, restaurant tabletop stands, brass plaques, and packaging outlive software cycles. When you print a QR code on physical materials, failure is not an option. DynamicQR provides the permanent bridge that keeps your physical assets alive forever.
           </p>
 
           {/* 4 Frosted Glass Architectural Pillar Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-6 text-left">
-            <div className="rounded-2xl border border-white/15 bg-[#11140F]/80 backdrop-blur-md p-5 space-y-2 hover:border-emerald-500/40 transition-all shadow-xl">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-emerald-400">
-                <ShieldCheck className="w-4 h-4" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-3 text-left">
+            <div className="rounded-xl border border-white/15 bg-[#11140F]/85 backdrop-blur-md p-4 space-y-1.5 hover:border-emerald-500/40 transition-all shadow-lg">
+              <div className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-emerald-400">
+                <ShieldCheck className="w-3.5 h-3.5" />
               </div>
-              <h3 className="text-[14px] font-bold text-white">Zero Reprint Guarantee</h3>
-              <p className="text-[12px] text-white/60 leading-relaxed">
+              <h3 className="text-[13px] font-bold text-white">Zero Reprint Guarantee</h3>
+              <p className="text-[11.5px] text-white/60 leading-relaxed">
                 Update destinations, menus, or Wi-Fi passwords anytime without re-engraving metal or re-ordering print.
               </p>
             </div>
 
-            <div className="rounded-2xl border border-white/15 bg-[#11140F]/80 backdrop-blur-md p-5 space-y-2 hover:border-emerald-500/40 transition-all shadow-xl">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-emerald-400">
-                <Zap className="w-4 h-4" />
+            <div className="rounded-xl border border-white/15 bg-[#11140F]/85 backdrop-blur-md p-4 space-y-1.5 hover:border-emerald-500/40 transition-all shadow-lg">
+              <div className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-emerald-400">
+                <Zap className="w-3.5 h-3.5" />
               </div>
-              <h3 className="text-[14px] font-bold text-white">Sub-10ms 307 Ingress</h3>
-              <p className="text-[12px] text-white/60 leading-relaxed">
+              <h3 className="text-[13px] font-bold text-white">Sub-10ms 307 Ingress</h3>
+              <p className="text-[11.5px] text-white/60 leading-relaxed">
                 Sub-millisecond edge wire resolution delivers instantaneous mobile handoffs with zero intermediary splash screens.
               </p>
             </div>
 
-            <div className="rounded-2xl border border-white/15 bg-[#11140F]/80 backdrop-blur-md p-5 space-y-2 hover:border-emerald-500/40 transition-all shadow-xl">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-emerald-400">
-                <Printer className="w-4 h-4" />
+            <div className="rounded-xl border border-white/15 bg-[#11140F]/85 backdrop-blur-md p-4 space-y-1.5 hover:border-emerald-500/40 transition-all shadow-lg">
+              <div className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-emerald-400">
+                <Printer className="w-3.5 h-3.5" />
               </div>
-              <h3 className="text-[14px] font-bold text-white">300 DPI Vector Math</h3>
-              <p className="text-[12px] text-white/60 leading-relaxed">
+              <h3 className="text-[13px] font-bold text-white">300 DPI Vector Math</h3>
+              <p className="text-[11.5px] text-white/60 leading-relaxed">
                 Sub-pixel SVG path geometry with mandatory 10% quiet-zone buffers ensures scannability on all print surfaces.
               </p>
             </div>
 
-            <div className="rounded-2xl border border-white/15 bg-[#11140F]/80 backdrop-blur-md p-5 space-y-2 hover:border-emerald-500/40 transition-all shadow-xl">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-emerald-400">
-                <Clock className="w-4 h-4" />
+            <div className="rounded-xl border border-white/15 bg-[#11140F]/85 backdrop-blur-md p-4 space-y-1.5 hover:border-emerald-500/40 transition-all shadow-lg">
+              <div className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-emerald-400">
+                <Clock className="w-3.5 h-3.5" />
               </div>
-              <h3 className="text-[14px] font-bold text-white">Temporal Dayparting</h3>
-              <p className="text-[12px] text-white/60 leading-relaxed">
+              <h3 className="text-[13px] font-bold text-white">Temporal Dayparting</h3>
+              <p className="text-[11.5px] text-white/60 leading-relaxed">
                 Automatically swap morning breakfast specials to evening cocktail hours on a single printed asset.
               </p>
             </div>
