@@ -344,17 +344,17 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
           </div>
 
           <h1
-            className="flex flex-col items-center gap-0.5 sm:gap-1 text-center"
+            className="flex flex-col items-center text-center"
             style={{ fontFamily: 'var(--font-display)' }}
           >
             <span className="block whitespace-normal md:whitespace-nowrap text-2xl sm:text-3xl md:text-[2.2rem] lg:text-[2.6rem] xl:text-[3rem] font-bold tracking-tight text-white leading-tight">
               Next-Gen Dynamic QR Codes
             </span>
-            <span className="inline-flex flex-wrap items-center justify-center gap-x-2.5 sm:gap-x-3.5 text-3xl sm:text-5xl md:text-[3.5rem] lg:text-[4.6rem] xl:text-[5.2rem] tracking-tight leading-none overflow-visible py-1">
+            <span className="inline-flex flex-wrap items-baseline justify-center gap-x-2 sm:gap-x-3 text-3xl sm:text-5xl md:text-[3.5rem] lg:text-[4.6rem] xl:text-[5.2rem] tracking-tight leading-tight overflow-visible -mt-1 sm:-mt-2 md:-mt-3">
               <span className="inline-block text-[0.75em] sm:text-[0.78em] font-medium text-white/85">
                 With Powerful
               </span>
-              <span className="inline-block font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-emerald-400 py-3 sm:py-4 px-2 leading-normal overflow-visible">
+              <span className="inline-block font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-emerald-400 pt-1 pb-2 px-1 overflow-visible">
                 DynamicQR
               </span>
             </span>
