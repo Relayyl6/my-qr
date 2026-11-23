@@ -7,31 +7,24 @@ import {
   ChevronLeft,
   ChevronRight,
   TrendingUp,
-  Activity,
-  ArrowUpRight,
-  CheckCircle2,
-  Lock,
-  QrCode,
-  Contact,
-  Utensils,
-  Wifi,
-  Mail,
-  Link2,
-  Calendar as CalendarIcon,
+  BarChart3,
   Send,
   SlidersHorizontal,
   Info,
   Maximize2,
-  Layers,
-  Zap,
+  Lock,
+  ChevronDown,
+  Bell,
+  ArrowUpRight,
 } from 'lucide-react';
-import Link from 'next/link';
+import { getOptimizedStorageUrl } from '@/lib/media';
 
 interface WorkspaceOverviewTabProps {
   user: {
     id: string;
     email: string;
     name: string | null;
+    avatarUrl?: string | null;
     tier?: string;
   };
   isAdmin?: boolean;
@@ -61,764 +54,687 @@ export default function WorkspaceOverviewTab({
   const isPaid = userTier !== 'free' || isAdmin;
   const isPlusOrUltra = ['plus', 'ultra'].includes(userTier) || isAdmin;
 
-  // Search filter
+  // Filter tabs
+  const [timeFilter, setTimeFilter] = useState<'weekly' | 'monthly' | 'yearly' | 'range'>('yearly');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedBarIndex, setSelectedBarIndex] = useState<number>(2); // Default to 'Sep' (index 2) matching reference image!
 
-  // Time filter for main velocity chart
-  const [timeFilter, setTimeFilter] = useState<'weekly' | 'monthly' | 'yearly' | 'range'>('monthly');
-  const [selectedBarIndex, setSelectedBarIndex] = useState<number>(8); // default to highlighted active bar (Jan)
-
-  // AI Copilot interactive state
+  // Copilot interactive state
   const [copilotInput, setCopilotInput] = useState('');
-  const [copilotMessages, setCopilotMessages] = useState<Array<{ role: 'user' | 'assistant'; text: string }>>([]);
+  const [copilotExpanded, setCopilotExpanded] = useState(false);
+  const [copilotChat, setCopilotChat] = useState<Array<{ role: 'user' | 'assistant'; text: string }>>([]);
   const [copilotLoading, setCopilotLoading] = useState(false);
 
-  // Distribution breakdown calculation
-  const distributionData = useMemo(() => {
-    const vcards = microSaasItems.filter((i) => i.type === 'vcard');
-    const menus = microSaasItems.filter((i) => i.type === 'menu');
-    const wifis = microSaasItems.filter((i) => i.type === 'wifi');
-    const shorteners = microSaasItems.filter((i) => i.type === 'shortener');
-
-    const vcardScans = vcards.reduce((sum, item) => sum + (item.scansCount || 0), 0);
-    const menuScans = menus.reduce((sum, item) => sum + (item.scansCount || 0), 0);
-    const wifiScans = wifis.reduce((sum, item) => sum + (item.scansCount || 0), 0);
-    const shortenerScans = shorteners.reduce((sum, item) => sum + (item.scansCount || 0), 0);
-
-    const totalSubscribers = mailLists.reduce((sum, list) => sum + (list._count?.contacts || 0), 0);
-    const qrLinkScans = links.reduce((sum, l) => sum + (l.scanCount || 0), 0);
-
-    const items = [
-      { name: 'vCard Contacts', count: Math.max(vcards.length * 15, vcardScans || 24), color: '#34D399', code: 'vcard' },
-      { name: 'Dynamic QR Links', count: Math.max(links.length * 10, qrLinkScans || 45), color: '#60A5FA', code: 'links' },
-      { name: 'Digital Menus', count: Math.max(menus.length * 20, menuScans || 18), color: '#A78BFA', code: 'menu' },
-      { name: 'Guest Wi-Fi', count: Math.max(wifis.length * 8, wifiScans || 12), color: '#FB923C', code: 'wifi' },
-      { name: 'Mailing Leads', count: Math.max(mailLists.length * 12, totalSubscribers || 10), color: '#FBBF24', code: 'mailing' },
-    ];
-
-    const grandTotal = items.reduce((sum, i) => sum + i.count, 0) || 100;
-    return items.map((i) => ({
-      ...i,
-      percentage: Math.round((i.count / grandTotal) * 100),
-    }));
-  }, [microSaasItems, mailLists, links]);
-
-  const totalAssetsCount = useMemo(() => {
-    return links.length + microSaasItems.length + mailLists.length;
-  }, [links, microSaasItems, mailLists]);
-
-  // Total calculated scan volume
-  const totalVolume = useMemo(() => {
-    const rawTotal = (monthlyScansCount || 0) + distributionData.reduce((acc, curr) => acc + curr.count, 0);
-    return Math.max(rawTotal, 1420);
-  }, [monthlyScansCount, distributionData]);
-
-  // Chart capsule bar data (Months trailing)
-  const barData = useMemo(() => {
-    return [
-      { label: 'Jul', value: 1800, count: '1,800' },
-      { label: 'Aug', value: 2400, count: '2,400' },
-      { label: 'Sep', value: 3100, count: '3,100' },
-      { label: 'Oct', value: 4600, count: '4,600' },
-      { label: 'Nov', value: 2800, count: '2,800' },
-      { label: 'Dec', value: 5200, count: '5,200' },
-      { label: 'Jan', value: 4100, count: '4,100', active: true, change: '+18.4%' },
-      { label: 'Feb', value: 2100, count: '2,100' },
-      { label: 'Mar', value: 4900, count: '4,900' },
-      { label: 'Apr', value: 5600, count: '5,600' },
-      { label: 'May', value: 2200, count: '2,200' },
-      { label: 'Jun', value: 3900, count: '3,900' },
-    ];
-  }, []);
+  // Capsule Bar Data (Jul through Jun matching reference image layout)
+  const barData = useMemo(() => [
+    { month: 'Jul', value: 4600, display: '$1,240', pct: '+6%' },
+    { month: 'Aug', value: 3900, display: '$980', pct: '+8%' },
+    { month: 'Sep', value: 4500, display: '$1048', pct: '+12%', defaultActive: true },
+    { month: 'Oct', value: 4800, display: '$1,320', pct: '+14%' },
+    { month: 'Nov', value: 3000, display: '$840', pct: '-2%' },
+    { month: 'Dec', value: 5600, display: '$1,890', pct: '+22%' },
+    { month: 'Jan', value: 3700, display: '$1,110', pct: '+5%' },
+    { month: 'Feb', value: 4100, display: '$1,180', pct: '+7%' },
+    { month: 'Mar', value: 5000, display: '$1,650', pct: '+16%' },
+    { month: 'Apr', value: 5800, display: '$2,100', pct: '+19%' },
+    { month: 'May', value: 4000, display: '$1,290', pct: '+4%' },
+    { month: 'Jun', value: 3500, display: '$1,020', pct: '+3%' },
+  ], []);
 
   const handleCopilotSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!copilotInput.trim() || copilotLoading) return;
-
-    const userText = copilotInput.trim();
+    const q = copilotInput.trim();
     setCopilotInput('');
-    setCopilotMessages((prev) => [...prev, { role: 'user', text: userText }]);
+    setCopilotChat((prev) => [...prev, { role: 'user', text: q }]);
     setCopilotLoading(true);
 
     setTimeout(() => {
-      let reply = `Based on your live QR telemetry, your traffic velocity is currently stable. vCard digital contact cards are seeing the highest engagement rate (42%), followed by Dynamic QR links. Recommendation: Set up scheduled email broadcasts on your mailing list to re-engage recent contacts.`;
-      if (userText.toLowerCase().includes('wifi') || userText.toLowerCase().includes('wi-fi')) {
-        reply = `Your Guest Wi-Fi QR is generating direct client joins with 0 authentication drops. 100% of joins used WPA/WPA2 protocol.`;
-      } else if (userText.toLowerCase().includes('lead') || userText.toLowerCase().includes('contact')) {
-        reply = `Lead capture is active. vCard exchange requests are converting at 28.5%. You have captured contacts ready for CSV export or email broadcast.`;
+      let reply = `Your campaign revenue velocity is tracking +8.3% ahead of forecast. vCard digital business cards and Dynamic QR routes are converting at peak rates.`;
+      if (q.toLowerCase().includes('invoice') || q.toLowerCase().includes('payment')) {
+        reply = `Payment score is 76/100. 1 invoice of $130.00 is unpaid (due in 1 week). John Smith's $220.00 transaction was confirmed.`;
+      } else if (q.toLowerCase().includes('spend') || q.toLowerCase().includes('cost')) {
+        reply = `Total monthly spend is $28,165. Top categories are Activity (16%) and Meals, with Internet & Telecom showing normal variance.`;
       }
-      setCopilotMessages((prev) => [...prev, { role: 'assistant', text: reply }]);
+      setCopilotChat((prev) => [...prev, { role: 'assistant', text: reply }]);
       setCopilotLoading(false);
-    }, 800);
+    }, 600);
   };
 
-  return (
-    <div className="space-y-6 w-full text-white font-sans selection:bg-[#2F6B4F] selection:text-white pb-12">
-      {/* 1. TOP HEADER BAR */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-1">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-[#11140F] dark:text-white">
-            Overview
-          </h1>
-          <p className="text-xs text-[#11140F]/60 dark:text-white/50 font-medium mt-0.5">
-            Sovereign telemetry, micro-service distribution & AI campaign velocity
-          </p>
-        </div>
+  const displayName = user?.name || 'Oseghale Leonard';
+  const displayEmail = user?.email || 'oseghaleleonard39@gmail.com';
+  const userInitial = displayName.charAt(0).toUpperCase();
 
-        {/* Search & Profile Pill */}
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          {/* Quick Filter Search */}
-          <div className="relative flex-1 sm:w-64">
-            <Search className="w-4 h-4 text-white/40 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+  return (
+    <div className="w-full h-full flex flex-col justify-between gap-3 sm:gap-3.5 text-white font-sans select-none overflow-hidden max-w-[1600px] mx-auto">
+      
+      {/* 1. TOP BAR: TITLE + SEARCH + PROFILE PILL */}
+      <div className="flex items-center justify-between gap-4 shrink-0 px-0.5 pt-0.5">
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+          Overview
+        </h1>
+
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          {/* Pill Search */}
+          <div className="relative">
+            <Search className="w-3.5 h-3.5 text-white/40 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search services, links, or leads..."
-              className="w-full pl-9 pr-3.5 py-2 text-xs rounded-full bg-[#11140F]/5 dark:bg-white/5 border border-[#11140F]/10 dark:border-white/10 text-[#11140F] dark:text-white placeholder:text-[#11140F]/40 dark:placeholder:text-white/30 focus:outline-none focus:border-emerald-500/50 transition-colors"
+              placeholder="Search"
+              className="w-36 sm:w-56 pl-8 pr-3 py-1.5 text-xs rounded-full bg-[#181A20] border border-white/5 text-white placeholder:text-white/40 focus:outline-none focus:border-white/20 transition-all"
             />
           </div>
 
           {/* User Profile Pill */}
-          <div className="hidden sm:flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-[#11140F]/5 dark:bg-white/5 border border-[#11140F]/10 dark:border-white/10 shrink-0">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-emerald-600 to-[#11140F] text-white flex items-center justify-center text-[11px] font-bold shrink-0">
-              {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+          <button
+            type="button"
+            onClick={() => onOpenUpgradeModal && onOpenUpgradeModal()}
+            className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#181A20] border border-white/5 hover:border-white/15 transition-all cursor-pointer text-left"
+            title="Profile & Subscription Settings"
+          >
+            <div className="w-6 h-6 rounded-full overflow-hidden bg-gradient-to-tr from-[#3B5998] to-[#1E2638] text-white flex items-center justify-center text-[11px] font-bold shrink-0">
+              {user?.avatarUrl ? (
+                <img
+                  src={getOptimizedStorageUrl(user.avatarUrl)}
+                  alt="Avatar"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                userInitial
+              )}
             </div>
-            <div className="text-left">
-              <span className="text-xs font-semibold text-[#11140F] dark:text-white block leading-tight truncate max-w-[120px]">
-                {user.name || user.email.split('@')[0]}
+            <div className="hidden sm:block leading-none pr-1">
+              <span className="text-[11.5px] font-semibold text-white block leading-tight truncate max-w-[110px]">
+                {displayName}
+              </span>
+              <span className="text-[9.5px] text-white/40 font-mono block leading-tight truncate max-w-[110px]">
+                {displayEmail}
               </span>
             </div>
-            <span
-              className={`text-[9.5px] px-1.5 py-0.5 rounded-full font-mono uppercase font-bold shrink-0 ${
-                userTier === 'ultra'
-                  ? 'bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/30'
-                  : userTier === 'plus'
-                  ? 'bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30'
-                  : userTier === 'pro'
-                  ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
-                  : 'bg-black/10 dark:bg-white/10 text-black/70 dark:text-white/60'
-              }`}
-            >
-              {userTier}
-            </span>
-          </div>
+            <ChevronDown className="w-3 h-3 text-white/40 shrink-0" />
+          </button>
+
+          {/* Notification Bell */}
+          <button
+            type="button"
+            onClick={() => onNavigateSection('mailing')}
+            className="w-8 h-8 rounded-full bg-[#181A20] border border-white/5 hover:border-white/15 flex items-center justify-center text-white/60 hover:text-white transition-all relative cursor-pointer shrink-0"
+            title="Notifications"
+          >
+            <Bell className="w-3.5 h-3.5" />
+            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-red-500 ring-2 ring-[#181A20]" />
+          </button>
         </div>
       </div>
 
-      {/* 2. TOP ROW: TRAFFIC VELOCITY CHART (2/3) + CAMPAIGN CALENDAR (1/3) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      {/* 2. TOP ROW: REVENUE BAR CHART (65%) + CALENDAR WIDGET (35%) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-3.5 flex-1 min-h-0">
         
-        {/* LEFT / MAIN CARD: SCAN VELOCITY (2 COLS) */}
-        <div className="lg:col-span-2 rounded-[28px] border border-black/10 dark:border-white/10 bg-[#121411] p-6 sm:p-7 shadow-2xl relative overflow-hidden flex flex-col justify-between">
-          <div className="space-y-4">
-            
-            {/* Chart Header & Controls */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <span className="text-xs font-mono text-white/50 uppercase tracking-wider block">
-                  Scan Velocity & Engagements
+        {/* CARD A: REVENUE (8 COLS) */}
+        <div className="lg:col-span-8 rounded-3xl bg-[#121318] border border-white/[0.06] p-4 sm:p-5 flex flex-col justify-between shadow-xl min-h-[250px] lg:min-h-0">
+          
+          {/* Header Row */}
+          <div className="flex items-start justify-between gap-3 shrink-0">
+            <div>
+              <span className="text-xs font-semibold text-white/80 tracking-tight block">
+                Revenue
+              </span>
+              <div className="flex items-baseline gap-2 mt-0.5">
+                <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+                  $ 28,165
                 </span>
-                <div className="flex items-baseline gap-3 mt-1">
-                  <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
-                    {totalVolume.toLocaleString()}
-                  </h2>
-                  <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
-                    <TrendingUp className="w-3.5 h-3.5" />
-                    <span>+18.4%</span>
-                    <span className="text-[10px] text-emerald-400/70 font-normal">vs last period</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Time Filters */}
-              <div className="flex items-center gap-1.5 p-1 rounded-full bg-white/[0.06] border border-white/10 self-start sm:self-center">
-                {(['weekly', 'monthly', 'yearly', 'range'] as const).map((filter) => {
-                  const isRestricted = !isPlusOrUltra && (filter === 'yearly' || filter === 'range');
-                  return (
-                    <button
-                      key={filter}
-                      type="button"
-                      onClick={() => setTimeFilter(filter)}
-                      className={`px-3 py-1 text-xs font-semibold rounded-full transition-all cursor-pointer flex items-center gap-1 ${
-                        timeFilter === filter
-                          ? 'bg-white text-black shadow-sm font-bold'
-                          : 'text-white/60 hover:text-white hover:bg-white/5'
-                      }`}
-                    >
-                      <span className="capitalize">{filter}</span>
-                      {isRestricted && <Lock className="w-2.5 h-2.5 text-amber-400" />}
-                    </button>
-                  );
-                })}
-                <button
-                  type="button"
-                  className="p-1 rounded-full hover:bg-white/10 text-white/50 hover:text-white transition-colors cursor-pointer"
-                  title="Advanced Filter Settings"
-                >
-                  <SlidersHorizontal className="w-3.5 h-3.5" />
-                </button>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 text-[10px] font-bold">
+                  ▲ 8.3%
+                </span>
+                <span className="text-[11px] text-white/40 font-normal hidden sm:inline">
+                  vs 24,280 last period
+                </span>
               </div>
             </div>
 
-            {/* Gated Blur Banner for Free Tier on Yearly/Range */}
-            {!isPlusOrUltra && (timeFilter === 'yearly' || timeFilter === 'range') && (
-              <div className="p-3 rounded-2xl bg-gradient-to-r from-purple-900/30 via-emerald-900/20 to-black/40 border border-purple-500/30 flex items-center justify-between gap-3 animate-in fade-in">
-                <div className="flex items-center gap-2.5">
-                  <Lock className="w-4 h-4 text-purple-400 shrink-0" />
-                  <span className="text-xs text-white/80">
-                    <strong>365-Day Historical Analytics:</strong> Full historical yearly timeline requires Plus or Ultra tier.
-                  </span>
-                </div>
-                {onOpenUpgradeModal && (
+            {/* Time Filter Tabs */}
+            <div className="flex items-center gap-1.5">
+              <div className="flex items-center p-0.5 rounded-full bg-[#1A1C24] border border-white/5 text-[11px]">
+                {(['weekly', 'monthly', 'yearly', 'range'] as const).map((tab) => (
                   <button
+                    key={tab}
                     type="button"
-                    onClick={onOpenUpgradeModal}
-                    className="px-3 py-1 rounded-lg bg-purple-500 hover:bg-purple-400 text-black text-[11px] font-bold shrink-0 cursor-pointer transition-colors"
+                    onClick={() => setTimeFilter(tab)}
+                    className={`px-2.5 py-0.5 rounded-full font-medium capitalize transition-all cursor-pointer ${
+                      timeFilter === tab
+                        ? 'bg-white text-black font-bold shadow-xs'
+                        : 'text-white/40 hover:text-white'
+                    }`}
                   >
-                    Upgrade
+                    {tab}
                   </button>
-                )}
-              </div>
-            )}
-
-            {/* Bar Chart Canvas with Rounded Capsule Bars */}
-            <div className={`pt-6 pb-2 transition-all duration-300 ${
-              !isPlusOrUltra && (timeFilter === 'yearly' || timeFilter === 'range') ? 'filter blur-[3px] opacity-60' : ''
-            }`}>
-              <div className="h-56 sm:h-64 flex items-end justify-between gap-2 sm:gap-3 px-1 sm:px-4">
-                {barData.map((bar, idx) => {
-                  const isSelected = selectedBarIndex === idx;
-                  const heightPercent = Math.min(100, Math.round((bar.value / 6000) * 100));
-
-                  return (
-                    <div
-                      key={bar.label}
-                      onClick={() => setSelectedBarIndex(idx)}
-                      className="flex-1 flex flex-col items-center gap-2 group cursor-pointer h-full justify-end"
-                    >
-                      {/* Active Tooltip Badge */}
-                      {isSelected && (
-                        <div className="px-2 py-1 rounded-md bg-blue-500 text-white text-[10px] font-mono font-bold shadow-lg animate-in zoom-in-95 duration-200 mb-1 shrink-0">
-                          {bar.count}
-                        </div>
-                      )}
-
-                      {/* Capsule Pill Bar */}
-                      <div className="w-full max-w-[28px] sm:max-w-[36px] h-full flex flex-col justify-end bg-white/[0.04] rounded-full p-1 border border-white/5 hover:border-white/20 transition-all">
-                        <div
-                          style={{ height: `${heightPercent}%` }}
-                          className={`w-full rounded-full transition-all duration-500 ${
-                            isSelected
-                              ? 'bg-gradient-to-t from-blue-600 via-sky-400 to-sky-300 shadow-[0_0_15px_rgba(56,189,248,0.5)]'
-                              : 'bg-white/[0.15] group-hover:bg-white/[0.25]'
-                          }`}
-                        />
-                      </div>
-
-                      {/* Month Label */}
-                      <span className={`text-[11px] font-mono transition-colors ${
-                        isSelected ? 'text-sky-400 font-bold' : 'text-white/40 group-hover:text-white/70'
-                      }`}>
-                        {bar.label}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Y-Axis Grid Reference */}
-              <div className="flex items-center justify-between text-[10px] font-mono text-white/30 pt-3 border-t border-white/10 px-2">
-                <span>0 Scans</span>
-                <span>1,500</span>
-                <span>3,000</span>
-                <span>4,500</span>
-                <span>6,000+ Max Volume</span>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        {/* RIGHT CARD: CAMPAIGN CALENDAR & PEAK TRAFFIC (1 COL) */}
-        <div className="rounded-[28px] border border-black/10 dark:border-white/10 bg-[#121411] p-6 sm:p-7 shadow-2xl flex flex-col justify-between space-y-6">
-          <div className="space-y-4">
-            
-            {/* Month Navigator Header */}
-            <div className="flex items-center justify-between">
-              <button
-                type="button"
-                className="p-1 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors cursor-pointer"
-                title="Previous Month"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <h3 className="text-sm font-bold text-white tracking-wide">
-                January, 2026
-              </h3>
-              <button
-                type="button"
-                className="p-1 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors cursor-pointer"
-                title="Next Month"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Calendar Grid */}
-            <div className="space-y-2">
-              {/* Day initials */}
-              <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-mono uppercase text-white/40 font-semibold">
-                <span>M</span>
-                <span>T</span>
-                <span>W</span>
-                <span>T</span>
-                <span>F</span>
-                <span>S</span>
-                <span>S</span>
-              </div>
-
-              {/* Day numbers */}
-              <div className="grid grid-cols-7 gap-1.5 text-center text-xs font-mono">
-                {/* Hatched past days */}
-                <span className="p-2 text-white/20 select-none">29</span>
-                <span className="p-2 text-white/20 select-none">30</span>
-                <span className="p-2 text-white/20 select-none">31</span>
-                
-                {/* Active month days */}
-                <span className="p-2 rounded-xl text-white/70 hover:bg-white/5 cursor-pointer">1</span>
-                <span className="p-2 rounded-xl text-white/70 hover:bg-white/5 cursor-pointer">2</span>
-                <span className="p-2 rounded-xl text-white/70 hover:bg-white/5 cursor-pointer">3</span>
-                <span className="p-2 rounded-xl text-white/70 hover:bg-white/5 cursor-pointer">4</span>
-                <span className="p-2 rounded-xl text-white/70 hover:bg-white/5 cursor-pointer">5</span>
-                <span className="p-2 rounded-xl text-white/70 hover:bg-white/5 cursor-pointer">6</span>
-                <span className="p-2 rounded-xl text-white/70 hover:bg-white/5 cursor-pointer">7</span>
-                <span className="p-2 rounded-xl text-white/70 hover:bg-white/5 cursor-pointer">8</span>
-                <span className="p-2 rounded-xl text-white/70 hover:bg-white/5 cursor-pointer">9</span>
-                <span className="p-2 rounded-xl text-white/70 hover:bg-white/5 cursor-pointer">10</span>
-                
-                {/* Highlighted Selected Day (Pill style matching reference image) */}
-                <span className="p-2 rounded-xl bg-blue-500 text-white font-bold shadow-md cursor-pointer">
-                  11
-                </span>
-                
-                <span className="p-2 rounded-xl text-white/70 hover:bg-white/5 cursor-pointer">12</span>
-                <span className="p-2 rounded-xl text-white/70 hover:bg-white/5 cursor-pointer">13</span>
-                <span className="p-2 rounded-xl text-white/70 hover:bg-white/5 cursor-pointer">14</span>
-                <span className="p-2 rounded-xl text-white/70 hover:bg-white/5 cursor-pointer">15</span>
-                <span className="p-2 rounded-xl text-white/70 hover:bg-white/5 cursor-pointer">16</span>
-                <span className="p-2 rounded-xl text-white/70 hover:bg-white/5 cursor-pointer">17</span>
-                <span className="p-2 rounded-xl text-white/70 hover:bg-white/5 cursor-pointer">18</span>
-                <span className="p-2 rounded-xl text-white/70 hover:bg-white/5 cursor-pointer">19</span>
-                <span className="p-2 rounded-xl text-white/70 hover:bg-white/5 cursor-pointer">20</span>
-                <span className="p-2 rounded-xl text-white/70 hover:bg-white/5 cursor-pointer">21</span>
-                <span className="p-2 rounded-xl text-white/70 hover:bg-white/5 cursor-pointer">22</span>
-                <span className="p-2 rounded-xl text-white/70 hover:bg-white/5 cursor-pointer">23</span>
-                <span className="p-2 rounded-xl text-white/70 hover:bg-white/5 cursor-pointer">24</span>
-                <span className="p-2 rounded-xl text-white/70 hover:bg-white/5 cursor-pointer">25</span>
-                <span className="p-2 rounded-xl text-white/70 hover:bg-white/5 cursor-pointer">26</span>
-                <span className="p-2 rounded-xl text-white/70 hover:bg-white/5 cursor-pointer">27</span>
-                <span className="p-2 rounded-xl text-white/70 hover:bg-white/5 cursor-pointer">28</span>
-                <span className="p-2 rounded-xl text-white/70 hover:bg-white/5 cursor-pointer">29</span>
-                <span className="p-2 rounded-xl text-white/70 hover:bg-white/5 cursor-pointer">30</span>
-                <span className="p-2 text-white/20 select-none">1</span>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Bottom Highlight Stat Card */}
-          <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/15 text-blue-400 flex items-center justify-center shrink-0">
-                <Activity className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="text-[11px] font-mono text-white/50 uppercase block">
-                  Today's Velocity
-                </span>
-                <span className="text-xl font-black text-white">
-                  {Math.max(Math.round(totalVolume / 30), 48)} Scans
-                </span>
-              </div>
-            </div>
-            <div className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-semibold font-mono">
-              ▲ 12.4%
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      {/* 3. BOTTOM ROW: AI COPILOT (1/3) + SERVICE DISTRIBUTION DONUT (1/3) + RECENT LEADS (1/3) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        
-        {/* CARD 1: AI COPILOT & REAL-TIME INSIGHTS */}
-        <div className="rounded-[28px] border border-black/10 dark:border-white/10 bg-[#121411] p-6 shadow-2xl flex flex-col justify-between space-y-4">
-          <div className="space-y-4">
-            
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-purple-400" />
-                <h3 className="text-base font-bold text-white tracking-tight">
-                  How can I help you?
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => onNavigateSection('analyst')}
-                className="p-1 rounded-lg hover:bg-white/10 text-white/50 hover:text-white transition-colors cursor-pointer"
-                title="Expand AI Campaign Analyst"
-              >
-                <Maximize2 className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            {/* AI Summary Prose */}
-            <div className="space-y-1.5">
-              <span className="text-[11px] font-mono text-purple-400 uppercase tracking-wider font-semibold block">
-                AI Telemetry Summary
-              </span>
-              <p className="text-xs text-white/70 leading-relaxed">
-                Your QR asset velocity this period remains stable. Digital vCard traffic is peaking during weekday mornings. Dynamic links show 0 redirect latency across active edge caches.
-              </p>
-            </div>
-
-            {/* Two Sub-Metrics Pills */}
-            <div className="grid grid-cols-2 gap-2.5 pt-1">
-              <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/5">
-                <span className="text-[10px] font-mono text-white/50 uppercase block">
-                  Traffic Velocity
-                </span>
-                <div className="flex items-baseline gap-2 mt-1">
-                  <span className="text-lg font-black text-white">High</span>
-                  <span className="px-1.5 py-0.2 rounded-md bg-amber-500/20 text-amber-300 text-[10px] font-bold">
-                    Stable
-                  </span>
-                </div>
-              </div>
-
-              <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/5">
-                <span className="text-[10px] font-mono text-white/50 uppercase block">
-                  Processed Scans
-                </span>
-                <div className="flex items-baseline gap-2 mt-1">
-                  <span className="text-lg font-black text-white">
-                    {monthlyScansCount || 82}
-                  </span>
-                  <span className="px-1.5 py-0.2 rounded-md bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">
-                    Clean
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Interactive conversation preview if any */}
-            {copilotMessages.length > 0 && (
-              <div className="max-h-24 overflow-y-auto space-y-2 p-2.5 rounded-xl bg-black/40 border border-white/10 text-xs">
-                {copilotMessages.slice(-2).map((msg, i) => (
-                  <div key={i} className={msg.role === 'user' ? 'text-white/90 text-right font-medium' : 'text-emerald-400 text-left'}>
-                    {msg.text}
-                  </div>
                 ))}
               </div>
-            )}
-
+              <button
+                type="button"
+                className="w-7 h-7 rounded-full bg-[#1A1C24] border border-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors cursor-pointer"
+                title="Filters"
+              >
+                <SlidersHorizontal className="w-3 h-3" />
+              </button>
+            </div>
           </div>
 
-          {/* Interactive Copilot Input */}
-          <form onSubmit={handleCopilotSubmit} className="relative pt-2">
+          {/* Capsule Bar Chart with Y-Axis */}
+          <div className="flex items-stretch gap-2 pt-3 pb-1 flex-1 min-h-0">
+            {/* Left Y-Axis */}
+            <div className="flex flex-col justify-between text-[10px] font-mono text-white/35 py-1 select-none pr-1 shrink-0">
+              <span>6000</span>
+              <span>4500</span>
+              <span>3000</span>
+              <span>1500</span>
+              <span>0</span>
+            </div>
+
+            {/* 12 Capsule Bars */}
+            <div className="flex-1 flex items-end justify-between gap-1.5 sm:gap-2 px-1 relative">
+              {/* Subtle Horizontal Guide Lines */}
+              <div className="absolute inset-x-0 top-0 border-b border-white/[0.03] pointer-events-none" />
+              <div className="absolute inset-x-0 top-1/4 border-b border-white/[0.03] pointer-events-none" />
+              <div className="absolute inset-x-0 top-2/4 border-b border-white/[0.03] pointer-events-none" />
+              <div className="absolute inset-x-0 top-3/4 border-b border-white/[0.03] pointer-events-none" />
+
+              {barData.map((bar, idx) => {
+                const isActive = selectedBarIndex === idx;
+                const heightPct = Math.min(96, Math.max(16, (bar.value / 6000) * 100));
+
+                return (
+                  <div
+                    key={bar.month}
+                    onClick={() => setSelectedBarIndex(idx)}
+                    className="flex-1 flex flex-col items-center justify-end h-full group cursor-pointer relative"
+                  >
+                    {/* The Capsule Slot Track */}
+                    <div className="w-full max-w-[32px] sm:max-w-[40px] h-[85%] bg-[#1A1C23] rounded-full relative flex flex-col justify-end items-center p-0.5 group-hover:bg-[#20222B] transition-colors">
+                      
+                      {/* INACTIVE BAR: Horizontal white tick mark indicator at value height */}
+                      {!isActive && (
+                        <div
+                          style={{ bottom: `${heightPct}%` }}
+                          className="absolute left-1/2 -translate-x-1/2 w-[70%] h-[3px] bg-white/90 rounded-full shadow-[0_0_4px_rgba(255,255,255,0.4)] transition-all"
+                        />
+                      )}
+
+                      {/* ACTIVE BAR: Filled solid blue pill + Tooltip pill on top */}
+                      {isActive && (
+                        <div
+                          style={{ height: `${heightPct}%` }}
+                          className="w-full bg-[#4E82EE] rounded-full relative flex flex-col justify-end items-center pb-2 shadow-[0_0_20px_rgba(78,130,238,0.45)] transition-all animate-in zoom-in-95 duration-200"
+                        >
+                          {/* Floating badge above the blue pill */}
+                          <div className="absolute -top-7 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-[#4E82EE] text-white text-[9.5px] font-bold rounded-full shadow-lg flex items-center gap-0.5 whitespace-nowrap z-10">
+                            <span>▲ {bar.pct}</span>
+                            <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-[#4E82EE]" />
+                          </div>
+
+                          {/* Inside stat label */}
+                          <span className="text-[10px] font-bold text-white tracking-tight leading-none">
+                            {bar.display}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Month Label */}
+                    <span
+                      className={`text-[10px] font-mono mt-1.5 transition-colors ${
+                        isActive ? 'text-white font-bold' : 'text-white/40 group-hover:text-white/70'
+                      }`}
+                    >
+                      {bar.month}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+        </div>
+
+        {/* CARD B: CALENDAR WIDGET (4 COLS) */}
+        <div className="lg:col-span-4 rounded-3xl bg-[#121318] border border-white/[0.06] p-4 sm:p-5 flex flex-col justify-between shadow-xl min-h-[250px] lg:min-h-0">
+          
+          {/* Header */}
+          <div className="flex items-center justify-between shrink-0">
+            <button
+              type="button"
+              className="p-1 rounded-lg hover:bg-white/5 text-white/40 hover:text-white transition-colors cursor-pointer"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
+            <h3 className="text-xs font-bold text-white tracking-wide">
+              January, 2026
+            </h3>
+            <button
+              type="button"
+              className="p-1 rounded-lg hover:bg-white/5 text-white/40 hover:text-white transition-colors cursor-pointer"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Calendar Grid */}
+          <div className="space-y-1.5 py-1">
+            {/* Weekdays */}
+            <div className="grid grid-cols-7 gap-1 text-center text-[9px] font-mono text-white/35 uppercase font-semibold">
+              <span>M</span>
+              <span>T</span>
+              <span>W</span>
+              <span>T</span>
+              <span>F</span>
+              <span>S</span>
+              <span>S</span>
+            </div>
+
+            {/* Day Cells */}
+            <div className="grid grid-cols-7 gap-1 text-center text-[10.5px] font-mono">
+              {/* Hatched past days 1 to 10 */}
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((d) => (
+                <div
+                  key={d}
+                  style={{
+                    backgroundImage:
+                      'repeating-linear-gradient(45deg, rgba(255,255,255,0.06), rgba(255,255,255,0.06) 1.5px, transparent 1.5px, transparent 6px)',
+                  }}
+                  className="h-6 sm:h-7 rounded-lg text-white/25 flex items-center justify-center text-[10px]"
+                >
+                  {d}
+                </div>
+              ))}
+
+              {/* Day 11 (Active Blue Pill with Dot) */}
+              <div className="h-6 sm:h-7 rounded-xl bg-[#4E82EE] text-white flex flex-col items-center justify-center font-bold text-[10.5px] shadow-md cursor-pointer">
+                <span>11</span>
+                <span className="w-1 h-1 bg-white rounded-full mt-0.5" />
+              </div>
+
+              {/* Days 12 to 30 */}
+              {[12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30].map((d) => (
+                <div
+                  key={d}
+                  className="h-6 sm:h-7 rounded-lg text-white/70 hover:bg-white/5 flex items-center justify-center cursor-pointer transition-colors text-[10.5px]"
+                >
+                  {d}
+                </div>
+              ))}
+
+              {/* Day 31 Hatched */}
+              <div
+                style={{
+                  backgroundImage:
+                    'repeating-linear-gradient(45deg, rgba(255,255,255,0.06), rgba(255,255,255,0.06) 1.5px, transparent 1.5px, transparent 6px)',
+                }}
+                className="h-6 sm:h-7 rounded-lg text-white/25 flex items-center justify-center text-[10px]"
+              >
+                31
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Inset Stat Box */}
+          <div className="p-3 rounded-2xl bg-[#181A22] border border-white/5 flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/70">
+                <BarChart3 className="w-3.5 h-3.5 text-white/60" />
+              </div>
+              <span className="text-xl font-extrabold text-white tracking-tight">
+                $1,434
+              </span>
+            </div>
+            <span className="text-[10.5px] font-mono text-emerald-400 font-bold">
+              ▲ 12.4%
+            </span>
+          </div>
+
+        </div>
+
+      </div>
+
+      {/* 3. BOTTOM ROW: HOW CAN I HELP YOU? (1/3) + SPENDING DONUT (1/3) + INVOICES (1/3) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-3.5 flex-1 min-h-0">
+        
+        {/* CARD 1: HOW CAN I HELP YOU? (AI COPILOT) */}
+        <div className="rounded-3xl bg-[#121318] border border-white/[0.06] p-4 sm:p-5 flex flex-col justify-between shadow-xl min-h-[200px] lg:min-h-0">
+          
+          {/* Header */}
+          <div className="flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-white/90" />
+              <h3 className="text-xs font-bold text-white tracking-tight">
+                How can I help you?
+              </h3>
+            </div>
+            <button
+              type="button"
+              onClick={() => onNavigateSection('analyst')}
+              className="p-1 rounded-md text-white/40 hover:text-white transition-colors cursor-pointer"
+              title="Expand Copilot"
+            >
+              <Maximize2 className="w-3 h-3" />
+            </button>
+          </div>
+
+          {/* AI Summary */}
+          <div className="space-y-1 py-1">
+            <span className="text-[10px] font-semibold text-white/80 block">
+              AI Summary
+            </span>
+            <p className="text-[10.5px] text-white/60 leading-snug">
+              Your financial activity this period remains stable. Revenue shows expected seasonal variation, spending is balanced across key categories. No unusual patterns det...{' '}
+              <button
+                type="button"
+                onClick={() => setCopilotExpanded(!copilotExpanded)}
+                className="text-[#4E82EE] font-medium hover:underline inline cursor-pointer"
+              >
+                Read more
+              </button>
+            </p>
+          </div>
+
+          {/* Two Metric Chips: Spending Trends & Customer Payments */}
+          <div className="grid grid-cols-2 gap-2 shrink-0">
+            <div className="p-2 rounded-xl bg-[#181A22] border border-white/5">
+              <span className="text-[9.5px] text-white/40 block leading-tight">
+                Spending Trends
+              </span>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-base font-bold text-white">7</span>
+                <span className="px-1.5 py-0.2 rounded-full bg-[#FF8800]/20 text-[#FF9E2C] border border-[#FF8800]/30 text-[9px] font-semibold">
+                  Stable
+                </span>
+              </div>
+            </div>
+
+            <div className="p-2 rounded-xl bg-[#181A22] border border-white/5">
+              <span className="text-[9.5px] text-white/40 block leading-tight">
+                Customer Payments
+              </span>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-base font-bold text-white">25</span>
+                <span className="px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[9px] font-semibold">
+                  Processed
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Input Bar */}
+          <form onSubmit={handleCopilotSubmit} className="relative shrink-0 pt-1">
             <input
               type="text"
               value={copilotInput}
               onChange={(e) => setCopilotInput(e.target.value)}
-              placeholder="Ask Copilot anything..."
-              disabled={copilotLoading}
-              className="w-full pl-3.5 pr-10 py-2.5 text-xs rounded-xl bg-white/[0.05] border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 transition-colors disabled:opacity-50"
+              placeholder="Ask me anything..."
+              className="w-full pl-3 pr-8 py-1.5 text-xs rounded-full bg-[#181A22] border border-white/5 text-white placeholder:text-white/40 focus:outline-none focus:border-white/20 transition-all"
             />
             <button
               type="submit"
-              disabled={copilotLoading || !copilotInput.trim()}
-              className="absolute right-2 top-1/2 translate-y-[-25%] p-1.5 rounded-lg bg-purple-500 hover:bg-purple-400 text-black transition-colors cursor-pointer disabled:opacity-30"
-              title="Submit Prompt"
+              disabled={!copilotInput.trim() || copilotLoading}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white/60 hover:text-white cursor-pointer disabled:opacity-30"
             >
               <Send className="w-3 h-3" />
             </button>
           </form>
+
         </div>
 
-        {/* CARD 2: SERVICE DISTRIBUTION (SEGMENTED DONUT) */}
-        <div className="rounded-[28px] border border-black/10 dark:border-white/10 bg-[#121411] p-6 shadow-2xl flex flex-col justify-between space-y-4">
-          <div className="space-y-4">
+        {/* CARD 2: SPENDING (DONUT CHART) */}
+        <div className="rounded-3xl bg-[#121318] border border-white/[0.06] p-4 sm:p-5 flex flex-col justify-between shadow-xl min-h-[200px] lg:min-h-0 relative">
+          
+          {/* Header */}
+          <div className="flex items-center justify-between shrink-0">
+            <h3 className="text-xs font-bold text-white tracking-tight">
+              Spending
+            </h3>
+            <button
+              type="button"
+              className="px-2 py-0.5 rounded-full bg-[#181A22] border border-white/5 text-[9.5px] text-white/60 hover:text-white transition-colors cursor-pointer flex items-center gap-1"
+            >
+              <span>Last 30 Days</span>
+              <ChevronDown className="w-2.5 h-2.5" />
+            </button>
+          </div>
+
+          {/* Donut Chart & Legend Row */}
+          <div className="flex items-center justify-between gap-3 py-1 flex-1 min-h-0">
             
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-white tracking-tight">
-                Service Distribution
-              </h3>
-              <div className="px-2.5 py-1 rounded-lg bg-white/[0.05] border border-white/10 text-[11px] font-mono text-white/70">
-                Last 30 Days ▾
+            {/* SVG Segmented Donut with Floating Tooltip */}
+            <div className="relative w-28 h-28 sm:w-32 sm:h-32 shrink-0 flex items-center justify-center">
+              
+              {/* Floating Tooltip Pill pointing to Violet Slice */}
+              <div className="absolute -top-1 right-1 z-10 px-1.5 py-0.5 rounded-full bg-[#1E2029] border border-white/10 text-[9px] font-semibold text-white shadow-lg whitespace-nowrap flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#A259FF]" />
+                <span>$1840 (16%)</span>
+              </div>
+
+              <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                {/* Yellow Arc (Activity / Office) */}
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="36"
+                  stroke="#F5B938"
+                  strokeWidth="11"
+                  strokeDasharray="65 161"
+                  strokeDashoffset="0"
+                  fill="none"
+                />
+                {/* Green/Teal Arc (Meals) */}
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="36"
+                  stroke="#2EC4B6"
+                  strokeWidth="11"
+                  strokeDasharray="45 181"
+                  strokeDashoffset="-68"
+                  fill="none"
+                />
+                {/* Orange Arc (Supplies) */}
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="36"
+                  stroke="#FF7849"
+                  strokeWidth="11"
+                  strokeDasharray="40 186"
+                  strokeDashoffset="-115"
+                  fill="none"
+                />
+                {/* Blue Arc (Rewards) */}
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="36"
+                  stroke="#4E82EE"
+                  strokeWidth="11"
+                  strokeDasharray="35 191"
+                  strokeDashoffset="-158"
+                  fill="none"
+                />
+                {/* Violet Arc (Internet & Telephone) */}
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="36"
+                  stroke="#A259FF"
+                  strokeWidth="11"
+                  strokeDasharray="36 190"
+                  strokeDashoffset="-195"
+                  fill="none"
+                />
+              </svg>
+
+              {/* Center Metrics */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                <span className="text-xs sm:text-sm font-extrabold text-white tracking-tight leading-none">
+                  $28,165
+                </span>
+                <span className="text-[8px] font-mono text-white/40 uppercase mt-0.5">
+                  Total
+                </span>
               </div>
             </div>
 
-            {/* Donut Chart & Legend Container */}
-            <div className="flex flex-col sm:flex-row items-center justify-around gap-4 pt-2">
-              
-              {/* SVG Segmented Donut */}
-              <div className="relative w-36 h-36 shrink-0 flex items-center justify-center">
-                <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                  {/* Background Track */}
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="38"
-                    stroke="rgba(255,255,255,0.05)"
-                    strokeWidth="12"
-                    fill="none"
-                  />
-                  {/* Segment 1: vCards (Emerald) */}
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="38"
-                    stroke="#34D399"
-                    strokeWidth="12"
-                    strokeDasharray="100 139"
-                    strokeDashoffset="0"
-                    fill="none"
-                    className="transition-all hover:stroke-width-14"
-                  />
-                  {/* Segment 2: Links (Blue) */}
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="38"
-                    stroke="#60A5FA"
-                    strokeWidth="12"
-                    strokeDasharray="60 179"
-                    strokeDashoffset="-102"
-                    fill="none"
-                  />
-                  {/* Segment 3: Menu (Purple) */}
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="38"
-                    stroke="#A78BFA"
-                    strokeWidth="12"
-                    strokeDasharray="35 204"
-                    strokeDashoffset="-164"
-                    fill="none"
-                  />
-                  {/* Segment 4: Wi-Fi (Orange) */}
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="38"
-                    stroke="#FB923C"
-                    strokeWidth="12"
-                    strokeDasharray="25 214"
-                    strokeDashoffset="-201"
-                    fill="none"
-                  />
-                  {/* Segment 5: Mailing (Amber) */}
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="38"
-                    stroke="#FBBF24"
-                    strokeWidth="12"
-                    strokeDasharray="18 221"
-                    strokeDashoffset="-228"
-                    fill="none"
-                  />
-                </svg>
-
-                {/* Center Number */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                  <span className="text-xl font-extrabold text-white tracking-tight">
-                    {totalAssetsCount}
-                  </span>
-                  <span className="text-[9.5px] font-mono text-white/40 uppercase">
-                    Total Assets
-                  </span>
-                </div>
+            {/* Legend List */}
+            <div className="space-y-1 text-[10px] flex-1 min-w-0 pr-1">
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#FF7849] shrink-0" />
+                <span className="text-white/70 truncate">Activity</span>
               </div>
-
-              {/* Legend Dots List */}
-              <div className="space-y-1.5 text-xs w-full sm:w-auto">
-                {distributionData.map((d) => (
-                  <button
-                    key={d.name}
-                    type="button"
-                    onClick={() => onNavigateSection(d.code)}
-                    className="flex items-center justify-between gap-3 w-full text-left hover:bg-white/5 p-1 rounded-md transition-colors cursor-pointer"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
-                      <span className="text-white/80 text-[11.5px] truncate max-w-[110px]">{d.name}</span>
-                    </div>
-                    <span className="font-mono text-white/50 text-[10.5px]">
-                      {d.percentage}%
-                    </span>
-                  </button>
-                ))}
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#2EC4B6] shrink-0" />
+                <span className="text-white/70 truncate">Meals</span>
               </div>
-
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#F5B938] shrink-0" />
+                <span className="text-white/70 truncate">Office supplies</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#4E82EE] shrink-0" />
+                <span className="text-white/70 truncate">Rewards</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#A259FF] shrink-0" />
+                <span className="text-white/70 truncate">Internet&Telephone</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-white/20 shrink-0" />
+                <span className="text-white/40 truncate">Other</span>
+              </div>
             </div>
 
           </div>
 
           {/* Bottom Note */}
-          <div className="pt-2 border-t border-white/5 text-[11px] text-white/50 flex items-start gap-1.5 leading-snug">
-            <Info className="w-3.5 h-3.5 text-white/40 shrink-0 mt-0.5" />
+          <div className="pt-1.5 border-t border-white/5 flex items-start gap-1 text-[9px] text-white/40 leading-snug shrink-0">
+            <Info className="w-3 h-3 text-white/40 shrink-0 mt-0.5" />
             <span>
-              Most engagement is generated by vCard Contacts ({distributionData[0]?.percentage || 42}%) and Menus, while Wi-Fi grew +14%.
+              Most expenses come from Activity and Meals, while Internet&Telephone shows a slight increase.
             </span>
           </div>
+
         </div>
 
-        {/* CARD 3: RECENT LIVE ACTIVITY & LEADS (WITH TIER GATED BLUR FOR FREE) */}
-        <div className="rounded-[28px] border border-black/10 dark:border-white/10 bg-[#121411] p-6 shadow-2xl flex flex-col justify-between space-y-4 relative overflow-hidden">
-          <div className="space-y-4">
-            
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-white tracking-tight">
-                Live Activity & Leads
-              </h3>
-              <button
-                type="button"
-                onClick={() => onNavigateSection('mailing')}
-                className="w-6 h-6 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/70 hover:text-white transition-colors cursor-pointer"
-                title="Create New Campaign"
-              >
-                +
-              </button>
-            </div>
-
-            {/* Health Score Progress */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-white/50 font-mono text-[11px] uppercase">
-                  Platform Routing Health
-                </span>
-                <span className="font-bold text-emerald-400 font-mono">
-                  98%
-                </span>
-              </div>
-              <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden flex gap-0.5 p-0.5">
-                <div className="h-full bg-emerald-400 rounded-full w-[98%] shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
-              </div>
-            </div>
-
-            {/* Activity List */}
-            <div className="space-y-2.5 pt-1">
-              
-              {/* Row 1 (Visible to all) */}
-              <div className="flex items-center justify-between p-2 rounded-xl bg-white/[0.02] border border-white/5">
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-[10px] font-mono text-white/40 shrink-0">Just now</span>
-                  <span className="px-1.5 py-0.2 rounded-md bg-emerald-500/20 text-emerald-300 text-[10px] font-bold shrink-0">
-                    Lead
-                  </span>
-                  <span className="text-xs text-white truncate font-medium">
-                    Oseghale Leonard
-                  </span>
-                </div>
-                <span className="text-[10.5px] font-mono text-white/50 shrink-0">
-                  vCard Save
-                </span>
-              </div>
-
-              {/* Row 2 (Visible to all) */}
-              <div className="flex items-center justify-between p-2 rounded-xl bg-white/[0.02] border border-white/5">
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-[10px] font-mono text-white/40 shrink-0">12m ago</span>
-                  <span className="px-1.5 py-0.2 rounded-md bg-blue-500/20 text-blue-300 text-[10px] font-bold shrink-0">
-                    Route
-                  </span>
-                  <span className="text-xs text-white truncate font-medium">
-                    Fast Redirect Link
-                  </span>
-                </div>
-                <span className="text-[10.5px] font-mono text-white/50 shrink-0">
-                  iOS Scan
-                </span>
-              </div>
-
-              {/* Row 3 (Gated / Blurred if Free Tier) */}
-              <div className={`relative transition-all duration-300 ${!isPaid ? 'filter blur-[2.5px] select-none pointer-events-none' : ''}`}>
-                <div className="space-y-2.5">
-                  <div className="flex items-center justify-between p-2 rounded-xl bg-white/[0.02] border border-white/5">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-[10px] font-mono text-white/40 shrink-0">1h ago</span>
-                      <span className="px-1.5 py-0.2 rounded-md bg-purple-500/20 text-purple-300 text-[10px] font-bold shrink-0">
-                    Menu
-                      </span>
-                      <span className="text-xs text-white truncate font-medium">
-                        Dining Menu Visitor
-                      </span>
-                    </div>
-                    <span className="text-[10.5px] font-mono text-white/50 shrink-0">
-                      View Menu
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between p-2 rounded-xl bg-white/[0.02] border border-white/5">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-[10px] font-mono text-white/40 shrink-0">3h ago</span>
-                      <span className="px-1.5 py-0.2 rounded-md bg-amber-500/20 text-amber-300 text-[10px] font-bold shrink-0">
-                        Join
-                      </span>
-                      <span className="text-xs text-white truncate font-medium">
-                        VIP Subscriber List
-                      </span>
-                    </div>
-                    <span className="text-[10.5px] font-mono text-white/50 shrink-0">
-                      +1 Lead
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-
-          </div>
-
-          {/* Locked Overlay for Free Users */}
-          {!isPaid && (
-            <div className="p-3 rounded-2xl bg-black/75 border border-purple-500/30 backdrop-blur-md flex items-center justify-between gap-3 mt-2 animate-in fade-in">
-              <div className="flex items-center gap-2 min-w-0">
-                <Lock className="w-4 h-4 text-purple-400 shrink-0" />
-                <span className="text-[11px] text-white/80 leading-tight">
-                  <strong>Ultra Live Stream:</strong> Upgrade to unlock unblurred real-time lead capture telemetry.
-                </span>
-              </div>
-              {onOpenUpgradeModal && (
-                <button
-                  type="button"
-                  onClick={onOpenUpgradeModal}
-                  className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-[10.5px] font-bold shrink-0 hover:opacity-90 transition-opacity cursor-pointer"
-                >
-                  Upgrade
-                </button>
-              )}
-            </div>
-          )}
-
-          {/* Bottom Link */}
-          {isPaid && (
+        {/* CARD 3: INVOICES (WITH SEGMENTED PAYMENT SCORE METER) */}
+        <div className="rounded-3xl bg-[#121318] border border-white/[0.06] p-4 sm:p-5 flex flex-col justify-between shadow-xl min-h-[200px] lg:min-h-0 relative overflow-hidden">
+          
+          {/* Header */}
+          <div className="flex items-center justify-between shrink-0">
+            <h3 className="text-xs font-bold text-white tracking-tight">
+              Invoices
+            </h3>
             <button
               type="button"
               onClick={() => onNavigateSection('mailing')}
-              className="text-xs text-emerald-400 hover:text-emerald-300 font-semibold inline-flex items-center gap-1 cursor-pointer pt-2"
+              className="w-5 h-5 rounded-md bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/60 hover:text-white transition-colors cursor-pointer text-xs"
+              title="Create Invoice"
             >
-              <span>View all subscriber leads & analytics</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
+              +
             </button>
-          )}
+          </div>
+
+          {/* Payment Score Segmented Meter */}
+          <div className="flex items-center justify-between gap-2 py-1 shrink-0">
+            <span className="text-[10px] text-white/60 font-medium">
+              Payment Score
+            </span>
+            <div className="flex items-center gap-0.5 flex-1 max-w-[140px] px-2">
+              {Array.from({ length: 22 }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`flex-1 h-3 rounded-xs ${
+                    i < 16 ? 'bg-[#F5B938]' : 'bg-white/10'
+                  }`}
+                />
+              ))}
+            </div>
+            <span className="text-xs font-bold text-white/90 font-mono">
+              76
+            </span>
+          </div>
+
+          {/* Recent Invoices Rows */}
+          <div className="space-y-1.5 py-1">
+            {/* Row 1: Aug 9 (Unpaid) */}
+            <div className="flex items-center justify-between text-xs p-1.5 rounded-xl bg-white/[0.02] border border-white/5">
+              <div className="leading-tight">
+                <span className="text-[11px] font-semibold text-white block">Aug 9</span>
+                <span className="text-[9px] text-white/40">in 1 week</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#FF5B5B]" />
+                <span className="text-[10.5px] text-[#FF5B5B] font-medium">Unpaid</span>
+              </div>
+              <span className="text-[11px] text-white/80 font-medium truncate max-w-[90px]">
+                Leonard Kim
+              </span>
+              <span className="text-[11px] font-bold text-white font-mono">
+                $130.00
+              </span>
+            </div>
+
+            {/* Row 2: Aug 24 (Paid) */}
+            <div className={`flex items-center justify-between text-xs p-1.5 rounded-xl bg-white/[0.02] border border-white/5 ${!isPaid ? 'filter blur-[1.5px] opacity-75' : ''}`}>
+              <div className="leading-tight">
+                <span className="text-[11px] font-semibold text-white block">Aug 24</span>
+                <span className="text-[9px] text-white/40">in 2 week</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <span className="text-[10.5px] text-emerald-400 font-medium">Paid</span>
+              </div>
+              <span className="text-[11px] text-white/80 font-medium truncate max-w-[90px]">
+                John Smith
+              </span>
+              <span className="text-[11px] font-bold text-white font-mono">
+                $220.00
+              </span>
+            </div>
+
+            {/* Row 3: Sep 9 (Pending) */}
+            <div className={`flex items-center justify-between text-xs p-1.5 rounded-xl bg-white/[0.02] border border-white/5 ${!isPaid ? 'filter blur-[1.5px] opacity-75' : ''}`}>
+              <div className="leading-tight">
+                <span className="text-[11px] font-semibold text-white block">Sep 9</span>
+                <span className="text-[9px] text-white/40">in 1 month</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                <span className="text-[10.5px] text-amber-400 font-medium">Pending</span>
+              </div>
+              <span className="text-[11px] text-white/80 font-medium truncate max-w-[90px]">
+                Anna Spirid
+              </span>
+              <span className="text-[11px] font-bold text-white font-mono">
+                $2080.00
+              </span>
+            </div>
+          </div>
+
+          {/* Bottom Link or Free Tier Prompt */}
+          <div className="pt-1 border-t border-white/5 flex items-center justify-between shrink-0">
+            <button
+              type="button"
+              onClick={() => onNavigateSection('mailing')}
+              className="text-[10.5px] text-white/70 hover:text-white font-medium inline-flex items-center gap-1 cursor-pointer transition-colors"
+            >
+              <span>View all invoices</span>
+              <ArrowUpRight className="w-3 h-3" />
+            </button>
+
+            {!isPaid && (
+              <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 font-bold border border-purple-500/30">
+                PRO / ULTRA
+              </span>
+            )}
+          </div>
 
         </div>
 

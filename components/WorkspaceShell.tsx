@@ -923,74 +923,78 @@ export default function WorkspaceShell({
         </div>
       )}
 
-      {/* 4. MAIN WORKSPACE CONTENT AREA (Inspired by Healthy Dashboard) */}
+      {/* 4. MAIN WORKSPACE CONTENT AREA */}
       <main
         className={`flex-1 min-w-0 transition-all duration-150 ${
-          density === 'compact'
+          activeSection === 'overview'
+            ? 'p-2 sm:p-3 lg:p-4 h-[calc(100vh-var(--announcement-bar-height,0px))] overflow-y-auto lg:overflow-hidden flex flex-col justify-between'
+            : density === 'compact'
             ? 'p-3 sm:p-4 lg:p-6 space-y-4'
             : 'p-4 sm:p-6 lg:p-8 space-y-6'
         }`}
       >
-        {/* Main Header Row (Insp. from "Welcome, Diana!" row in Image 6) */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-[#11140F]/10 dark:border-white/10">
-          <div>
-            <div className="flex items-center gap-2 text-xs font-mono text-[#11140F]/50 dark:text-white/50">
-              <span>DynamicQR</span>
-              <span>/</span>
-              <span className="text-emerald-700 dark:text-emerald-400 font-semibold uppercase">
-                {activeSection === 'all'
-                  ? 'All Services'
-                  : isMicroSaasSection
-                  ? `Micro-SaaS • ${activeSection}`
-                  : activeSection}
-              </span>
+        {/* Main Header Row (Suppressed on 'overview' to fit single desktop screen without scroll) */}
+        {activeSection !== 'overview' && (
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-[#11140F]/10 dark:border-white/10">
+            <div>
+              <div className="flex items-center gap-2 text-xs font-mono text-[#11140F]/50 dark:text-white/50">
+                <span>DynamicQR</span>
+                <span>/</span>
+                <span className="text-emerald-700 dark:text-emerald-400 font-semibold uppercase">
+                  {activeSection === 'all'
+                    ? 'All Services'
+                    : isMicroSaasSection
+                    ? `Micro-SaaS • ${activeSection}`
+                    : activeSection}
+                </span>
+              </div>
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#11140F] dark:text-white mt-0.5">
+                Welcome, {userName}!
+              </h1>
+              <p className="text-xs sm:text-[13px] text-[#11140F]/60 dark:text-white/60">
+                Manage dynamic routes, review scan intelligence, and dispatch physical print campaigns.
+              </p>
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#11140F] dark:text-white mt-0.5">
-              Welcome, {userName}!
-            </h1>
-            <p className="text-xs sm:text-[13px] text-[#11140F]/60 dark:text-white/60">
-              Manage dynamic routes, review scan intelligence, and dispatch physical print campaigns.
-            </p>
-          </div>
 
-          {/* Top Quick Actions & Stat Pills (Insp. from Image 6 top pill cards) */}
-          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-            {/* Promo Modal Preview Trigger (Admin only) */}
-            {isAdmin && (
+            {/* Top Quick Actions & Stat Pills */}
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+              {/* Promo Modal Preview Trigger (Admin only) */}
+              {isAdmin && (
+                <button
+                  type="button"
+                  onClick={() => setShowPromoModalPreview(true)}
+                  className="px-3.5 py-1.5 rounded-xl border border-dashed border-[#11140F]/20 dark:border-white/20 bg-white/70 dark:bg-[#11140F] hover:bg-white text-xs font-semibold text-[#11140F] dark:text-white transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer"
+                  title="Test Promotional Entry Popup"
+                >
+                  <Eye className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Test Promo Modal</span>
+                </button>
+              )}
+
+              {/* Quick Create Button */}
               <button
                 type="button"
-                onClick={() => setShowPromoModalPreview(true)}
-                className="px-3.5 py-1.5 rounded-xl border border-dashed border-[#11140F]/20 dark:border-white/20 bg-white/70 dark:bg-[#11140F] hover:bg-white text-xs font-semibold text-[#11140F] dark:text-white transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer"
-                title="Test Promotional Entry Popup"
+                onClick={handleCreateNewClick}
+                className="px-3.5 py-1.5 rounded-xl bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] text-xs font-bold hover:bg-[#2A2E25] transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer"
               >
-                <Eye className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Test Promo Modal</span>
+                <Plus className="w-3.5 h-3.5 text-emerald-400 dark:text-[#2F6B4F]" />
+                <span>New QR Link</span>
               </button>
-            )}
 
-            {/* Quick Create Button */}
-            <button
-              type="button"
-              onClick={handleCreateNewClick}
-              className="px-3.5 py-1.5 rounded-xl bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] text-xs font-bold hover:bg-[#2A2E25] transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5 text-emerald-400 dark:text-[#2F6B4F]" />
-              <span>New QR Link</span>
-            </button>
-
-            {/* View Mode Toggle */}
-            {activeSection !== 'all' && (
-              <button
-                type="button"
-                onClick={() => handleSelectSection('all')}
-                className="px-3 py-1.5 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#11140F] text-xs font-semibold text-[#11140F] dark:text-white hover:bg-[#11140F]/5 transition-all shadow-2xs cursor-pointer flex items-center gap-1.5"
-              >
-                <LayoutDashboard className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Show All Tools</span>
-              </button>
-            )}
+              {/* View Mode Toggle */}
+              {activeSection !== 'all' && (
+                <button
+                  type="button"
+                  onClick={() => handleSelectSection('all')}
+                  className="px-3 py-1.5 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#11140F] text-xs font-semibold text-[#11140F] dark:text-white hover:bg-[#11140F]/5 transition-all shadow-2xs cursor-pointer flex items-center gap-1.5"
+                >
+                  <LayoutDashboard className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Show All Tools</span>
+                </button>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* SECTION RENDER LOGIC */}
         {/* VIEW 1: COMPLETE ALL-IN-ONE VIEW (Default) */}
@@ -1014,9 +1018,9 @@ export default function WorkspaceShell({
           </div>
         )}
 
-        {/* VIEW 2: EXECUTIVE LIVE OVERVIEW TAB */}
+        {/* VIEW 2: EXECUTIVE LIVE OVERVIEW TAB (Single Page Desktop Fit) */}
         {activeSection === 'overview' && (
-          <div className="space-y-6">
+          <div className="w-full h-full flex flex-col min-h-0">
             <WorkspaceOverviewTab
               user={user!}
               isAdmin={isAdmin}
@@ -1029,9 +1033,6 @@ export default function WorkspaceShell({
               onNavigateSection={handleSelectSection}
               onOpenUpgradeModal={() => setShowAccountModal(true)}
             />
-            <div className="pt-2">
-              {planUsageMeter}
-            </div>
           </div>
         )}
 
