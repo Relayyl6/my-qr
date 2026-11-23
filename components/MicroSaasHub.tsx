@@ -124,8 +124,6 @@ export default function MicroSaasHub({
     utmCampaign: '',
     iosUrl: '',
     androidUrl: '',
-    avatarUrl: '',
-    bannerUrl: '',
   });
 
   const [editMenuForm, setEditMenuForm] = useState<{
@@ -188,8 +186,6 @@ export default function MicroSaasHub({
     utmCampaign: '',
     iosUrl: '',
     androidUrl: '',
-    avatarUrl: '',
-    bannerUrl: '',
   });
 
   const [menuForm, setMenuForm] = useState({
@@ -330,7 +326,7 @@ export default function MicroSaasHub({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to create short link');
       setShowShortenerModal(false);
-      setShortenerForm({ title: '', destinationUrl: '', slug: '', utmSource: '', utmMedium: '', utmCampaign: '', iosUrl: '', androidUrl: '', avatarUrl: '', bannerUrl: '' });
+      setShortenerForm({ title: '', destinationUrl: '', slug: '', utmSource: '', utmMedium: '', utmCampaign: '', iosUrl: '', androidUrl: '' });
       setSuccessMsg('Short link generated successfully!');
       setTimeout(() => setSuccessMsg(null), 3000);
       fetchItems();
@@ -453,8 +449,6 @@ export default function MicroSaasHub({
       utmCampaign: spec.utmCampaign || '',
       iosUrl: spec.iosUrl || '',
       androidUrl: spec.androidUrl || '',
-      avatarUrl: spec.avatarUrl || '',
-      bannerUrl: spec.bannerUrl || '',
     });
     setShowEditModal('shortener');
   };
@@ -1671,27 +1665,6 @@ export default function MicroSaasHub({
                 </div>
               </div>
 
-              {/* Profile & Header Banner */}
-              <div className="pt-2 border-t border-[#11140F]/10 space-y-3">
-                <span className="text-[11px] font-bold text-[#11140F] uppercase tracking-wider block">
-                  Profile & Header Branding (Optional)
-                </span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <ImageUploadField
-                    label="Profile / Brand Icon"
-                    value={shortenerForm.avatarUrl}
-                    onChange={(url) => setShortenerForm({ ...shortenerForm, avatarUrl: url })}
-                    variant="avatar"
-                  />
-                  <ImageUploadField
-                    label="Header Banner"
-                    value={shortenerForm.bannerUrl}
-                    onChange={(url) => setShortenerForm({ ...shortenerForm, bannerUrl: url })}
-                    variant="banner"
-                  />
-                </div>
-              </div>
-
               <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10">
                 <button
                   type="button"
@@ -2184,27 +2157,6 @@ export default function MicroSaasHub({
                     onChange={(e) => setEditShortenerForm({ ...editShortenerForm, utmCampaign: e.target.value })}
                     placeholder="utm_campaign"
                     className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-[#11140F]/15 bg-white"
-                  />
-                </div>
-              </div>
-
-              {/* Profile & Header Banner */}
-              <div className="pt-2 border-t border-[#11140F]/10 space-y-3">
-                <span className="text-[11px] font-bold text-[#11140F] uppercase tracking-wider block">
-                  Profile & Header Branding
-                </span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <ImageUploadField
-                    label="Profile / Brand Icon"
-                    value={editShortenerForm.avatarUrl}
-                    onChange={(url) => setEditShortenerForm({ ...editShortenerForm, avatarUrl: url })}
-                    variant="avatar"
-                  />
-                  <ImageUploadField
-                    label="Header Banner"
-                    value={editShortenerForm.bannerUrl}
-                    onChange={(url) => setEditShortenerForm({ ...editShortenerForm, bannerUrl: url })}
-                    variant="banner"
                   />
                 </div>
               </div>

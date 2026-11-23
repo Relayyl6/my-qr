@@ -78,6 +78,8 @@ export default function VCardInteractiveView({
   const [exchangePhone, setExchangePhone] = useState('');
   const [exchanging, setExchanging] = useState(false);
   const [exchangeSuccess, setExchangeSuccess] = useState(false);
+  const [avatarLoaded, setAvatarLoaded] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
 
   const initials = fullName
     .split(' ')
@@ -178,7 +180,7 @@ export default function VCardInteractiveView({
         {/* Main Card */}
         <div className={`${activeTheme.cardBg} rounded-2xl border ${activeTheme.border} p-6 sm:p-8 shadow-xl space-y-6 relative overflow-hidden backdrop-blur-md`}>
           {/* Cover Banner */}
-          {bannerUrl && (
+          {bannerUrl ? (
             <div className="-mx-6 -mt-6 sm:-mx-8 sm:-mt-8 mb-4 h-36 w-[calc(100%+3rem)] sm:w-[calc(100%+4rem)] overflow-hidden relative bg-black/20">
               <img
                 src={getOptimizedStorageUrl(bannerUrl)}
@@ -188,6 +190,10 @@ export default function VCardInteractiveView({
                 className="w-full h-full object-cover transition-opacity duration-300"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+            </div>
+          ) : (
+            <div className="-mx-6 -mt-6 sm:-mx-8 sm:-mt-8 mb-4 h-24 w-[calc(100%+3rem)] sm:w-[calc(100%+4rem)] overflow-hidden relative bg-gradient-to-br from-white/[0.04] via-transparent to-black/30 border-b border-white/5">
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-500/10 via-transparent to-transparent" />
             </div>
           )}
 
@@ -212,27 +218,30 @@ export default function VCardInteractiveView({
 
           {/* Profile Details */}
           <div className="text-center space-y-3 pt-1">
-            {avatarUrl ? (
-              <div
-                style={{ borderColor: activeTheme.accent }}
-                className="w-24 h-24 mx-auto rounded-full overflow-hidden shadow-xl border-2 ring-4 ring-white/10 shrink-0 relative bg-black/30"
-              >
+            <div
+              style={{ borderColor: activeTheme.accent }}
+              className="w-24 h-24 mx-auto rounded-full overflow-hidden shadow-xl border-2 ring-4 ring-white/10 shrink-0 relative bg-black/40 flex items-center justify-center"
+            >
+              {/* Always present fallback initials */}
+              <span className="text-2xl sm:text-3xl font-extrabold tracking-wider text-white select-none">
+                {initials}
+              </span>
+
+              {/* High-res image smoothly fades in when loaded */}
+              {avatarUrl && !avatarError && (
                 <img
                   src={getOptimizedStorageUrl(avatarUrl)}
                   alt={fullName}
                   loading="eager"
                   decoding="async"
-                  className="w-full h-full object-cover transition-opacity duration-300"
+                  onLoad={() => setAvatarLoaded(true)}
+                  onError={() => setAvatarError(true)}
+                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
+                    avatarLoaded ? 'opacity-100' : 'opacity-0'
+                  }`}
                 />
-              </div>
-            ) : (
-              <div
-                style={{ borderColor: activeTheme.accent }}
-                className="w-24 h-24 mx-auto rounded-full bg-black/40 text-white flex items-center justify-center text-3xl font-extrabold tracking-wider shadow-lg border-2"
-              >
-                {initials}
-              </div>
-            )}
+              )}
+            </div>
 
             <div>
               <h1 className={`text-2xl font-black ${activeTheme.text} tracking-tight`}>
@@ -244,17 +253,17 @@ export default function VCardInteractiveView({
                 </p>
               )}
               {company && (
-                <div className="flex items-center justify-center gap-1.5 mt-0.5">
+                <div className="inline-flex items-center justify-center gap-2 mt-1.5 px-3 py-1 rounded-xl bg-white/5 border border-white/10 shadow-xs max-w-full">
                   {logoUrl && (
                     <img
                       src={getOptimizedStorageUrl(logoUrl)}
                       alt={company}
                       loading="lazy"
                       decoding="async"
-                      className="w-4 h-4 rounded object-contain shrink-0"
+                      className="w-5 h-5 rounded object-contain shrink-0 bg-white/10 p-0.5"
                     />
                   )}
-                  <p className={`text-xs font-bold uppercase tracking-wider ${activeTheme.subtext}`}>
+                  <p className={`text-xs font-bold uppercase tracking-wider truncate ${activeTheme.subtext}`}>
                     {company}
                   </p>
                 </div>

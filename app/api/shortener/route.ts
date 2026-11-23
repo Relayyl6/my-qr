@@ -71,8 +71,6 @@ export async function POST(req: NextRequest) {
 
     const specPayload = {
       destinationUrl,
-      avatarUrl: body.avatarUrl || null,
-      bannerUrl: body.bannerUrl || null,
       utmSource: utmSource || undefined,
       utmMedium: utmMedium || undefined,
       utmCampaign: utmCampaign || undefined,
