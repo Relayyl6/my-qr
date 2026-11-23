@@ -38,6 +38,9 @@ export default async function Home() {
   let monthlyScansCount = 0;
   let aiCredit: any = null;
   let promoBanner: any = null;
+  let microSaasItems: any[] = [];
+  let mailLists: any[] = [];
+  let recentScans: any[] = [];
 
   try {
     // 1. Authoritative System Sovereignty Config (Available to all visitors)
@@ -69,7 +72,7 @@ export default async function Home() {
     }
 
     if (user) {
-      const [fetchedLinks, fetchedDomains, scanCount, creditRecord] = await Promise.all([
+      const [fetchedLinks, fetchedDomains, scanCount, creditRecord, fetchedMicroItems, fetchedMailLists, fetchedScans] = await Promise.all([
         prisma.qrLink.findMany({
           where: { userId: user.id },
           include: { landingPage: true, customDomain: true, routingRules: true },
@@ -88,12 +91,29 @@ export default async function Home() {
         prisma.aiCredit.findUnique({
           where: { userId: user.id },
         }),
+        prisma.microSaasItem.findMany({
+          where: { userId: user.id },
+          select: { id: true, type: true, slug: true, title: true, scansCount: true, createdAt: true, spec: true },
+        }),
+        prisma.customerMailList.findMany({
+          where: { userId: user.id },
+          include: { _count: { select: { contacts: true } } },
+        }),
+        prisma.scan.findMany({
+          where: { qrLink: { userId: user.id } },
+          take: 8,
+          orderBy: { scannedAt: 'desc' },
+          include: { qrLink: { select: { label: true, shortCode: true } } },
+        }),
       ]);
 
       links = fetchedLinks;
       customDomains = fetchedDomains;
       monthlyScansCount = scanCount;
       aiCredit = creditRecord;
+      microSaasItems = fetchedMicroItems;
+      mailLists = fetchedMailLists;
+      recentScans = fetchedScans;
     }
   } catch (err) {
     console.error('Safe SSR Fallback in Home page:', err);
@@ -142,6 +162,11 @@ export default async function Home() {
       user={user}
       isAdmin={isAdmin}
       activeLinksCount={activeLinksCount}
+      monthlyScansCount={monthlyScansCount}
+      links={links}
+      microSaasItems={microSaasItems}
+      mailLists={mailLists}
+      recentScans={recentScans}
       planUsageMeter={
         <PlanUsageMeter
           userTier={user.tier || 'free'}

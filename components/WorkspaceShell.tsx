@@ -33,6 +33,7 @@ import BulkImportWizard from './BulkImportWizard';
 import AccountSettingsModal from './AccountSettingsModal';
 import EntryPromoModal from './EntryPromoModal';
 import MicroSaasHub from './MicroSaasHub';
+import WorkspaceOverviewTab from './WorkspaceOverviewTab';
 import { getOptimizedStorageUrl } from '@/lib/media';
 import { signOut } from '@/app/auth-actions';
 import { getStoredPreferences } from '@/lib/theme';
@@ -92,6 +93,11 @@ interface WorkspaceShellProps {
   brandedDomainsManager: React.ReactNode;
   linkCreationAndList: React.ReactNode;
   activeLinksCount: number;
+  monthlyScansCount?: number;
+  links?: any[];
+  microSaasItems?: any[];
+  mailLists?: any[];
+  recentScans?: any[];
 }
 
 export default function WorkspaceShell({
@@ -102,6 +108,11 @@ export default function WorkspaceShell({
   brandedDomainsManager,
   linkCreationAndList,
   activeLinksCount,
+  monthlyScansCount = 0,
+  links = [],
+  microSaasItems = [],
+  mailLists = [],
+  recentScans = [],
 }: WorkspaceShellProps) {
   const [activeSection, setActiveSection] = useState<WorkspaceSection>('links');
   const [microSaasTab, setMicroSaasTab] = useState<'mailing' | 'vcard' | 'shortener' | 'menu' | 'wifi'>('mailing');
@@ -262,16 +273,18 @@ export default function WorkspaceShell({
       group: 'MAIN WORKSPACE',
       items: [
         {
-          id: 'all' as WorkspaceSection,
-          label: 'Complete Workspace',
+          id: 'overview' as WorkspaceSection,
+          label: 'Overview',
           icon: LayoutDashboard,
-          badge: 'All Tools',
+          badge: 'Live',
           badgeColor: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
         },
         {
-          id: 'overview' as WorkspaceSection,
-          label: 'Plan & Usage Meter',
-          icon: Gauge,
+          id: 'all' as WorkspaceSection,
+          label: 'Complete Workspace',
+          icon: Layers,
+          badge: 'All Tools',
+          badgeColor: 'bg-blue-500/10 text-blue-700 dark:text-blue-400',
         },
         {
           id: 'links' as WorkspaceSection,
@@ -1001,11 +1014,24 @@ export default function WorkspaceShell({
           </div>
         )}
 
-        {/* VIEW 2: PLAN USAGE METER FOCUSED */}
+        {/* VIEW 2: EXECUTIVE LIVE OVERVIEW TAB */}
         {activeSection === 'overview' && (
           <div className="space-y-6">
-            {planUsageMeter}
-            {campaignAnalyst}
+            <WorkspaceOverviewTab
+              user={user!}
+              isAdmin={isAdmin}
+              activeLinksCount={activeLinksCount}
+              monthlyScansCount={monthlyScansCount}
+              links={links}
+              microSaasItems={microSaasItems}
+              mailLists={mailLists}
+              recentScans={recentScans}
+              onNavigateSection={handleSelectSection}
+              onOpenUpgradeModal={() => setShowAccountModal(true)}
+            />
+            <div className="pt-2">
+              {planUsageMeter}
+            </div>
           </div>
         )}
 
