@@ -4,8 +4,9 @@ import { useState, useRef, useEffect } from 'react';
 import { signOut, getUserProfileAvatar } from '@/app/auth-actions';
 import AuthModal from './AuthModal';
 import Link from 'next/link';
-import { LayoutGrid, Sparkles, CreditCard, Shield, Settings, ChevronDown, LogOut } from 'lucide-react';
+import { LayoutGrid, Sparkles, CreditCard, Shield, Settings, ChevronDown, LogOut, Search } from 'lucide-react';
 import AccountSettingsModal from './AccountSettingsModal';
+import SearchCommandModal from './SearchCommandModal';
 import { getOptimizedStorageUrl } from '@/lib/media';
 
 interface Props {
@@ -49,8 +50,21 @@ export default function HeaderNav({
   const [authOpen, setAuthOpen] = useState(false);
   const [authTab, setAuthTab] = useState<'login' | 'signup'>('login');
   const [accountModalOpen, setAccountModalOpen] = useState(false);
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Global keyboard shortcut for Search Spotlight (⌘K / Ctrl+K)
+  useEffect(() => {
+    function handleGlobalKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setSearchModalOpen((prev) => !prev);
+      }
+    }
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
 
   // Close dropdown on click outside or Escape
   useEffect(() => {
@@ -161,8 +175,8 @@ export default function HeaderNav({
         <nav className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-8">
           {/* Main Top Navigation Row */}
           <div className="h-16 flex items-center justify-between gap-3 sm:gap-6">
-            {/* Left: DynamicQR Brand Logo */}
-            <div className="flex items-center gap-3 shrink-0">
+            {/* Left: DynamicQR Brand Logo & Pricing Link */}
+            <div className="flex items-center gap-2.5 sm:gap-4 shrink-0">
               <a
                 href="#top"
                 onClick={(e) => {
@@ -171,30 +185,43 @@ export default function HeaderNav({
                     handleTabClick('overview');
                   }
                 }}
-                className="flex items-center gap-2.5 group cursor-pointer"
+                className="flex items-center gap-2 sm:gap-2.5 group cursor-pointer"
               >
                 <div
-                  className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors shadow-xs ${
+                  className={`w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center transition-colors shadow-xs ${
                     isDark
                       ? 'bg-white/10 text-white group-hover:bg-white/20'
                       : 'bg-[#11140F] dark:bg-white/10 text-white group-hover:bg-[#2A2E25] dark:group-hover:bg-white/20'
                   }`}
                 >
-                  <QrMark className="w-4.5 h-4.5" fill="#FFFFFF" />
+                  <QrMark className="w-4 h-4 sm:w-4.5 sm:h-4.5" fill="#FFFFFF" />
                 </div>
                 <span
-                  className={`font-bold tracking-tight text-[16.5px] sm:text-[18px] transition-colors ${
+                  className={`font-bold tracking-tight text-[15.5px] sm:text-[18px] transition-colors ${
                     isDark ? 'text-white' : 'text-[#11140F] dark:text-white'
                   }`}
                 >
                   DynamicQR
                 </span>
               </a>
+
+              {/* Pricing moved beside DynamicQR */}
+              <Link
+                href="/pricing"
+                className={`hidden md:inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-xl text-[12.5px] sm:text-[13px] font-medium transition-all ${
+                  isDark
+                    ? 'text-white/70 hover:text-white hover:bg-white/10'
+                    : 'text-[#11140F]/70 dark:text-white/70 hover:text-[#11140F] dark:hover:text-white hover:bg-[#11140F]/5 dark:hover:bg-white/10'
+                }`}
+              >
+                <CreditCard className="w-3.5 h-3.5 opacity-70 shrink-0" />
+                <span>Pricing</span>
+              </Link>
             </div>
 
-            {/* Center: Unified Segmented View Tabs (Desktop & Tablet) */}
+            {/* Center: Overhauled Segmented View Tabs (Workspace vs Tour) - Directly in Main Bar on Mobile & Desktop */}
             <div
-              className={`hidden sm:flex items-center p-1 rounded-2xl border transition-colors ${
+              className={`flex items-center p-0.5 sm:p-1 rounded-2xl border transition-colors shrink-0 ${
                 isDark
                   ? 'bg-white/[0.08] border-white/15 shadow-2xs'
                   : 'bg-white/90 dark:bg-white/[0.08] border-[#11140F]/10 dark:border-white/10 shadow-2xs'
@@ -203,16 +230,18 @@ export default function HeaderNav({
               <button
                 type="button"
                 onClick={() => handleTabClick('workspace')}
-                className={`px-3.5 sm:px-4 py-1.5 rounded-xl text-[12.5px] sm:text-[13px] font-semibold flex items-center gap-2 transition-all cursor-pointer ${
+                className={`px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-xl text-[11.5px] sm:text-[13px] font-semibold flex items-center gap-1.5 sm:gap-2 transition-all cursor-pointer ${
                   activeTab === 'workspace'
                     ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] shadow-xs'
                     : isDark
                     ? 'text-white/70 hover:text-white hover:bg-white/10'
                     : 'text-[#11140F]/65 dark:text-white/70 hover:text-[#11140F] dark:hover:text-white hover:bg-[#EEF0EA] dark:hover:bg-white/10'
                 }`}
+                title="Switch to Workspace"
               >
                 <LayoutGrid className="w-3.5 h-3.5 shrink-0" />
-                <span>Workspace</span>
+                <span className="hidden xs:inline">Workspace</span>
+                <span className="xs:hidden">App</span>
                 {user && (
                   <span
                     className={`w-1.5 h-1.5 rounded-full shrink-0 ${
@@ -225,7 +254,7 @@ export default function HeaderNav({
               <button
                 type="button"
                 onClick={() => handleTabClick('overview')}
-                className={`px-3.5 sm:px-4 py-1.5 rounded-xl text-[12.5px] sm:text-[13px] font-semibold flex items-center gap-2 transition-all cursor-pointer ${
+                className={`px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-xl text-[11.5px] sm:text-[13px] font-semibold flex items-center gap-1.5 sm:gap-2 transition-all cursor-pointer ${
                   activeTab === 'overview'
                     ? isDark
                       ? 'bg-white text-[#11140F] shadow-xs font-bold'
@@ -234,26 +263,35 @@ export default function HeaderNav({
                     ? 'text-white/70 hover:text-white hover:bg-white/10'
                     : 'text-[#11140F]/65 dark:text-white/70 hover:text-[#11140F] dark:hover:text-white hover:bg-[#EEF0EA] dark:hover:bg-white/10'
                 }`}
+                title="Switch to Product Tour"
               >
                 <Sparkles className="w-3.5 h-3.5 shrink-0" />
-                <span>Product Tour</span>
+                <span className="hidden sm:inline">Product Tour</span>
+                <span className="sm:hidden">Tour</span>
               </button>
-
-              <Link
-                href="/pricing"
-                className={`px-3 sm:px-3.5 py-1.5 rounded-xl text-[12.5px] sm:text-[13px] font-semibold transition-colors flex items-center gap-1.5 ${
-                  isDark
-                    ? 'text-emerald-300 hover:bg-emerald-400/10'
-                    : 'text-[#2F6B4F] dark:text-[#34D399] hover:bg-[#2F6B4F]/10 dark:hover:bg-white/10'
-                }`}
-              >
-                <CreditCard className="w-3.5 h-3.5 shrink-0" />
-                <span>Pricing</span>
-              </Link>
             </div>
 
-            {/* Right: Consolidated User Profile Dropdown or Auth Actions */}
-            <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+            {/* Right: Quick Search & Consolidated User Profile Dropdown */}
+            <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+              {/* Quick Search Spotlight Button beside profile pill */}
+              <button
+                type="button"
+                onClick={() => setSearchModalOpen(true)}
+                className={`flex items-center gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border transition-all cursor-pointer shadow-xs group ${
+                  isDark
+                    ? 'bg-white/[0.08] hover:bg-white/[0.14] border-white/15 text-white'
+                    : 'bg-white/90 dark:bg-white/[0.08] hover:bg-white dark:hover:bg-white/[0.14] border-[#11140F]/12 dark:border-white/15 text-[#11140F] dark:text-white'
+                }`}
+                title="Quick Search & Command Palette (⌘K / Ctrl+K)"
+              >
+                <Search className="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform shrink-0" />
+                <span className="hidden lg:inline text-[12px] font-medium text-white/75 dark:text-white/75 group-hover:text-white">
+                  Search...
+                </span>
+                <kbd className="hidden xl:inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[9.5px] font-mono font-medium border bg-white/10 border-white/15 text-white/60">
+                  <span>⌘</span>K
+                </kbd>
+              </button>
               {user ? (
                 <div className="relative" ref={userMenuRef}>
                   {/* Single Clean Profile Trigger Button */}
@@ -451,62 +489,18 @@ export default function HeaderNav({
             </div>
           </div>
 
-          {/* Mobile Bottom Tab Bar (< sm screens) */}
-          <div className="sm:hidden pb-2.5 pt-0.5">
-            <div
-              className={`grid grid-cols-3 p-1 rounded-2xl border shadow-xs gap-1 ${
-                isDark
-                  ? 'bg-[#1A2216]/95 border-white/15'
-                  : 'bg-white/95 dark:bg-[#1A2216]/95 border-[#11140F]/10 dark:border-white/15'
-              }`}
-            >
-              <button
-                type="button"
-                onClick={() => handleTabClick('workspace')}
-                className={`py-1.5 rounded-xl text-[12px] font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                  activeTab === 'workspace'
-                    ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] shadow-xs'
-                    : isDark
-                    ? 'text-white/70 hover:text-white'
-                    : 'text-[#11140F]/65 dark:text-white/70 hover:text-[#11140F] dark:hover:text-white'
-                }`}
-              >
-                <LayoutGrid className="w-3.5 h-3.5 shrink-0" />
-                <span>Workspace</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleTabClick('overview')}
-                className={`py-1.5 rounded-xl text-[12px] font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                  activeTab === 'overview'
-                    ? isDark
-                      ? 'bg-white text-[#11140F] shadow-xs font-bold'
-                      : 'bg-[#11140F] text-white shadow-xs'
-                    : isDark
-                    ? 'text-white/70 hover:text-white'
-                    : 'text-[#11140F]/65 dark:text-white/70 hover:text-[#11140F] dark:hover:text-white'
-                }`}
-              >
-                <Sparkles className="w-3.5 h-3.5 shrink-0" />
-                <span>Tour</span>
-              </button>
-
-              <Link
-                href="/pricing"
-                className={`py-1.5 rounded-xl text-[12px] font-semibold flex items-center justify-center gap-1.5 transition-colors ${
-                  isDark
-                    ? 'text-emerald-300 hover:bg-emerald-400/10'
-                    : 'text-[#2F6B4F] dark:text-[#34D399] hover:bg-[#2F6B4F]/10'
-                }`}
-              >
-                <CreditCard className="w-3.5 h-3.5 shrink-0" />
-                <span>Pricing</span>
-              </Link>
-            </div>
-          </div>
         </nav>
       </header>
+
+      {/* Global Spotlight Search & Command Modal */}
+      <SearchCommandModal
+        isOpen={searchModalOpen}
+        onClose={() => setSearchModalOpen(false)}
+        onSelectTab={handleTabClick}
+        onOpenAccountSettings={() => setAccountModalOpen(true)}
+        user={user}
+        isAdmin={isAdmin}
+      />
 
       <AuthModal
         isOpen={authOpen}

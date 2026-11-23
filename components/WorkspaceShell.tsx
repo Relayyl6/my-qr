@@ -200,8 +200,16 @@ export default function WorkspaceShell({
       setMicroSaasTab(targetMicroTab);
     }
 
+    const handleNavigateEvent = (e: any) => {
+      if (e.detail?.section && VALID_SECTIONS.includes(e.detail.section)) {
+        handleSelectSection(e.detail.section);
+      }
+    };
+    window.addEventListener('dynamicqr-navigate-section', handleNavigateEvent);
+
     return () => {
       window.removeEventListener('dynamicqr-preferences-change', handlePrefChange);
+      window.removeEventListener('dynamicqr-navigate-section', handleNavigateEvent);
     };
   }, [storageSectionKey, storageTabKey]);
 
