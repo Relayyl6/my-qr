@@ -766,7 +766,7 @@ export default function WorkspaceOverviewTab({
           </div>
 
           {/* Capsule Bar Chart with Authentic Inactive Textured Sliders & Selected Active Blue Bar */}
-          <div className="flex items-stretch gap-2 pt-5 pb-1 flex-1 min-h-0">
+          <div className="flex items-stretch gap-2 pt-8 sm:pt-9 pb-1 flex-1 min-h-0">
             {/* Dynamic Y-Axis based on user's real peak scan volume */}
             <div className="flex flex-col justify-between text-[10px] font-mono text-white/35 py-1 select-none pr-1 shrink-0">
               {ySteps.map((step, idx) => (
@@ -793,10 +793,10 @@ export default function WorkspaceOverviewTab({
                   <div
                     key={bar.month}
                     onClick={() => setSelectedBarIndex(idx)}
-                    className="flex-1 flex flex-col items-center justify-end h-full group cursor-pointer relative"
+                    className="flex-1 flex flex-col items-center justify-end h-full group cursor-pointer relative overflow-visible"
                   >
                     {/* The Full Capsule Slot Track */}
-                    <div className="w-full max-w-[32px] sm:max-w-[40px] h-[76%] bg-[#14161F] rounded-full relative flex flex-col justify-end items-center p-0.5 group-hover:bg-[#1C1F2B] transition-colors">
+                    <div className="w-full max-w-[32px] sm:max-w-[40px] h-[72%] bg-[#14161F] rounded-full relative flex flex-col justify-end items-center p-0.5 group-hover:bg-[#1C1F2B] transition-colors">
                       
                       {/* INACTIVE CAPSULE: Authentic Diagonal Hatching Fill + Crisp White Horizontal Notch */}
                       {!isActive && (
@@ -824,7 +824,7 @@ export default function WorkspaceOverviewTab({
                           className="w-full bg-gradient-to-b from-[#5B8DEF] to-[#336DE3] rounded-full relative flex flex-col justify-end items-center pb-2 shadow-[0_0_24px_rgba(78,130,238,0.55)] transition-all animate-in zoom-in-95 duration-200"
                         >
                           {/* Floating Blue Pill Badge above the bar (unclipped with ample headroom) */}
-                          <div className="absolute -top-7 left-1/2 -translate-x-1/2 px-2.5 py-0.5 bg-[#4E82EE] text-white text-[9.5px] font-bold rounded-full shadow-lg flex items-center gap-0.5 whitespace-nowrap z-30">
+                          <div className="absolute -top-6.5 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-[#4E82EE] text-white text-[9px] font-bold rounded-full shadow-lg flex items-center gap-0.5 whitespace-nowrap z-30 pointer-events-none">
                             <span>▲ {bar.value} Scans</span>
                             <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-[#4E82EE]" />
                           </div>

@@ -1384,16 +1384,16 @@ export default function MicroSaasHub({
       {/* VCARD CREATION MODAL */}
       {showVCardModal && (
         <div className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl border border-[#11140F]/10 shadow-2xl max-w-lg w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-[#11140F]/10 pb-4">
+          <div className="bg-white dark:bg-[#0E1017] rounded-3xl border border-[#11140F]/10 dark:border-white/10 shadow-2xl max-w-xl w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto text-[#11140F] dark:text-white">
+            <div className="flex items-center justify-between border-b border-[#11140F]/10 dark:border-white/10 pb-4">
               <div className="flex items-center gap-2">
                 <Contact className="w-5 h-5 text-[#2F6B4F]" />
-                <h3 className="text-base font-bold text-[#11140F]">Create Digital Business Card (vCard)</h3>
+                <h3 className="text-base font-bold text-[#11140F] dark:text-white">Create Digital Business Card (vCard)</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowVCardModal(false)}
-                className="text-[#11140F]/50 hover:text-[#11140F] text-sm font-bold cursor-pointer"
+                className="text-[#11140F]/50 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white text-sm font-bold cursor-pointer"
               >
                 ✕
               </button>
@@ -1402,114 +1402,114 @@ export default function MicroSaasHub({
             <form onSubmit={handleCreateVCard} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">First Name *</label>
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">First Name *</label>
                   <input
                     type="text"
                     required
                     value={vcardForm.firstName}
                     onChange={(e) => setVcardForm({ ...vcardForm, firstName: e.target.value })}
                     placeholder="e.g. Sarah"
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">Last Name</label>
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Last Name</label>
                   <input
                     type="text"
                     value={vcardForm.lastName}
                     onChange={(e) => setVcardForm({ ...vcardForm, lastName: e.target.value })}
                     placeholder="e.g. Jenkins"
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">Job Title</label>
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Job Title</label>
                   <input
                     type="text"
                     value={vcardForm.title}
                     onChange={(e) => setVcardForm({ ...vcardForm, title: e.target.value })}
                     placeholder="e.g. Creative Director"
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">Company</label>
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Company</label>
                   <input
                     type="text"
                     value={vcardForm.company}
                     onChange={(e) => setVcardForm({ ...vcardForm, company: e.target.value })}
                     placeholder="e.g. Studio Acme"
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">Email *</label>
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Email *</label>
                   <input
                     type="email"
                     required
                     value={vcardForm.email}
                     onChange={(e) => setVcardForm({ ...vcardForm, email: e.target.value })}
                     placeholder="e.g. sarah@acme.com"
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">Phone Number</label>
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Phone Number</label>
                   <input
                     type="tel"
                     value={vcardForm.phone}
                     onChange={(e) => setVcardForm({ ...vcardForm, phone: e.target.value })}
                     placeholder="e.g. +1 555-0192"
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#11140F]">Website or Portfolio</label>
+                <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Website or Portfolio</label>
                 <input
                   type="url"
                   value={vcardForm.website}
                   onChange={(e) => setVcardForm({ ...vcardForm, website: e.target.value })}
                   placeholder="https://example.com"
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#11140F]">Bio / Pitch</label>
+                <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Bio / Pitch</label>
                 <textarea
                   rows={2}
                   value={vcardForm.bio}
                   onChange={(e) => setVcardForm({ ...vcardForm, bio: e.target.value })}
                   placeholder="Short introduction about yourself or your services..."
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F] resize-none"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500 resize-none"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#11140F]">Custom Slug (Optional)</label>
+                <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Custom Slug (Optional)</label>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-mono text-[#11140F]/50">/c/</span>
+                  <span className="text-xs font-mono text-[#11140F]/50 dark:text-white/50">/c/</span>
                   <input
                     type="text"
                     value={vcardForm.slug}
                     onChange={(e) => setVcardForm({ ...vcardForm, slug: e.target.value })}
                     placeholder="sarah-jenkins"
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                   />
                 </div>
               </div>
 
               {/* Media & Image Uploads */}
-              <div className="pt-2 border-t border-[#11140F]/10 space-y-3">
-                <span className="text-[11px] font-bold text-[#11140F] uppercase tracking-wider block">
+              <div className="pt-2 border-t border-[#11140F]/10 dark:border-white/10 dark:border-white/10 dark:border-white/10 space-y-3">
+                <span className="text-[11px] font-bold text-[#11140F] dark:text-white uppercase tracking-wider block">
                   Media & Visual Branding (Optional)
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1534,18 +1534,18 @@ export default function MicroSaasHub({
                 />
               </div>
 
-              <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10">
+              <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10 dark:border-white/10 dark:border-white/10 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setShowVCardModal(false)}
-                  className="px-4 py-2 text-xs font-semibold text-[#11140F]/70 hover:text-[#11140F] cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold text-[#11140F]/70 dark:text-white/70 hover:text-[#11140F] dark:hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={actionLoading}
-                  className="px-5 py-2.5 rounded-xl bg-[#11140F] text-white text-xs font-bold hover:bg-[#2A2E25] transition-all cursor-pointer shadow-xs disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-xl bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] text-xs font-bold hover:bg-[#2A2E25] dark:hover:bg-white/90 transition-all cursor-pointer shadow-xs disabled:opacity-50"
                 >
                   {actionLoading ? 'Creating...' : 'Create Digital vCard'}
                 </button>
@@ -1559,15 +1559,15 @@ export default function MicroSaasHub({
       {showShortenerModal && (
         <div className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl border border-[#11140F]/10 shadow-2xl max-w-lg w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between border-b border-[#11140F]/10 pb-4">
+            <div className="flex items-center justify-between border-b border-[#11140F]/10 dark:border-white/10 pb-4">
               <div className="flex items-center gap-2">
                 <Link2 className="w-5 h-5 text-[#2F6B4F]" />
-                <h3 className="text-base font-bold text-[#11140F]">Create Branded Short Link</h3>
+                <h3 className="text-base font-bold text-[#11140F] dark:text-white">Create Branded Short Link</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowShortenerModal(false)}
-                className="text-[#11140F]/50 hover:text-[#11140F] text-sm font-bold cursor-pointer"
+                className="text-[#11140F]/50 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white text-sm font-bold cursor-pointer"
               >
                 ✕
               </button>
@@ -1575,46 +1575,46 @@ export default function MicroSaasHub({
 
             <form onSubmit={handleCreateShortener} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#11140F]">Destination URL *</label>
+                <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Destination URL *</label>
                 <input
                   type="url"
                   required
                   value={shortenerForm.destinationUrl}
                   onChange={(e) => setShortenerForm({ ...shortenerForm, destinationUrl: e.target.value })}
                   placeholder="https://yourwebsite.com/long-page-url-to-shorten"
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">Title / Memo</label>
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Title / Memo</label>
                   <input
                     type="text"
                     value={shortenerForm.title}
                     onChange={(e) => setShortenerForm({ ...shortenerForm, title: e.target.value })}
                     placeholder="e.g. Black Friday Promo Link"
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">Custom Slug</label>
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Custom Slug</label>
                   <div className="flex items-center gap-1">
-                    <span className="text-xs font-mono text-[#11140F]/50">/s/</span>
+                    <span className="text-xs font-mono text-[#11140F]/50 dark:text-white/50">/s/</span>
                     <input
                       type="text"
                       value={shortenerForm.slug}
                       onChange={(e) => setShortenerForm({ ...shortenerForm, slug: e.target.value })}
                       placeholder="blackfriday26"
-                      className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                     />
                   </div>
                 </div>
               </div>
 
               {/* UTM Builder */}
-              <div className="p-3 bg-[#F7F8F5] rounded-xl border border-[#11140F]/5 space-y-2.5">
-                <span className="text-[11px] font-bold text-[#11140F] uppercase tracking-wider block">
+              <div className="p-3 bg-[#F7F8F5] dark:bg-white/[0.03] rounded-xl border border-[#11140F]/10 dark:border-white/10 space-y-2.5">
+                <span className="text-[11px] font-bold text-[#11140F] dark:text-white uppercase tracking-wider block">
                   UTM Analytics Parameters (Optional)
                 </span>
                 <div className="grid grid-cols-3 gap-2">
@@ -1623,28 +1623,28 @@ export default function MicroSaasHub({
                     value={shortenerForm.utmSource}
                     onChange={(e) => setShortenerForm({ ...shortenerForm, utmSource: e.target.value })}
                     placeholder="utm_source"
-                    className="px-2.5 py-1.5 text-[11px] rounded-lg border border-[#11140F]/15 bg-white"
+                    className="px-2.5 py-1.5 text-[11px] rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white"
                   />
                   <input
                     type="text"
                     value={shortenerForm.utmMedium}
                     onChange={(e) => setShortenerForm({ ...shortenerForm, utmMedium: e.target.value })}
                     placeholder="utm_medium"
-                    className="px-2.5 py-1.5 text-[11px] rounded-lg border border-[#11140F]/15 bg-white"
+                    className="px-2.5 py-1.5 text-[11px] rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white"
                   />
                   <input
                     type="text"
                     value={shortenerForm.utmCampaign}
                     onChange={(e) => setShortenerForm({ ...shortenerForm, utmCampaign: e.target.value })}
                     placeholder="utm_campaign"
-                    className="px-2.5 py-1.5 text-[11px] rounded-lg border border-[#11140F]/15 bg-white"
+                    className="px-2.5 py-1.5 text-[11px] rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white"
                   />
                 </div>
               </div>
 
               {/* Mobile OS Routing */}
-              <div className="p-3 bg-[#F7F8F5] rounded-xl border border-[#11140F]/5 space-y-2.5">
-                <span className="text-[11px] font-bold text-[#11140F] uppercase tracking-wider block">
+              <div className="p-3 bg-[#F7F8F5] dark:bg-white/[0.03] rounded-xl border border-[#11140F]/10 dark:border-white/10 space-y-2.5">
+                <span className="text-[11px] font-bold text-[#11140F] dark:text-white uppercase tracking-wider block">
                   Device OS Conditional Routing (Optional)
                 </span>
                 <div className="grid grid-cols-2 gap-2">
@@ -1653,30 +1653,30 @@ export default function MicroSaasHub({
                     value={shortenerForm.iosUrl}
                     onChange={(e) => setShortenerForm({ ...shortenerForm, iosUrl: e.target.value })}
                     placeholder="Apple App Store URL (iOS)"
-                    className="px-2.5 py-1.5 text-[11px] rounded-lg border border-[#11140F]/15 bg-white"
+                    className="px-2.5 py-1.5 text-[11px] rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white"
                   />
                   <input
                     type="url"
                     value={shortenerForm.androidUrl}
                     onChange={(e) => setShortenerForm({ ...shortenerForm, androidUrl: e.target.value })}
                     placeholder="Google Play URL (Android)"
-                    className="px-2.5 py-1.5 text-[11px] rounded-lg border border-[#11140F]/15 bg-white"
+                    className="px-2.5 py-1.5 text-[11px] rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white"
                   />
                 </div>
               </div>
 
-              <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10">
+              <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10 dark:border-white/10 dark:border-white/10 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setShowShortenerModal(false)}
-                  className="px-4 py-2 text-xs font-semibold text-[#11140F]/70 hover:text-[#11140F] cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold text-[#11140F]/70 dark:text-white/70 hover:text-[#11140F] dark:hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={actionLoading}
-                  className="px-5 py-2.5 rounded-xl bg-[#11140F] text-white text-xs font-bold hover:bg-[#2A2E25] transition-all cursor-pointer shadow-xs disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-xl bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] text-xs font-bold hover:bg-[#2A2E25] dark:hover:bg-white/90 transition-all cursor-pointer shadow-xs disabled:opacity-50"
                 >
                   {actionLoading ? 'Creating...' : 'Create Short Link'}
                 </button>
@@ -1689,16 +1689,16 @@ export default function MicroSaasHub({
       {/* MENU CREATION MODAL */}
       {showMenuModal && (
         <div className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl border border-[#11140F]/10 shadow-2xl max-w-md w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between border-b border-[#11140F]/10 pb-4">
+          <div className="bg-white dark:bg-[#0E1017] rounded-3xl border border-[#11140F]/10 dark:border-white/10 shadow-2xl max-w-xl w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto text-[#11140F] dark:text-white">
+            <div className="flex items-center justify-between border-b border-[#11140F]/10 dark:border-white/10 pb-4">
               <div className="flex items-center gap-2">
                 <Utensils className="w-5 h-5 text-[#2F6B4F]" />
-                <h3 className="text-base font-bold text-[#11140F]">Create Digital Restaurant Menu</h3>
+                <h3 className="text-base font-bold text-[#11140F] dark:text-white">Create Digital Restaurant Menu</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowMenuModal(false)}
-                className="text-[#11140F]/50 hover:text-[#11140F] text-sm font-bold cursor-pointer"
+                className="text-[#11140F]/50 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white text-sm font-bold cursor-pointer"
               >
                 ✕
               </button>
@@ -1706,24 +1706,24 @@ export default function MicroSaasHub({
 
             <form onSubmit={handleCreateMenu} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#11140F]">Restaurant / Menu Name *</label>
+                <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Restaurant / Menu Name *</label>
                 <input
                   type="text"
                   required
                   value={menuForm.title}
                   onChange={(e) => setMenuForm({ ...menuForm, title: e.target.value })}
                   placeholder="e.g. Bistro Lumina - Evening Dinner"
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">Currency Symbol</label>
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Currency Symbol</label>
                   <select
                     value={menuForm.currency}
                     onChange={(e) => setMenuForm({ ...menuForm, currency: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F] bg-white"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                   >
                     <option value="$">$ (USD)</option>
                     <option value="€">€ (EUR)</option>
@@ -1735,27 +1735,27 @@ export default function MicroSaasHub({
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">Custom Slug</label>
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Custom Slug</label>
                   <div className="flex items-center gap-1">
-                    <span className="text-xs font-mono text-[#11140F]/50">/m/</span>
+                    <span className="text-xs font-mono text-[#11140F]/50 dark:text-white/50">/m/</span>
                     <input
                       type="text"
                       value={menuForm.slug}
                       onChange={(e) => setMenuForm({ ...menuForm, slug: e.target.value })}
                       placeholder="bistro-lumina"
-                      className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                     />
                   </div>
                 </div>
               </div>
 
-              <p className="text-[11px] text-[#11140F]/60 bg-[#F7F8F5] p-3 rounded-xl border border-[#11140F]/5">
+              <p className="text-[11px] text-[#11140F]/70 dark:text-white/70 bg-[#F7F8F5] dark:bg-white/[0.03] p-3 rounded-xl border border-[#11140F]/10 dark:border-white/10">
                 ✨ Includes pre-configured sample sections (Starters, Mains, Drinks) with vegetarian, gluten-free, and spicy badges. You can immediately preview or customize the live menu.
               </p>
 
               {/* Restaurant Branding Images */}
-              <div className="pt-2 border-t border-[#11140F]/10 space-y-3">
-                <span className="text-[11px] font-bold text-[#11140F] uppercase tracking-wider block">
+              <div className="pt-2 border-t border-[#11140F]/10 dark:border-white/10 dark:border-white/10 dark:border-white/10 space-y-3">
+                <span className="text-[11px] font-bold text-[#11140F] dark:text-white uppercase tracking-wider block">
                   Restaurant Visual Branding (Optional)
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1774,18 +1774,18 @@ export default function MicroSaasHub({
                 </div>
               </div>
 
-              <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10">
+              <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10 dark:border-white/10 dark:border-white/10 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setShowMenuModal(false)}
-                  className="px-4 py-2 text-xs font-semibold text-[#11140F]/70 hover:text-[#11140F] cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold text-[#11140F]/70 dark:text-white/70 hover:text-[#11140F] dark:hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={actionLoading}
-                  className="px-5 py-2.5 rounded-xl bg-[#11140F] text-white text-xs font-bold hover:bg-[#2A2E25] transition-all cursor-pointer shadow-xs disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-xl bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] text-xs font-bold hover:bg-[#2A2E25] dark:hover:bg-white/90 transition-all cursor-pointer shadow-xs disabled:opacity-50"
                 >
                   {actionLoading ? 'Creating...' : 'Create Digital Menu'}
                 </button>
@@ -1798,16 +1798,16 @@ export default function MicroSaasHub({
       {/* WIFI CREATION MODAL */}
       {showWifiModal && (
         <div className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl border border-[#11140F]/10 shadow-2xl max-w-md w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between border-b border-[#11140F]/10 pb-4">
+          <div className="bg-white dark:bg-[#0E1017] rounded-3xl border border-[#11140F]/10 dark:border-white/10 shadow-2xl max-w-xl w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto text-[#11140F] dark:text-white">
+            <div className="flex items-center justify-between border-b border-[#11140F]/10 dark:border-white/10 pb-4">
               <div className="flex items-center gap-2">
                 <Wifi className="w-5 h-5 text-[#2F6B4F]" />
-                <h3 className="text-base font-bold text-[#11140F]">Create Dynamic Wi-Fi QR Card</h3>
+                <h3 className="text-base font-bold text-[#11140F] dark:text-white">Create Dynamic Wi-Fi QR Card</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowWifiModal(false)}
-                className="text-[#11140F]/50 hover:text-[#11140F] text-sm font-bold cursor-pointer"
+                className="text-[#11140F]/50 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white text-sm font-bold cursor-pointer"
               >
                 ✕
               </button>
@@ -1815,34 +1815,34 @@ export default function MicroSaasHub({
 
             <form onSubmit={handleCreateWifi} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#11140F]">Wi-Fi Network SSID *</label>
+                <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Wi-Fi Network SSID *</label>
                 <input
                   type="text"
                   required
                   value={wifiForm.ssid}
                   onChange={(e) => setWifiForm({ ...wifiForm, ssid: e.target.value })}
                   placeholder="e.g. Acme_Guest_WiFi"
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">Network Password</label>
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Network Password</label>
                   <input
                     type="text"
                     value={wifiForm.password}
                     onChange={(e) => setWifiForm({ ...wifiForm, password: e.target.value })}
                     placeholder="Leave empty for open"
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">Security Encryption</label>
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Security Encryption</label>
                   <select
                     value={wifiForm.authType}
                     onChange={(e) => setWifiForm({ ...wifiForm, authType: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F] bg-white"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                   >
                     <option value="WPA">WPA / WPA2 / WPA3</option>
                     <option value="WEP">WEP</option>
@@ -1852,18 +1852,18 @@ export default function MicroSaasHub({
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#11140F]">Location / Area (Optional)</label>
+                <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Location / Area (Optional)</label>
                 <input
                   type="text"
                   value={wifiForm.location}
                   onChange={(e) => setWifiForm({ ...wifiForm, location: e.target.value })}
                   placeholder="e.g. Ground Floor Lounge & Cafe"
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#11140F]">Custom Slug (Optional)</label>
+                <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Custom Slug (Optional)</label>
                 <div className="flex items-center gap-1">
                   <span className="text-xs font-mono text-[#11140F]/50">/w/</span>
                   <input
@@ -1871,14 +1871,14 @@ export default function MicroSaasHub({
                     value={wifiForm.slug}
                     onChange={(e) => setWifiForm({ ...wifiForm, slug: e.target.value })}
                     placeholder="guest-lounge"
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                   />
                 </div>
               </div>
 
               {/* Wi-Fi Venue Branding Images */}
-              <div className="pt-2 border-t border-[#11140F]/10 space-y-3">
-                <span className="text-[11px] font-bold text-[#11140F] uppercase tracking-wider block">
+              <div className="pt-2 border-t border-[#11140F]/10 dark:border-white/10 dark:border-white/10 dark:border-white/10 space-y-3">
+                <span className="text-[11px] font-bold text-[#11140F] dark:text-white uppercase tracking-wider block">
                   Venue Visual Branding (Optional)
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1897,18 +1897,18 @@ export default function MicroSaasHub({
                 </div>
               </div>
 
-              <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10">
+              <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10 dark:border-white/10 dark:border-white/10 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setShowWifiModal(false)}
-                  className="px-4 py-2 text-xs font-semibold text-[#11140F]/70 hover:text-[#11140F] cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold text-[#11140F]/70 dark:text-white/70 hover:text-[#11140F] dark:hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={actionLoading}
-                  className="px-5 py-2.5 rounded-xl bg-[#11140F] text-white text-xs font-bold hover:bg-[#2A2E25] transition-all cursor-pointer shadow-xs disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-xl bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] text-xs font-bold hover:bg-[#2A2E25] dark:hover:bg-white/90 transition-all cursor-pointer shadow-xs disabled:opacity-50"
                 >
                   {actionLoading ? 'Creating...' : 'Create Wi-Fi QR'}
                 </button>
@@ -1921,16 +1921,16 @@ export default function MicroSaasHub({
       {/* EDIT MODAL 1: DIGITAL VCARD */}
       {showEditModal === 'vcard' && editingItem && (
         <div className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl border border-[#11140F]/10 shadow-2xl max-w-lg w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-[#11140F]/10 pb-4">
+          <div className="bg-white dark:bg-[#0E1017] rounded-3xl border border-[#11140F]/10 dark:border-white/10 shadow-2xl max-w-xl w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto text-[#11140F] dark:text-white">
+            <div className="flex items-center justify-between border-b border-[#11140F]/10 dark:border-white/10 pb-4">
               <div className="flex items-center gap-2">
                 <Contact className="w-5 h-5 text-[#2F6B4F]" />
-                <h3 className="text-base font-bold text-[#11140F]">Edit Digital vCard</h3>
+                <h3 className="text-base font-bold text-[#11140F] dark:text-white">Edit Digital vCard</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowEditModal(null)}
-                className="text-[#11140F]/50 hover:text-[#11140F] text-sm font-bold cursor-pointer"
+                className="text-[#11140F]/50 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white text-sm font-bold cursor-pointer"
               >
                 ✕
               </button>
@@ -1939,92 +1939,92 @@ export default function MicroSaasHub({
             <form onSubmit={handleUpdateVcard} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">First Name *</label>
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">First Name *</label>
                   <input
                     type="text"
                     required
                     value={editVcardForm.firstName}
                     onChange={(e) => setEditVcardForm({ ...editVcardForm, firstName: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">Last Name</label>
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Last Name</label>
                   <input
                     type="text"
                     value={editVcardForm.lastName}
                     onChange={(e) => setEditVcardForm({ ...editVcardForm, lastName: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">Job Title</label>
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Job Title</label>
                   <input
                     type="text"
                     value={editVcardForm.title}
                     onChange={(e) => setEditVcardForm({ ...editVcardForm, title: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">Company</label>
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Company</label>
                   <input
                     type="text"
                     value={editVcardForm.company}
                     onChange={(e) => setEditVcardForm({ ...editVcardForm, company: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">Email *</label>
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Email *</label>
                   <input
                     type="email"
                     required
                     value={editVcardForm.email}
                     onChange={(e) => setEditVcardForm({ ...editVcardForm, email: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">Phone Number</label>
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Phone Number</label>
                   <input
                     type="tel"
                     value={editVcardForm.phone}
                     onChange={(e) => setEditVcardForm({ ...editVcardForm, phone: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#11140F]">Website or Portfolio</label>
+                <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Website or Portfolio</label>
                 <input
                   type="url"
                   value={editVcardForm.website}
                   onChange={(e) => setEditVcardForm({ ...editVcardForm, website: e.target.value })}
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#11140F]">Bio / Pitch</label>
+                <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Bio / Pitch</label>
                 <textarea
                   rows={2}
                   value={editVcardForm.bio}
                   onChange={(e) => setEditVcardForm({ ...editVcardForm, bio: e.target.value })}
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F] resize-none"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500 resize-none"
                 />
               </div>
 
               {/* Media & Image Uploads */}
-              <div className="pt-2 border-t border-[#11140F]/10 space-y-3">
-                <span className="text-[11px] font-bold text-[#11140F] uppercase tracking-wider block">
+              <div className="pt-2 border-t border-[#11140F]/10 dark:border-white/10 dark:border-white/10 dark:border-white/10 space-y-3">
+                <span className="text-[11px] font-bold text-[#11140F] dark:text-white uppercase tracking-wider block">
                   Media & Visual Branding
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -2049,18 +2049,18 @@ export default function MicroSaasHub({
                 />
               </div>
 
-              <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10">
+              <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10 dark:border-white/10 dark:border-white/10 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setShowEditModal(null)}
-                  className="px-4 py-2 text-xs font-semibold text-[#11140F]/70 hover:text-[#11140F] cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold text-[#11140F]/70 dark:text-white/70 hover:text-[#11140F] dark:hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={actionLoading}
-                  className="px-5 py-2.5 rounded-xl bg-[#11140F] text-white text-xs font-bold hover:bg-[#2A2E25] transition-all cursor-pointer shadow-xs disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-xl bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] text-xs font-bold hover:bg-[#2A2E25] dark:hover:bg-white/90 transition-all cursor-pointer shadow-xs disabled:opacity-50"
                 >
                   {actionLoading ? 'Saving...' : 'Update vCard'}
                 </button>
@@ -2073,16 +2073,16 @@ export default function MicroSaasHub({
       {/* EDIT MODAL 2: LINK SHORTENER */}
       {showEditModal === 'shortener' && editingItem && (
         <div className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl border border-[#11140F]/10 shadow-2xl max-w-lg w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-[#11140F]/10 pb-4">
+          <div className="bg-white dark:bg-[#0E1017] rounded-3xl border border-[#11140F]/10 dark:border-white/10 shadow-2xl max-w-xl w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto text-[#11140F] dark:text-white">
+            <div className="flex items-center justify-between border-b border-[#11140F]/10 dark:border-white/10 pb-4">
               <div className="flex items-center gap-2">
                 <Link2 className="w-5 h-5 text-[#2F6B4F]" />
-                <h3 className="text-base font-bold text-[#11140F]">Edit Short Link</h3>
+                <h3 className="text-base font-bold text-[#11140F] dark:text-white">Edit Short Link</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowEditModal(null)}
-                className="text-[#11140F]/50 hover:text-[#11140F] text-sm font-bold cursor-pointer"
+                className="text-[#11140F]/50 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white text-sm font-bold cursor-pointer"
               >
                 ✕
               </button>
@@ -2090,46 +2090,46 @@ export default function MicroSaasHub({
 
             <form onSubmit={handleUpdateShortener} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#11140F]">Link Title *</label>
+                <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Link Title *</label>
                 <input
                   type="text"
                   required
                   value={editShortenerForm.title}
                   onChange={(e) => setEditShortenerForm({ ...editShortenerForm, title: e.target.value })}
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#11140F]">Destination URL *</label>
+                <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Destination URL *</label>
                 <input
                   type="url"
                   required
                   value={editShortenerForm.destinationUrl}
                   onChange={(e) => setEditShortenerForm({ ...editShortenerForm, destinationUrl: e.target.value })}
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">iOS App Store Fallback</label>
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">iOS App Store Fallback</label>
                   <input
                     type="url"
                     value={editShortenerForm.iosUrl}
                     onChange={(e) => setEditShortenerForm({ ...editShortenerForm, iosUrl: e.target.value })}
                     placeholder="https://apps.apple.com/..."
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">Android Play Store Fallback</label>
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Android Play Store Fallback</label>
                   <input
                     type="url"
                     value={editShortenerForm.androidUrl}
                     onChange={(e) => setEditShortenerForm({ ...editShortenerForm, androidUrl: e.target.value })}
                     placeholder="https://play.google.com/..."
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                   />
                 </div>
               </div>
@@ -2161,18 +2161,18 @@ export default function MicroSaasHub({
                 </div>
               </div>
 
-              <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10">
+              <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10 dark:border-white/10 dark:border-white/10 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setShowEditModal(null)}
-                  className="px-4 py-2 text-xs font-semibold text-[#11140F]/70 hover:text-[#11140F] cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold text-[#11140F]/70 dark:text-white/70 hover:text-[#11140F] dark:hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={actionLoading}
-                  className="px-5 py-2.5 rounded-xl bg-[#11140F] text-white text-xs font-bold hover:bg-[#2A2E25] transition-all cursor-pointer shadow-xs disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-xl bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] text-xs font-bold hover:bg-[#2A2E25] dark:hover:bg-white/90 transition-all cursor-pointer shadow-xs disabled:opacity-50"
                 >
                   {actionLoading ? 'Saving...' : 'Update Short Link'}
                 </button>
@@ -2185,16 +2185,16 @@ export default function MicroSaasHub({
       {/* EDIT MODAL 3: RESTAURANT MENU */}
       {showEditModal === 'menu' && editingItem && (
         <div className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl border border-[#11140F]/10 shadow-2xl max-w-2xl w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-[#11140F]/10 pb-4">
+          <div className="bg-white dark:bg-[#0E1017] rounded-3xl border border-[#11140F]/10 dark:border-white/10 shadow-2xl max-w-2xl w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto text-[#11140F] dark:text-white">
+            <div className="flex items-center justify-between border-b border-[#11140F]/10 dark:border-white/10 pb-4">
               <div className="flex items-center gap-2">
                 <Utensils className="w-5 h-5 text-[#2F6B4F]" />
-                <h3 className="text-base font-bold text-[#11140F]">Edit Restaurant Menu & Dishes</h3>
+                <h3 className="text-base font-bold text-[#11140F] dark:text-white">Edit Restaurant Menu & Dishes</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowEditModal(null)}
-                className="text-[#11140F]/50 hover:text-[#11140F] text-sm font-bold cursor-pointer"
+                className="text-[#11140F]/50 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white text-sm font-bold cursor-pointer"
               >
                 ✕
               </button>
@@ -2203,17 +2203,17 @@ export default function MicroSaasHub({
             <form onSubmit={handleUpdateMenu} className="space-y-5">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="sm:col-span-2 space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">Menu Title *</label>
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Menu Title *</label>
                   <input
                     type="text"
                     required
                     value={editMenuForm.title}
                     onChange={(e) => setEditMenuForm({ ...editMenuForm, title: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">Currency Symbol</label>
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Currency Symbol</label>
                   <select
                     value={editMenuForm.currency}
                     onChange={(e) => setEditMenuForm({ ...editMenuForm, currency: e.target.value })}
@@ -2380,18 +2380,18 @@ export default function MicroSaasHub({
                 ))}
               </div>
 
-              <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10">
+              <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10 dark:border-white/10 dark:border-white/10 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setShowEditModal(null)}
-                  className="px-4 py-2 text-xs font-semibold text-[#11140F]/70 hover:text-[#11140F] cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold text-[#11140F]/70 dark:text-white/70 hover:text-[#11140F] dark:hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={actionLoading}
-                  className="px-5 py-2.5 rounded-xl bg-[#11140F] text-white text-xs font-bold hover:bg-[#2A2E25] transition-all cursor-pointer shadow-xs disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-xl bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] text-xs font-bold hover:bg-[#2A2E25] dark:hover:bg-white/90 transition-all cursor-pointer shadow-xs disabled:opacity-50"
                 >
                   {actionLoading ? 'Saving...' : 'Update Restaurant Menu'}
                 </button>
@@ -2405,15 +2405,15 @@ export default function MicroSaasHub({
       {showEditModal === 'wifi' && editingItem && (
         <div className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl border border-[#11140F]/10 shadow-2xl max-w-md w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-[#11140F]/10 pb-4">
+            <div className="flex items-center justify-between border-b border-[#11140F]/10 dark:border-white/10 pb-4">
               <div className="flex items-center gap-2">
                 <Wifi className="w-5 h-5 text-[#2F6B4F]" />
-                <h3 className="text-base font-bold text-[#11140F]">Edit Wi-Fi Access Card</h3>
+                <h3 className="text-base font-bold text-[#11140F] dark:text-white">Edit Wi-Fi Access Card</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowEditModal(null)}
-                className="text-[#11140F]/50 hover:text-[#11140F] text-sm font-bold cursor-pointer"
+                className="text-[#11140F]/50 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white text-sm font-bold cursor-pointer"
               >
                 ✕
               </button>
@@ -2421,33 +2421,33 @@ export default function MicroSaasHub({
 
             <form onSubmit={handleUpdateWifi} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#11140F]">Wi-Fi Network SSID *</label>
+                <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Wi-Fi Network SSID *</label>
                 <input
                   type="text"
                   required
                   value={editWifiForm.ssid}
                   onChange={(e) => setEditWifiForm({ ...editWifiForm, ssid: e.target.value })}
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">Network Password</label>
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Network Password</label>
                   <input
                     type="text"
                     value={editWifiForm.password}
                     onChange={(e) => setEditWifiForm({ ...editWifiForm, password: e.target.value })}
                     placeholder="Leave empty for open"
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">Security Encryption</label>
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Security Encryption</label>
                   <select
                     value={editWifiForm.authType}
                     onChange={(e) => setEditWifiForm({ ...editWifiForm, authType: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F] bg-white"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                   >
                     <option value="WPA">WPA / WPA2 / WPA3</option>
                     <option value="WEP">WEP</option>
@@ -2457,30 +2457,30 @@ export default function MicroSaasHub({
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#11140F]">Location / Area (Optional)</label>
+                <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Location / Area (Optional)</label>
                 <input
                   type="text"
                   value={editWifiForm.location}
                   onChange={(e) => setEditWifiForm({ ...editWifiForm, location: e.target.value })}
                   placeholder="e.g. Ground Floor Lounge & Cafe"
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#11140F]">Welcome Message</label>
+                <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Welcome Message</label>
                 <input
                   type="text"
                   value={editWifiForm.welcomeMessage}
                   onChange={(e) => setEditWifiForm({ ...editWifiForm, welcomeMessage: e.target.value })}
                   placeholder="Welcome message displayed on mobile"
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 focus:outline-hidden focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                 />
               </div>
 
               {/* Wi-Fi Venue Branding Images */}
-              <div className="pt-2 border-t border-[#11140F]/10 space-y-3">
-                <span className="text-[11px] font-bold text-[#11140F] uppercase tracking-wider block">
+              <div className="pt-2 border-t border-[#11140F]/10 dark:border-white/10 dark:border-white/10 dark:border-white/10 space-y-3">
+                <span className="text-[11px] font-bold text-[#11140F] dark:text-white uppercase tracking-wider block">
                   Venue Visual Branding
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -2499,18 +2499,18 @@ export default function MicroSaasHub({
                 </div>
               </div>
 
-              <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10">
+              <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10 dark:border-white/10 dark:border-white/10 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setShowEditModal(null)}
-                  className="px-4 py-2 text-xs font-semibold text-[#11140F]/70 hover:text-[#11140F] cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold text-[#11140F]/70 dark:text-white/70 hover:text-[#11140F] dark:hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={actionLoading}
-                  className="px-5 py-2.5 rounded-xl bg-[#11140F] text-white text-xs font-bold hover:bg-[#2A2E25] transition-all cursor-pointer shadow-xs disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-xl bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] text-xs font-bold hover:bg-[#2A2E25] dark:hover:bg-white/90 transition-all cursor-pointer shadow-xs disabled:opacity-50"
                 >
                   {actionLoading ? 'Saving...' : 'Update Wi-Fi QR'}
                 </button>
@@ -2613,14 +2613,14 @@ export default function MicroSaasHub({
       {/* VCARD EXCHANGED LEADS MODAL */}
       {leadsModalCard && (
         <div className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl border border-[#11140F]/10 shadow-2xl max-w-xl w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[85vh] flex flex-col">
-            <div className="flex items-center justify-between border-b border-[#11140F]/10 pb-4 shrink-0">
+          <div className="bg-white dark:bg-[#0E1017] rounded-3xl border border-[#11140F]/10 dark:border-white/10 shadow-2xl max-w-xl w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[85vh] flex flex-col text-[#11140F] dark:text-white">
+            <div className="flex items-center justify-between border-b border-[#11140F]/10 dark:border-white/10 pb-4 shrink-0">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-center">
                   <Users className="w-5 h-5 text-emerald-600" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-[#11140F]">
+                  <h3 className="text-base font-bold text-[#11140F] dark:text-white">
                     Exchanged Contacts & Leads
                   </h3>
                   <p className="text-xs text-[#11140F]/60">
@@ -2696,7 +2696,7 @@ export default function MicroSaasHub({
               )}
             </div>
 
-            <div className="pt-3 border-t border-[#11140F]/10 flex items-center justify-between gap-2 shrink-0">
+            <div className="pt-3 border-t border-[#11140F]/10 dark:border-white/10 dark:border-white/10 dark:border-white/10 flex items-center justify-between gap-2 shrink-0">
               <span className="text-[11px] text-[#11140F]/50">
                 Connected via two-way instant notification
               </span>
