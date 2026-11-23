@@ -103,15 +103,15 @@ export default function ImageUploadField({
 
       {value ? (
         /* Preview State with Remove / Replace */
-        <div className="p-3 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-[#121411] flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
+        <div className="p-2.5 sm:p-3 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-[#14161F] flex items-center justify-between gap-2.5 min-w-0">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
             {aspectRatio === 'avatar' && (
               <img
                 src={getOptimizedStorageUrl(value)}
                 alt={label}
                 loading="eager"
                 decoding="async"
-                className="w-14 h-14 rounded-full object-cover border-2 border-[#2F6B4F] shrink-0 shadow-xs bg-black/10"
+                className="w-12 h-12 rounded-full object-cover border-2 border-[#2F6B4F] shrink-0 shadow-xs bg-black/10"
               />
             )}
             {aspectRatio === 'banner' && (
@@ -120,11 +120,11 @@ export default function ImageUploadField({
                 alt={label}
                 loading="eager"
                 decoding="async"
-                className="w-28 h-12 rounded-lg object-cover border border-[#11140F]/10 dark:border-white/10 shrink-0 bg-black/10"
+                className="w-20 h-11 rounded-lg object-cover border border-[#11140F]/10 dark:border-white/10 shrink-0 bg-black/10"
               />
             )}
             {aspectRatio === 'logo' && (
-              <div className="w-12 h-12 rounded-lg bg-white p-1 border border-[#11140F]/10 flex items-center justify-center shrink-0">
+              <div className="w-11 h-11 rounded-lg bg-white p-1 border border-[#11140F]/10 flex items-center justify-center shrink-0">
                 <img
                   src={getOptimizedStorageUrl(value)}
                   alt={label}
@@ -140,26 +140,26 @@ export default function ImageUploadField({
                 alt={label}
                 loading="eager"
                 decoding="async"
-                className="w-14 h-14 rounded-xl object-cover border border-[#11140F]/10 dark:border-white/10 shrink-0 bg-black/10"
+                className="w-12 h-12 rounded-xl object-cover border border-[#11140F]/10 dark:border-white/10 shrink-0 bg-black/10"
               />
             )}
-            <div className="min-w-0 text-left">
-              <span className="text-xs font-semibold text-[#11140F] dark:text-white block truncate">
-                Image Attached
+            <div className="min-w-0 flex-1">
+              <span className="text-[11px] sm:text-xs font-semibold text-[#11140F] dark:text-white block truncate leading-tight">
+                {label || 'Image Attached'}
               </span>
-              <span className="text-[10.5px] text-emerald-600 dark:text-emerald-400 font-mono flex items-center gap-1">
-                <Check className="w-3 h-3" /> Cloud Hosted
+              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono flex items-center gap-1 mt-0.5">
+                <Check className="w-3 h-3 shrink-0" /> Cloud Hosted
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center gap-1 shrink-0">
             <button
               type="button"
               onClick={() => {
                 if (fileInputRef.current) fileInputRef.current.click();
               }}
-              className="px-2.5 py-1 rounded-lg border border-[#11140F]/15 dark:border-white/15 hover:bg-white dark:hover:bg-white/10 text-[11px] font-semibold text-[#11140F] dark:text-white transition-colors cursor-pointer"
+              className="px-2.5 py-1 rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/10 hover:bg-[#ECEEEA] dark:hover:bg-white/20 text-[11px] font-semibold text-[#11140F] dark:text-white transition-colors cursor-pointer"
             >
               Replace
             </button>
@@ -205,7 +205,7 @@ export default function ImageUploadField({
           {mode === 'upload' ? (
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-[#11140F]/15 dark:border-white/15 hover:border-[#2F6B4F] dark:hover:border-[#34D399] rounded-xl p-4 text-center cursor-pointer transition-all bg-[#F7F8F5]/60 dark:bg-white/[0.02] hover:bg-[#F7F8F5] dark:hover:bg-white/[0.04]"
+              className="border-2 border-dashed border-[#11140F]/20 dark:border-white/20 hover:border-[#2F6B4F] dark:hover:border-[#34D399] rounded-xl p-3 sm:p-4 text-center cursor-pointer transition-all bg-[#F7F8F5]/80 dark:bg-white/[0.03] hover:bg-[#F2F4EF] dark:hover:bg-white/[0.06]"
             >
               {processing ? (
                 <div className="flex items-center justify-center gap-2 text-xs text-[#2F6B4F] dark:text-[#34D399] py-2">
@@ -218,7 +218,7 @@ export default function ImageUploadField({
                   <div className="text-xs font-semibold text-[#11140F] dark:text-white">
                     Click to browse or drop image here
                   </div>
-                  <div className="text-[10.5px] text-[#11140F]/50 dark:text-white/50">
+                  <div className="text-[10.5px] text-[#11140F]/60 dark:text-white/60">
                     PNG, JPG, WebP, GIF, SVG (Original Quality • S3 Cloud Hosted)
                   </div>
                 </div>
@@ -233,7 +233,7 @@ export default function ImageUploadField({
                   value={urlInput}
                   onChange={(e) => setUrlInput(e.target.value)}
                   placeholder={placeholder}
-                  className="w-full pl-8 pr-3 py-1.5 rounded-xl border border-[#11140F]/15 dark:border-white/15 text-xs bg-white dark:bg-[#11140F] text-[#11140F] dark:text-white focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full pl-8 pr-3 py-1.5 rounded-xl border border-[#11140F]/15 dark:border-white/15 text-xs bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-none focus:border-[#2F6B4F]"
                 />
               </div>
               <button

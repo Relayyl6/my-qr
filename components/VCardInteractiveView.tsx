@@ -80,6 +80,17 @@ export default function VCardInteractiveView({
   const [exchangeSuccess, setExchangeSuccess] = useState(false);
   const [avatarLoaded, setAvatarLoaded] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
+  const [avatarSrc, setAvatarSrc] = useState(getOptimizedStorageUrl(avatarUrl));
+  const [logoSrc, setLogoSrc] = useState(getOptimizedStorageUrl(logoUrl));
+  const [bannerSrc, setBannerSrc] = useState(getOptimizedStorageUrl(bannerUrl));
+
+  const handleAvatarError = () => {
+    if (avatarSrc !== avatarUrl && avatarUrl) {
+      setAvatarSrc(avatarUrl);
+    } else {
+      setAvatarError(true);
+    }
+  };
 
   const initials = fullName
     .split(' ')
@@ -183,10 +194,13 @@ export default function VCardInteractiveView({
           {bannerUrl ? (
             <div className="-mx-6 -mt-6 sm:-mx-8 sm:-mt-8 mb-4 h-36 w-[calc(100%+3rem)] sm:w-[calc(100%+4rem)] overflow-hidden relative bg-black/20">
               <img
-                src={getOptimizedStorageUrl(bannerUrl)}
+                src={bannerSrc}
                 alt="Cover Banner"
                 loading="eager"
                 decoding="async"
+                onError={() => {
+                  if (bannerSrc !== bannerUrl && bannerUrl) setBannerSrc(bannerUrl);
+                }}
                 className="w-full h-full object-cover transition-opacity duration-300"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -230,12 +244,12 @@ export default function VCardInteractiveView({
               {/* High-res image smoothly fades in when loaded */}
               {avatarUrl && !avatarError && (
                 <img
-                  src={getOptimizedStorageUrl(avatarUrl)}
+                  src={avatarSrc}
                   alt={fullName}
                   loading="eager"
                   decoding="async"
                   onLoad={() => setAvatarLoaded(true)}
-                  onError={() => setAvatarError(true)}
+                  onError={handleAvatarError}
                   className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
                     avatarLoaded ? 'opacity-100' : 'opacity-0'
                   }`}
@@ -256,10 +270,13 @@ export default function VCardInteractiveView({
                 <div className="inline-flex items-center justify-center gap-2 mt-1.5 px-3 py-1 rounded-xl bg-white/5 border border-white/10 shadow-xs max-w-full">
                   {logoUrl && (
                     <img
-                      src={getOptimizedStorageUrl(logoUrl)}
+                      src={logoSrc}
                       alt={company}
                       loading="lazy"
                       decoding="async"
+                      onError={() => {
+                        if (logoSrc !== logoUrl && logoUrl) setLogoSrc(logoUrl);
+                      }}
                       className="w-5 h-5 rounded object-contain shrink-0 bg-white/10 p-0.5"
                     />
                   )}
