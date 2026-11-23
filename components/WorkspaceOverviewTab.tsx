@@ -224,6 +224,43 @@ export default function WorkspaceOverviewTab({
     return [...distributionData].sort((a, b) => b.percentage - a.percentage)[0] || distributionData[0];
   }, [distributionData]);
 
+  // Dynamically compute SVG donut stroke dasharrays from exact percentages
+  const donutArcs = useMemo(() => {
+    const radius = 36;
+    const circumference = 2 * Math.PI * radius; // ~226.195
+    let accumulatedLength = 0;
+
+    return distributionData
+      .filter((item) => item.percentage > 0)
+      .map((item) => {
+        const arcLength = (item.percentage / 100) * circumference;
+        const dashArray = `${arcLength.toFixed(1)} ${(circumference - arcLength).toFixed(1)}`;
+        const dashOffset = (-accumulatedLength).toFixed(1);
+        accumulatedLength += arcLength;
+        return {
+          ...item,
+          dashArray,
+          dashOffset,
+        };
+      });
+  }, [distributionData]);
+
+  const topTwoServicesPct = useMemo(() => {
+    return distributionData
+      .slice(0, 2)
+      .reduce((sum, item) => sum + item.percentage, 0);
+  }, [distributionData]);
+
+  // Real operational health score from active endpoints
+  const healthScore = useMemo(() => {
+    const total = links.length + microSaasItems.length;
+    if (total === 0) return 100;
+    const activeCount =
+      links.filter((l) => l.active !== false).length +
+      microSaasItems.filter((m) => m.active !== false).length;
+    return Math.min(100, Math.round((activeCount / total) * 100));
+  }, [links, microSaasItems]);
+
   // 4. COMBINED REAL LIVE ACTIVITY & SUBSCRIBER STREAM
   const realActivityStream = useMemo(() => {
     const events: Array<{
@@ -258,8 +295,8 @@ export default function WorkspaceOverviewTab({
       const dev = (scan.device || 'ios').toLowerCase();
       const devBadge = dev.includes('android') ? 'Android' : dev.includes('desk') ? 'Desktop' : 'iOS';
       const devColor = devBadge === 'Android' ? '#2EC4B6' : devBadge === 'Desktop' ? '#F5B938' : '#4E82EE';
-      const loc = scan.city && scan.country ? `${scan.city.replace(/%20/g, ' ')}, ${scan.country}` : scan.country || 'Lagos, NG';
-      const linkTitle = scan.qrLink?.label || scan.qrLink?.shortCode || (vcards[0]?.title ?? 'Dynamic QR Route');
+      const loc = scan.city && scan.country ? `${scan.city.replace(/%20/g, ' ')}, ${scan.country}` : scan.country || scan.city || 'Edge Route';
+      const linkTitle = scan.qrLink?.label || scan.qrLink?.shortCode || (scan.targetUrl ? 'Direct Redirect' : 'Dynamic Route');
 
       events.push({
         id: `scan-${scan.id}`,
@@ -317,11 +354,49 @@ export default function WorkspaceOverviewTab({
     return matched.length;
   }, [recentScans, selectedDay, now]);
 
-  // 6. REAL AI COPILOT INTERACTION
+  // 6. REAL AI COPILOT INTERACTION (Fully dynamic, zero hardcoded strings)
   const [copilotInput, setCopilotInput] = useState('');
   const [copilotExpanded, setCopilotExpanded] = useState(false);
   const [copilotChat, setCopilotChat] = useState<Array<{ role: 'user' | 'assistant'; text: string }>>([]);
   const [copilotLoading, setCopilotLoading] = useState(false);
+
+  // Dynamic AI Synthesis constructed strictly from present database records
+  const dynamicAiSynthesis = useMemo(() => {
+    const parts: string[] = [];
+    if (links.length > 0) {
+      parts.push(`${links.length} dynamic QR link${links.length === 1 ? '' : 's'}`);
+    }
+    if (vcards.length > 0) {
+      const cardTitle = vcards[0]?.title || vcards[0]?.slug;
+      parts.push(`${vcards.length} vCard${cardTitle ? ` ('${cardTitle}')` : ''}`);
+    }
+    if (shorteners.length > 0) {
+      const shortTitle = shorteners[0]?.title || shorteners[0]?.slug;
+      parts.push(`${shorteners.length} branded shortener${shortTitle ? ` ('${shortTitle}')` : ''}`);
+    }
+    if (menus.length > 0) {
+      parts.push(`${menus.length} digital menu${menus.length === 1 ? '' : 's'}`);
+    }
+    if (wifis.length > 0) {
+      parts.push(`${wifis.length} Wi-Fi portal${wifis.length === 1 ? '' : 's'}`);
+    }
+
+    let base = parts.length > 0
+      ? `Your DynamicQR network is active with ${parts.join(', ')}.`
+      : 'Your DynamicQR workspace is live and ready. Create your first dynamic QR link or micro-service to begin routing traffic.';
+
+    if (totalSubscribers > 0) {
+      const listName = mailLists[0]?.name ? ` in '${mailLists[0].name}'` : '';
+      base += ` You have captured ${totalSubscribers} VIP subscriber${totalSubscribers === 1 ? '' : 's'}${listName}.`;
+    }
+
+    if (topLink && (topLink.scanCount || 0) > 0) {
+      const routeName = topLink.label || topLink.shortCode || 'primary route';
+      base += ` Top route is '${routeName}' with ${topLink.scanCount} scans.`;
+    }
+
+    return base;
+  }, [links, vcards, shorteners, menus, wifis, mailLists, totalSubscribers, topLink]);
 
   const handleCopilotSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -333,24 +408,44 @@ export default function WorkspaceOverviewTab({
 
     setTimeout(() => {
       const lower = q.toLowerCase();
-      let reply = `Your DynamicQR network has ${links.length} active QR links and ${microSaasItems.length} micro-service endpoints with ${totalScansVolume} total recorded redirects. Top performing link is "${topLink?.label || 'gdgoc-uniben'}" with ${topLink?.scanCount || 26} scans.`;
+      let reply = `Your DynamicQR network has ${links.length} active QR links and ${microSaasItems.length} micro-service endpoints with ${totalScansVolume} total recorded redirects.`;
+      if (topLink && (topLink.scanCount || 0) > 0) {
+        reply += ` Top performing route is "${topLink.label || topLink.shortCode}" with ${topLink.scanCount} scans.`;
+      }
 
       if (lower.includes('lead') || lower.includes('subscriber') || lower.includes('vip')) {
-        reply = `You have ${totalSubscribers} captured leads in your "${mailLists[0]?.name || 'VIP Subscriber'}" list. Latest contact captured: ${customerContacts[0]?.email || 'yeru'}.`;
+        if (totalSubscribers > 0) {
+          const listName = mailLists[0]?.name || 'Mailing List';
+          const latestEmail = customerContacts[0]?.email ? ` Latest contact captured: ${customerContacts[0].email}.` : '';
+          reply = `You have ${totalSubscribers} captured leads in your "${listName}" list.${latestEmail}`;
+        } else {
+          reply = `You currently have 0 captured leads. Connect a VIP mailing list to capture subscribers from dynamic QR pages.`;
+        }
       } else if (lower.includes('vcard') || lower.includes('contact')) {
-        reply = `vCard "${vcards[0]?.title || 'Developer'}" is active with ${vcards[0]?.scansCount || 8} scans and direct vCard download exchanges.`;
-      } else if (lower.includes('shortener') || lower.includes('ester')) {
-        reply = `Branded shortener "${shorteners[0]?.title || 'ester'}" has generated ${shorteners[0]?.scansCount || 41} high-speed redirects.`;
+        if (vcards.length > 0) {
+          const cardName = vcards[0]?.title || vcards[0]?.slug || 'vCard';
+          reply = `vCard "${cardName}" is active with ${vcards[0]?.scansCount || 0} scans and direct contact downloads.`;
+        } else {
+          reply = `You have 0 digital vCards deployed.`;
+        }
+      } else if (lower.includes('shortener') || lower.includes('link')) {
+        if (shorteners.length > 0) {
+          const shortName = shorteners[0]?.title || shorteners[0]?.slug || 'Shortener';
+          reply = `Branded shortener "${shortName}" has generated ${shorteners[0]?.scansCount || 0} high-speed redirects.`;
+        } else {
+          reply = `You have 0 branded shorteners deployed.`;
+        }
       } else if (lower.includes('scan') || lower.includes('traffic')) {
-        reply = `Total recorded scans across your account: ${totalScansVolume} scans. Peak monthly volume was in November (${monthlyBuckets.find((b) => b.month === 'Nov')?.value || 68} scans).`;
+        const peakMonth = [...monthlyBuckets].sort((a, b) => b.value - a.value)[0];
+        reply = `Total recorded scans across your account: ${totalScansVolume} scans. Peak monthly volume was in ${peakMonth?.month || 'the current period'} (${peakMonth?.value || 0} scans).`;
       }
       setCopilotChat((prev) => [...prev, { role: 'assistant', text: reply }]);
       setCopilotLoading(false);
     }, 600);
   };
 
-  const displayName = user?.name || 'Leonard';
-  const displayEmail = user?.email || 'oseghaleleonard39@gmail.com';
+  const displayName = user?.name || user?.email?.split('@')[0] || 'User';
+  const displayEmail = user?.email || '';
   const userInitial = displayName.charAt(0).toUpperCase();
 
   const selectedMonthBar = monthlyBuckets[selectedBarIndex] || monthlyBuckets[peakMonthIndex];
@@ -726,7 +821,7 @@ export default function WorkspaceOverviewTab({
               AI Routing Synthesis
             </span>
             <p className="text-[10.5px] text-white/70 leading-snug">
-              Your DynamicQR network is active with {links.length} dynamic QR links, {vcards.length} vCard contact card ('{vcards[0]?.title || 'Developer'}'), and {shorteners.length} branded shortener ('{shorteners[0]?.title || 'ester'}'). You have captured {totalSubscribers} VIP subscribers in '{mailLists[0]?.name || 'VIP Subscriber'}'. Top route is '{topLink?.label || 'gdgoc-uniben'}' with {topLink?.scanCount || 26} scans.{' '}
+              {dynamicAiSynthesis}{' '}
               <button
                 type="button"
                 onClick={() => setCopilotExpanded(!copilotExpanded)}
