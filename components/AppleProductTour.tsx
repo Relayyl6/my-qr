@@ -337,24 +337,25 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
         </div>
 
         {/* Section Headline Inside/Above the Glowing Circle Arc */}
-        <div className="text-center max-w-4xl mx-auto space-y-6 relative z-10 mb-10 sm:mb-14">
+        <div className="text-center max-w-5xl xl:max-w-6xl mx-auto space-y-6 relative z-10 mb-10 sm:mb-14">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/80 text-[12px] font-mono tracking-wide shadow-md backdrop-blur-md">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             Your Operations, Fully Under Control
           </div>
 
           <h1
-            className="text-[2.6rem] sm:text-[3.8rem] md:text-[5rem] font-bold tracking-tight leading-[1.04] text-white"
+            className="text-3xl sm:text-4xl md:text-[2.75rem] lg:text-[3.6rem] xl:text-[4.2rem] font-bold tracking-tight leading-[1.12] text-white"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            Consolidate All Your Micro-SaaS Apps{' '}
-            <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-emerald-400">
+            <span className="block whitespace-normal md:whitespace-nowrap">
+              Consolidate All Your Micro-SaaS Apps
+            </span>
+            <span className="block whitespace-normal md:whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-emerald-400">
               With Powerful DynamicQR
             </span>
           </h1>
 
-          <p className="text-[16px] sm:text-[19px] md:text-[20px] text-white/70 max-w-[55ch] mx-auto leading-relaxed font-normal">
+          <p className="text-[16px] sm:text-[18px] md:text-[20px] text-white/70 max-w-[62ch] mx-auto leading-relaxed font-normal">
             Manage, track, and route your physical media and micro-SaaS apps with smart tools designed for sub-10ms speed, zero reprint costs, and infinite scalability.
           </p>
 
