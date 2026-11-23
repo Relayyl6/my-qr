@@ -31,63 +31,45 @@ export default function ImageUploadField({
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      setError('Please select a valid image file (PNG, JPG, WebP, GIF)');
+      setError('Please select a valid image file (PNG, JPG, WebP, GIF, SVG)');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setError('File size exceeds 10MB limit');
       return;
     }
 
     setProcessing(true);
     setError(null);
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        try {
-          let maxDim = 800;
-          if (aspectRatio === 'banner') maxDim = 1200;
-          if (aspectRatio === 'avatar' || aspectRatio === 'logo') maxDim = 500;
-          if (aspectRatio === 'dish') maxDim = 600;
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', aspectRatio);
 
-          let width = img.width;
-          let height = img.height;
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
 
-          if (width > maxDim || height > maxDim) {
-            if (width > height) {
-              height = Math.round((height * maxDim) / width);
-              width = maxDim;
-            } else {
-              width = Math.round((width * maxDim) / height);
-              height = maxDim;
-            }
-          }
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to upload image to cloud storage');
+      }
 
-          const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            ctx.drawImage(img, 0, 0, width, height);
-            const dataUrl = canvas.toDataURL('image/webp', 0.82);
-            onChange(dataUrl);
-          }
-        } catch (err: any) {
-          setError('Failed to process image');
-        } finally {
-          setProcessing(false);
-        }
-      };
-      img.onerror = () => {
-        setError('Could not decode image.');
-        setProcessing(false);
-      };
-      img.src = event.target?.result as string;
-    };
-    reader.readAsDataURL(file);
+      onChange(data.url);
+    } catch (err: any) {
+      console.error('[Upload Error]:', err);
+      setError(err.message || 'Cloud upload failed. Please try again.');
+    } finally {
+      setProcessing(false);
+    }
   };
 
   const handleApplyUrl = () => {
@@ -150,7 +132,7 @@ export default function ImageUploadField({
                 Image Attached
               </span>
               <span className="text-[10.5px] text-emerald-600 dark:text-emerald-400 font-mono flex items-center gap-1">
-                <Check className="w-3 h-3" /> Ready
+                <Check className="w-3 h-3" /> Cloud Hosted
               </span>
             </div>
           </div>
@@ -212,7 +194,7 @@ export default function ImageUploadField({
               {processing ? (
                 <div className="flex items-center justify-center gap-2 text-xs text-[#2F6B4F] dark:text-[#34D399] py-2">
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Processing image...</span>
+                  <span>Uploading to cloud storage...</span>
                 </div>
               ) : (
                 <div className="space-y-1">
@@ -221,7 +203,7 @@ export default function ImageUploadField({
                     Click to browse or drop image here
                   </div>
                   <div className="text-[10.5px] text-[#11140F]/50 dark:text-white/50">
-                    PNG, JPG, WebP, GIF (auto-optimized)
+                    PNG, JPG, WebP, GIF, SVG (Original Quality • S3 Cloud Hosted)
                   </div>
                 </div>
               )}
