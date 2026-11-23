@@ -370,10 +370,10 @@ export default function PrintTemplateModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
       {/* Container Card */}
-      <div className="bg-white rounded-3xl max-w-5xl w-full border border-[#11140F]/15 shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[92vh]">
+      <div className="bg-white dark:bg-[#0E1017] rounded-3xl max-w-5xl w-full border border-[#11140F]/15 dark:border-white/15 shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[92vh] text-[#11140F] dark:text-white">
         
         {/* Left Side: Controls & Customization */}
-        <div className="p-5 sm:p-7 md:w-1/2 flex flex-col justify-between border-b md:border-b-0 md:border-r border-[#11140F]/10 space-y-5 overflow-y-auto">
+        <div className="p-5 sm:p-7 md:w-1/2 flex flex-col justify-between border-b md:border-b-0 md:border-r border-[#11140F]/10 dark:border-white/10 space-y-5 overflow-y-auto">
           <div className="space-y-5">
             {/* Header */}
             <div className="flex items-center justify-between">
@@ -382,7 +382,7 @@ export default function PrintTemplateModal({
                   <Printer className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-[16px] sm:text-[17px] text-[#11140F]">Physical Print Studio</h3>
+                  <h3 className="font-bold text-[16px] sm:text-[17px] text-[#11140F] dark:text-white">Physical Print Studio</h3>
                   <div className="flex items-center gap-1.5 text-[11px] text-emerald-700 font-medium">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     <span>Guaranteed 1-Page Output</span>
@@ -411,14 +411,14 @@ export default function PrintTemplateModal({
             )}
 
             {/* Sub-tabs: Format, Text Content, Visibility Toggles, Theme */}
-            <div className="flex items-center gap-1.5 p-1 bg-[#EEF0EA] rounded-xl text-[12px] font-medium">
+            <div className="flex items-center gap-1.5 p-1 bg-[#EEF0EA] dark:bg-white/[0.05] rounded-xl text-[12px] font-medium">
               <button
                 type="button"
                 onClick={() => setActiveTab('content')}
                 className={`flex-1 py-1.5 px-2 rounded-lg transition-all ${
                   activeTab === 'content'
-                    ? 'bg-white text-[#11140F] shadow-xs font-semibold'
-                    : 'text-[#11140F]/60 hover:text-[#11140F]'
+                    ? 'bg-white dark:bg-white/15 text-[#11140F] dark:text-white shadow-xs font-semibold'
+                    : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white'
                 }`}
               >
                 Layout & Text

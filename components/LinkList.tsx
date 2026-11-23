@@ -130,14 +130,14 @@ export default function LinkList({
   return (
     <div className="w-full min-w-0 space-y-4">
       {/* Tab Switcher: Active vs Archived */}
-      <div className="flex items-center justify-between gap-2 border-b border-[#11140F]/10 pb-3">
+      <div className="flex items-center justify-between gap-2 border-b border-[#11140F]/10 dark:border-white/10 pb-3">
         <div className="flex gap-2">
           <button
             onClick={() => setTab('active')}
             className={`rounded-full px-3.5 py-1 text-xs font-medium transition-colors ${
               tab === 'active'
-                ? 'bg-[#11140F] text-[#EEF0EA]'
-                : 'text-[#11140F]/60 hover:text-[#11140F] hover:bg-[#11140F]/5'
+                ? 'bg-[#11140F] text-[#EEF0EA] dark:bg-white dark:text-[#11140F]'
+                : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white hover:bg-[#11140F]/5 dark:hover:bg-white/5'
             }`}
           >
             Active ({activeLinks.length})
@@ -146,8 +146,8 @@ export default function LinkList({
             onClick={() => setTab('archived')}
             className={`rounded-full px-3.5 py-1 text-xs font-medium transition-colors ${
               tab === 'archived'
-                ? 'bg-[#11140F] text-[#EEF0EA]'
-                : 'text-[#11140F]/60 hover:text-[#11140F] hover:bg-[#11140F]/5'
+                ? 'bg-[#11140F] text-[#EEF0EA] dark:bg-white dark:text-[#11140F]'
+                : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white hover:bg-[#11140F]/5 dark:hover:bg-white/5'
             }`}
           >
             Archived ({archivedLinks.length})
@@ -250,14 +250,14 @@ export default function LinkList({
                         href={shortUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-[11px] sm:text-[13px] text-[#11140F]/70 hover:text-[#11140F] transition-colors truncate font-mono min-w-0 flex-1"
+                        className="text-[11px] sm:text-[13px] text-[#11140F]/70 dark:text-white/70 hover:text-[#11140F] dark:hover:text-white transition-colors truncate font-mono min-w-0 flex-1"
                         style={{ fontFamily: 'var(--font-mono)' }}
                       >
                         {shortUrl.replace(/^https?:\/\//, '')}
                       </a>
                       <button
                         onClick={() => handleCopy(link.id, shortUrl)}
-                        className="shrink-0 rounded-full border border-[#11140F]/15 px-2 py-0.5 text-[10px] sm:text-[11px] text-[#11140F]/60 hover:border-[#11140F]/30 hover:text-[#11140F] transition-colors"
+                        className="shrink-0 rounded-full border border-[#11140F]/15 dark:border-white/15 px-2 py-0.5 text-[10px] sm:text-[11px] text-[#11140F]/60 dark:text-white/60 hover:border-[#11140F]/30 dark:hover:border-white/30 hover:text-[#11140F] dark:hover:text-white bg-white dark:bg-white/[0.05] transition-colors"
                       >
                         {copiedId === link.id ? 'Copied' : 'Copy'}
                       </button>
@@ -325,11 +325,11 @@ export default function LinkList({
                         </p>
                       </div>
                     ) : (
-                      <div className="rounded-lg bg-[#EEF0EA] p-2 min-w-0 w-full overflow-hidden">
-                        <p className="text-[9px] text-[#11140F]/40 uppercase tracking-wider font-medium">
+                      <div className="rounded-lg bg-[#EEF0EA] dark:bg-white/[0.05] border border-transparent dark:border-white/10 p-2 min-w-0 w-full overflow-hidden">
+                        <p className="text-[9px] text-[#11140F]/40 dark:text-white/40 uppercase tracking-wider font-medium">
                           Destination
                         </p>
-                        <p className="truncate text-[11px] sm:text-[12px] font-medium text-[#11140F]/80 mt-0.5" title={link.destinationUrl}>
+                        <p className="truncate text-[11px] sm:text-[12px] font-medium text-[#11140F]/80 dark:text-white/80 mt-0.5" title={link.destinationUrl}>
                           {link.destinationUrl}
                         </p>
                       </div>
@@ -359,7 +359,7 @@ export default function LinkList({
                           type="button"
                           onClick={() => handleCheckHealth(link.id, link.destinationUrl)}
                           disabled={checkingHealthId === link.id}
-                          className="inline-flex items-center gap-1 text-[11px] text-[#11140F]/50 hover:text-[#11140F] transition-colors"
+                          className="inline-flex items-center gap-1 text-[11px] text-[#11140F]/50 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white transition-colors"
                         >
                           <Activity className={`w-3 h-3 ${checkingHealthId === link.id ? 'animate-spin' : ''}`} />
                           {checkingHealthId === link.id ? 'Pinging URL…' : 'Ping link health'}
@@ -369,8 +369,8 @@ export default function LinkList({
 
 
                     {/* Scan count & relative time */}
-                    <div className="text-[11px] text-[#11140F]/45 truncate">
-                      <strong className="text-[#11140F] font-medium">{link.scanCount}</strong> scans
+                    <div className="text-[11px] text-[#11140F]/45 dark:text-white/50 truncate">
+                      <strong className="text-[#11140F] dark:text-white font-medium">{link.scanCount}</strong> scans
                       <span className="mx-1">&middot;</span>
                       {timeAgo(link.lastScannedAt)}
                     </div>
@@ -400,8 +400,8 @@ export default function LinkList({
                           onClick={() => setActiveRouterLink({ link, tab: 'ai' })}
                           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-medium transition-colors cursor-pointer ${
                             link.routingRules && link.routingRules.length > 0
-                              ? 'border-[#11140F]/30 bg-slate-100/90 hover:bg-slate-200/90 text-slate-900 font-semibold shadow-xs'
-                              : 'border-[#11140F]/15 bg-white hover:bg-slate-50 text-[#11140F]/80'
+                              ? 'border-[#11140F]/30 dark:border-white/20 bg-slate-100/90 dark:bg-white/10 hover:bg-slate-200/90 dark:hover:bg-white/15 text-slate-900 dark:text-white font-semibold shadow-xs'
+                              : 'border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.06] hover:bg-slate-50 dark:hover:bg-white/[0.1] text-[#11140F]/80 dark:text-white/80'
                           }`}
                         >
                           {link.routingRules && link.routingRules.length > 0 ? (
@@ -412,7 +412,7 @@ export default function LinkList({
                             </>
                           ) : (
                             <>
-                              <Compass className="w-3 h-3 text-[#11140F]/60 shrink-0" />
+                              <Compass className="w-3 h-3 text-[#11140F]/60 dark:text-white/60 shrink-0" />
                               <span>Smart Router</span>
                             </>
                           )}
@@ -425,7 +425,7 @@ export default function LinkList({
                         <button
                           type="button"
                           onClick={() => setActiveArtLink(link)}
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-purple-500/20 bg-purple-50/60 hover:bg-purple-100/80 text-[11px] font-medium text-purple-800 transition-colors cursor-pointer"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-purple-500/20 dark:border-purple-500/30 bg-purple-50/60 dark:bg-purple-950/30 hover:bg-purple-100/80 dark:hover:bg-purple-900/40 text-[11px] font-medium text-purple-800 dark:text-purple-300 transition-colors cursor-pointer"
                         >
                           <Palette className="w-3 h-3 text-purple-600" />
                           <span>QR Art Studio</span>
@@ -441,7 +441,7 @@ export default function LinkList({
                           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-medium transition-colors cursor-pointer ${
                             link.type === 'landing-page' && link.landingPage?.published
                               ? 'border-blue-400 bg-blue-100/80 text-blue-900 font-semibold'
-                              : 'border-blue-500/20 bg-blue-50/60 hover:bg-blue-100/80 text-blue-800'
+                              : 'border-blue-500/20 dark:border-blue-500/30 bg-blue-50/60 dark:bg-blue-950/30 hover:bg-blue-100/80 dark:hover:bg-blue-900/40 text-blue-800 dark:text-blue-300'
                           }`}
                         >
                           <Smartphone className="w-3 h-3 text-blue-600" />

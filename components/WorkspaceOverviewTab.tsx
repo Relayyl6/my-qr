@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Sparkles,
   Search,
@@ -271,6 +271,26 @@ export default function WorkspaceOverviewTab({
   // Filter tabs & interactive state
   const [selectedBarIndex, setSelectedBarIndex] = useState<number>(peakMonthIndex);
   const [searchQuery, setSearchQuery] = useState('');
+  const [userAvatar, setUserAvatar] = useState<string | null>(user?.avatarUrl || null);
+
+  useEffect(() => {
+    if (user?.avatarUrl) {
+      setUserAvatar(user.avatarUrl);
+    } else {
+      try {
+        const cached = localStorage.getItem('dynamicqr_user_avatar');
+        if (cached) setUserAvatar(cached);
+      } catch (e) {}
+    }
+
+    const handleAvatarChange = (e: any) => {
+      if (e.detail?.avatarUrl !== undefined) {
+        setUserAvatar(e.detail.avatarUrl || null);
+      }
+    };
+    window.addEventListener('dynamicqr-avatar-change', handleAvatarChange);
+    return () => window.removeEventListener('dynamicqr-avatar-change', handleAvatarChange);
+  }, [user?.avatarUrl]);
 
   // 3. REAL SERVICE DISTRIBUTION DONUT (Calculated directly from DB)
   const distributionData = useMemo(() => {
@@ -664,9 +684,9 @@ export default function WorkspaceOverviewTab({
             title="Profile & Sovereign Tier"
           >
             <div className="w-6 h-6 rounded-full overflow-hidden bg-gradient-to-tr from-[#3B82F6] to-[#1E3A8A] text-white flex items-center justify-center text-[11px] font-bold shrink-0">
-              {user?.avatarUrl ? (
+              {userAvatar ? (
                 <img
-                  src={getOptimizedStorageUrl(user.avatarUrl)}
+                  src={getOptimizedStorageUrl(userAvatar)}
                   alt="Avatar"
                   className="w-full h-full object-cover"
                 />

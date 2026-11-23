@@ -229,8 +229,8 @@ export default function CampaignAnalyst({ userTier = 'free', isAdmin = false }: 
       {data && (
         <>
           {/* Executive Summary Narrative */}
-          <div className="rounded-xl bg-[#11140F]/[0.02] border border-[#11140F]/[0.07] p-4 text-[13.5px] text-[#11140F]/85 leading-relaxed">
-            <span className="font-semibold text-[#11140F] block mb-1 text-[12.5px] uppercase tracking-wider">
+          <div className="rounded-xl bg-[#11140F]/[0.02] dark:bg-white/[0.03] border border-[#11140F]/[0.07] dark:border-white/10 p-4 text-[13.5px] text-[#11140F]/85 dark:text-white/85 leading-relaxed">
+            <span className="font-semibold text-[#11140F] dark:text-white block mb-1 text-[12.5px] uppercase tracking-wider">
               Executive Brief
             </span>
             {data.analysis.summary}
@@ -238,12 +238,12 @@ export default function CampaignAnalyst({ userTier = 'free', isAdmin = false }: 
 
           {/* Aggregated Quick Metrics */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-            <div className="rounded-xl border border-[#11140F]/10 bg-white p-3">
-              <span className="text-[11px] text-[#11140F]/50 uppercase font-medium">Scans Analyzed</span>
-              <p className="text-[18px] font-bold text-[#11140F] mt-0.5">{data.stats.totalScans}</p>
+            <div className="rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-white/[0.04] p-3">
+              <span className="text-[11px] text-[#11140F]/50 dark:text-white/50 uppercase font-medium">Scans Analyzed</span>
+              <p className="text-[18px] font-bold text-[#11140F] dark:text-white mt-0.5">{data.stats.totalScans}</p>
             </div>
-            <div className="rounded-xl border border-[#11140F]/10 bg-white p-3">
-              <span className="text-[11px] text-[#11140F]/50 uppercase font-medium">Mobile Traffic</span>
+            <div className="rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-white/[0.04] p-3">
+              <span className="text-[11px] text-[#11140F]/50 dark:text-white/50 uppercase font-medium">Mobile Traffic</span>
               <p className="text-[18px] font-bold text-emerald-700 mt-0.5 flex items-center gap-1">
                 <Smartphone className="w-4 h-4" />
                 {data.stats.totalScans > 0
@@ -256,34 +256,34 @@ export default function CampaignAnalyst({ userTier = 'free', isAdmin = false }: 
                 %
               </p>
             </div>
-            <div className="rounded-xl border border-[#11140F]/10 bg-white p-3">
-              <span className="text-[11px] text-[#11140F]/50 uppercase font-medium">Peak Window</span>
-              <p className="text-[16px] font-bold text-[#11140F] mt-0.5 capitalize flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5 text-[#11140F]/50" />
+            <div className="rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-white/[0.04] p-3">
+              <span className="text-[11px] text-[#11140F]/50 dark:text-white/50 uppercase font-medium">Peak Window</span>
+              <p className="text-[16px] font-bold text-[#11140F] dark:text-white mt-0.5 capitalize flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5 text-[#11140F]/50 dark:text-white/50" />
                 {data.stats.timeOfDayBreakdown.afternoon >= data.stats.timeOfDayBreakdown.evening
                   ? 'Afternoon'
                   : 'Evening'}
               </p>
             </div>
-            <div className="rounded-xl border border-[#11140F]/10 bg-white p-3">
-              <span className="text-[11px] text-[#11140F]/50 uppercase font-medium">Active Links</span>
-              <p className="text-[18px] font-bold text-[#11140F] mt-0.5">{data.stats.totalLinks}</p>
+            <div className="rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-white/[0.04] p-3">
+              <span className="text-[11px] text-[#11140F]/50 dark:text-white/50 uppercase font-medium">Active Links</span>
+              <p className="text-[18px] font-bold text-[#11140F] dark:text-white mt-0.5">{data.stats.totalLinks}</p>
             </div>
           </div>
 
           {/* Key Insights */}
           {data.analysis.insights.length > 0 && (
             <div className="space-y-2.5">
-              <span className="text-[12.5px] font-semibold text-[#11140F]/80 uppercase tracking-wider block">
+              <span className="text-[12.5px] font-semibold text-[#11140F]/80 dark:text-white/80 uppercase tracking-wider block">
                 Key Observations
               </span>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {data.analysis.insights.map((insight, idx) => (
                   <div
                     key={idx}
-                    className="rounded-xl border border-[#11140F]/10 bg-white p-3.5 space-y-1 shadow-sm"
+                    className="rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-white/[0.04] p-3.5 space-y-1 shadow-sm"
                   >
-                    <div className="flex items-center gap-1.5 font-medium text-[13px] text-[#11140F]">
+                    <div className="flex items-center gap-1.5 font-medium text-[13px] text-[#11140F] dark:text-white">
                       {insight.type === 'surge' && <TrendingUp className="w-4 h-4 text-emerald-600" />}
                       {insight.type === 'stale' && <AlertTriangle className="w-4 h-4 text-amber-500" />}
                       {insight.type === 'device_trend' && <Smartphone className="w-4 h-4 text-blue-500" />}

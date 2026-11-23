@@ -309,7 +309,7 @@ export default function LandingPageEditor({
             <h3 className="text-[15px] font-semibold text-[#11140F] flex items-center gap-2">
               Adaptive Showcase Studio for <span className="font-mono text-emerald-700">/{shortCode}</span>
             </h3>
-            <p className="text-[12px] text-[#11140F]/55 truncate max-w-md">
+            <p className="text-[12px] text-[#11140F]/55 dark:text-white/50 truncate max-w-md">
               Adaptive single-page showcase &middot; Primary: <span className="font-mono text-[#11140F]/80">{destinationUrl}</span>
             </p>
           </div>
@@ -325,7 +325,7 @@ export default function LandingPageEditor({
       </div>
 
       {/* Mode / Revert Status Banner */}
-      <div className="shrink-0 rounded-xl p-3 border flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-[12px] transition-colors bg-[#F7F8F5] border-[#11140F]/10">
+      <div className="shrink-0 rounded-xl p-3 border flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-[12px] transition-colors bg-[#F7F8F5] dark:bg-white/[0.03] border-[#11140F]/10 dark:border-white/10">
         <div className="flex items-center gap-2">
           {isActive ? (
             <>
@@ -381,7 +381,7 @@ export default function LandingPageEditor({
             className={`px-3 py-1.5 rounded-lg text-[12px] font-medium flex items-center gap-1.5 transition-colors ${
               activeTab === 'prompt'
                 ? 'bg-[#11140F] text-white'
-                : 'text-[#11140F]/60 hover:bg-[#11140F]/5'
+                : 'text-[#11140F]/60 dark:text-white/60 hover:bg-[#11140F]/5 dark:hover:bg-white/5'
             }`}
           >
             <Edit3 className="w-3.5 h-3.5" />
@@ -394,7 +394,7 @@ export default function LandingPageEditor({
             className={`px-3 py-1.5 rounded-lg text-[12px] font-medium flex items-center gap-1.5 transition-colors disabled:opacity-40 ${
               activeTab === 'links'
                 ? 'bg-[#11140F] text-white'
-                : 'text-[#11140F]/60 hover:bg-[#11140F]/5'
+                : 'text-[#11140F]/60 dark:text-white/60 hover:bg-[#11140F]/5 dark:hover:bg-white/5'
             }`}
           >
             <Sliders className="w-3.5 h-3.5" />
@@ -407,7 +407,7 @@ export default function LandingPageEditor({
             className={`px-3 py-1.5 rounded-lg text-[12px] font-medium flex items-center gap-1.5 transition-colors disabled:opacity-40 ${
               activeTab === 'preview'
                 ? 'bg-[#11140F] text-white'
-                : 'text-[#11140F]/60 hover:bg-[#11140F]/5'
+                : 'text-[#11140F]/60 dark:text-white/60 hover:bg-[#11140F]/5 dark:hover:bg-white/5'
             }`}
           >
             <Eye className="w-3.5 h-3.5" />

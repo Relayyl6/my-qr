@@ -70,6 +70,15 @@ export async function getCurrentUser() {
       if (user.email.toLowerCase() === adminEmail) {
         user.tier = 'ultra';
       }
+      try {
+        const avatarRecord = await prisma.aiCache.findUnique({
+          where: { key: `user_avatar_${user.id}` },
+        });
+        const avatarUrl = (avatarRecord?.value as any)?.avatarUrl || null;
+        return { ...user, avatarUrl };
+      } catch {
+        return { ...user, avatarUrl: null };
+      }
     }
     return user;
   } catch (error) {

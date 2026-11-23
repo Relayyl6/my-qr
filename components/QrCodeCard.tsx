@@ -221,7 +221,7 @@ export default function QrCodeCard({
         </div>
 
         <span
-          className="text-[9px] text-[#11140F]/50 font-mono tracking-tight text-center truncate max-w-[80px]"
+          className="text-[9px] text-[#11140F]/50 dark:text-white/50 font-mono tracking-tight text-center truncate max-w-[80px]"
           title={`/id/${shortCode}`}
         >
           /{shortCode}
@@ -238,7 +238,7 @@ export default function QrCodeCard({
         <div className="relative" ref={menuRef}>
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="rounded-full border border-[#11140F]/15 px-2.5 py-0.5 text-[10px] font-medium text-[#11140F]/75 hover:border-[#11140F]/30 hover:text-[#11140F] transition-colors whitespace-nowrap cursor-pointer flex items-center gap-1 bg-white"
+            className="rounded-full border border-[#11140F]/15 dark:border-white/15 px-2.5 py-0.5 text-[10px] font-medium text-[#11140F]/75 dark:text-white/80 hover:border-[#11140F]/30 dark:hover:border-white/30 hover:text-[#11140F] dark:hover:text-white transition-colors whitespace-nowrap cursor-pointer flex items-center gap-1 bg-white dark:bg-white/[0.06]"
             title="Download PNG, vector SVG, or print physical templates"
           >
             <span>Export</span>
@@ -247,52 +247,52 @@ export default function QrCodeCard({
 
           {/* Dropdown Menu */}
           {isMenuOpen && (
-            <div className="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 z-30 w-52 rounded-2xl border border-[#11140F]/10 bg-white p-1.5 shadow-xl text-left">
+            <div className="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 z-30 w-52 rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#11140F] p-1.5 shadow-xl text-left">
               <button
                 onClick={() => {
                   setIsMenuOpen(false);
                   setIsExportModalOpen(true);
                 }}
-                className="w-full flex items-center gap-2 px-2.5 py-2 text-[11px] font-medium text-emerald-950 bg-emerald-50/70 rounded-xl hover:bg-emerald-100 transition-colors border border-emerald-200/60 mb-1 cursor-pointer"
+                className="w-full flex items-center gap-2 px-2.5 py-2 text-[11px] font-medium text-emerald-950 dark:text-emerald-300 bg-emerald-50/70 dark:bg-emerald-950/40 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors border border-emerald-200/60 dark:border-emerald-700/50 mb-1 cursor-pointer"
               >
                 <Sliders className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
                 <div className="leading-tight text-left">
-                  <div className="font-semibold text-emerald-900">Customizer Studio</div>
-                  <div className="text-[9px] text-emerald-700/80">Edit out text & zero-margin</div>
+                  <div className="font-semibold text-emerald-900 dark:text-emerald-200">Customizer Studio</div>
+                  <div className="text-[9px] text-emerald-700/80 dark:text-emerald-300/80">Edit out text & zero-margin</div>
                 </div>
               </button>
 
               <button
                 onClick={handleDownloadRawPng}
-                className="w-full flex items-center gap-2 px-2.5 py-1.5 text-[11px] font-medium text-[#11140F] rounded-xl hover:bg-[#EEF0EA] transition-colors cursor-pointer"
+                className="w-full flex items-center gap-2 px-2.5 py-1.5 text-[11px] font-medium text-[#11140F] dark:text-white rounded-xl hover:bg-[#EEF0EA] dark:hover:bg-white/[0.08] transition-colors cursor-pointer"
               >
                 <Crop className="w-3.5 h-3.5 text-[#2F6B4F] shrink-0" />
                 <div className="leading-tight text-left">
                   <div>Zero-Margin PNG</div>
-                  <div className="text-[9px] text-[#11140F]/50">Pure QR (0 extra margins)</div>
+                  <div className="text-[9px] text-[#11140F]/50 dark:text-white/50">Pure QR (0 extra margins)</div>
                 </div>
               </button>
 
               <button
                 onClick={handleDownloadPng}
-                className="w-full flex items-center gap-2 px-2.5 py-1.5 text-[11px] font-medium text-[#11140F] rounded-xl hover:bg-[#EEF0EA] transition-colors cursor-pointer"
+                className="w-full flex items-center gap-2 px-2.5 py-1.5 text-[11px] font-medium text-[#11140F] dark:text-white rounded-xl hover:bg-[#EEF0EA] dark:hover:bg-white/[0.08] transition-colors cursor-pointer"
               >
                 <FileImage className="w-3.5 h-3.5 text-[#2F6B4F] shrink-0" />
                 <div className="leading-tight text-left">
                   <div>Poster PNG</div>
-                  <div className="text-[9px] text-[#11140F]/50">300 DPI with card frame</div>
+                  <div className="text-[9px] text-[#11140F]/50 dark:text-white/50">300 DPI with card frame</div>
                 </div>
               </button>
 
               <button
                 onClick={handleDownloadSvg}
-                className="w-full flex items-center justify-between px-2.5 py-1.5 text-[11px] font-medium text-[#11140F] rounded-xl hover:bg-[#EEF0EA] transition-colors cursor-pointer"
+                className="w-full flex items-center justify-between px-2.5 py-1.5 text-[11px] font-medium text-[#11140F] dark:text-white rounded-xl hover:bg-[#EEF0EA] dark:hover:bg-white/[0.08] transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2">
                   <FileCode className="w-3.5 h-3.5 text-[#2F6B4F] shrink-0" />
                   <div className="leading-tight text-left">
                     <div>Vector SVG</div>
-                    <div className="text-[9px] text-[#11140F]/50">Infinite scale for print</div>
+                    <div className="text-[9px] text-[#11140F]/50 dark:text-white/50">Infinite scale for print</div>
                   </div>
                 </div>
                 {!canExportSvg && (
@@ -304,12 +304,12 @@ export default function QrCodeCard({
 
               <button
                 onClick={handleOpenPrintTemplates}
-                className="w-full flex items-center gap-2 px-2.5 py-1.5 text-[11px] font-medium text-[#11140F] rounded-xl hover:bg-[#EEF0EA] transition-colors cursor-pointer"
+                className="w-full flex items-center gap-2 px-2.5 py-1.5 text-[11px] font-medium text-[#11140F] dark:text-white rounded-xl hover:bg-[#EEF0EA] dark:hover:bg-white/[0.08] transition-colors cursor-pointer"
               >
                 <Printer className="w-3.5 h-3.5 text-[#2F6B4F] shrink-0" />
                 <div className="leading-tight text-left">
                   <div>Print Templates</div>
-                  <div className="text-[9px] text-[#11140F]/50">Table tent, sign, PDF</div>
+                  <div className="text-[9px] text-[#11140F]/50 dark:text-white/50">Table tent, sign, PDF</div>
                 </div>
               </button>
             </div>

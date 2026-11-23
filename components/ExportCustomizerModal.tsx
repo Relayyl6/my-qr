@@ -354,25 +354,25 @@ export default function ExportCustomizerModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-[#11140F]/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
-      <div className="rounded-3xl border border-[#11140F]/15 bg-white p-5 sm:p-7 shadow-2xl max-w-4xl w-full max-h-[94vh] flex flex-col space-y-5 my-auto">
+      <div className="rounded-3xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#0E1017] p-5 sm:p-7 shadow-2xl max-w-4xl w-full max-h-[94vh] flex flex-col space-y-5 my-auto text-[#11140F] dark:text-white">
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-[#11140F]/10 shrink-0">
+        <div className="flex items-center justify-between pb-3 border-b border-[#11140F]/10 dark:border-white/10 shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center">
               <Sliders className="w-4.5 h-4.5 text-emerald-600" />
             </div>
             <div>
-              <h3 className="text-[16px] font-semibold text-[#11140F] flex items-center gap-2">
+              <h3 className="text-[16px] font-semibold text-[#11140F] dark:text-white flex items-center gap-2">
                 Customizable Export Studio for <span className="font-mono text-emerald-700">/{shortCode}</span>
               </h3>
-              <p className="text-[12px] text-[#11140F]/55">
+              <p className="text-[12px] text-[#11140F]/55 dark:text-white/50">
                 Edit out unneeded details, remove extra white space, and export die-cut assets
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-[#11140F]/40 hover:text-[#11140F] p-1.5 rounded-xl hover:bg-[#11140F]/5 transition-colors"
+            className="text-[#11140F]/40 dark:text-white/40 hover:text-[#11140F] dark:hover:text-white p-1.5 rounded-xl hover:bg-[#11140F]/5 dark:hover:bg-white/5 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -383,7 +383,7 @@ export default function ExportCustomizerModal({
           <div className="md:col-span-6 space-y-4">
             {/* 1. Layout & Padding Presets */}
             <div className="space-y-2">
-              <span className="text-[11.5px] uppercase font-bold tracking-wider text-[#11140F]/60 block">
+              <span className="text-[11.5px] uppercase font-bold tracking-wider text-[#11140F]/60 dark:text-white/60 block">
                 1. Crop & White Space Control:
               </span>
               <div className="grid grid-cols-2 gap-2">
@@ -401,14 +401,14 @@ export default function ExportCustomizerModal({
                   className={`p-2.5 rounded-xl text-left border transition-all cursor-pointer ${
                     layoutMode === 'zero-margin'
                       ? 'border-emerald-600 bg-emerald-50/50 shadow-xs'
-                      : 'border-[#11140F]/10 hover:border-[#11140F]/30 bg-white'
+                      : 'border-[#11140F]/10 dark:border-white/10 hover:border-[#11140F]/30 dark:hover:border-white/30 bg-white dark:bg-white/[0.04]'
                   }`}
                 >
-                  <div className="flex items-center gap-1.5 font-bold text-[12.5px] text-[#11140F]">
+                  <div className="flex items-center gap-1.5 font-bold text-[12.5px] text-[#11140F] dark:text-white">
                     <Crop className="w-3.5 h-3.5 text-emerald-600" />
                     <span>Zero Margin</span>
                   </div>
-                  <p className="text-[10.5px] text-[#11140F]/55 mt-0.5">
+                  <p className="text-[10.5px] text-[#11140F]/55 dark:text-white/50 mt-0.5">
                     100% pure QR code. 0 white space, no extra text.
                   </p>
                 </button>
@@ -419,14 +419,14 @@ export default function ExportCustomizerModal({
                   className={`p-2.5 rounded-xl text-left border transition-all cursor-pointer ${
                     layoutMode === 'minimal'
                       ? 'border-emerald-600 bg-emerald-50/50 shadow-xs'
-                      : 'border-[#11140F]/10 hover:border-[#11140F]/30 bg-white'
+                      : 'border-[#11140F]/10 dark:border-white/10 hover:border-[#11140F]/30 dark:hover:border-white/30 bg-white dark:bg-white/[0.04]'
                   }`}
                 >
-                  <div className="flex items-center gap-1.5 font-bold text-[12.5px] text-[#11140F]">
+                  <div className="flex items-center gap-1.5 font-bold text-[12.5px] text-[#11140F] dark:text-white">
                     <Maximize2 className="w-3.5 h-3.5 text-emerald-600" />
                     <span>Minimal Quiet Zone</span>
                   </div>
-                  <p className="text-[10.5px] text-[#11140F]/55 mt-0.5">
+                  <p className="text-[10.5px] text-[#11140F]/55 dark:text-white/50 mt-0.5">
                     Compliant 10% white margin buffer only.
                   </p>
                 </button>
@@ -437,14 +437,14 @@ export default function ExportCustomizerModal({
                   className={`p-2.5 rounded-xl text-left border transition-all cursor-pointer ${
                     layoutMode === 'compact-card'
                       ? 'border-emerald-600 bg-emerald-50/50 shadow-xs'
-                      : 'border-[#11140F]/10 hover:border-[#11140F]/30 bg-white'
+                      : 'border-[#11140F]/10 dark:border-white/10 hover:border-[#11140F]/30 dark:hover:border-white/30 bg-white dark:bg-white/[0.04]'
                   }`}
                 >
-                  <div className="flex items-center gap-1.5 font-bold text-[12.5px] text-[#11140F]">
+                  <div className="flex items-center gap-1.5 font-bold text-[12.5px] text-[#11140F] dark:text-white">
                     <Layers className="w-3.5 h-3.5 text-emerald-600" />
                     <span>Compact Card</span>
                   </div>
-                  <p className="text-[10.5px] text-[#11140F]/55 mt-0.5">
+                  <p className="text-[10.5px] text-[#11140F]/55 dark:text-white/50 mt-0.5">
                     Balanced card format with selectable details.
                   </p>
                 </button>
@@ -455,14 +455,14 @@ export default function ExportCustomizerModal({
                   className={`p-2.5 rounded-xl text-left border transition-all cursor-pointer ${
                     layoutMode === 'poster'
                       ? 'border-emerald-600 bg-emerald-50/50 shadow-xs'
-                      : 'border-[#11140F]/10 hover:border-[#11140F]/30 bg-white'
+                      : 'border-[#11140F]/10 dark:border-white/10 hover:border-[#11140F]/30 dark:hover:border-white/30 bg-white dark:bg-white/[0.04]'
                   }`}
                 >
-                  <div className="flex items-center gap-1.5 font-bold text-[12.5px] text-[#11140F]">
+                  <div className="flex items-center gap-1.5 font-bold text-[12.5px] text-[#11140F] dark:text-white">
                     <FileImage className="w-3.5 h-3.5 text-emerald-600" />
                     <span>Poster Standard</span>
                   </div>
-                  <p className="text-[10.5px] text-[#11140F]/55 mt-0.5">
+                  <p className="text-[10.5px] text-[#11140F]/55 dark:text-white/50 mt-0.5">
                     Classic 1080×1350px print poster layout.
                   </p>
                 </button>

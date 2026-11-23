@@ -1294,7 +1294,7 @@ export default function CustomerMailingListManager({
           <div className="w-full max-w-2xl bg-white rounded-lg p-6 shadow-xl border border-[#11140F]/15 max-h-[85vh] overflow-y-auto space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-[#11140F]/10">
               <div>
-                <h4 className="font-bold text-sm text-[#11140F]">{inspectingCampaign.subject}</h4>
+                <h4 className="font-bold text-sm text-[#11140F] dark:text-white">{inspectingCampaign.subject}</h4>
                 <p className="text-xs text-[#11140F]/60 mt-0.5">
                   Dispatched on {inspectingCampaign.sentAt ? new Date(inspectingCampaign.sentAt).toLocaleString() : '—'} • {inspectingCampaign.sentCount} delivered
                 </p>
@@ -1372,7 +1372,7 @@ export default function CustomerMailingListManager({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
           <div className="w-full max-w-lg bg-white rounded-lg p-5 shadow-xl border border-[#11140F]/15 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-2 border-b border-[#11140F]/10">
-              <h4 className="text-sm font-bold text-[#11140F]">Create Mailing List</h4>
+              <h4 className="text-sm font-bold text-[#11140F] dark:text-white">Create Mailing List</h4>
               <button
                 type="button"
                 onClick={() => setShowCreateModal(false)}
@@ -1384,7 +1384,7 @@ export default function CustomerMailingListManager({
 
             <form onSubmit={handleCreateList} className="space-y-3">
               <div>
-                <label className="block text-xs font-semibold text-[#11140F] mb-1">List Name *</label>
+                <label className="block text-xs font-semibold text-[#11140F] dark:text-white/90 mb-1">List Name *</label>
                 <input
                   type="text"
                   value={newListName}
@@ -1397,9 +1397,9 @@ export default function CustomerMailingListManager({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-[#11140F] mb-1">
+                  <label className="block text-xs font-semibold text-[#11140F] dark:text-white/90 mb-1">
                     Form Badge Tag
-                    <span className="text-[10px] text-[#11140F]/50 font-normal ml-1">(custom tag)</span>
+                    <span className="text-[10px] text-[#11140F]/50 dark:text-white/50 font-normal ml-1">(custom tag)</span>
                   </label>
                   <input
                     type="text"
@@ -1411,9 +1411,9 @@ export default function CustomerMailingListManager({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-[#11140F] mb-1">
+                  <label className="block text-xs font-semibold text-[#11140F] dark:text-white/90 mb-1">
                     Button CTA Text
-                    <span className="text-[10px] text-[#11140F]/50 font-normal ml-1">(submit label)</span>
+                    <span className="text-[10px] text-[#11140F]/50 dark:text-white/50 font-normal ml-1">(submit label)</span>
                   </label>
                   <input
                     type="text"
@@ -1426,9 +1426,9 @@ export default function CustomerMailingListManager({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#11140F] mb-1">
+                <label className="block text-xs font-semibold text-[#11140F] dark:text-white/90 mb-1">
                   Public Headline
-                  <span className="text-[10px] text-[#11140F]/50 font-normal ml-1">(optional, defaults to List Name)</span>
+                  <span className="text-[10px] text-[#11140F]/50 dark:text-white/50 font-normal ml-1">(optional, defaults to List Name)</span>
                 </label>
                 <input
                   type="text"
@@ -1440,7 +1440,7 @@ export default function CustomerMailingListManager({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#11140F] mb-1">Description / Subtitle</label>
+                <label className="block text-xs font-semibold text-[#11140F] dark:text-white/90 mb-1">Description / Subtitle</label>
                 <textarea
                   rows={2}
                   value={newListDesc}
@@ -1451,9 +1451,9 @@ export default function CustomerMailingListManager({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#11140F] mb-1">
+                <label className="block text-xs font-semibold text-[#11140F] dark:text-white/90 mb-1">
                   Custom Success Note
-                  <span className="text-[10px] text-[#11140F]/50 font-normal ml-1">(shown right after subscribing)</span>
+                  <span className="text-[10px] text-[#11140F]/50 dark:text-white/50 font-normal ml-1">(shown right after subscribing)</span>
                 </label>
                 <input
                   type="text"
@@ -1507,7 +1507,7 @@ export default function CustomerMailingListManager({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
           <div className="w-full max-w-lg bg-white rounded-lg p-5 shadow-xl border border-[#11140F]/15 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-2 border-b border-[#11140F]/10">
-              <h4 className="text-sm font-bold text-[#11140F]">Edit Mailing List Settings</h4>
+              <h4 className="text-sm font-bold text-[#11140F] dark:text-white">Edit Mailing List Settings</h4>
               <button
                 type="button"
                 onClick={() => setShowEditListModal(false)}
@@ -1519,7 +1519,7 @@ export default function CustomerMailingListManager({
 
             <form onSubmit={handleUpdateList} className="space-y-3">
               <div>
-                <label className="block text-xs font-semibold text-[#11140F] mb-1">List Name *</label>
+                <label className="block text-xs font-semibold text-[#11140F] dark:text-white/90 mb-1">List Name *</label>
                 <input
                   type="text"
                   value={editListName}
@@ -1531,9 +1531,9 @@ export default function CustomerMailingListManager({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-[#11140F] mb-1">
+                  <label className="block text-xs font-semibold text-[#11140F] dark:text-white/90 mb-1">
                     Form Badge Tag
-                    <span className="text-[10px] text-[#11140F]/50 font-normal ml-1">(custom tag)</span>
+                    <span className="text-[10px] text-[#11140F]/50 dark:text-white/50 font-normal ml-1">(custom tag)</span>
                   </label>
                   <input
                     type="text"
@@ -1545,9 +1545,9 @@ export default function CustomerMailingListManager({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-[#11140F] mb-1">
+                  <label className="block text-xs font-semibold text-[#11140F] dark:text-white/90 mb-1">
                     Button CTA Text
-                    <span className="text-[10px] text-[#11140F]/50 font-normal ml-1">(submit label)</span>
+                    <span className="text-[10px] text-[#11140F]/50 dark:text-white/50 font-normal ml-1">(submit label)</span>
                   </label>
                   <input
                     type="text"
@@ -1560,9 +1560,9 @@ export default function CustomerMailingListManager({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#11140F] mb-1">
+                <label className="block text-xs font-semibold text-[#11140F] dark:text-white/90 mb-1">
                   Public Headline
-                  <span className="text-[10px] text-[#11140F]/50 font-normal ml-1">(optional, defaults to List Name)</span>
+                  <span className="text-[10px] text-[#11140F]/50 dark:text-white/50 font-normal ml-1">(optional, defaults to List Name)</span>
                 </label>
                 <input
                   type="text"
@@ -1574,7 +1574,7 @@ export default function CustomerMailingListManager({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#11140F] mb-1">Description / Subtitle</label>
+                <label className="block text-xs font-semibold text-[#11140F] dark:text-white/90 mb-1">Description / Subtitle</label>
                 <textarea
                   rows={2}
                   value={editListDesc}
@@ -1584,9 +1584,9 @@ export default function CustomerMailingListManager({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#11140F] mb-1">
+                <label className="block text-xs font-semibold text-[#11140F] dark:text-white/90 mb-1">
                   Custom Success Note
-                  <span className="text-[10px] text-[#11140F]/50 font-normal ml-1">(shown right after subscribing)</span>
+                  <span className="text-[10px] text-[#11140F]/50 dark:text-white/50 font-normal ml-1">(shown right after subscribing)</span>
                 </label>
                 <input
                   type="text"
@@ -1639,10 +1639,10 @@ export default function CustomerMailingListManager({
       {showAddContactModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
           <div className="w-full max-w-md bg-white rounded-lg p-5 shadow-xl border border-[#11140F]/15 space-y-4">
-            <h4 className="text-sm font-bold text-[#11140F]">Add Subscriber to {selectedList?.name}</h4>
+            <h4 className="text-sm font-bold text-[#11140F] dark:text-white">Add Subscriber to {selectedList?.name}</h4>
             <form onSubmit={handleAddContact} className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-[#11140F] mb-1">Email Address *</label>
+                <label className="block text-xs font-medium text-[#11140F] dark:text-white/90 mb-1">Email Address *</label>
                 <input
                   type="email"
                   value={newContactEmail}
@@ -1654,7 +1654,7 @@ export default function CustomerMailingListManager({
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[#11140F] mb-1">First Name (optional)</label>
+                <label className="block text-xs font-medium text-[#11140F] dark:text-white/90 mb-1">First Name (optional)</label>
                 <input
                   type="text"
                   value={newContactName}
@@ -1690,10 +1690,10 @@ export default function CustomerMailingListManager({
       {showEditContactModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
           <div className="w-full max-w-md bg-white rounded-lg p-5 shadow-xl border border-[#11140F]/15 space-y-4">
-            <h4 className="text-sm font-bold text-[#11140F]">Edit Subscriber</h4>
+            <h4 className="text-sm font-bold text-[#11140F] dark:text-white">Edit Subscriber</h4>
             <form onSubmit={handleUpdateContact} className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-[#11140F] mb-1">Email Address *</label>
+                <label className="block text-xs font-medium text-[#11140F] dark:text-white/90 mb-1">Email Address *</label>
                 <input
                   type="email"
                   value={editContactEmail}
@@ -1704,7 +1704,7 @@ export default function CustomerMailingListManager({
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[#11140F] mb-1">First Name</label>
+                <label className="block text-xs font-medium text-[#11140F] dark:text-white/90 mb-1">First Name</label>
                 <input
                   type="text"
                   value={editContactName}
@@ -1714,7 +1714,7 @@ export default function CustomerMailingListManager({
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[#11140F] mb-1">Status</label>
+                <label className="block text-xs font-medium text-[#11140F] dark:text-white/90 mb-1">Status</label>
                 <select
                   value={editContactStatus}
                   onChange={(e) => setEditContactStatus(e.target.value)}
@@ -1753,7 +1753,7 @@ export default function CustomerMailingListManager({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
           <div className="w-full max-w-lg bg-white rounded-lg p-5 shadow-xl border border-[#11140F]/15 space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-[#11140F]/10">
-              <h4 className="text-sm font-bold text-[#11140F] flex items-center gap-1.5">
+              <h4 className="text-sm font-bold text-[#11140F] dark:text-white flex items-center gap-1.5">
                 <FileSpreadsheet className="w-4 h-4 text-[#2F6B4F]" />
                 CSV Bulk Import
               </h4>
@@ -1766,13 +1766,13 @@ export default function CustomerMailingListManager({
               </button>
             </div>
 
-            <p className="text-xs text-[#11140F]/60">
+            <p className="text-xs text-[#11140F]/60 dark:text-white/60">
               Upload a .csv file or paste lines below in format: <code>email, first_name</code>.
             </p>
 
             <form onSubmit={handleCsvImport} className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-[#11140F] mb-1">Upload CSV File</label>
+                <label className="block text-xs font-medium text-[#11140F] dark:text-white/90 mb-1">Upload CSV File</label>
                 <input
                   type="file"
                   accept=".csv,.txt"
@@ -1782,7 +1782,7 @@ export default function CustomerMailingListManager({
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[#11140F] mb-1">
+                <label className="block text-xs font-medium text-[#11140F] dark:text-white/90 mb-1">
                   Or Paste CSV Content
                 </label>
                 <textarea
@@ -1823,10 +1823,10 @@ export default function CustomerMailingListManager({
           <div className="w-full max-w-4xl bg-white rounded-lg p-5 shadow-xl border border-[#11140F]/15 max-h-[90vh] overflow-y-auto space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-[#11140F]/10">
               <div>
-                <h4 className="text-sm font-bold text-[#11140F]">
+                <h4 className="text-sm font-bold text-[#11140F] dark:text-white">
                   Broadcast to {selectedList.name}
                 </h4>
-                <p className="text-xs text-[#11140F]/60">
+                <p className="text-xs text-[#11140F]/60 dark:text-white/60">
                   Delivering to {contacts.filter((c) => c.status === 'active').length} active recipients via personal Gmail.
                 </p>
               </div>
@@ -1874,7 +1874,7 @@ export default function CustomerMailingListManager({
 
             <form onSubmit={handleBroadcast} className="space-y-3 pt-1">
               <div>
-                <label className="block text-xs font-medium text-[#11140F] mb-1">Subject Line *</label>
+                <label className="block text-xs font-medium text-[#11140F] dark:text-white/90 mb-1">Subject Line *</label>
                 <input
                   type="text"
                   value={broadcastSubject}
@@ -1888,7 +1888,7 @@ export default function CustomerMailingListManager({
               {/* Rich Text Toolbar */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-medium text-[#11140F]">Email Body (HTML &amp; Rich Text) *</label>
+                  <label className="text-xs font-medium text-[#11140F] dark:text-white/90">Email Body (HTML &amp; Rich Text) *</label>
                   <div className="flex items-center gap-1 text-[11px] text-[#11140F]/50">
                     <span>Tags:</span>
                     <button
@@ -2139,7 +2139,7 @@ export default function CustomerMailingListManager({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
           <div className="w-full max-w-2xl bg-white rounded-lg p-5 shadow-xl border border-[#11140F]/15 space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-[#11140F]/10">
-              <h4 className="text-sm font-bold text-[#11140F] flex items-center gap-1.5">
+              <h4 className="text-sm font-bold text-[#11140F] dark:text-white flex items-center gap-1.5">
                 <Code className="w-4 h-4 text-[#2F6B4F]" />
                 Embeddable Subscriber Form
               </h4>
@@ -2152,7 +2152,7 @@ export default function CustomerMailingListManager({
               </button>
             </div>
 
-            <p className="text-xs text-[#11140F]/60">
+            <p className="text-xs text-[#11140F]/60 dark:text-white/60">
               Paste this HTML snippet on your website to capture subscribers directly into {selectedList?.name}.
             </p>
 

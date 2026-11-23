@@ -41,7 +41,7 @@ export default function DeleteConfirmModal({
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-sm rounded-2xl border border-[#11140F]/15 bg-[#EEF0EA] p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-200"
+        className="relative w-full max-w-sm rounded-2xl border border-[#11140F]/15 dark:border-white/15 bg-[#EEF0EA] dark:bg-[#0E1017] p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-200 text-[#11140F] dark:text-white"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-3">
@@ -49,12 +49,12 @@ export default function DeleteConfirmModal({
             ⚠️
           </div>
           <div>
-            <h3 className="text-[16px] font-medium text-[#11140F]">Delete "{title}"?</h3>
-            <p className="text-[12px] text-[#11140F]/55">Manage active QR destination</p>
+            <h3 className="text-[16px] font-medium text-[#11140F] dark:text-white">Delete "{title}"?</h3>
+            <p className="text-[12px] text-[#11140F]/55 dark:text-white/50">Manage active QR destination</p>
           </div>
         </div>
 
-        <p className="text-[13px] text-[#11140F]/70 leading-relaxed">
+        <p className="text-[13px] text-[#11140F]/70 dark:text-white/70 leading-relaxed">
           Physical materials already printed with this QR code will stop redirecting immediately.
         </p>
 

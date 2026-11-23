@@ -112,14 +112,14 @@ export default function LinkForm({ customDomains = [] }: LinkFormProps) {
       {/* Destination URL & AI Enricher Trigger */}
       <div className="w-full min-w-0">
         <div className="flex items-center justify-between mb-1.5">
-          <label htmlFor="destinationUrl" className="block text-[13px] font-medium text-[#11140F]/70">
+          <label htmlFor="destinationUrl" className="block text-[13px] font-medium text-[#11140F]/70 dark:text-white/70">
             Destination URL
           </label>
           <button
             type="button"
             onClick={() => handleEnrich()}
             disabled={isEnriching || !destinationUrl}
-            className="inline-flex items-center gap-1.5 text-[12px] font-medium text-emerald-700 hover:text-emerald-800 disabled:opacity-40 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-[12px] font-medium text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 disabled:opacity-40 transition-colors cursor-pointer"
           >
             {isEnriching ? (
               <>
@@ -266,8 +266,8 @@ export default function LinkForm({ customDomains = [] }: LinkFormProps) {
 
       {/* Label Field */}
       <div className="w-full min-w-0">
-        <label htmlFor="label" className="block text-[13px] font-medium text-[#11140F]/70 mb-1.5">
-          Label <span className="text-[#11140F]/35 font-normal">(optional)</span>
+        <label htmlFor="label" className="block text-[13px] font-medium text-[#11140F]/70 dark:text-white/70 mb-1.5">
+          Label <span className="text-[#11140F]/35 dark:text-white/40 font-normal">(optional)</span>
         </label>
         <input
           id="label"

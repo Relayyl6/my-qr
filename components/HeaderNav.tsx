@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { signOut } from '@/app/auth-actions';
+import { signOut, getUserProfileAvatar } from '@/app/auth-actions';
 import AuthModal from './AuthModal';
 import Link from 'next/link';
 import { LayoutGrid, Sparkles, CreditCard, Shield, Settings, ChevronDown, LogOut } from 'lucide-react';
 import AccountSettingsModal from './AccountSettingsModal';
+import { getOptimizedStorageUrl } from '@/lib/media';
 
 interface Props {
   user: {
@@ -13,6 +14,7 @@ interface Props {
     email: string;
     name: string | null;
     tier?: string;
+    avatarUrl?: string | null;
   } | null;
   isAdmin?: boolean;
   activeTab?: 'workspace' | 'overview';
@@ -75,6 +77,47 @@ export default function HeaderNav({
   const displayName = user?.name || user?.email?.split('@')[0] || 'User';
   const userInitial = (displayName[0] || 'U').toUpperCase();
   const userTier = (user?.tier || 'free').toUpperCase();
+
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(user?.avatarUrl || null);
+  const [avatarError, setAvatarError] = useState(false);
+
+  useEffect(() => {
+    if (user?.avatarUrl) {
+      setAvatarUrl(user.avatarUrl);
+      setAvatarError(false);
+    } else {
+      try {
+        const cached = typeof window !== 'undefined' ? localStorage.getItem('dynamicqr_user_avatar') : null;
+        if (cached) {
+          setAvatarUrl(cached);
+          setAvatarError(false);
+        }
+      } catch (e) {}
+    }
+
+    if (user?.id) {
+      getUserProfileAvatar()
+        .then((serverUrl) => {
+          if (serverUrl) {
+            setAvatarUrl(serverUrl);
+            setAvatarError(false);
+            try {
+              localStorage.setItem('dynamicqr_user_avatar', serverUrl);
+            } catch (e) {}
+          }
+        })
+        .catch(() => {});
+    }
+
+    const handleAvatarChange = (e: any) => {
+      if (e.detail?.avatarUrl !== undefined) {
+        setAvatarUrl(e.detail.avatarUrl || null);
+        setAvatarError(false);
+      }
+    };
+    window.addEventListener('dynamicqr-avatar-change', handleAvatarChange);
+    return () => window.removeEventListener('dynamicqr-avatar-change', handleAvatarChange);
+  }, [user?.id, user?.avatarUrl]);
 
   const openAuth = (tab: 'login' | 'signup') => {
     setAuthTab(tab);
@@ -225,9 +268,20 @@ export default function HeaderNav({
                     aria-expanded={userMenuOpen}
                     aria-haspopup="true"
                   >
-                    {/* User Avatar Circle with Gradient & Initial */}
-                    <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-emerald-600 via-teal-500 to-emerald-400 text-white font-bold text-xs flex items-center justify-center shadow-xs ring-1 ring-white/20 shrink-0">
-                      {userInitial}
+                    {/* User Avatar Circle with Image or Initial Fallback */}
+                    <div className="w-7 h-7 rounded-full overflow-hidden bg-gradient-to-tr from-emerald-600 via-teal-500 to-emerald-400 text-white font-bold text-xs flex items-center justify-center shadow-xs ring-1 ring-white/20 shrink-0">
+                      {avatarUrl && !avatarError ? (
+                        <img
+                          src={getOptimizedStorageUrl(avatarUrl)}
+                          alt={displayName}
+                          loading="eager"
+                          decoding="async"
+                          onError={() => setAvatarError(true)}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span>{userInitial}</span>
+                      )}
                     </div>
 
                     {/* Display Name */}
@@ -256,30 +310,45 @@ export default function HeaderNav({
                           : 'bg-white/98 dark:bg-[#141912]/95 border-[#11140F]/12 dark:border-white/15 text-[#11140F] dark:text-white shadow-xl'
                       }`}
                     >
-                      {/* Identity Header Card with Badges */}
+                      {/* Identity Header Card with Badges & Avatar */}
                       <div
-                        className={`px-3 py-2.5 mb-1.5 rounded-xl border ${
+                        className={`p-3 mb-1.5 rounded-xl border flex items-center gap-2.5 ${
                           isDark
                             ? 'bg-white/[0.04] border-white/10'
                             : 'bg-[#11140F]/[0.03] dark:bg-white/[0.04] border-[#11140F]/5 dark:border-white/10'
                         }`}
                       >
-                        <div className="flex items-center justify-between gap-2 mb-1">
-                          <span className="text-[13px] font-bold truncate">{displayName}</span>
-                          <div className="flex items-center gap-1 shrink-0">
-                            {isAdmin && (
-                              <span className="px-1.5 py-0.2 rounded text-[9.5px] font-mono font-bold bg-amber-400/20 text-amber-300 border border-amber-400/40 uppercase">
-                                Admin
-                              </span>
-                            )}
-                            <span className="px-1.5 py-0.2 rounded text-[9.5px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 uppercase">
-                              {userTier}
-                            </span>
-                          </div>
+                        <div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-tr from-emerald-600 via-teal-500 to-emerald-400 text-white font-bold text-xs flex items-center justify-center shadow-xs ring-1 ring-white/20 shrink-0">
+                          {avatarUrl && !avatarError ? (
+                            <img
+                              src={getOptimizedStorageUrl(avatarUrl)}
+                              alt={displayName}
+                              loading="lazy"
+                              decoding="async"
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span>{userInitial}</span>
+                          )}
                         </div>
-                        <p className="text-[11px] text-white/50 dark:text-white/50 truncate font-mono">
-                          {user.email}
-                        </p>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-1 mb-0.5">
+                            <span className="text-[13px] font-bold truncate">{displayName}</span>
+                            <div className="flex items-center gap-1 shrink-0">
+                              {isAdmin && (
+                                <span className="px-1.5 py-0.2 rounded text-[9.5px] font-mono font-bold bg-amber-400/20 text-amber-300 border border-amber-400/40 uppercase">
+                                  Admin
+                                </span>
+                              )}
+                              <span className="px-1.5 py-0.2 rounded text-[9.5px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 uppercase">
+                                {userTier}
+                              </span>
+                            </div>
+                          </div>
+                          <p className="text-[11px] text-white/50 dark:text-white/50 truncate font-mono">
+                            {user.email}
+                          </p>
+                        </div>
                       </div>
 
                       {/* Dropdown Options */}

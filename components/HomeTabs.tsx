@@ -13,6 +13,7 @@ interface HomeTabsProps {
     email: string;
     name: string | null;
     tier?: string;
+    avatarUrl?: string | null;
   } | null;
   isAdmin?: boolean;
   overviewContent: React.ReactNode;

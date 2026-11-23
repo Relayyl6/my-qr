@@ -148,7 +148,7 @@ export default function QrArtStudio({
 
   if (!isEligible) {
     return (
-      <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-[#11140F]/10 space-y-6 animate-in fade-in zoom-in-95 duration-150">
+      <div className="bg-white dark:bg-[#0E1017] rounded-2xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-[#11140F]/10 dark:border-white/10 space-y-6 animate-in fade-in zoom-in-95 duration-150 text-[#11140F] dark:text-white">
         <div className="flex items-center justify-between pb-4 border-b border-[#11140F]/10">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center">
@@ -493,7 +493,7 @@ export default function QrArtStudio({
   };
 
   return (
-    <div className="rounded-3xl border border-[#11140F]/15 bg-white p-5 sm:p-7 shadow-2xl space-y-5 max-w-2xl w-full max-h-[92vh] overflow-y-auto">
+    <div className="rounded-3xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#0E1017] p-5 sm:p-7 shadow-2xl space-y-5 max-w-2xl w-full max-h-[92vh] overflow-y-auto text-[#11140F] dark:text-white">
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-[#11140F]/10">
         <div className="flex items-center gap-2.5">
@@ -501,10 +501,10 @@ export default function QrArtStudio({
             <Palette className="w-4.5 h-4.5 text-purple-600" />
           </div>
           <div>
-            <h3 className="text-[16px] font-semibold text-[#11140F] flex items-center gap-2">
+            <h3 className="text-[16px] font-semibold text-[#11140F] dark:text-white flex items-center gap-2">
               AI QR Art Studio for <span className="font-mono text-purple-700">/id/{shortCode}</span>
             </h3>
-            <p className="text-[12px] text-[#11140F]/55">
+            <p className="text-[12px] text-[#11140F]/55 dark:text-white/50">
               Generative scannable artwork with radiant multi-stop gradients & brand emblems
             </p>
           </div>
@@ -521,7 +521,7 @@ export default function QrArtStudio({
 
       {/* Style Inspirations Bar */}
       <div className="space-y-2">
-        <span className="text-[11px] uppercase tracking-wider font-bold text-[#11140F]/55 block">
+        <span className="text-[11px] uppercase tracking-wider font-bold text-[#11140F]/55 dark:text-white/50 block">
           Curated Art Profiles:
         </span>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">

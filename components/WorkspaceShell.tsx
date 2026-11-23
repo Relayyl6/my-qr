@@ -86,6 +86,7 @@ interface WorkspaceShellProps {
     email: string;
     name: string | null;
     tier?: string;
+    avatarUrl?: string | null;
   } | null;
   isAdmin?: boolean;
   planUsageMeter: React.ReactNode;
@@ -253,13 +254,17 @@ export default function WorkspaceShell({
   const userInitial = (user?.name || user?.email || 'U').charAt(0).toUpperCase();
   const tierName = (user?.tier || 'free').toUpperCase();
 
-  const [userAvatar, setUserAvatar] = useState<string | null>(null);
+  const [userAvatar, setUserAvatar] = useState<string | null>(user?.avatarUrl || null);
 
   useEffect(() => {
-    try {
-      const cached = localStorage.getItem('dynamicqr_user_avatar');
-      if (cached) setUserAvatar(cached);
-    } catch (e) {}
+    if (user?.avatarUrl) {
+      setUserAvatar(user.avatarUrl);
+    } else {
+      try {
+        const cached = localStorage.getItem('dynamicqr_user_avatar');
+        if (cached) setUserAvatar(cached);
+      } catch (e) {}
+    }
 
     const handleAvatarChange = (e: any) => {
       if (e.detail?.avatarUrl !== undefined) {
@@ -268,7 +273,7 @@ export default function WorkspaceShell({
     };
     window.addEventListener('dynamicqr-avatar-change', handleAvatarChange);
     return () => window.removeEventListener('dynamicqr-avatar-change', handleAvatarChange);
-  }, []);
+  }, [user?.avatarUrl]);
 
   const navSections = [
     {

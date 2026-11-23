@@ -221,12 +221,12 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 pt-1">
                   {/* Step 1 */}
-                  <div className="p-3.5 rounded-xl bg-white border border-[#11140F]/8 space-y-1.5 shadow-2xs">
+                  <div className="p-3.5 rounded-xl bg-white dark:bg-white/[0.04] border border-[#11140F]/8 dark:border-white/10 space-y-1.5 shadow-2xs">
                     <div className="font-bold text-[#2F6B4F] flex items-center gap-1.5 text-[13px]">
                       <span className="w-5 h-5 rounded-full bg-[#2F6B4F] text-white flex items-center justify-center text-[11px] font-bold">1</span>
                       Enter Subdomain
                     </div>
-                    <p className="text-[12px] text-[#11140F]/70 leading-relaxed">
+                    <p className="text-[12px] text-[#11140F]/70 dark:text-white/70 leading-relaxed">
                       In the input box below, type your desired subdomain (e.g. <code className="font-mono text-[#11140F] font-semibold">qr.yourcompany.com</code> or <code className="font-mono text-[#11140F] font-semibold">go.yourbrand.com</code>) and click <strong>"+ Add Domain"</strong>.
                     </p>
                   </div>
@@ -237,10 +237,10 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
                       <span className="w-5 h-5 rounded-full bg-[#2F6B4F] text-white flex items-center justify-center text-[11px] font-bold">2</span>
                       Add 2 DNS Records
                     </div>
-                    <div className="text-[11.5px] text-[#11140F]/75 space-y-1.5 leading-snug">
+                    <div className="text-[11.5px] text-[#11140F]/75 dark:text-white/75 space-y-1.5 leading-snug">
                       <p>In your registrar (Namecheap, GoDaddy, Cloudflare, etc.):</p>
-                      <div className="p-2 rounded-lg bg-[#F7F8F5] border border-[#11140F]/8 font-mono text-[11px] space-y-1">
-                        <div><strong>• CNAME:</strong> Host <code className="text-[#2F6B4F]">qr</code> &rarr; <code className="text-[#11140F]">cname.vercel-dns.com</code></div>
+                      <div className="p-2 rounded-lg bg-[#F7F8F5] dark:bg-white/[0.03] border border-[#11140F]/8 dark:border-white/10 font-mono text-[11px] space-y-1 text-[#11140F] dark:text-white">
+                        <div><strong>• CNAME:</strong> Host <code className="text-[#2F6B4F]">qr</code> &rarr; <code className="text-[#11140F] dark:text-emerald-400">cname.vercel-dns.com</code></div>
                         <div><strong>• TXT:</strong> Host <code className="text-[#2F6B4F]">_dynamicqr.qr</code> &rarr; copy TXT value</div>
                       </div>
                     </div>
@@ -261,12 +261,12 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
 
               {/* Add Domain Form */}
               <form action={formAction} className="space-y-3">
-                <label className="block text-[12.5px] font-medium text-[#11140F]/70">
+                <label className="block text-[12.5px] font-medium text-[#11140F]/70 dark:text-white/70">
                   Connect a new branded subdomain:
                 </label>
                 <div className="flex flex-col sm:flex-row items-center gap-2.5">
                   <div className="relative flex-1 w-full">
-                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[13px] text-[#11140F]/40 font-mono select-none">
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[13px] text-[#11140F]/40 dark:text-white/40 font-mono select-none">
                       https://
                     </span>
                     <input
@@ -274,7 +274,7 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
                       name="domain"
                       required
                       placeholder="qr.yourbrand.com"
-                      className="w-full pl-20 pr-4 py-2.5 rounded-xl border border-[#11140F]/15 text-[13.5px] font-mono outline-none focus:border-[#11140F] transition-colors bg-white"
+                      className="w-full pl-20 pr-4 py-2.5 rounded-xl border border-[#11140F]/15 dark:border-white/15 text-[13.5px] font-mono outline-none focus:border-[#11140F] dark:focus:border-white transition-colors bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white"
                     />
                   </div>
                   <SubmitDomainBtn />
@@ -301,12 +301,12 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
 
               {/* Connected Domains List */}
               {domains.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-[#11140F]/15 p-6 text-center text-[13px] text-[#11140F]/50">
+                <div className="rounded-xl border border-dashed border-[#11140F]/15 dark:border-white/15 p-6 text-center text-[13px] text-[#11140F]/50 dark:text-white/50">
                   No custom domains connected yet. Enter your subdomain above (e.g. <code>qr.yourbrand.com</code>) to get started.
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <h4 className="text-[13px] font-semibold text-[#11140F]/75 uppercase tracking-wider">
+                  <h4 className="text-[13px] font-semibold text-[#11140F]/75 dark:text-white/75 uppercase tracking-wider">
                     Your Connected Domains ({domains.length})
                   </h4>
 
@@ -315,11 +315,11 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
                     return (
                       <div
                         key={d.id}
-                        className="rounded-2xl border border-[#11140F]/10 bg-[#EEF0EA]/40 p-4 sm:p-5 space-y-4"
+                        className="rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-[#EEF0EA]/40 dark:bg-white/[0.03] p-4 sm:p-5 space-y-4"
                       >
                         <div className="flex items-center justify-between flex-wrap gap-2">
                           <div className="flex items-center gap-2.5">
-                            <span className="font-mono font-bold text-[14.5px] text-[#11140F]">
+                            <span className="font-mono font-bold text-[14.5px] text-[#11140F] dark:text-white">
                               {d.domain}
                             </span>
                             {d.status === 'verified' ? (
