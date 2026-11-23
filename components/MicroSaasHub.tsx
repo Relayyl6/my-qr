@@ -35,6 +35,7 @@ import PrintTemplateModal from '@/components/PrintTemplateModal';
 import ConfirmModal from '@/components/ConfirmModal';
 import ImageUploadField from '@/components/ImageUploadField';
 import { APP_URL } from '@/lib/config';
+import { getOptimizedStorageUrl } from '@/lib/media';
 
 interface MicroSaasHubProps {
   userTier: string;
@@ -757,9 +758,11 @@ export default function MicroSaasHub({
                         <div className="flex items-center gap-3 min-w-0">
                           {spec.avatarUrl ? (
                             <img
-                              src={spec.avatarUrl}
+                              src={getOptimizedStorageUrl(spec.avatarUrl)}
                               alt={card.title}
-                              className="w-10 h-10 rounded-full object-cover border-2 border-emerald-500/20 shadow-2xs shrink-0"
+                              loading="lazy"
+                              decoding="async"
+                              className="w-10 h-10 rounded-full object-cover border-2 border-emerald-500/20 shadow-2xs shrink-0 bg-black/10"
                             />
                           ) : (
                             <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-emerald-700 to-[#11140F] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Search, UtensilsCrossed, Sparkles } from 'lucide-react';
 import { APP_URL } from '@/lib/config';
+import { getOptimizedStorageUrl } from '@/lib/media';
 
 export interface MenuItem {
   id: string;
@@ -70,15 +71,27 @@ export default function MenuInteractiveView({
       {/* Top Banner / Hero */}
       <header className="bg-[#11140F] text-white pt-8 pb-8 px-4 sm:px-6 shadow-md text-center space-y-2 sticky top-0 z-30 relative overflow-hidden">
         {bannerUrl && (
-          <div className="absolute inset-0 z-0">
-            <img src={bannerUrl} alt={title} className="w-full h-full object-cover opacity-35" />
+          <div className="absolute inset-0 z-0 bg-black/40">
+            <img
+              src={getOptimizedStorageUrl(bannerUrl)}
+              alt={title}
+              loading="eager"
+              decoding="async"
+              className="w-full h-full object-cover opacity-35"
+            />
             <div className="absolute inset-0 bg-gradient-to-b from-[#11140F]/80 via-[#11140F]/70 to-[#11140F]" />
           </div>
         )}
         <div className="relative z-10 space-y-2">
           {logoUrl ? (
             <div className="w-14 h-14 rounded-2xl bg-white p-1.5 mx-auto flex items-center justify-center shadow-md border border-white/20 mb-2">
-              <img src={logoUrl} alt={title} className="w-full h-full object-contain" />
+              <img
+                src={getOptimizedStorageUrl(logoUrl)}
+                alt={title}
+                loading="eager"
+                decoding="async"
+                className="w-full h-full object-contain"
+              />
             </div>
           ) : (
             <div className="w-10 h-10 rounded-xl bg-white/10 mx-auto flex items-center justify-center text-[#34D399] mb-2 border border-white/10">
@@ -204,9 +217,11 @@ export default function MenuInteractiveView({
                   >
                     {item.imageUrl && (
                       <img
-                        src={item.imageUrl}
+                        src={getOptimizedStorageUrl(item.imageUrl)}
                         alt={item.title}
-                        className="w-20 h-20 sm:w-22 sm:h-22 rounded-xl object-cover shrink-0 border border-[#11140F]/8 shadow-xs"
+                        loading="lazy"
+                        decoding="async"
+                        className="w-20 h-20 sm:w-22 sm:h-22 rounded-xl object-cover shrink-0 border border-[#11140F]/8 shadow-xs bg-black/5"
                       />
                     )}
 

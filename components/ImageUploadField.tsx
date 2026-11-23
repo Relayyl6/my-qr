@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { Upload, X, Image as ImageIcon, Link as LinkIcon, Loader2, Check } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, Link as LinkIcon, Loader2, Check, Sparkles } from 'lucide-react';
+import { getOptimizedStorageUrl, optimizeImageInBrowser } from '@/lib/media';
 
 interface ImageUploadFieldProps {
   label: string;
@@ -49,8 +50,11 @@ export default function ImageUploadField({
     setError(null);
 
     try {
+      // High-performance client-side optimization to compress multi-MB phone photos into crisp WebP (<50KB)
+      const optimizedFile = await optimizeImageInBrowser(file, aspectRatio);
+
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', optimizedFile);
       formData.append('folder', aspectRatio);
 
       const res = await fetch('/api/upload', {
@@ -103,28 +107,40 @@ export default function ImageUploadField({
           <div className="flex items-center gap-3 min-w-0">
             {aspectRatio === 'avatar' && (
               <img
-                src={value}
+                src={getOptimizedStorageUrl(value)}
                 alt={label}
-                className="w-14 h-14 rounded-full object-cover border-2 border-[#2F6B4F] shrink-0 shadow-xs"
+                loading="eager"
+                decoding="async"
+                className="w-14 h-14 rounded-full object-cover border-2 border-[#2F6B4F] shrink-0 shadow-xs bg-black/10"
               />
             )}
             {aspectRatio === 'banner' && (
               <img
-                src={value}
+                src={getOptimizedStorageUrl(value)}
                 alt={label}
-                className="w-28 h-12 rounded-lg object-cover border border-[#11140F]/10 dark:border-white/10 shrink-0"
+                loading="eager"
+                decoding="async"
+                className="w-28 h-12 rounded-lg object-cover border border-[#11140F]/10 dark:border-white/10 shrink-0 bg-black/10"
               />
             )}
             {aspectRatio === 'logo' && (
               <div className="w-12 h-12 rounded-lg bg-white p-1 border border-[#11140F]/10 flex items-center justify-center shrink-0">
-                <img src={value} alt={label} className="w-full h-full object-contain" />
+                <img
+                  src={getOptimizedStorageUrl(value)}
+                  alt={label}
+                  loading="eager"
+                  decoding="async"
+                  className="w-full h-full object-contain"
+                />
               </div>
             )}
             {(aspectRatio === 'dish' || aspectRatio === 'square') && (
               <img
-                src={value}
+                src={getOptimizedStorageUrl(value)}
                 alt={label}
-                className="w-14 h-14 rounded-xl object-cover border border-[#11140F]/10 dark:border-white/10 shrink-0"
+                loading="eager"
+                decoding="async"
+                className="w-14 h-14 rounded-xl object-cover border border-[#11140F]/10 dark:border-white/10 shrink-0 bg-black/10"
               />
             )}
             <div className="min-w-0 text-left">

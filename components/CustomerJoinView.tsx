@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Mail, CheckCircle2, AlertCircle, Loader2, Sparkles, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { APP_URL } from '@/lib/config';
+import { getOptimizedStorageUrl } from '@/lib/media';
 
 interface CustomerJoinViewProps {
   listId: string;
@@ -79,8 +80,14 @@ export default function CustomerJoinView({
         {/* Card Box */}
         <div className="rounded-2xl border border-white/10 bg-[#0E110C]/90 backdrop-blur-xl p-6 sm:p-8 shadow-2xl space-y-6 relative overflow-hidden">
           {bannerUrl && (
-            <div className="-mx-6 -mt-6 sm:-mx-8 sm:-mt-8 mb-4 h-32 w-[calc(100%+3rem)] sm:w-[calc(100%+4rem)] overflow-hidden relative">
-              <img src={bannerUrl} alt={listName} className="w-full h-full object-cover" />
+            <div className="-mx-6 -mt-6 sm:-mx-8 sm:-mt-8 mb-4 h-32 w-[calc(100%+3rem)] sm:w-[calc(100%+4rem)] overflow-hidden relative bg-black/20">
+              <img
+                src={getOptimizedStorageUrl(bannerUrl)}
+                alt={listName}
+                loading="eager"
+                decoding="async"
+                className="w-full h-full object-cover"
+              />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0E110C] via-transparent to-transparent" />
             </div>
           )}
@@ -131,7 +138,13 @@ export default function CustomerJoinView({
               <div className="space-y-3 text-center sm:text-left">
                 {logoUrl && (
                   <div className="w-14 h-14 rounded-2xl bg-white p-2 border border-white/20 shadow-md inline-flex items-center justify-center">
-                    <img src={logoUrl} alt={listName} className="w-full h-full object-contain" />
+                    <img
+                      src={getOptimizedStorageUrl(logoUrl)}
+                      alt={listName}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-full object-contain"
+                    />
                   </div>
                 )}
                 <div className="block">

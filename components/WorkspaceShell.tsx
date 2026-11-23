@@ -33,6 +33,7 @@ import BulkImportWizard from './BulkImportWizard';
 import AccountSettingsModal from './AccountSettingsModal';
 import EntryPromoModal from './EntryPromoModal';
 import MicroSaasHub from './MicroSaasHub';
+import { getOptimizedStorageUrl } from '@/lib/media';
 import { signOut } from '@/app/auth-actions';
 import { getStoredPreferences } from '@/lib/theme';
 
@@ -382,7 +383,13 @@ export default function WorkspaceShell({
               title="Account Settings"
             >
               {userAvatar ? (
-                <img src={userAvatar} alt="Profile" className="w-full h-full object-cover" />
+                <img
+                  src={getOptimizedStorageUrl(userAvatar)}
+                  alt="Profile"
+                  loading="eager"
+                  decoding="async"
+                  className="w-full h-full object-cover"
+                />
               ) : (
                 userInitial
               )}
@@ -662,7 +669,13 @@ export default function WorkspaceShell({
                     title="Account Settings"
                   >
                     {userAvatar ? (
-                      <img src={userAvatar} alt="Profile" className="w-full h-full object-cover" />
+                      <img
+                        src={getOptimizedStorageUrl(userAvatar)}
+                        alt="Profile"
+                        loading="lazy"
+                        decoding="async"
+                        className="w-full h-full object-cover"
+                      />
                     ) : (
                       userInitial
                     )}
@@ -711,7 +724,13 @@ export default function WorkspaceShell({
                   title={`Signed in as ${userName} (${user.email}) - Account Settings`}
                 >
                   {userAvatar ? (
-                    <img src={userAvatar} alt="Profile" className="w-full h-full object-cover" />
+                    <img
+                      src={getOptimizedStorageUrl(userAvatar)}
+                      alt="Profile"
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
                     userInitial
                   )}
@@ -861,7 +880,13 @@ export default function WorkspaceShell({
                 >
                   <div className="w-7 h-7 rounded-full overflow-hidden bg-gradient-to-tr from-emerald-600 to-[#11140F] text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-xs">
                     {userAvatar ? (
-                      <img src={userAvatar} alt="Profile" className="w-full h-full object-cover" />
+                      <img
+                        src={getOptimizedStorageUrl(userAvatar)}
+                        alt="Profile"
+                        loading="lazy"
+                        decoding="async"
+                        className="w-full h-full object-cover"
+                      />
                     ) : (
                       userInitial
                     )}

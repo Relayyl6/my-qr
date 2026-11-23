@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { APP_URL } from "@/lib/config";
+import { getOptimizedStorageUrl } from "@/lib/media";
 
 export function normalizeLandingUrl(url?: string | null, fallbackUrl?: string | null): string {
   if (!url || url.trim() === "" || url.trim() === "#") {
@@ -173,9 +174,11 @@ export function RenderLandingPage({
           <div className="flex items-center gap-4 min-w-0">
             {heroBlock?.avatarUrl ? (
               <img
-                src={heroBlock.avatarUrl}
+                src={getOptimizedStorageUrl(heroBlock.avatarUrl)}
                 alt={spec.businessName}
-                className="w-16 h-16 rounded-2xl object-cover border-2 shrink-0"
+                loading="eager"
+                decoding="async"
+                className="w-16 h-16 rounded-2xl object-cover border-2 shrink-0 bg-black/10"
                 style={{ borderColor: theme.primaryColor }}
               />
             ) : (
@@ -292,9 +295,11 @@ export function RenderLandingPage({
           <div className="flex items-center gap-3">
             {heroBlock?.avatarUrl ? (
               <img
-                src={heroBlock.avatarUrl}
+                src={getOptimizedStorageUrl(heroBlock.avatarUrl)}
                 alt={spec.businessName}
-                className="w-9 h-9 rounded-xl object-cover border"
+                loading="eager"
+                decoding="async"
+                className="w-9 h-9 rounded-xl object-cover border bg-black/10"
                 style={{ borderColor: `${theme.primaryColor}30` }}
               />
             ) : (
@@ -383,8 +388,14 @@ export function RenderLandingPage({
             >
               <div className="space-y-3.5">
                 {heroBlock?.avatarUrl ? (
-                  <div className="w-24 h-24 rounded-2xl overflow-hidden border-2 shadow-sm" style={{ borderColor: theme.primaryColor }}>
-                    <img src={heroBlock.avatarUrl} alt={spec.businessName} className="w-full h-full object-cover" />
+                  <div className="w-24 h-24 rounded-2xl overflow-hidden border-2 shadow-sm bg-black/10" style={{ borderColor: theme.primaryColor }}>
+                    <img
+                      src={getOptimizedStorageUrl(heroBlock.avatarUrl)}
+                      alt={spec.businessName}
+                      loading="eager"
+                      decoding="async"
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                 ) : (
                   <div
@@ -648,8 +659,14 @@ function renderMobileBlock(
       return (
         <div className="text-center space-y-3 py-2">
           {block.avatarUrl && (
-            <div className="mx-auto w-24 h-24 rounded-full overflow-hidden border-2 shadow-sm" style={{ borderColor: theme.primaryColor }}>
-              <img src={block.avatarUrl} alt={block.title} className="w-full h-full object-cover" />
+            <div className="mx-auto w-24 h-24 rounded-full overflow-hidden border-2 shadow-sm bg-black/10" style={{ borderColor: theme.primaryColor }}>
+              <img
+                src={getOptimizedStorageUrl(block.avatarUrl)}
+                alt={block.title}
+                loading="eager"
+                decoding="async"
+                className="w-full h-full object-cover"
+              />
             </div>
           )}
           {block.badgeText && (

@@ -51,9 +51,11 @@ export async function uploadObjectToCloud({
     })
   );
 
-  const publicUrl = `${ENDPOINT}/${BUCKET_NAME}/${uniqueKey}`;
+  const publicUrl = `/api/cdn/${uniqueKey}`;
   return { url: publicUrl, key: uniqueKey };
 }
+
+export { getOptimizedStorageUrl } from './media';
 
 export async function deleteObjectFromCloud(key: string): Promise<boolean> {
   const s3 = getS3Client();

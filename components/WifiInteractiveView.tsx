@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Wifi, Copy, Check, Smartphone, Eye, EyeOff } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { APP_URL } from '@/lib/config';
+import { getOptimizedStorageUrl } from '@/lib/media';
 
 export interface WifiProps {
   ssid: string;
@@ -47,8 +48,14 @@ export default function WifiInteractiveView({
         <div className="bg-white rounded-2xl border border-[#11140F]/10 p-6 sm:p-8 shadow-md space-y-6 relative overflow-hidden">
           {/* Banner Image */}
           {bannerUrl ? (
-            <div className="-mx-6 -mt-6 sm:-mx-8 sm:-mt-8 mb-4 h-36 w-[calc(100%+3rem)] sm:w-[calc(100%+4rem)] overflow-hidden relative">
-              <img src={bannerUrl} alt={ssid} className="w-full h-full object-cover" />
+            <div className="-mx-6 -mt-6 sm:-mx-8 sm:-mt-8 mb-4 h-36 w-[calc(100%+3rem)] sm:w-[calc(100%+4rem)] overflow-hidden relative bg-black/20">
+              <img
+                src={getOptimizedStorageUrl(bannerUrl)}
+                alt={ssid}
+                loading="eager"
+                decoding="async"
+                className="w-full h-full object-cover"
+              />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
             </div>
           ) : (
@@ -60,7 +67,13 @@ export default function WifiInteractiveView({
           <div className="text-center space-y-2 pt-2">
             {logoUrl ? (
               <div className="w-14 h-14 mx-auto rounded-xl bg-white p-1.5 shadow-sm border border-[#11140F]/10 flex items-center justify-center">
-                <img src={logoUrl} alt={ssid} className="w-full h-full object-contain" />
+                <img
+                  src={getOptimizedStorageUrl(logoUrl)}
+                  alt={ssid}
+                  loading="eager"
+                  decoding="async"
+                  className="w-full h-full object-contain"
+                />
               </div>
             ) : (
               <div className="w-12 h-12 mx-auto rounded-xl bg-[#11140F] text-[#34D399] flex items-center justify-center shadow-xs">

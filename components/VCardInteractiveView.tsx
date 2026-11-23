@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { APP_URL } from '@/lib/config';
+import { getOptimizedStorageUrl } from '@/lib/media';
 
 export interface VCardProps {
   slug: string;
@@ -178,8 +179,14 @@ export default function VCardInteractiveView({
         <div className={`${activeTheme.cardBg} rounded-2xl border ${activeTheme.border} p-6 sm:p-8 shadow-xl space-y-6 relative overflow-hidden backdrop-blur-md`}>
           {/* Cover Banner */}
           {bannerUrl && (
-            <div className="-mx-6 -mt-6 sm:-mx-8 sm:-mt-8 mb-4 h-36 w-[calc(100%+3rem)] sm:w-[calc(100%+4rem)] overflow-hidden relative">
-              <img src={bannerUrl} alt="Cover Banner" className="w-full h-full object-cover" />
+            <div className="-mx-6 -mt-6 sm:-mx-8 sm:-mt-8 mb-4 h-36 w-[calc(100%+3rem)] sm:w-[calc(100%+4rem)] overflow-hidden relative bg-black/20">
+              <img
+                src={getOptimizedStorageUrl(bannerUrl)}
+                alt="Cover Banner"
+                loading="eager"
+                decoding="async"
+                className="w-full h-full object-cover transition-opacity duration-300"
+              />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
             </div>
           )}
@@ -208,9 +215,15 @@ export default function VCardInteractiveView({
             {avatarUrl ? (
               <div
                 style={{ borderColor: activeTheme.accent }}
-                className="w-24 h-24 mx-auto rounded-full overflow-hidden shadow-xl border-2 ring-4 ring-white/10 shrink-0"
+                className="w-24 h-24 mx-auto rounded-full overflow-hidden shadow-xl border-2 ring-4 ring-white/10 shrink-0 relative bg-black/30"
               >
-                <img src={avatarUrl} alt={fullName} className="w-full h-full object-cover" />
+                <img
+                  src={getOptimizedStorageUrl(avatarUrl)}
+                  alt={fullName}
+                  loading="eager"
+                  decoding="async"
+                  className="w-full h-full object-cover transition-opacity duration-300"
+                />
               </div>
             ) : (
               <div
@@ -233,7 +246,13 @@ export default function VCardInteractiveView({
               {company && (
                 <div className="flex items-center justify-center gap-1.5 mt-0.5">
                   {logoUrl && (
-                    <img src={logoUrl} alt={company} className="w-4 h-4 rounded object-contain shrink-0" />
+                    <img
+                      src={getOptimizedStorageUrl(logoUrl)}
+                      alt={company}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-4 h-4 rounded object-contain shrink-0"
+                    />
                   )}
                   <p className={`text-xs font-bold uppercase tracking-wider ${activeTheme.subtext}`}>
                     {company}
