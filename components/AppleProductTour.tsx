@@ -344,13 +344,13 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
           </div>
 
           <h1
-            className="text-3xl sm:text-4xl md:text-[2.6rem] lg:text-[3.4rem] xl:text-[4.1rem] font-bold tracking-tight leading-[1.24] text-white flex flex-col items-center gap-2.5 sm:gap-4"
+            className="flex flex-col items-center gap-1.5 sm:gap-3 text-center"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            <span className="block whitespace-normal md:whitespace-nowrap pb-0.5">
+            <span className="block whitespace-normal md:whitespace-nowrap text-2xl sm:text-3xl md:text-[2.2rem] lg:text-[2.8rem] xl:text-[3.3rem] font-bold tracking-tight text-white/95 leading-tight">
               Consolidate All Your Micro-SaaS Apps
             </span>
-            <span className="block whitespace-normal md:whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-emerald-400 pt-0.5">
+            <span className="inline-block whitespace-normal md:whitespace-nowrap text-3xl sm:text-5xl md:text-[3.4rem] lg:text-[4.4rem] xl:text-[5rem] font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-emerald-400 py-2 sm:py-3 px-2 leading-[1.2] overflow-visible">
               With Powerful DynamicQR
             </span>
           </h1>
@@ -859,7 +859,7 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
 
       {/* 2. Apple-Style Perspective Showcase: Real World Industries */}
       <section id="industries" className="py-20 md:py-32 px-5 md:px-8 max-w-[1280px] mx-auto border-t border-white/10">
-        <div className="text-center max-w-3xl mx-auto space-y-4 mb-14">
+        <div className="text-center max-w-3xl mx-auto space-y-4 mb-8">
           <h2
             className="text-[2.2rem] sm:text-[3rem] font-bold tracking-tight leading-tight text-white"
             style={{ fontFamily: 'var(--font-display)' }}
@@ -869,9 +869,11 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
           <p className="text-[15px] sm:text-[17px] text-white/60">
             Select an industry below to see how physical media stays active without reprints.
           </p>
+        </div>
 
-          {/* Industry Tab Selector: Strictly in ONE Single Line */}
-          <div className="flex flex-nowrap items-center justify-start sm:justify-center gap-2 pt-4 overflow-x-auto max-w-full pb-2 px-1">
+        {/* Industry Tab Selector: Wide container with smooth horizontal scroll and zero cut-off */}
+        <div className="w-full max-w-5xl mx-auto overflow-x-auto pb-4 pt-1 mb-10 px-4">
+          <div className="flex flex-nowrap items-center gap-2.5 w-max mx-auto px-1">
             {(Object.keys(INDUSTRIES) as IndustryTab[]).map((tabKey) => {
               const ind = INDUSTRIES[tabKey];
               const Icon = ind.icon;
@@ -879,12 +881,13 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
               return (
                 <button
                   key={tabKey}
+                  type="button"
                   onClick={() => {
                     startTransition(() => {
                       setActiveTab(tabKey);
                     });
                   }}
-                  className={`whitespace-nowrap shrink-0 inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-[12.5px] sm:text-[13px] font-medium transition-all ${
+                  className={`whitespace-nowrap shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-medium transition-all cursor-pointer ${
                     isActive
                       ? 'bg-white text-[#11140F] font-semibold shadow-md'
                       : 'bg-white/5 border border-white/10 text-white/70 hover:bg-white/10 hover:text-white'
@@ -989,7 +992,7 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
 
       {/* 2.5. Apple-Style Turnkey Micro-SaaS Ecosystem */}
       <section id="microsaas" className="py-20 md:py-32 px-5 md:px-8 max-w-[1280px] mx-auto border-t border-white/10">
-        <div className="text-center max-w-3xl mx-auto space-y-4 mb-14">
+        <div className="text-center max-w-3xl mx-auto space-y-4 mb-8">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 font-mono text-[11px] font-semibold tracking-wider uppercase shadow-[0_0_20px_rgba(52,211,153,0.15)]">
             <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
             Turnkey Micro-SaaS Ecosystem
@@ -1006,9 +1009,11 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
           <p className="text-[15px] sm:text-[17px] text-white/60">
             DynamicQR goes far beyond basic URL redirects. Every dynamic QR code can instantly launch full-fledged customer mailing lists, digital executive vCards, deep link shorteners, restaurant menus, or Wi-Fi cards — zero extra tools required.
           </p>
+        </div>
 
-          {/* Micro-SaaS Tab Selector: Strictly in ONE Single Line */}
-          <div className="flex flex-nowrap items-center justify-start sm:justify-center gap-2 pt-4 overflow-x-auto max-w-full pb-2 px-1">
+        {/* Micro-SaaS Tab Selector: Wide container with smooth horizontal scroll and zero cut-off */}
+        <div className="w-full max-w-5xl mx-auto overflow-x-auto pb-4 pt-1 mb-10 px-4">
+          <div className="flex flex-nowrap items-center gap-2.5 w-max mx-auto px-1">
             {(Object.keys(MICRO_SAAS_APPS) as MicroSaasTab[]).map((tabKey) => {
               const app = MICRO_SAAS_APPS[tabKey];
               const Icon = app.icon;
@@ -1022,7 +1027,7 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
                       setActiveMicroSaas(tabKey);
                     });
                   }}
-                  className={`whitespace-nowrap shrink-0 inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-[12.5px] sm:text-[13px] font-medium transition-all cursor-pointer ${
+                  className={`whitespace-nowrap shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-medium transition-all cursor-pointer ${
                     isActive
                       ? 'bg-white text-[#11140F] font-semibold shadow-md'
                       : 'bg-white/5 border border-white/10 text-white/70 hover:bg-white/10 hover:text-white'
@@ -1411,115 +1416,115 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
           </p>
         </div>
 
-        {/* Strictly 2 Rows: Row 1 = 2+1+1 (4 cols), Row 2 = 1+1+2 (4 cols) · 1.5x Height Proportions */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        {/* Strictly 2 Rows: Row 1 = 2+1+1 (4 cols), Row 2 = 1+1+2 (4 cols) · 1.5x Taller Proportions */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5">
           {/* Row 1 / Item 1: Wide Rectangle (2 Cols) — Sub-10ms 307 Ingress */}
-          <div className="sm:col-span-2 md:col-span-2 min-h-[165px] sm:min-h-[175px] rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.01] p-4 sm:p-5 flex flex-col justify-between space-y-3 hover:border-white/20 transition-all">
+          <div className="sm:col-span-2 md:col-span-2 min-h-[250px] sm:min-h-[265px] rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.01] p-5 sm:p-6 md:p-7 flex flex-col justify-between space-y-4 hover:border-white/20 transition-all shadow-xl">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
-                  <Zap className="w-4 h-4" />
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
+                  <Zap className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-sm sm:text-base font-bold text-white tracking-tight leading-tight">
+                  <h3 className="text-base sm:text-lg font-bold text-white tracking-tight leading-tight">
                     Sub-10ms 307 Ingress
                   </h3>
-                  <span className="text-[9.5px] font-mono uppercase tracking-wider text-emerald-400">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400">
                     Edge Architecture
                   </span>
                 </div>
               </div>
-              <span className="text-lg sm:text-xl font-bold font-mono text-emerald-400">
+              <span className="text-xl sm:text-2xl font-bold font-mono text-emerald-400">
                 &lt;10ms
               </span>
             </div>
 
-            <p className="text-[12px] sm:text-[12.5px] text-white/60 leading-relaxed line-clamp-2">
+            <p className="text-[13px] sm:text-[14px] text-white/70 leading-relaxed">
               Zero intermediary splash screens. The edge server returns a clean HTTP 307 temporary redirect directly into the browser with sub-millisecond DNS dispatch.
             </p>
 
-            <div className="rounded-xl border border-white/10 bg-black/50 px-3 py-2 font-mono text-[10px] space-y-1.5">
-              <div className="flex items-center justify-between text-white/70">
+            <div className="rounded-xl border border-white/10 bg-black/60 px-4 py-3 font-mono text-[11px] space-y-2">
+              <div className="flex items-center justify-between text-white/80">
                 <span className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
                   Physical Camera → Edge Ingress
                 </span>
                 <span className="text-emerald-300 font-semibold">7.2ms · 99.99% Edge Cache HIT</span>
               </div>
-              <div className="w-full bg-white/5 h-1 rounded-full overflow-hidden">
+              <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
                 <div className="bg-gradient-to-r from-emerald-500 to-teal-300 h-full w-full animate-pulse" />
               </div>
             </div>
           </div>
 
           {/* Row 1 / Item 2: Compact Card (1 Col) — Native OS Branching */}
-          <div className="sm:col-span-1 md:col-span-1 min-h-[165px] sm:min-h-[175px] rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.05] to-white/[0.01] p-4 sm:p-5 flex flex-col justify-between space-y-3 hover:border-white/20 transition-all">
+          <div className="sm:col-span-1 md:col-span-1 min-h-[250px] sm:min-h-[265px] rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.05] to-white/[0.01] p-5 sm:p-6 flex flex-col justify-between space-y-4 hover:border-white/20 transition-all shadow-xl">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
-                  <Smartphone className="w-4 h-4" />
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
+                  <Smartphone className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-[13px] sm:text-[14px] font-bold text-white tracking-tight leading-tight">
+                  <h3 className="text-[14px] sm:text-[15px] font-bold text-white tracking-tight leading-tight">
                     OS Branching
                   </h3>
-                  <span className="text-[9px] font-mono uppercase tracking-wider text-white/40">
+                  <span className="text-[9.5px] font-mono uppercase tracking-wider text-white/40">
                     Device Sensing
                   </span>
                 </div>
               </div>
-              <span className="text-base sm:text-lg font-bold font-mono text-white">
+              <span className="text-lg sm:text-xl font-bold font-mono text-white">
                 100%
               </span>
             </div>
 
-            <p className="text-[11.5px] sm:text-[12px] text-white/60 leading-relaxed line-clamp-2">
+            <p className="text-[12.5px] sm:text-[13px] text-white/65 leading-relaxed">
               Differentiates iOS, Android, and Desktop user-agents at the wire level.
             </p>
 
-            <div className="space-y-1 font-mono text-[10px]">
-              <div className="flex items-center justify-between px-2.5 py-1 rounded-md bg-black/40 border border-white/5 text-white/70">
+            <div className="space-y-1.5 font-mono text-[10.5px]">
+              <div className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-black/50 border border-white/5 text-white/80">
                 <span>Apple iOS</span>
-                <span className="text-emerald-400">App Store</span>
+                <span className="text-emerald-400 font-semibold">App Store</span>
               </div>
-              <div className="flex items-center justify-between px-2.5 py-1 rounded-md bg-black/40 border border-white/5 text-white/70">
+              <div className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-black/50 border border-white/5 text-white/80">
                 <span>Android</span>
-                <span className="text-emerald-400">Google Play</span>
+                <span className="text-emerald-400 font-semibold">Google Play</span>
               </div>
             </div>
           </div>
 
           {/* Row 1 / Item 3: Compact Card (1 Col) — 300 DPI Vector Math */}
-          <div className="sm:col-span-1 md:col-span-1 min-h-[165px] sm:min-h-[175px] rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.05] to-white/[0.01] p-4 sm:p-5 flex flex-col justify-between space-y-3 hover:border-white/20 transition-all">
+          <div className="sm:col-span-1 md:col-span-1 min-h-[250px] sm:min-h-[265px] rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.05] to-white/[0.01] p-5 sm:p-6 flex flex-col justify-between space-y-4 hover:border-white/20 transition-all shadow-xl">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 shrink-0">
-                  <Printer className="w-4 h-4" />
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 shrink-0">
+                  <Printer className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-[13px] sm:text-[14px] font-bold text-white tracking-tight leading-tight">
+                  <h3 className="text-[14px] sm:text-[15px] font-bold text-white tracking-tight leading-tight">
                     300 DPI Vector
                   </h3>
-                  <span className="text-[9px] font-mono uppercase tracking-wider text-white/40">
+                  <span className="text-[9.5px] font-mono uppercase tracking-wider text-white/40">
                     Print Physics
                   </span>
                 </div>
               </div>
-              <span className="text-base sm:text-lg font-bold font-mono text-purple-300">
+              <span className="text-lg sm:text-xl font-bold font-mono text-purple-300">
                 Print
               </span>
             </div>
 
-            <p className="text-[11.5px] sm:text-[12px] text-white/60 leading-relaxed line-clamp-2">
+            <p className="text-[12.5px] sm:text-[13px] text-white/65 leading-relaxed">
               Sub-pixel precision SVG with mandatory 10% quiet-zone buffers.
             </p>
 
-            <div className="rounded-xl bg-black/40 border border-white/5 p-2 font-mono text-[10px] space-y-1">
-              <div className="flex items-center justify-between text-white/70">
+            <div className="rounded-xl bg-black/50 border border-white/5 p-2.5 font-mono text-[10.5px] space-y-1.5">
+              <div className="flex items-center justify-between text-white/80">
                 <span>Vector XML</span>
-                <span className="text-purple-300">Clean &lt;path&gt;</span>
+                <span className="text-purple-300 font-semibold">Clean &lt;path&gt;</span>
               </div>
-              <div className="flex items-center justify-between text-white/40 text-[9.5px]">
+              <div className="flex items-center justify-between text-white/45 text-[10px]">
                 <span>CMYK Proofing</span>
                 <span>1024×1024 PNG</span>
               </div>
@@ -1527,111 +1532,111 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
           </div>
 
           {/* Row 2 / Item 4: Compact Card (1 Col) — Branded Custom Domain */}
-          <div className="sm:col-span-1 md:col-span-1 min-h-[165px] sm:min-h-[175px] rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.05] to-white/[0.01] p-4 sm:p-5 flex flex-col justify-between space-y-3 hover:border-white/20 transition-all">
+          <div className="sm:col-span-1 md:col-span-1 min-h-[250px] sm:min-h-[265px] rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.05] to-white/[0.01] p-5 sm:p-6 flex flex-col justify-between space-y-4 hover:border-white/20 transition-all shadow-xl">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400 shrink-0">
-                  <Globe2 className="w-4 h-4" />
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400 shrink-0">
+                  <Globe2 className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-[13px] sm:text-[14px] font-bold text-white tracking-tight leading-tight">
+                  <h3 className="text-[14px] sm:text-[15px] font-bold text-white tracking-tight leading-tight">
                     Custom Domain
                   </h3>
-                  <span className="text-[9px] font-mono uppercase tracking-wider text-teal-400">
+                  <span className="text-[9.5px] font-mono uppercase tracking-wider text-teal-400">
                     Whitelabel
                   </span>
                 </div>
               </div>
-              <span className="text-base sm:text-lg font-bold font-mono text-teal-300">
+              <span className="text-lg sm:text-xl font-bold font-mono text-teal-300">
                 0% Ads
               </span>
             </div>
 
-            <p className="text-[11.5px] sm:text-[12px] text-white/60 leading-relaxed line-clamp-2">
+            <p className="text-[12.5px] sm:text-[13px] text-white/65 leading-relaxed">
               Serve dynamic links under your verified corporate SSL domain.
             </p>
 
-            <div className="rounded-xl bg-black/40 border border-white/5 px-2.5 py-1.5 flex items-center gap-1.5 font-mono text-[10px]">
-              <Lock className="w-3 h-3 text-teal-400 shrink-0" />
+            <div className="rounded-xl bg-black/50 border border-white/5 px-3 py-2 flex items-center gap-2 font-mono text-[10.5px]">
+              <Lock className="w-3.5 h-3.5 text-teal-400 shrink-0" />
               <span className="text-teal-300 font-semibold truncate">qr.brand.com</span>
-              <span className="ml-auto text-[9px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded shrink-0">
+              <span className="ml-auto text-[9.5px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded font-bold shrink-0">
                 TLS 1.3
               </span>
             </div>
           </div>
 
           {/* Row 2 / Item 5: Compact Card (1 Col) — Zero-Cookie Privacy */}
-          <div className="sm:col-span-1 md:col-span-1 min-h-[165px] sm:min-h-[175px] rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.05] to-white/[0.01] p-4 sm:p-5 flex flex-col justify-between space-y-3 hover:border-white/20 transition-all">
+          <div className="sm:col-span-1 md:col-span-1 min-h-[250px] sm:min-h-[265px] rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.05] to-white/[0.01] p-5 sm:p-6 flex flex-col justify-between space-y-4 hover:border-white/20 transition-all shadow-xl">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
-                  <ShieldCheck className="w-4 h-4" />
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
+                  <ShieldCheck className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-[13px] sm:text-[14px] font-bold text-white tracking-tight leading-tight">
+                  <h3 className="text-[14px] sm:text-[15px] font-bold text-white tracking-tight leading-tight">
                     Zero Cookies
                   </h3>
-                  <span className="text-[9px] font-mono uppercase tracking-wider text-white/40">
+                  <span className="text-[9.5px] font-mono uppercase tracking-wider text-white/40">
                     Privacy Core
                   </span>
                 </div>
               </div>
-              <span className="text-base sm:text-lg font-bold font-mono text-emerald-400">
+              <span className="text-lg sm:text-xl font-bold font-mono text-emerald-400">
                 GDPR
               </span>
             </div>
 
-            <p className="text-[11.5px] sm:text-[12px] text-white/60 leading-relaxed line-clamp-2">
+            <p className="text-[12.5px] sm:text-[13px] text-white/65 leading-relaxed">
               Anonymized diurnal metrics with cryptographic daily rotating salts.
             </p>
 
-            <div className="rounded-xl bg-black/40 border border-white/5 p-2 font-mono text-[10px] space-y-1">
-              <div className="flex items-center justify-between text-emerald-400">
+            <div className="rounded-xl bg-black/50 border border-white/5 p-2.5 font-mono text-[10.5px] space-y-1.5">
+              <div className="flex items-center justify-between text-emerald-400 font-semibold">
                 <span>GDPR / CCPA</span>
                 <span>100% Compliant</span>
               </div>
-              <div className="text-[9.5px] text-white/40">
+              <div className="text-[10px] text-white/50">
                 0 tracking cookies stored
               </div>
             </div>
           </div>
 
           {/* Row 2 / Item 6: Wide Rectangle (2 Cols) — Time & Day-of-Week Dayparting */}
-          <div className="sm:col-span-2 md:col-span-2 min-h-[165px] sm:min-h-[175px] rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.01] p-4 sm:p-5 flex flex-col justify-between space-y-3 hover:border-white/20 transition-all">
+          <div className="sm:col-span-2 md:col-span-2 min-h-[250px] sm:min-h-[265px] rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.01] p-5 sm:p-6 md:p-7 flex flex-col justify-between space-y-4 hover:border-white/20 transition-all shadow-xl">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
-                  <Clock className="w-4 h-4" />
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
+                  <Clock className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-sm sm:text-base font-bold text-white tracking-tight leading-tight">
+                  <h3 className="text-base sm:text-lg font-bold text-white tracking-tight leading-tight">
                     Temporal Dayparting
                   </h3>
-                  <span className="text-[9.5px] font-mono uppercase tracking-wider text-amber-400">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-amber-400">
                     Day &amp; Hour Swaps
                   </span>
                 </div>
               </div>
-              <span className="text-lg sm:text-xl font-bold font-mono text-amber-400">
+              <span className="text-xl sm:text-2xl font-bold font-mono text-amber-400">
                 24/7
               </span>
             </div>
 
-            <p className="text-[12px] sm:text-[12.5px] text-white/60 leading-relaxed line-clamp-2">
+            <p className="text-[13px] sm:text-[14px] text-white/70 leading-relaxed">
               Swap physical QR targets continuously without human intervention. Breakfast menus at dawn, happy hour in the evening, and VIP access at midnight.
             </p>
 
-            <div className="rounded-xl border border-white/10 bg-black/50 px-3 py-2 font-mono text-[10px] space-y-1.5">
-              <div className="flex items-center justify-between text-white/50 text-[9.5px]">
+            <div className="rounded-xl border border-white/10 bg-black/60 px-4 py-3 font-mono text-[11px] space-y-2">
+              <div className="flex items-center justify-between text-white/60 text-[10px]">
                 <span>08:00 BREAKFAST</span>
                 <span>12:00 LUNCH</span>
                 <span className="text-amber-300 font-bold">17:00 HAPPY HOUR</span>
                 <span>20:00 TASTING</span>
               </div>
-              <div className="grid grid-cols-4 gap-1 h-1 rounded-full overflow-hidden">
+              <div className="grid grid-cols-4 gap-1.5 h-1.5 rounded-full overflow-hidden">
                 <div className="bg-white/20 rounded-full" />
                 <div className="bg-white/20 rounded-full" />
-                <div className="bg-amber-400 rounded-full shadow-[0_0_6px_#fbbf24]" />
+                <div className="bg-amber-400 rounded-full shadow-[0_0_8px_#fbbf24]" />
                 <div className="bg-white/20 rounded-full" />
               </div>
             </div>
