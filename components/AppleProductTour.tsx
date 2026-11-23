@@ -59,6 +59,10 @@ import {
   Contact,
   Link2,
   Download,
+  Bot,
+  Activity,
+  QrCode,
+  ArrowUpRight,
 } from 'lucide-react';
 
 interface Props {
@@ -303,77 +307,422 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
 
   return (
     <div className="w-full bg-[#11140F] text-white overflow-hidden selection:bg-emerald-500 selection:text-black">
-      {/* 1. Cinematic Apple-Style Hero */}
-      <section className="relative pt-24 pb-20 md:pt-36 md:pb-32 px-5 md:px-8 max-w-[1280px] mx-auto">
-        {/* Subtle radial ambient glow */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-tr from-emerald-600/15 via-teal-500/10 to-transparent blur-[120px] pointer-events-none rounded-full" />
+      {/* ============================================================ */}
+      {/* 1. Redefined Hero: DynamicQR & Consolidated Micro-SaaS Engine */}
+      {/* ============================================================ */}
+      <section className="relative pt-20 pb-16 md:pt-28 md:pb-24 px-4 sm:px-6 md:px-8 max-w-[1340px] mx-auto">
+        {/* Subtle radial ambient glows in dark green/emerald */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-gradient-to-tr from-emerald-600/20 via-teal-500/15 to-transparent blur-[140px] pointer-events-none rounded-full" />
+        <div className="absolute top-1/2 left-1/4 w-[350px] h-[350px] bg-emerald-500/10 blur-[120px] pointer-events-none rounded-full" />
 
-        <div className="text-center max-w-4xl mx-auto space-y-6 relative z-10">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/80 text-[12px] font-mono tracking-wide uppercase">
+        {/* Top Header & Core Pitch */}
+        <div className="text-center max-w-4xl mx-auto space-y-5 relative z-10">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-[11.5px] font-mono tracking-wider uppercase shadow-[0_0_20px_rgba(16,185,129,0.15)]">
             <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-            Engineered for the physical world
+            Dynamic QR &amp; Consolidated Micro-SaaS Ecosystem
           </div>
 
           <h1
             className="text-[2.6rem] sm:text-[3.8rem] md:text-[5rem] font-bold tracking-tight leading-[1.03] text-white"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            One code.
+            One code.{' '}
             <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-200 to-white">
               Infinite destinations.
             </span>
           </h1>
 
-          <p className="text-[16px] sm:text-[19px] md:text-[20px] text-white/65 max-w-[55ch] mx-auto leading-relaxed font-normal">
-            A dynamic QR code you print once on paper, metal, or packaging.
-            Then route, schedule, and measure forever with sub-10ms edge intelligence.
+          <p className="text-[16px] sm:text-[19px] md:text-[20px] text-white/70 max-w-[58ch] mx-auto leading-relaxed font-normal">
+            A dynamic QR platform engineered for the physical world. Route, schedule, and measure forever with sub-10ms edge intelligence — while consolidating Customer Mailing Lists, Digital vCards, Deep Link Shorteners, Menus, and Instant Wi-Fi into one unified engine.
           </p>
 
-          <div className="pt-4 flex flex-wrap items-center justify-center gap-4">
+          {/* Action Pills */}
+          <div className="pt-3 flex flex-wrap items-center justify-center gap-3.5">
             <button
               onClick={handleOpenWorkspace}
-              className="rounded-2xl bg-white px-7 py-3.5 text-[15px] font-semibold text-[#11140F] hover:bg-[#EEF0EA] transition-all duration-200 flex items-center gap-2 shadow-lg shadow-white/10 cursor-pointer"
+              className="rounded-2xl bg-white px-7 py-3.5 text-[15px] font-semibold text-[#11140F] hover:bg-[#EEF0EA] transition-all duration-200 flex items-center gap-2 shadow-lg shadow-white/10 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
             >
-              Open Your Workspace
-              <ArrowRight className="w-4 h-4" />
+              Try for free
+              <ArrowRight className="w-4 h-4 text-[#11140F]" />
             </button>
             <a
-              href="#industries"
-              className="rounded-2xl border border-white/15 bg-white/[0.04] px-6 py-3.5 text-[15px] font-medium text-white/80 hover:text-white hover:border-white/30 hover:bg-white/[0.08] transition-all"
+              href="#microsaas"
+              className="rounded-2xl border border-white/15 bg-white/[0.05] px-6 py-3.5 text-[15px] font-medium text-white/85 hover:text-white hover:border-emerald-500/40 hover:bg-emerald-500/10 transition-all flex items-center gap-2"
             >
-              Explore Real-World Use Cases
+              <Layers className="w-4 h-4 text-emerald-400" />
+              Explore Consolidated Micro-SaaS
             </a>
           </div>
 
-          <div className="pt-10 flex items-center justify-center gap-8 text-[12.5px] text-white/45 font-mono">
-            <span>✓ 307 Edge Handoff</span>
-            <span>•</span>
-            <span>✓ 300 DPI Vector Math</span>
-            <span>•</span>
-            <span>✓ Zero Reprint Guarantee</span>
+          <div className="pt-6 flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-[12px] sm:text-[12.5px] text-white/50 font-mono">
+            <span className="flex items-center gap-1.5 text-emerald-400">
+              <Check className="w-3.5 h-3.5" /> Sub-10ms 307 Ingress
+            </span>
+            <span className="text-white/20">•</span>
+            <span className="flex items-center gap-1.5 text-emerald-400">
+              <Check className="w-3.5 h-3.5" /> 300 DPI Vector Math
+            </span>
+            <span className="text-white/20">•</span>
+            <span className="flex items-center gap-1.5 text-emerald-400">
+              <Check className="w-3.5 h-3.5" /> 5 Consolidated Micro-Apps
+            </span>
+            <span className="text-white/20">•</span>
+            <span className="flex items-center gap-1.5 text-emerald-400">
+              <Check className="w-3.5 h-3.5" /> Zero Reprint Guarantee
+            </span>
           </div>
         </div>
 
         {/* ============================================================ */}
-        {/* Workspace Screenshot Frame Directly Under Hero Checks         */}
+        {/* Hero Interactive Stage: Transformed Character & Service Badges */}
         {/* ============================================================ */}
         <div className="mt-12 sm:mt-16 max-w-5xl mx-auto relative px-2">
+          {/* Subtle Green Matrix Dot Background Pattern */}
+          <div className="absolute -inset-4 sm:-inset-6 bg-[radial-gradient(circle_at_center,rgba(52,211,153,0.12)_1.5px,transparent_1.5px)] bg-[size:28px_28px] opacity-75 pointer-events-none rounded-[40px] -z-10" />
+          
           {/* Ambient Glow Aura */}
-          <div className="absolute -inset-4 sm:-inset-6 bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-emerald-500/15 blur-3xl rounded-[40px] opacity-60 pointer-events-none -z-10" />
+          <div className="absolute -inset-4 sm:-inset-6 bg-gradient-to-r from-emerald-500/20 via-teal-500/15 to-emerald-500/20 blur-3xl rounded-[40px] opacity-70 pointer-events-none -z-10" />
 
-          {/* Clean Screenshot Frame with zero additional text around it */}
-          <div className="rounded-2xl sm:rounded-3xl border border-white/15 bg-[#0E110C] shadow-[0_30px_90px_-20px_rgba(0,0,0,0.95),0_0_50px_rgba(52,211,153,0.08)] overflow-hidden">
+          {/* Central Character & Interactive Platform Service Cards Stage */}
+          <div className="relative rounded-3xl border border-white/15 bg-gradient-to-b from-[#141812] to-[#0A0D08] p-4 sm:p-8 md:p-10 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.95),0_0_50px_rgba(52,211,153,0.12)] overflow-hidden">
+            {/* Top Sub-Navigation Pills (Echoing Image 1 Top Actions) */}
+            <div className="flex items-center justify-center gap-3 mb-6 relative z-20">
+              <button
+                onClick={handleOpenWorkspace}
+                className="px-5 py-2 rounded-full bg-emerald-500 hover:bg-emerald-400 text-black text-[12.5px] font-semibold flex items-center gap-1.5 shadow-[0_0_20px_rgba(52,211,153,0.4)] transition-all cursor-pointer"
+              >
+                <span>Launch Workspace</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+              <a
+                href="#dashboard-preview"
+                className="px-4 py-2 rounded-full bg-white/[0.06] hover:bg-white/10 border border-white/15 text-white/80 hover:text-white text-[12.5px] font-medium transition-all flex items-center gap-1.5"
+              >
+                <Play className="w-3 h-3 fill-current text-emerald-400" />
+                <span>Watch Command Center</span>
+              </a>
+            </div>
+
+            {/* Central Stage Container */}
+            <div className="relative min-h-[440px] sm:min-h-[500px] md:min-h-[540px] flex items-center justify-center">
+              {/* Background Cyborg Character Graphic (Green-shifted with iridescent saturn ring & glowing sphere) */}
+              <div className="relative w-full max-w-[680px] mx-auto flex items-center justify-center select-none pointer-events-none">
+                <img
+                  src="/images/hero-dark-green.png"
+                  alt="DynamicQR Autonomous Intelligence"
+                  className="w-full h-auto object-contain max-h-[480px] drop-shadow-[0_15px_35px_rgba(0,0,0,0.8)] filter contrast-[1.05]"
+                />
+              </div>
+
+              {/* Floating Service Badge: Top-Left (OS Branching Toggle) */}
+              <div className="absolute top-2 sm:top-6 left-2 sm:left-4 z-20 max-w-[210px] sm:max-w-[240px] rounded-2xl border border-white/15 bg-[#121611]/85 backdrop-blur-md p-3 sm:p-3.5 shadow-2xl space-y-1.5 transition-all hover:border-emerald-500/40 hover:scale-[1.02]">
+                <div className="flex items-center justify-between">
+                  <span className="text-[12px] sm:text-[13px] font-semibold text-white">Smart OS Branching</span>
+                  {/* Glowing Emerald Switch Toggle */}
+                  <div className="w-9 h-5 rounded-full bg-emerald-500 p-0.5 flex items-center justify-end shadow-[0_0_10px_rgba(52,211,153,0.5)]">
+                    <div className="w-4 h-4 rounded-full bg-white shadow-xs" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 text-[10px] font-mono text-emerald-300">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>iOS App Store · Android Play</span>
+                </div>
+              </div>
+
+              {/* Floating Service Badge: Mid-Left (AI Telemetry Copilot) */}
+              <div className="absolute top-[135px] sm:top-[150px] left-1 sm:left-2 z-20 max-w-[220px] sm:max-w-[250px] rounded-2xl border border-white/15 bg-[#121611]/85 backdrop-blur-md p-3 sm:p-3.5 shadow-2xl space-y-2 transition-all hover:border-emerald-500/40 hover:scale-[1.02]">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <Bot className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-[12px] font-bold text-white">AI Telemetry Copilot</span>
+                  </div>
+                  <span className="text-[9.5px] font-mono text-emerald-400 font-semibold bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                    99.98%
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  <div className="w-full bg-white/10 h-1 rounded-full overflow-hidden">
+                    <div className="bg-gradient-to-r from-emerald-500 to-teal-300 h-full w-[94%]" />
+                  </div>
+                  <div className="text-[10px] font-mono text-white/60 flex items-center justify-between">
+                    <span>Edge Latency: 7.2ms</span>
+                    <span className="text-emerald-400">High Stable</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Floating Service Bubble: Bottom-Left (Wi-Fi Ingress Handoff) */}
+              <div className="absolute bottom-3 sm:bottom-6 left-2 sm:left-6 z-20 max-w-[240px] sm:max-w-[280px] rounded-2xl border border-white/15 bg-[#121611]/90 backdrop-blur-md p-2.5 sm:p-3 shadow-2xl flex items-center gap-2.5 transition-all hover:border-emerald-500/40 hover:scale-[1.02]">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-black font-bold text-[12px] shrink-0 shadow-md">
+                  <Wifi className="w-4 h-4 text-black" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[11px] font-medium text-white/95 leading-tight">
+                    Guest connected to <span className="text-emerald-300 font-semibold">Atelier-Guest-5G</span> in 1 scan
+                  </div>
+                  <div className="text-[9.5px] font-mono text-emerald-400/80 mt-0.5">
+                    ✓ Zero password typing
+                  </div>
+                </div>
+              </div>
+
+              {/* Floating Service Badge: Top-Right (Scan Velocity & Engagements Stat) */}
+              <div className="absolute top-2 sm:top-6 right-2 sm:right-4 z-20 max-w-[220px] sm:max-w-[260px] rounded-2xl border border-white/15 bg-[#121611]/85 backdrop-blur-md p-3 sm:p-3.5 shadow-2xl space-y-1 transition-all hover:border-emerald-500/40 hover:scale-[1.02]">
+                <span className="text-[10.5px] font-mono uppercase tracking-wider text-white/50 block">
+                  Scan Velocity &amp; Engagements
+                </span>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-xl sm:text-2xl font-bold font-mono text-white">1,420</span>
+                  <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                    +18.4% this period
+                  </span>
+                </div>
+                <div className="text-[9.5px] font-mono text-white/45">
+                  Peak Diurnal Flow · Real-Time Telemetry
+                </div>
+              </div>
+
+              {/* Floating Service Bubble: Mid-Right (Touchless Menu Swapping) */}
+              <div className="absolute top-[135px] sm:top-[150px] right-1 sm:right-2 z-20 max-w-[230px] sm:max-w-[270px] rounded-2xl border border-white/15 bg-[#121611]/85 backdrop-blur-md p-2.5 sm:p-3 shadow-2xl flex items-center gap-2.5 transition-all hover:border-amber-500/40 hover:scale-[1.02]">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center shrink-0 border border-amber-500/30">
+                  <Utensils className="w-4 h-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[11px] font-medium text-white/95 leading-tight">
+                    Menu swapped to <span className="text-amber-300 font-semibold">Chef Dinner Specials</span> live
+                  </div>
+                  <div className="text-[9.5px] font-mono text-amber-300/80 mt-0.5">
+                    ✓ $1,800/yr saved on paper reprints
+                  </div>
+                </div>
+              </div>
+
+              {/* Floating Service Bubble: Bottom-Right (Digital Executive vCard) */}
+              <div className="absolute bottom-3 sm:bottom-6 right-2 sm:right-6 z-20 max-w-[240px] sm:max-w-[280px] rounded-2xl border border-white/15 bg-[#121611]/90 backdrop-blur-md p-2.5 sm:p-3 shadow-2xl flex items-center gap-2.5 transition-all hover:border-blue-500/40 hover:scale-[1.02]">
+                <div className="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-300 flex items-center justify-center shrink-0 border border-blue-500/30">
+                  <Contact className="w-4 h-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[11px] font-medium text-white/95 leading-tight">
+                    Alex Chen: <span className="text-blue-300 font-semibold">Executive vCard</span> (.vcf) saved
+                  </div>
+                  <div className="text-[9.5px] font-mono text-blue-300/80 mt-0.5">
+                    ✓ One-tap Apple &amp; Android Address Book
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Platform Consolidation Banner */}
+            <div className="mt-4 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 text-[11px] font-mono text-white/60">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-emerald-300 font-semibold">Edge Ingress Active</span>
+                <span className="text-white/40">·</span>
+                <span>US-East (IAD) &amp; EU-West (FRA)</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-white/50">Unified Micro-SaaS Engine:</span>
+                <span className="text-white font-medium">Mailing · vCards · Shortener · Menus · Wi-Fi</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================ */}
+      {/* 2. Unified Command Center: Glowing Circle Hue & Dashboard     */}
+      {/* (Inspired by Image 2 glowing neon circle, featuring Image 4) */}
+      {/* ============================================================ */}
+      <section id="dashboard-preview" className="relative py-20 md:py-32 px-4 sm:px-6 md:px-8 max-w-[1340px] mx-auto overflow-hidden">
+        {/* Giant Glowing Neon Circular Arc (Inspired by Image 2, tuned to dark green/emerald theme) */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[720px] sm:w-[940px] md:w-[1140px] h-[550px] sm:h-[650px] pointer-events-none -z-10 flex items-center justify-center overflow-hidden">
+          {/* Ambient Radiant Glow Filling the Arc */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_75%,rgba(16,185,129,0.25)_0%,rgba(5,150,105,0.08)_50%,transparent_75%)] blur-2xl" />
+          
+          {/* Giant Glowing Neon Circular Arc Border */}
+          <div className="w-[660px] sm:w-[860px] md:w-[1060px] h-[660px] sm:h-[860px] md:h-[1060px] rounded-full border-[2.5px] border-emerald-400/80 shadow-[0_0_60px_rgba(52,211,153,0.55),inset_0_0_40px_rgba(16,185,129,0.3)] relative -translate-y-16 sm:-translate-y-24">
+            {/* Inner Secondary Concentric Ring */}
+            <div className="absolute inset-6 rounded-full border border-emerald-500/20" />
+            {/* Ambient Rim Highlights */}
+            <div className="absolute top-0 left-1/4 right-1/4 h-1.5 bg-gradient-to-r from-transparent via-emerald-300 to-transparent shadow-[0_0_25px_#34d399]" />
+          </div>
+
+          {/* Star Particle Flecks */}
+          <div className="absolute top-12 left-1/4 w-1.5 h-1.5 rounded-full bg-emerald-300 shadow-[0_0_8px_#6ee7b7] animate-pulse" />
+          <div className="absolute top-28 right-1/4 w-1 h-1 rounded-full bg-teal-300 shadow-[0_0_8px_#2dd4bf] animate-ping" />
+          <div className="absolute top-44 left-1/3 w-1.5 h-1.5 rounded-full bg-white/70 shadow-[0_0_6px_#fff]" />
+          <div className="absolute top-36 right-1/3 w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
+        </div>
+
+        {/* Section Headline Inside/Above the Glowing Circle Arc */}
+        <div className="text-center max-w-3xl mx-auto space-y-4 mb-12 sm:mb-16 relative z-10">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 font-mono text-[11px] font-semibold tracking-wider uppercase shadow-[0_0_20px_rgba(52,211,153,0.2)]">
+            <Activity className="w-3.5 h-3.5 text-emerald-400" />
+            Your Operations, Fully Under Control
+          </div>
+
+          <h2
+            className="text-[2.2rem] sm:text-[3.2rem] md:text-[3.8rem] font-bold tracking-tight leading-[1.08] text-white"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
+            Consolidate All Your Micro-SaaS Apps{' '}
+            <br className="hidden sm:inline" />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-emerald-400">
+              With One Powerful Engine
+            </span>
+          </h2>
+
+          <p className="text-[15px] sm:text-[17px] text-white/65 max-w-[55ch] mx-auto leading-relaxed">
+            Manage, track, and route your physical and digital assets with smart edge tools designed for sub-10ms speed, zero reprint costs, and infinite scalability.
+          </p>
+        </div>
+
+        {/* The Dashboard Screenshot Frame (Image 4 - dashboard-user.png) */}
+        <div className="max-w-5xl mx-auto relative px-2 z-10">
+          {/* Top Emerald Radiant Rim Glow */}
+          <div className="absolute -top-3 left-1/4 right-1/4 h-6 bg-emerald-400/30 blur-xl pointer-events-none rounded-full" />
+          
+          {/* Clean Screenshot Frame with Elevated Obsidian Glassmorphism */}
+          <div className="rounded-2xl sm:rounded-3xl border border-white/20 bg-[#0E110C] shadow-[0_30px_100px_-20px_rgba(0,0,0,0.98),0_0_60px_rgba(52,211,153,0.18)] overflow-hidden transition-all duration-300 hover:border-emerald-500/40">
+            {/* Top Border Rim Light */}
+            <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_15px_#34d399]" />
             <img
-              src="/images/workspace-microsaas-showcase.png"
-              alt="DynamicQR Workspace Ecosystem"
+              src="/images/dashboard-user.png"
+              alt="DynamicQR & MicroSaaS Unified Command Center"
               className="w-full h-auto block object-cover object-top"
             />
           </div>
+
+          {/* Social Proof Bar (Echoing Image 2 bottom row) */}
+          <div className="mt-10 sm:mt-12 text-center space-y-4">
+            <span className="text-[12px] font-mono uppercase tracking-wider text-white/50 block">
+              Trusted by 4,000+ Growing Brands &amp; Physical Operators
+            </span>
+            <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-[13.5px] font-semibold text-white/40 tracking-wider">
+              <span className="hover:text-white transition-colors">LinkedIn</span>
+              <span className="hover:text-white transition-colors">Meta</span>
+              <span className="hover:text-white transition-colors">Google</span>
+              <span className="hover:text-white transition-colors">Amazon</span>
+              <span className="hover:text-white transition-colors">Airbnb</span>
+              <span className="hover:text-white transition-colors">Stripe</span>
+              <span className="hover:text-white transition-colors">Vercel</span>
+              <span className="hover:text-white transition-colors">Shopify</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================ */}
+      {/* 3. The Ancient Bridge Section: Physical-to-Digital Durability */}
+      {/* (Featuring Image 3 as Background: ancient-bridge-landscape.jpg) */}
+      {/* ============================================================ */}
+      <section className="relative py-24 md:py-36 px-5 md:px-8 max-w-[1280px] mx-auto my-12 rounded-3xl overflow-hidden border border-white/15 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.95)]">
+        {/* Image 3 as Background */}
+        <div className="absolute inset-0 -z-20">
+          <img
+            src="/images/ancient-bridge-landscape.jpg"
+            alt="The Indestructible Bridge of DynamicQR"
+            className="w-full h-full object-cover object-center filter brightness-[0.7] saturate-[1.1]"
+          />
+        </div>
+
+        {/* Dark Obsidian & Emerald Vignette Gradient Overlays for High-Contrast Text */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#11140F] via-[#11140F]/80 to-[#11140F]/90 -z-10" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(17,20,15,0.65)_0%,rgba(17,20,15,0.95)_100%)] -z-10" />
+
+        <div className="relative z-10 max-w-4xl mx-auto text-center space-y-6">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[11.5px] font-mono tracking-wider uppercase backdrop-blur-md shadow-md">
+            <Building2 className="w-3.5 h-3.5 text-emerald-400" />
+            Architectural Longevity · Zero Reprint Guarantee
+          </div>
+
+          <h2
+            className="text-[2.2rem] sm:text-[3.2rem] md:text-[3.8rem] font-bold tracking-tight text-white leading-tight"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
+            Built to last generations.{' '}
+            <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-emerald-400">
+              The indestructible bridge between physical media and digital intelligence.
+            </span>
+          </h2>
+
+          <p className="text-[15.5px] sm:text-[18px] text-white/75 max-w-[58ch] mx-auto leading-relaxed">
+            Physical signage, restaurant tabletop stands, brass plaques, and packaging outlive software cycles. When you print a QR code on physical materials, failure is not an option. DynamicQR provides the permanent bridge that keeps your physical assets alive forever.
+          </p>
+
+          {/* 4 Frosted Glass Architectural Pillar Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-6 text-left">
+            <div className="rounded-2xl border border-white/15 bg-[#11140F]/80 backdrop-blur-md p-5 space-y-2 hover:border-emerald-500/40 transition-all shadow-xl">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-emerald-400">
+                <ShieldCheck className="w-4 h-4" />
+              </div>
+              <h3 className="text-[14px] font-bold text-white">Zero Reprint Guarantee</h3>
+              <p className="text-[12px] text-white/60 leading-relaxed">
+                Update destinations, menus, or Wi-Fi passwords anytime without re-engraving metal or re-ordering print.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-white/15 bg-[#11140F]/80 backdrop-blur-md p-5 space-y-2 hover:border-emerald-500/40 transition-all shadow-xl">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-emerald-400">
+                <Zap className="w-4 h-4" />
+              </div>
+              <h3 className="text-[14px] font-bold text-white">Sub-10ms 307 Ingress</h3>
+              <p className="text-[12px] text-white/60 leading-relaxed">
+                Sub-millisecond edge wire resolution delivers instantaneous mobile handoffs with zero intermediary splash screens.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-white/15 bg-[#11140F]/80 backdrop-blur-md p-5 space-y-2 hover:border-emerald-500/40 transition-all shadow-xl">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-emerald-400">
+                <Printer className="w-4 h-4" />
+              </div>
+              <h3 className="text-[14px] font-bold text-white">300 DPI Vector Math</h3>
+              <p className="text-[12px] text-white/60 leading-relaxed">
+                Sub-pixel SVG path geometry with mandatory 10% quiet-zone buffers ensures scannability on all print surfaces.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-white/15 bg-[#11140F]/80 backdrop-blur-md p-5 space-y-2 hover:border-emerald-500/40 transition-all shadow-xl">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-emerald-400">
+                <Clock className="w-4 h-4" />
+              </div>
+              <h3 className="text-[14px] font-bold text-white">Temporal Dayparting</h3>
+              <p className="text-[12px] text-white/60 leading-relaxed">
+                Automatically swap morning breakfast specials to evening cocktail hours on a single printed asset.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================ */}
+      {/* 4. Precision Interactive Hardware Mockup Simulator           */}
+      {/* ============================================================ */}
+      <section className="py-16 md:py-24 px-5 md:px-8 max-w-[1280px] mx-auto border-t border-white/10">
+        <div className="text-center max-w-3xl mx-auto space-y-4 mb-10">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 font-mono text-[11px] font-semibold tracking-wider uppercase">
+            <Smartphone className="w-3.5 h-3.5 text-emerald-400" />
+            Adaptive Ingress Simulator
+          </div>
+          <h2
+            className="text-[2.2rem] sm:text-[3rem] font-bold tracking-tight leading-tight text-white"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
+            One physical print.{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-emerald-400">
+              Adaptive hardware ingress.
+            </span>
+          </h2>
+          <p className="text-[15px] sm:text-[17px] text-white/60">
+            Simulate incoming scan devices in real-time. Scan the live QR code on screen with your phone camera to test instantaneous sub-10ms edge redirection.
+          </p>
         </div>
 
         {/* Floating Precision Interactive Hardware Mockup */}
-        <div className="mt-16 md:mt-24 max-w-4xl mx-auto rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.07] to-white/[0.01] p-6 sm:p-10 shadow-2xl backdrop-blur-md relative overflow-hidden">
+        <div className="max-w-4xl mx-auto rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.07] to-white/[0.01] p-6 sm:p-10 shadow-2xl backdrop-blur-md relative overflow-hidden">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
             {/* Left: Device Simulator with Real Hardware & Actual Scannable QR Code */}
             <div className="md:col-span-5 flex flex-col items-center justify-center min-h-[460px]">
