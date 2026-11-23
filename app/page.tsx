@@ -41,6 +41,7 @@ export default async function Home() {
   let microSaasItems: any[] = [];
   let mailLists: any[] = [];
   let recentScans: any[] = [];
+  let customerContacts: any[] = [];
 
   try {
     // 1. Authoritative System Sovereignty Config (Available to all visitors)
@@ -72,7 +73,7 @@ export default async function Home() {
     }
 
     if (user) {
-      const [fetchedLinks, fetchedDomains, scanCount, creditRecord, fetchedMicroItems, fetchedMailLists, fetchedScans] = await Promise.all([
+      const [fetchedLinks, fetchedDomains, scanCount, creditRecord, fetchedMicroItems, fetchedMailLists, fetchedScans, fetchedContacts] = await Promise.all([
         prisma.qrLink.findMany({
           where: { userId: user.id },
           include: { landingPage: true, customDomain: true, routingRules: true },
@@ -101,9 +102,15 @@ export default async function Home() {
         }),
         prisma.scan.findMany({
           where: { qrLink: { userId: user.id } },
-          take: 8,
+          take: 100,
           orderBy: { scannedAt: 'desc' },
           include: { qrLink: { select: { label: true, shortCode: true } } },
+        }),
+        prisma.customerMailContact.findMany({
+          where: { userId: user.id },
+          take: 30,
+          orderBy: { createdAt: 'desc' },
+          include: { list: { select: { name: true } } },
         }),
       ]);
 
@@ -114,6 +121,7 @@ export default async function Home() {
       microSaasItems = fetchedMicroItems;
       mailLists = fetchedMailLists;
       recentScans = fetchedScans;
+      customerContacts = fetchedContacts;
     }
   } catch (err) {
     console.error('Safe SSR Fallback in Home page:', err);
@@ -167,6 +175,7 @@ export default async function Home() {
       microSaasItems={microSaasItems}
       mailLists={mailLists}
       recentScans={recentScans}
+      customerContacts={customerContacts}
       planUsageMeter={
         <PlanUsageMeter
           userTier={user.tier || 'free'}

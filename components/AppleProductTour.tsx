@@ -308,22 +308,136 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
   return (
     <div className="w-full bg-[#11140F] text-white overflow-hidden selection:bg-emerald-500 selection:text-black">
       {/* ============================================================ */}
-      {/* 1. Redefined Hero: DynamicQR & Consolidated Micro-SaaS Engine */}
+      {/* 1. Redefined Hero: "One code. Infinite destinations."        */}
+      {/* Background is the transformed green artwork from Image 1    */}
       {/* ============================================================ */}
-      <section className="relative pt-20 pb-16 md:pt-28 md:pb-24 px-4 sm:px-6 md:px-8 max-w-[1340px] mx-auto">
-        {/* Subtle radial ambient glows in dark green/emerald */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-gradient-to-tr from-emerald-600/20 via-teal-500/15 to-transparent blur-[140px] pointer-events-none rounded-full" />
-        <div className="absolute top-1/2 left-1/4 w-[350px] h-[350px] bg-emerald-500/10 blur-[120px] pointer-events-none rounded-full" />
+      <section className="relative min-h-[660px] sm:min-h-[760px] pt-24 pb-20 md:pt-32 md:pb-28 px-4 sm:px-6 md:px-8 max-w-[1380px] mx-auto flex flex-col justify-center items-center overflow-hidden">
+        {/* Full Hero Background: Transformed Green Cyborg Astronaut & Radiant Ambient Aura */}
+        <div className="absolute inset-0 -z-20 overflow-hidden flex items-center justify-center pointer-events-none select-none">
+          <img
+            src="/images/hero-dark-green.png"
+            alt=""
+            className="w-full h-full object-cover sm:object-contain object-center filter contrast-[1.08] saturate-[1.15] opacity-60 sm:opacity-80"
+          />
+        </div>
 
-        {/* Top Header & Core Pitch */}
-        <div className="text-center max-w-4xl mx-auto space-y-5 relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-[11.5px] font-mono tracking-wider uppercase shadow-[0_0_20px_rgba(16,185,129,0.15)]">
+        {/* Ambient Dark Green Vignette & Matrix Dot Grid */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(52,211,153,0.12)_1.5px,transparent_1.5px)] bg-[size:28px_28px] pointer-events-none -z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#11140F]/70 via-transparent to-[#11140F] pointer-events-none -z-10" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,#11140F_85%)] pointer-events-none -z-10" />
+
+        {/* Left Side Floating Service Cards (Desktop: Floating flanking widgets) */}
+        <div className="hidden xl:flex flex-col gap-4 absolute left-6 top-1/2 -translate-y-1/2 z-20 max-w-[260px] pointer-events-auto">
+          {/* Smart OS Branching Switch */}
+          <div className="rounded-2xl border border-white/15 bg-[#121611]/85 backdrop-blur-md p-3.5 shadow-2xl space-y-1.5 transition-all hover:border-emerald-500/40 hover:scale-[1.02]">
+            <div className="flex items-center justify-between">
+              <span className="text-[13px] font-semibold text-white">Smart OS Branching</span>
+              <div className="w-9 h-5 rounded-full bg-emerald-500 p-0.5 flex items-center justify-end shadow-[0_0_10px_rgba(52,211,153,0.5)]">
+                <div className="w-4 h-4 rounded-full bg-white shadow-xs" />
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5 text-[10.5px] font-mono text-emerald-300">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span>iOS App Store · Android Play</span>
+            </div>
+          </div>
+
+          {/* AI Telemetry Copilot */}
+          <div className="rounded-2xl border border-white/15 bg-[#121611]/85 backdrop-blur-md p-3.5 shadow-2xl space-y-2 transition-all hover:border-emerald-500/40 hover:scale-[1.02]">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <Bot className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="text-[12.5px] font-bold text-white">AI Telemetry Copilot</span>
+              </div>
+              <span className="text-[10px] font-mono text-emerald-400 font-semibold bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                99.98%
+              </span>
+            </div>
+            <div className="space-y-1">
+              <div className="w-full bg-white/10 h-1 rounded-full overflow-hidden">
+                <div className="bg-gradient-to-r from-emerald-500 to-teal-300 h-full w-[94%]" />
+              </div>
+              <div className="text-[10.5px] font-mono text-white/60 flex items-center justify-between">
+                <span>Edge Latency: 7.2ms</span>
+                <span className="text-emerald-400">High Stable</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Wi-Fi Ingress Bubble */}
+          <div className="rounded-2xl border border-white/15 bg-[#121611]/90 backdrop-blur-md p-3 shadow-2xl flex items-center gap-2.5 transition-all hover:border-emerald-500/40 hover:scale-[1.02]">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-black font-bold text-[12px] shrink-0 shadow-md">
+              <Wifi className="w-4 h-4 text-black" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-[11.5px] font-medium text-white/95 leading-tight">
+                Guest joined <span className="text-emerald-300 font-semibold">Atelier-Guest-5G</span>
+              </div>
+              <div className="text-[10px] font-mono text-emerald-400/80 mt-0.5">
+                ✓ 1 scan · Zero password typing
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side Floating Service Cards (Desktop: Floating flanking widgets) */}
+        <div className="hidden xl:flex flex-col gap-4 absolute right-6 top-1/2 -translate-y-1/2 z-20 max-w-[270px] pointer-events-auto">
+          {/* Scan Velocity Stat */}
+          <div className="rounded-2xl border border-white/15 bg-[#121611]/85 backdrop-blur-md p-3.5 shadow-2xl space-y-1 transition-all hover:border-emerald-500/40 hover:scale-[1.02]">
+            <span className="text-[10.5px] font-mono uppercase tracking-wider text-white/50 block">
+              Scan Velocity &amp; Engagements
+            </span>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-bold font-mono text-white">1,420</span>
+              <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                +18.4% this period
+              </span>
+            </div>
+            <div className="text-[10px] font-mono text-white/45">
+              Peak Diurnal Flow · Real-Time Telemetry
+            </div>
+          </div>
+
+          {/* Touchless Dining Menu */}
+          <div className="rounded-2xl border border-white/15 bg-[#121611]/85 backdrop-blur-md p-3 shadow-2xl flex items-center gap-2.5 transition-all hover:border-amber-500/40 hover:scale-[1.02]">
+            <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center shrink-0 border border-amber-500/30">
+              <Utensils className="w-4 h-4" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-[11.5px] font-medium text-white/95 leading-tight">
+                Menu swapped to <span className="text-amber-300 font-semibold">Chef Dinner Specials</span> live
+              </div>
+              <div className="text-[10px] font-mono text-amber-300/80 mt-0.5">
+                ✓ $1,800/yr saved on reprints
+              </div>
+            </div>
+          </div>
+
+          {/* Executive vCard */}
+          <div className="rounded-2xl border border-white/15 bg-[#121611]/90 backdrop-blur-md p-3 shadow-2xl flex items-center gap-2.5 transition-all hover:border-blue-500/40 hover:scale-[1.02]">
+            <div className="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-300 flex items-center justify-center shrink-0 border border-blue-500/30">
+              <Contact className="w-4 h-4" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-[11.5px] font-medium text-white/95 leading-tight">
+                Alex Chen: <span className="text-blue-300 font-semibold">Executive vCard</span> (.vcf)
+              </div>
+              <div className="text-[10px] font-mono text-blue-300/80 mt-0.5">
+                ✓ 1-tap Apple &amp; Android Contacts
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Center Content: Top Pill, Headline, Subhead, CTAs & Checks */}
+        <div className="text-center max-w-4xl mx-auto space-y-6 relative z-10">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-[11.5px] font-mono tracking-wider uppercase shadow-[0_0_20px_rgba(16,185,129,0.15)] backdrop-blur-md">
             <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
             Dynamic QR &amp; Consolidated Micro-SaaS Ecosystem
           </div>
 
           <h1
-            className="text-[2.6rem] sm:text-[3.8rem] md:text-[5rem] font-bold tracking-tight leading-[1.03] text-white"
+            className="text-[2.8rem] sm:text-[4rem] md:text-[5.2rem] font-bold tracking-tight leading-[1.02] text-white"
             style={{ fontFamily: 'var(--font-display)' }}
           >
             One code.{' '}
@@ -333,29 +447,30 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
             </span>
           </h1>
 
-          <p className="text-[16px] sm:text-[19px] md:text-[20px] text-white/70 max-w-[58ch] mx-auto leading-relaxed font-normal">
+          <p className="text-[16px] sm:text-[19px] md:text-[20px] text-white/75 max-w-[58ch] mx-auto leading-relaxed font-normal">
             A dynamic QR platform engineered for the physical world. Route, schedule, and measure forever with sub-10ms edge intelligence — while consolidating Customer Mailing Lists, Digital vCards, Deep Link Shorteners, Menus, and Instant Wi-Fi into one unified engine.
           </p>
 
           {/* Action Pills */}
-          <div className="pt-3 flex flex-wrap items-center justify-center gap-3.5">
+          <div className="pt-2 flex flex-wrap items-center justify-center gap-3.5">
             <button
               onClick={handleOpenWorkspace}
-              className="rounded-2xl bg-white px-7 py-3.5 text-[15px] font-semibold text-[#11140F] hover:bg-[#EEF0EA] transition-all duration-200 flex items-center gap-2 shadow-lg shadow-white/10 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+              className="rounded-2xl bg-white px-8 py-4 text-[15px] font-semibold text-[#11140F] hover:bg-[#EEF0EA] transition-all duration-200 flex items-center gap-2 shadow-xl shadow-white/10 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
             >
               Try for free
               <ArrowRight className="w-4 h-4 text-[#11140F]" />
             </button>
             <a
               href="#microsaas"
-              className="rounded-2xl border border-white/15 bg-white/[0.05] px-6 py-3.5 text-[15px] font-medium text-white/85 hover:text-white hover:border-emerald-500/40 hover:bg-emerald-500/10 transition-all flex items-center gap-2"
+              className="rounded-2xl border border-white/20 bg-white/[0.08] backdrop-blur-md px-7 py-4 text-[15px] font-medium text-white/90 hover:text-white hover:border-emerald-500/40 hover:bg-emerald-500/15 transition-all flex items-center gap-2"
             >
               <Layers className="w-4 h-4 text-emerald-400" />
               Explore Consolidated Micro-SaaS
             </a>
           </div>
 
-          <div className="pt-6 flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-[12px] sm:text-[12.5px] text-white/50 font-mono">
+          {/* Core Assurances */}
+          <div className="pt-6 flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-[12px] sm:text-[12.5px] text-white/60 font-mono">
             <span className="flex items-center gap-1.5 text-emerald-400">
               <Check className="w-3.5 h-3.5" /> Sub-10ms 307 Ingress
             </span>
@@ -372,160 +487,36 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
               <Check className="w-3.5 h-3.5" /> Zero Reprint Guarantee
             </span>
           </div>
-        </div>
 
-        {/* ============================================================ */}
-        {/* Hero Interactive Stage: Transformed Character & Service Badges */}
-        {/* ============================================================ */}
-        <div className="mt-12 sm:mt-16 max-w-5xl mx-auto relative px-2">
-          {/* Subtle Green Matrix Dot Background Pattern */}
-          <div className="absolute -inset-4 sm:-inset-6 bg-[radial-gradient(circle_at_center,rgba(52,211,153,0.12)_1.5px,transparent_1.5px)] bg-[size:28px_28px] opacity-75 pointer-events-none rounded-[40px] -z-10" />
-          
-          {/* Ambient Glow Aura */}
-          <div className="absolute -inset-4 sm:-inset-6 bg-gradient-to-r from-emerald-500/20 via-teal-500/15 to-emerald-500/20 blur-3xl rounded-[40px] opacity-70 pointer-events-none -z-10" />
-
-          {/* Central Character & Interactive Platform Service Cards Stage */}
-          <div className="relative rounded-3xl border border-white/15 bg-gradient-to-b from-[#141812] to-[#0A0D08] p-4 sm:p-8 md:p-10 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.95),0_0_50px_rgba(52,211,153,0.12)] overflow-hidden">
-            {/* Top Sub-Navigation Pills (Echoing Image 1 Top Actions) */}
-            <div className="flex items-center justify-center gap-3 mb-6 relative z-20">
-              <button
-                onClick={handleOpenWorkspace}
-                className="px-5 py-2 rounded-full bg-emerald-500 hover:bg-emerald-400 text-black text-[12.5px] font-semibold flex items-center gap-1.5 shadow-[0_0_20px_rgba(52,211,153,0.4)] transition-all cursor-pointer"
-              >
-                <span>Launch Workspace</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-              <a
-                href="#dashboard-preview"
-                className="px-4 py-2 rounded-full bg-white/[0.06] hover:bg-white/10 border border-white/15 text-white/80 hover:text-white text-[12.5px] font-medium transition-all flex items-center gap-1.5"
-              >
-                <Play className="w-3 h-3 fill-current text-emerald-400" />
-                <span>Watch Command Center</span>
-              </a>
+          {/* Mobile-Only Responsive Grid for Service Badges */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-6 xl:hidden text-left">
+            <div className="rounded-xl border border-white/10 bg-white/[0.04] p-3 flex items-center justify-between">
+              <div>
+                <span className="text-[12px] font-semibold text-white block">Smart OS Branching</span>
+                <span className="text-[10px] font-mono text-emerald-400">iOS App Store · Android Play</span>
+              </div>
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             </div>
-
-            {/* Central Stage Container */}
-            <div className="relative min-h-[440px] sm:min-h-[500px] md:min-h-[540px] flex items-center justify-center">
-              {/* Background Cyborg Character Graphic (Green-shifted with iridescent saturn ring & glowing sphere) */}
-              <div className="relative w-full max-w-[680px] mx-auto flex items-center justify-center select-none pointer-events-none">
-                <img
-                  src="/images/hero-dark-green.png"
-                  alt="DynamicQR Autonomous Intelligence"
-                  className="w-full h-auto object-contain max-h-[480px] drop-shadow-[0_15px_35px_rgba(0,0,0,0.8)] filter contrast-[1.05]"
-                />
+            <div className="rounded-xl border border-white/10 bg-white/[0.04] p-3 flex items-center justify-between">
+              <div>
+                <span className="text-[12px] font-semibold text-white block">AI Telemetry Copilot</span>
+                <span className="text-[10px] font-mono text-emerald-400">99.98% Routing Health · 7.2ms</span>
               </div>
-
-              {/* Floating Service Badge: Top-Left (OS Branching Toggle) */}
-              <div className="absolute top-2 sm:top-6 left-2 sm:left-4 z-20 max-w-[210px] sm:max-w-[240px] rounded-2xl border border-white/15 bg-[#121611]/85 backdrop-blur-md p-3 sm:p-3.5 shadow-2xl space-y-1.5 transition-all hover:border-emerald-500/40 hover:scale-[1.02]">
-                <div className="flex items-center justify-between">
-                  <span className="text-[12px] sm:text-[13px] font-semibold text-white">Smart OS Branching</span>
-                  {/* Glowing Emerald Switch Toggle */}
-                  <div className="w-9 h-5 rounded-full bg-emerald-500 p-0.5 flex items-center justify-end shadow-[0_0_10px_rgba(52,211,153,0.5)]">
-                    <div className="w-4 h-4 rounded-full bg-white shadow-xs" />
-                  </div>
-                </div>
-                <div className="flex items-center gap-1.5 text-[10px] font-mono text-emerald-300">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>iOS App Store · Android Play</span>
-                </div>
-              </div>
-
-              {/* Floating Service Badge: Mid-Left (AI Telemetry Copilot) */}
-              <div className="absolute top-[135px] sm:top-[150px] left-1 sm:left-2 z-20 max-w-[220px] sm:max-w-[250px] rounded-2xl border border-white/15 bg-[#121611]/85 backdrop-blur-md p-3 sm:p-3.5 shadow-2xl space-y-2 transition-all hover:border-emerald-500/40 hover:scale-[1.02]">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <Bot className="w-3.5 h-3.5 text-emerald-400" />
-                    <span className="text-[12px] font-bold text-white">AI Telemetry Copilot</span>
-                  </div>
-                  <span className="text-[9.5px] font-mono text-emerald-400 font-semibold bg-emerald-500/10 px-1.5 py-0.5 rounded">
-                    99.98%
-                  </span>
-                </div>
-                <div className="space-y-1">
-                  <div className="w-full bg-white/10 h-1 rounded-full overflow-hidden">
-                    <div className="bg-gradient-to-r from-emerald-500 to-teal-300 h-full w-[94%]" />
-                  </div>
-                  <div className="text-[10px] font-mono text-white/60 flex items-center justify-between">
-                    <span>Edge Latency: 7.2ms</span>
-                    <span className="text-emerald-400">High Stable</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Floating Service Bubble: Bottom-Left (Wi-Fi Ingress Handoff) */}
-              <div className="absolute bottom-3 sm:bottom-6 left-2 sm:left-6 z-20 max-w-[240px] sm:max-w-[280px] rounded-2xl border border-white/15 bg-[#121611]/90 backdrop-blur-md p-2.5 sm:p-3 shadow-2xl flex items-center gap-2.5 transition-all hover:border-emerald-500/40 hover:scale-[1.02]">
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-black font-bold text-[12px] shrink-0 shadow-md">
-                  <Wifi className="w-4 h-4 text-black" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-[11px] font-medium text-white/95 leading-tight">
-                    Guest connected to <span className="text-emerald-300 font-semibold">Atelier-Guest-5G</span> in 1 scan
-                  </div>
-                  <div className="text-[9.5px] font-mono text-emerald-400/80 mt-0.5">
-                    ✓ Zero password typing
-                  </div>
-                </div>
-              </div>
-
-              {/* Floating Service Badge: Top-Right (Scan Velocity & Engagements Stat) */}
-              <div className="absolute top-2 sm:top-6 right-2 sm:right-4 z-20 max-w-[220px] sm:max-w-[260px] rounded-2xl border border-white/15 bg-[#121611]/85 backdrop-blur-md p-3 sm:p-3.5 shadow-2xl space-y-1 transition-all hover:border-emerald-500/40 hover:scale-[1.02]">
-                <span className="text-[10.5px] font-mono uppercase tracking-wider text-white/50 block">
-                  Scan Velocity &amp; Engagements
-                </span>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-xl sm:text-2xl font-bold font-mono text-white">1,420</span>
-                  <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                    +18.4% this period
-                  </span>
-                </div>
-                <div className="text-[9.5px] font-mono text-white/45">
-                  Peak Diurnal Flow · Real-Time Telemetry
-                </div>
-              </div>
-
-              {/* Floating Service Bubble: Mid-Right (Touchless Menu Swapping) */}
-              <div className="absolute top-[135px] sm:top-[150px] right-1 sm:right-2 z-20 max-w-[230px] sm:max-w-[270px] rounded-2xl border border-white/15 bg-[#121611]/85 backdrop-blur-md p-2.5 sm:p-3 shadow-2xl flex items-center gap-2.5 transition-all hover:border-amber-500/40 hover:scale-[1.02]">
-                <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center shrink-0 border border-amber-500/30">
-                  <Utensils className="w-4 h-4" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-[11px] font-medium text-white/95 leading-tight">
-                    Menu swapped to <span className="text-amber-300 font-semibold">Chef Dinner Specials</span> live
-                  </div>
-                  <div className="text-[9.5px] font-mono text-amber-300/80 mt-0.5">
-                    ✓ $1,800/yr saved on paper reprints
-                  </div>
-                </div>
-              </div>
-
-              {/* Floating Service Bubble: Bottom-Right (Digital Executive vCard) */}
-              <div className="absolute bottom-3 sm:bottom-6 right-2 sm:right-6 z-20 max-w-[240px] sm:max-w-[280px] rounded-2xl border border-white/15 bg-[#121611]/90 backdrop-blur-md p-2.5 sm:p-3 shadow-2xl flex items-center gap-2.5 transition-all hover:border-blue-500/40 hover:scale-[1.02]">
-                <div className="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-300 flex items-center justify-center shrink-0 border border-blue-500/30">
-                  <Contact className="w-4 h-4" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-[11px] font-medium text-white/95 leading-tight">
-                    Alex Chen: <span className="text-blue-300 font-semibold">Executive vCard</span> (.vcf) saved
-                  </div>
-                  <div className="text-[9.5px] font-mono text-blue-300/80 mt-0.5">
-                    ✓ One-tap Apple &amp; Android Address Book
-                  </div>
-                </div>
-              </div>
+              <Bot className="w-4 h-4 text-emerald-400" />
             </div>
-
-            {/* Bottom Platform Consolidation Banner */}
-            <div className="mt-4 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 text-[11px] font-mono text-white/60">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-emerald-300 font-semibold">Edge Ingress Active</span>
-                <span className="text-white/40">·</span>
-                <span>US-East (IAD) &amp; EU-West (FRA)</span>
+            <div className="rounded-xl border border-white/10 bg-white/[0.04] p-3 flex items-center justify-between">
+              <div>
+                <span className="text-[12px] font-semibold text-white block">Guest Wi-Fi Ingress</span>
+                <span className="text-[10px] font-mono text-emerald-400">1 Scan · Zero typing</span>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="text-white/50">Unified Micro-SaaS Engine:</span>
-                <span className="text-white font-medium">Mailing · vCards · Shortener · Menus · Wi-Fi</span>
+              <Wifi className="w-4 h-4 text-emerald-400" />
+            </div>
+            <div className="rounded-xl border border-white/10 bg-white/[0.04] p-3 flex items-center justify-between">
+              <div>
+                <span className="text-[12px] font-semibold text-white block">Scan Velocity &amp; Telemetry</span>
+                <span className="text-[10px] font-mono text-emerald-400">1,420 Active Scans (+18.4%)</span>
               </div>
+              <Activity className="w-4 h-4 text-emerald-400" />
             </div>
           </div>
         </div>

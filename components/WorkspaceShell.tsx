@@ -98,6 +98,7 @@ interface WorkspaceShellProps {
   microSaasItems?: any[];
   mailLists?: any[];
   recentScans?: any[];
+  customerContacts?: any[];
 }
 
 export default function WorkspaceShell({
@@ -113,6 +114,7 @@ export default function WorkspaceShell({
   microSaasItems = [],
   mailLists = [],
   recentScans = [],
+  customerContacts = [],
 }: WorkspaceShellProps) {
   const [activeSection, setActiveSection] = useState<WorkspaceSection>('links');
   const [microSaasTab, setMicroSaasTab] = useState<'mailing' | 'vcard' | 'shortener' | 'menu' | 'wifi'>('mailing');
@@ -1030,6 +1032,7 @@ export default function WorkspaceShell({
               microSaasItems={microSaasItems}
               mailLists={mailLists}
               recentScans={recentScans}
+              customerContacts={customerContacts}
               onNavigateSection={handleSelectSection}
               onOpenUpgradeModal={() => setShowAccountModal(true)}
             />
