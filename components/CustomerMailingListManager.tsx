@@ -782,18 +782,18 @@ export default function CustomerMailingListManager({
   return (
     <div className="space-y-6">
       {/* Top Banner & Quotas */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-lg border border-[#11140F]/10 shadow-xs">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-[#0E1017] p-5 rounded-lg border border-[#11140F]/10 dark:border-white/10 shadow-xs">
         <div>
           <div className="flex items-center gap-2">
-            <Mail className="w-4 h-4 text-[#2F6B4F]" />
-            <h3 className="text-base font-bold text-[#11140F]">
+            <Mail className="w-4 h-4 text-[#2F6B4F] dark:text-emerald-400" />
+            <h3 className="text-base font-bold text-[#11140F] dark:text-white">
               Customer Mailing Lists & Campaigns
             </h3>
-            <span className="text-[11px] font-mono uppercase px-2 py-0.5 rounded-md bg-[#11140F]/5 text-[#11140F]/70 font-semibold">
+            <span className="text-[11px] font-mono uppercase px-2 py-0.5 rounded-md bg-[#11140F]/5 dark:bg-white/10 text-[#11140F]/70 dark:text-white/70 font-semibold">
               {quotas?.tier || userTier.toUpperCase()}
             </span>
           </div>
-          <p className="text-xs text-[#11140F]/60 mt-0.5">
+          <p className="text-xs text-[#11140F]/60 dark:text-white/60 mt-0.5">
             Collect subscriber contacts via your printed QR codes and dispatch email broadcasts using dedicated Gmail delivery.
           </p>
         </div>
@@ -801,17 +801,17 @@ export default function CustomerMailingListManager({
         {/* Quota Progress Pills */}
         {quotas && (
           <div className="flex flex-wrap items-center gap-2">
-            <div className="px-3 py-1.5 rounded-md bg-[#F7F8F5] border border-[#11140F]/10 text-xs flex items-center gap-1.5 font-mono">
-              <span className="text-[#11140F]/50">Lists:</span>
-              <strong className="text-[#11140F]">{quotas.listsUsed} / {quotas.listsMax}</strong>
+            <div className="px-3 py-1.5 rounded-md bg-[#F7F8F5] dark:bg-white/[0.04] border border-[#11140F]/10 dark:border-white/10 text-xs flex items-center gap-1.5 font-mono">
+              <span className="text-[#11140F]/50 dark:text-white/50">Lists:</span>
+              <strong className="text-[#11140F] dark:text-white">{quotas.listsUsed} / {quotas.listsMax}</strong>
             </div>
-            <div className="px-3 py-1.5 rounded-md bg-[#F7F8F5] border border-[#11140F]/10 text-xs flex items-center gap-1.5 font-mono">
-              <span className="text-[#11140F]/50">Subscribers:</span>
-              <strong className="text-[#11140F]">{quotas.contactsUsed} / {quotas.contactsMax}</strong>
+            <div className="px-3 py-1.5 rounded-md bg-[#F7F8F5] dark:bg-white/[0.04] border border-[#11140F]/10 dark:border-white/10 text-xs flex items-center gap-1.5 font-mono">
+              <span className="text-[#11140F]/50 dark:text-white/50">Subscribers:</span>
+              <strong className="text-[#11140F] dark:text-white">{quotas.contactsUsed} / {quotas.contactsMax}</strong>
             </div>
-            <div className="px-3 py-1.5 rounded-md bg-[#F7F8F5] border border-[#11140F]/10 text-xs flex items-center gap-1.5 font-mono">
-              <span className="text-[#11140F]/50">Broadcasts:</span>
-              <strong className="text-[#11140F]">{quotas.campaignsUsedThisMonth} / {quotas.campaignsMaxPerMonth} mo</strong>
+            <div className="px-3 py-1.5 rounded-md bg-[#F7F8F5] dark:bg-white/[0.04] border border-[#11140F]/10 dark:border-white/10 text-xs flex items-center gap-1.5 font-mono">
+              <span className="text-[#11140F]/50 dark:text-white/50">Broadcasts:</span>
+              <strong className="text-[#11140F] dark:text-white">{quotas.campaignsUsedThisMonth} / {quotas.campaignsMaxPerMonth} mo</strong>
             </div>
           </div>
         )}
@@ -850,15 +850,15 @@ export default function CustomerMailingListManager({
           <span>Loading customer lists...</span>
         </div>
       ) : lists.length === 0 ? (
-        <div className="p-8 text-center bg-white rounded-lg border border-[#11140F]/10 space-y-3">
-          <Mail className="w-8 h-8 text-[#2F6B4F] mx-auto opacity-70" />
-          <h4 className="text-sm font-bold text-[#11140F]">No Customer Mailing Lists Yet</h4>
-          <p className="text-xs text-[#11140F]/60 max-w-sm mx-auto">
+        <div className="p-8 text-center bg-white dark:bg-[#0E1017] rounded-lg border border-[#11140F]/10 dark:border-white/10 space-y-3">
+          <Mail className="w-8 h-8 text-[#2F6B4F] dark:text-emerald-400 mx-auto opacity-70" />
+          <h4 className="text-sm font-bold text-[#11140F] dark:text-white">No Customer Mailing Lists Yet</h4>
+          <p className="text-xs text-[#11140F]/60 dark:text-white/60 max-w-sm mx-auto">
             Create your first mailing list to collect customer emails via QR signs, retail counter tents, and online widgets.
           </p>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="px-4 py-2 rounded-md bg-[#11140F] text-white text-xs font-semibold hover:bg-[#2A2E25] transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+            className="px-4 py-2 rounded-md bg-[#11140F] dark:bg-emerald-600 text-white text-xs font-semibold hover:bg-[#2A2E25] dark:hover:bg-emerald-500 transition-colors inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Create First List</span>
@@ -867,7 +867,7 @@ export default function CustomerMailingListManager({
       ) : (
         <div className="space-y-4">
           {/* List Selector Navigation Bar */}
-          <div className="flex items-center justify-between border-b border-[#11140F]/10 pb-3 gap-2 overflow-x-auto">
+          <div className="flex items-center justify-between border-b border-[#11140F]/10 dark:border-white/10 pb-3 gap-2 overflow-x-auto">
             <div className="flex items-center gap-2">
               {lists.map((l) => (
                 <button
@@ -875,14 +875,14 @@ export default function CustomerMailingListManager({
                   onClick={() => setSelectedListId(l.id)}
                   className={`px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-colors flex items-center gap-1.5 cursor-pointer ${
                     selectedListId === l.id
-                      ? 'bg-[#11140F] text-white shadow-xs'
-                      : 'bg-white border border-[#11140F]/10 text-[#11140F]/70 hover:bg-[#F7F8F5]'
+                      ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] shadow-xs'
+                      : 'bg-white dark:bg-[#0E1017] border border-[#11140F]/10 dark:border-white/10 text-[#11140F]/70 dark:text-white/70 hover:bg-[#F7F8F5] dark:hover:bg-white/5'
                   }`}
                 >
                   <span>{l.name}</span>
                   <span
                     className={`text-[10px] px-1.5 py-0.2 rounded-md font-mono ${
-                      selectedListId === l.id ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600'
+                      selectedListId === l.id ? 'bg-white/20 text-white dark:bg-[#11140F]/15 dark:text-[#11140F]' : 'bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-white/60'
                     }`}
                   >
                     {l._count.contacts}
@@ -895,7 +895,7 @@ export default function CustomerMailingListManager({
               <button
                 onClick={() => setShowCreateModal(true)}
                 disabled={quotas ? quotas.listsUsed >= quotas.listsMax : false}
-                className="px-3 py-1.5 rounded-md bg-white border border-[#11140F]/15 text-[#11140F] text-xs font-semibold hover:bg-gray-50 transition-colors flex items-center gap-1 cursor-pointer disabled:opacity-40"
+                className="px-3 py-1.5 rounded-md bg-white dark:bg-[#0E1017] border border-[#11140F]/15 dark:border-white/15 text-[#11140F] dark:text-white text-xs font-semibold hover:bg-gray-50 dark:hover:bg-white/5 transition-colors flex items-center gap-1 cursor-pointer disabled:opacity-40"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>New List</span>
@@ -907,14 +907,14 @@ export default function CustomerMailingListManager({
           {selectedList && (
             <div className="space-y-4 pt-1">
               {/* Header Action Bar */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#F7F8F5] p-4 rounded-lg border border-[#11140F]/8">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#F7F8F5] dark:bg-[#0E1017] p-4 rounded-lg border border-[#11140F]/8 dark:border-white/10">
                 <div>
                   <div className="flex items-center gap-2">
-                    <h4 className="text-sm font-bold text-[#11140F]">{selectedList.name}</h4>
+                    <h4 className="text-sm font-bold text-[#11140F] dark:text-white">{selectedList.name}</h4>
                     <button
                       type="button"
                       onClick={handleOpenEditList}
-                      className="p-1 rounded-md text-[#11140F]/40 hover:text-[#11140F] hover:bg-white transition-colors cursor-pointer"
+                      className="p-1 rounded-md text-[#11140F]/40 dark:text-white/40 hover:text-[#11140F] dark:hover:text-white hover:bg-white dark:hover:bg-white/10 transition-colors cursor-pointer"
                       title="Edit mailing list"
                     >
                       <Pencil className="w-3.5 h-3.5" />
@@ -923,13 +923,13 @@ export default function CustomerMailingListManager({
                       type="button"
                       onClick={handleDeleteList}
                       disabled={deletingList}
-                      className="p-1 rounded-md text-red-400 hover:text-red-700 hover:bg-red-50 transition-colors cursor-pointer disabled:opacity-40"
+                      className="p-1 rounded-md text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer disabled:opacity-40"
                       title="Delete this mailing list"
                     >
                       {deletingList ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                     </button>
                   </div>
-                  <p className="text-xs text-[#11140F]/60 mt-0.5">
+                  <p className="text-xs text-[#11140F]/60 dark:text-white/60 mt-0.5">
                     {selectedList.description || 'Customer subscriber list.'}
                   </p>
                 </div>
@@ -938,7 +938,7 @@ export default function CustomerMailingListManager({
                   <button
                     onClick={() => setShowAddContactModal(true)}
                     disabled={quotas ? quotas.contactsUsed >= quotas.contactsMax : false}
-                    className="px-3 py-1.5 rounded-md bg-white border border-[#11140F]/15 text-[#11140F] text-xs font-semibold hover:bg-gray-50 transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
+                    className="px-3 py-1.5 rounded-md bg-white dark:bg-[#14161F] border border-[#11140F]/15 dark:border-white/15 text-[#11140F] dark:text-white text-xs font-semibold hover:bg-gray-50 dark:hover:bg-white/10 transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Add Subscriber</span>
@@ -947,16 +947,16 @@ export default function CustomerMailingListManager({
                   <button
                     onClick={() => setShowCsvModal(true)}
                     disabled={quotas ? quotas.contactsUsed >= quotas.contactsMax : false}
-                    className="px-3 py-1.5 rounded-md bg-white border border-[#11140F]/15 text-[#11140F] text-xs font-semibold hover:bg-gray-50 transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
+                    className="px-3 py-1.5 rounded-md bg-white dark:bg-[#14161F] border border-[#11140F]/15 dark:border-white/15 text-[#11140F] dark:text-white text-xs font-semibold hover:bg-gray-50 dark:hover:bg-white/10 transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
                   >
-                    <FileSpreadsheet className="w-3.5 h-3.5 text-[#2F6B4F]" />
+                    <FileSpreadsheet className="w-3.5 h-3.5 text-[#2F6B4F] dark:text-emerald-400" />
                     <span>Import CSV</span>
                   </button>
 
                   <button
                     onClick={handleExportCsv}
                     disabled={filteredContacts.length === 0}
-                    className="px-3 py-1.5 rounded-md bg-white border border-[#11140F]/15 text-[#11140F] text-xs font-semibold hover:bg-gray-50 transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
+                    className="px-3 py-1.5 rounded-md bg-white dark:bg-[#14161F] border border-[#11140F]/15 dark:border-white/15 text-[#11140F] dark:text-white text-xs font-semibold hover:bg-gray-50 dark:hover:bg-white/10 transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span>Export CSV</span>
@@ -964,24 +964,24 @@ export default function CustomerMailingListManager({
 
                   <button
                     onClick={() => setShowEmbedModal(true)}
-                    className="px-3 py-1.5 rounded-md bg-white border border-[#11140F]/15 text-[#11140F] text-xs font-semibold hover:bg-gray-50 transition-colors flex items-center gap-1.5 cursor-pointer"
+                    className="px-3 py-1.5 rounded-md bg-white dark:bg-[#14161F] border border-[#11140F]/15 dark:border-white/15 text-[#11140F] dark:text-white text-xs font-semibold hover:bg-gray-50 dark:hover:bg-white/10 transition-colors flex items-center gap-1.5 cursor-pointer"
                   >
-                    <Code className="w-3.5 h-3.5 text-blue-600" />
+                    <Code className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                     <span>Embed Form</span>
                   </button>
 
                   <button
                     onClick={() => setShowPrintModal(true)}
-                    className="px-3 py-1.5 rounded-md bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-semibold hover:bg-emerald-100 transition-colors flex items-center gap-1.5 cursor-pointer"
+                    className="px-3 py-1.5 rounded-md bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs font-semibold hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors flex items-center gap-1.5 cursor-pointer"
                   >
-                    <Printer className="w-3.5 h-3.5 text-[#2F6B4F]" />
+                    <Printer className="w-3.5 h-3.5 text-[#2F6B4F] dark:text-emerald-400" />
                     <span>Print QR Displays</span>
                   </button>
 
                   <button
                     onClick={() => setShowBroadcastModal(true)}
                     disabled={contacts.filter((c) => c.status === 'active').length === 0}
-                    className="px-3.5 py-1.5 rounded-md bg-[#2F6B4F] text-white text-xs font-semibold hover:bg-[#25553E] transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer disabled:opacity-40"
+                    className="px-3.5 py-1.5 rounded-md bg-[#2F6B4F] dark:bg-emerald-600 text-white text-xs font-semibold hover:bg-[#25553E] dark:hover:bg-emerald-500 transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer disabled:opacity-40"
                   >
                     <Send className="w-3.5 h-3.5" />
                     <span>Compose Broadcast</span>
@@ -990,15 +990,15 @@ export default function CustomerMailingListManager({
               </div>
 
               {/* Physical Print & Retail Setup Banner */}
-              <div className="p-4 rounded-lg bg-[#2F6B4F]/5 border border-[#2F6B4F]/15 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+              <div className="p-4 rounded-lg bg-[#2F6B4F]/10 dark:bg-emerald-950/20 border border-[#2F6B4F]/20 dark:border-emerald-500/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-2">
-                    <Printer className="w-4 h-4 text-[#2F6B4F]" />
-                    <h5 className="text-xs font-bold text-[#11140F] uppercase tracking-wide">
+                    <Printer className="w-4 h-4 text-[#2F6B4F] dark:text-emerald-400" />
+                    <h5 className="text-xs font-bold text-[#11140F] dark:text-emerald-300 uppercase tracking-wide">
                       Counter Cards, Packaging & Table Tents
                     </h5>
                   </div>
-                  <p className="text-xs text-[#11140F]/70 leading-relaxed">
+                  <p className="text-xs text-[#11140F]/70 dark:text-white/70 leading-relaxed">
                     Print QR codes for your venue or packages. Customers scan and join immediately. Broadcast updates to them via Gmail.
                   </p>
                 </div>
@@ -1007,7 +1007,7 @@ export default function CustomerMailingListManager({
                   <Link
                     href={`/join/${selectedList.id}`}
                     target="_blank"
-                    className="px-3 py-1.5 rounded-md border border-[#11140F]/15 bg-white text-[#11140F] text-xs font-medium hover:bg-gray-50 transition-colors flex items-center gap-1.5"
+                    className="px-3 py-1.5 rounded-md border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/10 text-[#11140F] dark:text-white text-xs font-medium hover:bg-gray-50 dark:hover:bg-white/15 transition-colors flex items-center gap-1.5 shadow-2xs"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
                     <span>Test Form</span>
@@ -1015,7 +1015,7 @@ export default function CustomerMailingListManager({
                   <button
                     type="button"
                     onClick={() => setShowPrintModal(true)}
-                    className="px-3.5 py-1.5 rounded-md bg-[#2F6B4F] text-white text-xs font-medium hover:bg-[#25553E] transition-colors flex items-center gap-1.5 cursor-pointer"
+                    className="px-3.5 py-1.5 rounded-md bg-[#2F6B4F] dark:bg-emerald-600 text-white text-xs font-medium hover:bg-[#25553E] dark:hover:bg-emerald-500 transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
                   >
                     <Printer className="w-3.5 h-3.5" />
                     <span>Print Studio</span>
@@ -1024,15 +1024,15 @@ export default function CustomerMailingListManager({
               </div>
 
               {/* Sub-Tab Navigation: Subscribers vs Broadcast History */}
-              <div className="flex items-center justify-between border-b border-[#11140F]/10 pb-2">
+              <div className="flex items-center justify-between border-b border-[#11140F]/10 dark:border-white/10 pb-2">
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => setListSubTab('contacts')}
                     className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
                       listSubTab === 'contacts'
-                        ? 'bg-[#11140F] text-white shadow-xs'
-                        : 'text-[#11140F]/60 hover:text-[#11140F] hover:bg-gray-100'
+                        ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] shadow-xs'
+                        : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'
                     }`}
                   >
                     <Users className="w-3.5 h-3.5" />
@@ -1044,8 +1044,8 @@ export default function CustomerMailingListManager({
                     onClick={() => setListSubTab('history')}
                     className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
                       listSubTab === 'history'
-                        ? 'bg-[#11140F] text-white shadow-xs'
-                        : 'text-[#11140F]/60 hover:text-[#11140F] hover:bg-gray-100'
+                        ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] shadow-xs'
+                        : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'
                     }`}
                   >
                     <History className="w-3.5 h-3.5" />
@@ -1068,17 +1068,17 @@ export default function CustomerMailingListManager({
 
               {/* SUB-TAB 1: SUBSCRIBERS */}
               {listSubTab === 'contacts' && (
-                <div className="rounded-lg border border-[#11140F]/10 bg-white overflow-hidden shadow-xs space-y-0">
+                <div className="rounded-lg border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#0E1017] overflow-hidden shadow-xs space-y-0">
                   {/* Search and Filters */}
-                  <div className="p-3 bg-[#F7F8F5] border-b border-[#11140F]/8 flex flex-col sm:flex-row items-center justify-between gap-2.5">
+                  <div className="p-3 bg-[#F7F8F5] dark:bg-white/[0.03] border-b border-[#11140F]/8 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-2.5">
                     <div className="relative w-full sm:w-64">
-                      <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-[#11140F]/40" />
+                      <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-[#11140F]/40 dark:text-white/40" />
                       <input
                         type="text"
                         value={contactSearch}
                         onChange={(e) => setContactSearch(e.target.value)}
                         placeholder="Search subscriber email or name..."
-                        className="w-full pl-8 pr-3 py-1.5 rounded-md border border-[#11140F]/15 bg-white text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                        className="w-full pl-8 pr-3 py-1.5 rounded-md border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-xs text-[#11140F] dark:text-white focus:outline-none focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                       />
                     </div>
 
@@ -1090,8 +1090,8 @@ export default function CustomerMailingListManager({
                           onClick={() => setContactStatusFilter(st)}
                           className={`px-2.5 py-1 rounded-md text-[11px] font-medium capitalize transition-colors cursor-pointer ${
                             contactStatusFilter === st
-                              ? 'bg-[#11140F] text-white'
-                              : 'text-[#11140F]/60 hover:text-[#11140F] hover:bg-white'
+                              ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F]'
+                              : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white hover:bg-white dark:hover:bg-white/10'
                           }`}
                         >
                           {st}
@@ -1101,11 +1101,11 @@ export default function CustomerMailingListManager({
                   </div>
 
                   {loadingContacts ? (
-                    <div className="p-8 text-center text-xs text-[#11140F]/50">
+                    <div className="p-8 text-center text-xs text-[#11140F]/50 dark:text-white/50">
                       Loading contacts...
                     </div>
                   ) : filteredContacts.length === 0 ? (
-                    <div className="p-8 text-center text-xs text-[#11140F]/50">
+                    <div className="p-8 text-center text-xs text-[#11140F]/50 dark:text-white/50">
                       {contacts.length === 0
                         ? 'No subscribers in this list yet. Share your QR code or use "Add Subscriber" above.'
                         : 'No subscribers match your search filter.'}
@@ -1114,15 +1114,15 @@ export default function CustomerMailingListManager({
                     <div className="overflow-x-auto">
                       <table className="w-full text-left border-collapse text-xs">
                         <thead>
-                          <tr className="border-b border-[#11140F]/8 bg-white text-[11px] uppercase font-semibold text-[#11140F]/50 tracking-wider">
+                          <tr className="border-b border-[#11140F]/8 dark:border-white/10 bg-white dark:bg-[#0E1017] text-[11px] uppercase font-semibold text-[#11140F]/50 dark:text-white/50 tracking-wider">
                             <th className="py-2.5 px-3 w-8">
                               <button
                                 type="button"
                                 onClick={handleToggleSelectAll}
-                                className="text-[#11140F]/60 hover:text-[#11140F] cursor-pointer"
+                                className="text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white cursor-pointer"
                               >
                                 {selectedContactIds.length === filteredContacts.length && filteredContacts.length > 0 ? (
-                                  <CheckSquare className="w-4 h-4 text-[#2F6B4F]" />
+                                  <CheckSquare className="w-4 h-4 text-[#2F6B4F] dark:text-emerald-400" />
                                 ) : (
                                   <Square className="w-4 h-4" />
                                 )}
@@ -1134,11 +1134,11 @@ export default function CustomerMailingListManager({
                             <th className="py-2.5 px-3 text-right">Actions</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-[#11140F]/5">
+                        <tbody className="divide-y divide-[#11140F]/5 dark:divide-white/5">
                           {filteredContacts.map((c) => {
                             const isSelected = selectedContactIds.includes(c.id);
                             return (
-                              <tr key={c.id} className="hover:bg-[#F7F8F5]/60 transition-colors">
+                              <tr key={c.id} className="hover:bg-[#F7F8F5]/60 dark:hover:bg-white/[0.03] transition-colors">
                                 <td className="py-2.5 px-3">
                                   <button
                                     type="button"
@@ -1146,39 +1146,39 @@ export default function CustomerMailingListManager({
                                     className="cursor-pointer"
                                   >
                                     {isSelected ? (
-                                      <CheckSquare className="w-4 h-4 text-[#2F6B4F]" />
+                                      <CheckSquare className="w-4 h-4 text-[#2F6B4F] dark:text-emerald-400" />
                                     ) : (
-                                      <Square className="w-4 h-4 text-[#11140F]/30" />
+                                      <Square className="w-4 h-4 text-[#11140F]/30 dark:text-white/30" />
                                     )}
                                   </button>
                                 </td>
                                 <td className="py-2.5 px-3">
-                                  <div className="font-medium text-[#11140F]">{c.email}</div>
+                                  <div className="font-medium text-[#11140F] dark:text-white">{c.email}</div>
                                   {c.firstName && (
-                                    <div className="text-[11px] text-[#11140F]/50">{c.firstName}</div>
+                                    <div className="text-[11px] text-[#11140F]/50 dark:text-white/50">{c.firstName}</div>
                                   )}
                                 </td>
                                 <td className="py-2.5 px-3">
                                   {c.status === 'active' && (
-                                    <span className="inline-flex items-center gap-1 text-[10.5px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                                    <span className="inline-flex items-center gap-1 text-[10.5px] font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-500/30">
                                       <CheckCircle2 className="w-3 h-3" />
                                       Active
                                     </span>
                                   )}
                                   {c.status === 'unsubscribed' && (
-                                    <span className="inline-flex items-center gap-1 text-[10.5px] font-medium text-gray-600 bg-gray-100 px-2 py-0.5 rounded-md">
+                                    <span className="inline-flex items-center gap-1 text-[10.5px] font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-white/10 px-2 py-0.5 rounded-md">
                                       <XCircle className="w-3 h-3" />
                                       Unsubscribed
                                     </span>
                                   )}
                                   {c.status === 'pending' && (
-                                    <span className="inline-flex items-center gap-1 text-[10.5px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+                                    <span className="inline-flex items-center gap-1 text-[10.5px] font-medium text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/30 px-2 py-0.5 rounded-md border border-amber-200 dark:border-amber-500/30">
                                       <Clock className="w-3 h-3" />
                                       Pending
                                     </span>
                                   )}
                                 </td>
-                                <td className="py-2.5 px-3 text-[11px] text-[#11140F]/50 font-mono">
+                                <td className="py-2.5 px-3 text-[11px] text-[#11140F]/50 dark:text-white/50 font-mono">
                                   {new Date(c.createdAt).toLocaleDateString()}
                                 </td>
                                 <td className="py-2.5 px-3 text-right">
@@ -1186,7 +1186,7 @@ export default function CustomerMailingListManager({
                                     <button
                                       type="button"
                                       onClick={() => handleOpenEditContact(c)}
-                                      className="p-1 rounded-md text-[#11140F]/50 hover:text-[#11140F] hover:bg-gray-100 transition-colors cursor-pointer"
+                                      className="p-1 rounded-md text-[#11140F]/50 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
                                       title="Edit contact"
                                     >
                                       <Pencil className="w-3.5 h-3.5" />
@@ -1194,7 +1194,7 @@ export default function CustomerMailingListManager({
                                     <button
                                       type="button"
                                       onClick={() => handleDeleteContact(c.id, c.email)}
-                                      className="p-1 rounded-md text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors cursor-pointer"
+                                      className="p-1 rounded-md text-red-500 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
                                       title="Remove contact"
                                     >
                                       <Trash2 className="w-3.5 h-3.5" />
@@ -1213,34 +1213,34 @@ export default function CustomerMailingListManager({
 
               {/* SUB-TAB 2: BROADCAST HISTORY */}
               {listSubTab === 'history' && (
-                <div className="rounded-lg border border-[#11140F]/10 bg-white overflow-hidden shadow-xs">
-                  <div className="p-3 bg-[#F7F8F5] border-b border-[#11140F]/8 flex items-center justify-between">
-                    <span className="text-xs font-semibold text-[#11140F]">
+                <div className="rounded-lg border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#0E1017] overflow-hidden shadow-xs">
+                  <div className="p-3 bg-[#F7F8F5] dark:bg-white/[0.03] border-b border-[#11140F]/8 dark:border-white/10 flex items-center justify-between">
+                    <span className="text-xs font-semibold text-[#11140F] dark:text-white">
                       Recorded Email Broadcasts ({campaigns.length})
                     </span>
                     <button
                       type="button"
                       onClick={loadCampaigns}
-                      className="text-[11px] text-[#2F6B4F] hover:underline flex items-center gap-1"
+                      className="text-[11px] text-[#2F6B4F] dark:text-emerald-400 hover:underline flex items-center gap-1 cursor-pointer"
                     >
                       Refresh Logs
                     </button>
                   </div>
 
                   {loadingCampaigns ? (
-                    <div className="p-8 text-center text-xs text-[#11140F]/50">
+                    <div className="p-8 text-center text-xs text-[#11140F]/50 dark:text-white/50">
                       Loading broadcast logs...
                     </div>
                   ) : campaigns.length === 0 ? (
-                    <div className="p-8 text-center text-xs text-[#11140F]/50 space-y-1">
-                      <p className="font-semibold text-[#11140F]">No broadcasts dispatched yet.</p>
+                    <div className="p-8 text-center text-xs text-[#11140F]/50 dark:text-white/50 space-y-1">
+                      <p className="font-semibold text-[#11140F] dark:text-white">No broadcasts dispatched yet.</p>
                       <p>Send your first broadcast using &quot;Compose Broadcast&quot; above to see delivery telemetry.</p>
                     </div>
                   ) : (
                     <div className="overflow-x-auto">
                       <table className="w-full text-left border-collapse text-xs">
                         <thead>
-                          <tr className="border-b border-[#11140F]/8 bg-white text-[11px] uppercase font-semibold text-[#11140F]/50 tracking-wider">
+                          <tr className="border-b border-[#11140F]/8 dark:border-white/10 bg-white dark:bg-[#0E1017] text-[11px] uppercase font-semibold text-[#11140F]/50 dark:text-white/50 tracking-wider">
                             <th className="py-2.5 px-4">Subject</th>
                             <th className="py-2.5 px-4">Delivery Status</th>
                             <th className="py-2.5 px-4">Delivered</th>
@@ -1248,29 +1248,29 @@ export default function CustomerMailingListManager({
                             <th className="py-2.5 px-4 text-right">Details</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-[#11140F]/5">
+                        <tbody className="divide-y divide-[#11140F]/5 dark:divide-white/5">
                           {campaigns.map((camp) => (
-                            <tr key={camp.id} className="hover:bg-[#F7F8F5]/60 transition-colors">
-                              <td className="py-3 px-4 font-medium text-[#11140F] max-w-xs truncate">
+                            <tr key={camp.id} className="hover:bg-[#F7F8F5]/60 dark:hover:bg-white/[0.03] transition-colors">
+                              <td className="py-3 px-4 font-medium text-[#11140F] dark:text-white max-w-xs truncate">
                                 {camp.subject}
                               </td>
                               <td className="py-3 px-4">
-                                <span className="inline-flex items-center gap-1 text-[10.5px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                                <span className="inline-flex items-center gap-1 text-[10.5px] font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-500/30">
                                   <CheckCircle2 className="w-3 h-3" />
                                   Sent
                                 </span>
                               </td>
-                              <td className="py-3 px-4 font-mono text-[11px] text-[#11140F]">
+                              <td className="py-3 px-4 font-mono text-[11px] text-[#11140F] dark:text-white">
                                 {camp.sentCount} / {camp.recipientCount || camp.sentCount} recipients
                               </td>
-                              <td className="py-3 px-4 text-[11px] text-[#11140F]/50">
+                              <td className="py-3 px-4 text-[11px] text-[#11140F]/50 dark:text-white/50">
                                 {camp.sentAt ? new Date(camp.sentAt).toLocaleString() : '—'}
                               </td>
                               <td className="py-3 px-4 text-right">
                                 <button
                                   type="button"
                                   onClick={() => setInspectingCampaign(camp)}
-                                  className="px-2.5 py-1 rounded-md border border-[#11140F]/15 bg-white text-[11px] font-medium hover:bg-gray-50 transition-colors cursor-pointer"
+                                  className="px-2.5 py-1 rounded-md border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[11px] font-medium text-[#11140F] dark:text-white hover:bg-gray-50 dark:hover:bg-white/10 transition-colors cursor-pointer"
                                 >
                                   View Log
                                 </button>

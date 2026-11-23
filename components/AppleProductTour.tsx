@@ -337,25 +337,25 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
         </div>
 
         {/* Section Headline Inside/Above the Glowing Circle Arc */}
-        <div className="text-center max-w-5xl xl:max-w-6xl mx-auto space-y-6 relative z-10 mb-10 sm:mb-14">
+        <div className="text-center max-w-5xl xl:max-w-6xl mx-auto space-y-4 sm:space-y-5 relative z-10 mb-10 sm:mb-14">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/80 text-[12px] font-mono tracking-wide shadow-md backdrop-blur-md">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             Your Operations, Fully Under Control
           </div>
 
           <h1
-            className="flex flex-col items-center gap-1.5 sm:gap-3 text-center"
+            className="flex flex-col items-center gap-0.5 sm:gap-1 text-center"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            <span className="block whitespace-normal md:whitespace-nowrap text-2xl sm:text-3xl md:text-[2.2rem] lg:text-[2.8rem] xl:text-[3.3rem] font-bold tracking-tight text-white/95 leading-tight">
+            <span className="block whitespace-normal md:whitespace-nowrap text-2xl sm:text-3xl md:text-[2.2rem] lg:text-[2.7rem] xl:text-[3.1rem] font-bold tracking-tight text-white/95 leading-tight">
               Consolidate All Your Micro-SaaS Apps
             </span>
-            <span className="inline-block whitespace-normal md:whitespace-nowrap text-3xl sm:text-5xl md:text-[3.4rem] lg:text-[4.4rem] xl:text-[5rem] font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-emerald-400 py-2 sm:py-3 px-2 leading-[1.2] overflow-visible">
+            <span className="inline-block whitespace-normal md:whitespace-nowrap text-3xl sm:text-5xl md:text-[3.7rem] lg:text-[4.8rem] xl:text-[5.4rem] font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-emerald-400 pt-0.5 pb-1 px-1.5 leading-[1.15] overflow-visible">
               With Powerful DynamicQR
             </span>
           </h1>
 
-          <p className="text-[16px] sm:text-[18px] md:text-[20px] text-white/70 max-w-[62ch] mx-auto leading-relaxed font-normal">
+          <p className="text-[15.5px] sm:text-[17.5px] md:text-[19px] text-white/70 max-w-[62ch] mx-auto leading-relaxed font-normal pt-0 sm:pt-0.5">
             Manage, track, and route your physical media and micro-SaaS apps with smart tools designed for sub-10ms speed, zero reprint costs, and infinite scalability.
           </p>
 

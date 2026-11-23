@@ -685,15 +685,15 @@ export default function MicroSaasHub({
       {/* TAB 2: DIGITAL VCARD */}
       {activeTab === 'vcard' && (
         <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#F7F8F5] p-4 rounded-xl border border-[#11140F]/5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#F7F8F5] dark:bg-[#0E1017] p-4 rounded-xl border border-[#11140F]/5 dark:border-white/10">
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold text-[#11140F]">Digital Business Cards (vCard 3.0)</h3>
-                <span className="text-xs font-mono font-medium text-[#11140F]/60">
+                <h3 className="text-sm font-bold text-[#11140F] dark:text-white">Digital Business Cards (vCard 3.0)</h3>
+                <span className="text-xs font-mono font-medium text-[#11140F]/60 dark:text-white/60">
                   ({vcards.length} / {entitlements.microsaas.vcard} used)
                 </span>
               </div>
-              <p className="text-xs text-[#11140F]/60 mt-0.5">
+              <p className="text-xs text-[#11140F]/60 dark:text-white/60 mt-0.5">
                 Modern scannable networking card. Supports one-tap RFC 6350 phone contact save and contact exchange leads.
               </p>
             </div>
@@ -701,7 +701,7 @@ export default function MicroSaasHub({
               <button
                 type="button"
                 onClick={() => setShowVCardModal(true)}
-                className="py-2 px-4 rounded-xl bg-[#11140F] text-white text-xs font-semibold hover:bg-[#2A2E25] transition-all flex items-center gap-1.5 shrink-0 cursor-pointer shadow-xs"
+                className="py-2 px-4 rounded-xl bg-[#11140F] dark:bg-emerald-600 text-white text-xs font-semibold hover:bg-[#2A2E25] dark:hover:bg-emerald-500 transition-all flex items-center gap-1.5 shrink-0 cursor-pointer shadow-xs"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Create vCard</span>
@@ -718,21 +718,21 @@ export default function MicroSaasHub({
           </div>
 
           {loading ? (
-            <div className="py-12 text-center text-xs text-[#11140F]/50 flex items-center justify-center gap-2">
-              <RefreshCw className="w-4 h-4 animate-spin text-[#2F6B4F]" />
+            <div className="py-12 text-center text-xs text-[#11140F]/50 dark:text-white/50 flex items-center justify-center gap-2">
+              <RefreshCw className="w-4 h-4 animate-spin text-[#2F6B4F] dark:text-emerald-400" />
               <span>Loading digital business cards...</span>
             </div>
           ) : vcards.length === 0 ? (
-            <div className="py-12 text-center border-2 border-dashed border-[#11140F]/10 rounded-2xl p-6 space-y-3">
-              <Contact className="w-8 h-8 mx-auto text-[#11140F]/30" />
-              <div className="text-sm font-semibold text-[#11140F]">No Digital vCards Created Yet</div>
-              <p className="text-xs text-[#11140F]/60 max-w-sm mx-auto">
+            <div className="py-12 text-center border-2 border-dashed border-[#11140F]/10 dark:border-white/10 rounded-2xl p-6 space-y-3">
+              <Contact className="w-8 h-8 mx-auto text-[#11140F]/30 dark:text-white/30" />
+              <div className="text-sm font-semibold text-[#11140F] dark:text-white">No Digital vCards Created Yet</div>
+              <p className="text-xs text-[#11140F]/60 dark:text-white/60 max-w-sm mx-auto">
                 Create your first digital business card. Share your contact info, social profiles, and allow people to exchange contacts with you.
               </p>
               <button
                 type="button"
                 onClick={() => setShowVCardModal(true)}
-                className="py-2 px-4 rounded-xl bg-[#11140F] text-white text-xs font-semibold hover:bg-[#2A2E25] inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
+                className="py-2 px-4 rounded-xl bg-[#11140F] dark:bg-emerald-600 text-white text-xs font-semibold hover:bg-[#2A2E25] dark:hover:bg-emerald-500 inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Create Your First vCard</span>

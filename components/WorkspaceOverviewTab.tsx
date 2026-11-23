@@ -766,7 +766,7 @@ export default function WorkspaceOverviewTab({
           </div>
 
           {/* Capsule Bar Chart with Authentic Inactive Textured Sliders & Selected Active Blue Bar */}
-          <div className="flex items-stretch gap-2 pt-3 pb-1 flex-1 min-h-0">
+          <div className="flex items-stretch gap-2 pt-5 pb-1 flex-1 min-h-0">
             {/* Dynamic Y-Axis based on user's real peak scan volume */}
             <div className="flex flex-col justify-between text-[10px] font-mono text-white/35 py-1 select-none pr-1 shrink-0">
               {ySteps.map((step, idx) => (
@@ -796,7 +796,7 @@ export default function WorkspaceOverviewTab({
                     className="flex-1 flex flex-col items-center justify-end h-full group cursor-pointer relative"
                   >
                     {/* The Full Capsule Slot Track */}
-                    <div className="w-full max-w-[32px] sm:max-w-[40px] h-[85%] bg-[#14161F] rounded-full relative flex flex-col justify-end items-center p-0.5 group-hover:bg-[#1C1F2B] transition-colors overflow-hidden">
+                    <div className="w-full max-w-[32px] sm:max-w-[40px] h-[76%] bg-[#14161F] rounded-full relative flex flex-col justify-end items-center p-0.5 group-hover:bg-[#1C1F2B] transition-colors">
                       
                       {/* INACTIVE CAPSULE: Authentic Diagonal Hatching Fill + Crisp White Horizontal Notch */}
                       {!isActive && (
@@ -823,8 +823,8 @@ export default function WorkspaceOverviewTab({
                           style={{ height: `${heightPct}%` }}
                           className="w-full bg-gradient-to-b from-[#5B8DEF] to-[#336DE3] rounded-full relative flex flex-col justify-end items-center pb-2 shadow-[0_0_24px_rgba(78,130,238,0.55)] transition-all animate-in zoom-in-95 duration-200"
                         >
-                          {/* Floating Blue Pill Badge above the bar */}
-                          <div className="absolute -top-7 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-[#4E82EE] text-white text-[9.5px] font-bold rounded-full shadow-lg flex items-center gap-0.5 whitespace-nowrap z-20">
+                          {/* Floating Blue Pill Badge above the bar (unclipped with ample headroom) */}
+                          <div className="absolute -top-7 left-1/2 -translate-x-1/2 px-2.5 py-0.5 bg-[#4E82EE] text-white text-[9.5px] font-bold rounded-full shadow-lg flex items-center gap-0.5 whitespace-nowrap z-30">
                             <span>▲ {bar.value} Scans</span>
                             <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-[#4E82EE]" />
                           </div>
@@ -854,7 +854,7 @@ export default function WorkspaceOverviewTab({
         </div>
 
         {/* CARD B: FULLY OPERATIONAL REAL CALENDAR WIDGET (4 COLS) */}
-        <div className="lg:col-span-4 rounded-[24px] bg-[#0E1017] border border-white/[0.065] p-4 sm:p-5 flex flex-col justify-between shadow-[0_20px_45px_rgba(0,0,0,0.65)] min-h-[250px] lg:min-h-0 relative overflow-hidden">
+        <div className="lg:col-span-4 rounded-[24px] bg-[#0E1017] border border-white/[0.065] p-3.5 sm:p-4 flex flex-col justify-between shadow-[0_20px_45px_rgba(0,0,0,0.65)] min-h-[250px] lg:min-h-0 relative overflow-hidden">
           
           {/* Calendar Month Header with Working Navigation */}
           <div className="flex items-center justify-between shrink-0">
@@ -880,9 +880,9 @@ export default function WorkspaceOverviewTab({
           </div>
 
           {/* Calendar Day Grid */}
-          <div className="space-y-1 py-1">
+          <div className="space-y-0.5 py-0.5">
             {/* Weekdays */}
-            <div className="grid grid-cols-7 gap-1 text-center text-[9px] font-mono text-white/35 uppercase font-semibold">
+            <div className="grid grid-cols-7 gap-0.5 sm:gap-1 text-center text-[9px] font-mono text-white/35 uppercase font-semibold">
               <span>M</span>
               <span>T</span>
               <span>W</span>
@@ -893,7 +893,7 @@ export default function WorkspaceOverviewTab({
             </div>
 
             {/* Complete Day Cells Grid with Authentic Diagonal Hatching on Boundary Days */}
-            <div className="grid grid-cols-7 gap-1 text-center text-[10.5px] font-mono">
+            <div className="grid grid-cols-7 gap-0.5 sm:gap-1 text-center text-[10px] font-mono">
               {/* Leading days from previous month */}
               {calendarGrid.leadingDays.map((d) => (
                 <div
@@ -902,7 +902,7 @@ export default function WorkspaceOverviewTab({
                     backgroundImage:
                       'repeating-linear-gradient(45deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 1.5px, transparent 1.5px, transparent 5px)',
                   }}
-                  className="h-6 sm:h-7 rounded-lg text-white/25 flex items-center justify-center text-[10px]"
+                  className="h-5 sm:h-6 rounded-md text-white/25 flex items-center justify-center text-[9.5px]"
                 >
                   {d.day}
                 </div>
@@ -920,7 +920,7 @@ export default function WorkspaceOverviewTab({
                   return (
                     <div
                       key={d.dateStr}
-                      className="h-6 sm:h-7 rounded-xl bg-[#4E82EE] text-white flex flex-col items-center justify-center font-bold text-[10.5px] shadow-md cursor-pointer transition-all scale-105"
+                      className="h-5 sm:h-6 rounded-lg bg-[#4E82EE] text-white flex flex-col items-center justify-center font-bold text-[10px] shadow-md cursor-pointer transition-all scale-105"
                     >
                       <span>{d.day}</span>
                       <span className="w-1 h-1 bg-white rounded-full mt-0.5" />
@@ -938,7 +938,7 @@ export default function WorkspaceOverviewTab({
                         day: d.day,
                       })
                     }
-                    className="h-6 sm:h-7 rounded-lg text-white/70 hover:bg-white/10 hover:text-white flex flex-col items-center justify-center cursor-pointer transition-all text-[10.5px] relative group"
+                    className="h-5 sm:h-6 rounded-md text-white/70 hover:bg-white/10 hover:text-white flex flex-col items-center justify-center cursor-pointer transition-all text-[10px] relative group"
                   >
                     <span>{d.day}</span>
                     {hasScans && (
@@ -956,7 +956,7 @@ export default function WorkspaceOverviewTab({
                     backgroundImage:
                       'repeating-linear-gradient(45deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 1.5px, transparent 1.5px, transparent 5px)',
                   }}
-                  className="h-6 sm:h-7 rounded-lg text-white/25 flex items-center justify-center text-[10px]"
+                  className="h-5 sm:h-6 rounded-md text-white/25 flex items-center justify-center text-[9.5px]"
                 >
                   {d.day}
                 </div>
@@ -965,7 +965,7 @@ export default function WorkspaceOverviewTab({
           </div>
 
           {/* Bottom Inset Stat Box: Real Scan Volume for Selected Date */}
-          <div className="p-3 rounded-2xl bg-[#141720] border border-white/[0.06] flex items-center justify-between shrink-0">
+          <div className="p-2 sm:p-2.5 rounded-xl bg-[#141720] border border-white/[0.06] flex items-center justify-between shrink-0 mt-1">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
                 <BarChart3 className="w-3.5 h-3.5" />
