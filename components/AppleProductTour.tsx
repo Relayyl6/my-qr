@@ -344,19 +344,24 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
           </div>
 
           <h1
-            className="flex flex-col items-center gap-0.5 sm:gap-1 text-center"
+            className="flex flex-col items-center gap-1 sm:gap-1.5 text-center"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            <span className="block whitespace-normal md:whitespace-nowrap text-2xl sm:text-3xl md:text-[2.2rem] lg:text-[2.7rem] xl:text-[3.1rem] font-bold tracking-tight text-white/95 leading-tight">
-              Consolidate All Your Micro-SaaS Apps
+            <span className="block whitespace-normal md:whitespace-nowrap text-2xl sm:text-3xl md:text-[2.2rem] lg:text-[2.7rem] xl:text-[3.1rem] font-bold tracking-tight text-white leading-tight">
+              Next-Gen Dynamic QR Codes
             </span>
-            <span className="inline-block whitespace-normal md:whitespace-nowrap text-3xl sm:text-5xl md:text-[3.7rem] lg:text-[4.8rem] xl:text-[5.4rem] font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-emerald-400 pt-0.5 pb-1 px-1.5 leading-[1.15] overflow-visible">
-              With Powerful DynamicQR
+            <span className="inline-flex flex-wrap items-baseline justify-center gap-x-2 sm:gap-x-3 text-3xl sm:text-4xl md:text-[2.8rem] lg:text-[3.6rem] xl:text-[4.2rem] tracking-tight leading-[1.18] overflow-visible pt-0.5 pb-1">
+              <span className="text-[0.74em] sm:text-[0.78em] font-medium text-white/80">
+                With Powerful
+              </span>
+              <span className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-emerald-400">
+                DynamicQR
+              </span>
             </span>
           </h1>
 
           <p className="text-[15.5px] sm:text-[17.5px] md:text-[19px] text-white/70 max-w-[62ch] mx-auto leading-relaxed font-normal pt-0 sm:pt-0.5">
-            Manage, track, and route your physical media and micro-SaaS apps with smart tools designed for sub-10ms speed, zero reprint costs, and infinite scalability.
+            Manage, route, and scale your dynamic QR codes and turnkey micro-apps with smart tools designed for sub-10ms speed, zero reprint costs, and infinite scalability.
           </p>
 
           {/* Action CTAs */}
