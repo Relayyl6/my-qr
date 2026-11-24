@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 import { getCurrentUser } from "@/lib/auth";
-import { stripe, PLANS } from "@/lib/stripe";
+import { PLANS } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { TIER_CONFIGS } from "@/lib/ai/flags";
+import { getDomainPricingConfig } from "@/lib/domains/fxEngine";
+
+export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,9 +25,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid plan selected" }, { status: 400 });
     }
 
-    const origin = req.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const origin = req.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL || "https://my-qr-sandy.vercel.app";
 
-    // Validate Promo Code if provided
+    // 1. Validate Promo Code if provided
     let discountPercent = 0;
     let appliedPromoRecord: any = null;
 
@@ -47,29 +51,81 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // If Stripe secret key is not set, provide seamless test upgrade mode
-    if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY === "sk_test_placeholder_key") {
-      console.info(
-        `[Billing] Stripe key not configured. Executing instant development upgrade to ${planId} with discount: ${discountPercent}% (${promoCodeStr || 'no promo'})`
-      );
+    // 2. Compute USD Price (inclusive of +$1 markup across all tiers)
+    const baseUsd = interval === "year" ? plan.yearlyPrice : plan.monthlyPrice;
+    let finalUsd = baseUsd;
+    if (discountPercent > 0) {
+      finalUsd = Math.max(1, Number((baseUsd * (1 - discountPercent / 100)).toFixed(2)));
+    }
 
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { tier: planId },
+    // 3. Fetch active buffered/manual FX Rate from Sovereignty Engine
+    const pricingConfig = await getDomainPricingConfig().catch(() => null);
+    const effectiveRate = pricingConfig
+      ? pricingConfig.mode === "manual_override"
+        ? pricingConfig.manualOverrideRate
+        : pricingConfig.bufferedRate
+      : 1400;
+
+    // 4. Calculate Final Naira Price (rounded up to nearest ₦100)
+    const finalPriceNgn = Math.ceil((finalUsd * effectiveRate) / 100) * 100;
+    const amountKobo = finalPriceNgn * 100;
+
+    const reference = `SUB_${planId.toUpperCase()}_${user.id.slice(-6)}_${Date.now()}`;
+    const paystackSecret = process.env.PAYSTACK_SECRET_KEY;
+
+    // 5. If Paystack Live/Test key is available, initialize Paystack transaction
+    if (paystackSecret && !paystackSecret.includes("placeholder")) {
+      const paystackRes = await fetch("https://api.paystack.co/transaction/initialize", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${paystackSecret}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: user.email,
+          amount: amountKobo,
+          currency: "NGN",
+          reference,
+          callback_url: `${origin}/billing/success?tier=${planId}&ref=${reference}&session_id=${reference}`,
+          metadata: {
+            userId: user.id,
+            planId,
+            interval,
+            usdAmount: finalUsd,
+            ngnAmount: finalPriceNgn,
+            effectiveFxRate: effectiveRate,
+            promoCode: promoCodeStr || undefined,
+            discountPercent: discountPercent > 0 ? String(discountPercent) : undefined,
+            custom_fields: [
+              {
+                display_name: "Plan Tier",
+                variable_name: "plan_tier",
+                value: planId.toUpperCase(),
+              },
+              {
+                display_name: "Billing Interval",
+                variable_name: "billing_interval",
+                value: interval === "year" ? "Annual" : "Monthly",
+              },
+              {
+                display_name: "USD Amount",
+                variable_name: "usd_amount",
+                value: `$${finalUsd}`,
+              },
+              {
+                display_name: "FX Rate (USD to NGN)",
+                variable_name: "fx_rate",
+                value: `₦${effectiveRate}/$1`,
+              },
+            ],
+          },
+        }),
       });
 
-      const tierConfig = TIER_CONFIGS[planId] || TIER_CONFIGS.pro;
-      await prisma.aiCredit.upsert({
-        where: { userId: user.id },
-        create: {
-          userId: user.id,
-          monthlyLimitUsd: tierConfig.monthlyLimitUsd,
-          usedThisMonth: 0,
-        },
-        update: {
-          monthlyLimitUsd: tierConfig.monthlyLimitUsd,
-        },
-      });
+      const paystackData = await paystackRes.json();
+      if (!paystackData.status) {
+        throw new Error(paystackData.message || "Paystack checkout initialization failed");
+      }
 
       // Increment redemption count if promo used
       if (appliedPromoRecord) {
@@ -79,85 +135,32 @@ export async function POST(req: NextRequest) {
         }).catch(() => {});
       }
 
-      const redirectParams = new URLSearchParams({
-        tier: planId,
-        mode: "dev",
-        ...(promoCodeStr ? { promo: promoCodeStr, discount: String(discountPercent) } : {}),
-      });
-
-      return NextResponse.json({
-        url: `${origin}/billing/success?${redirectParams.toString()}`,
-      });
+      return NextResponse.json({ url: paystackData.data.authorization_url });
     }
 
-    // Real Stripe Checkout Session creation
-    const basePriceAmount = interval === "year" ? plan.yearlyPrice * 100 : plan.monthlyPrice * 100;
-    let finalPriceAmount = basePriceAmount;
+    // 6. Seamless Sandbox / Dev Upgrade Mode (if Paystack key is pending setup in env)
+    console.info(
+      `[Billing] Paystack key pending. Executing instant development upgrade to ${planId} (USD: $${finalUsd}, NGN: ₦${finalPriceNgn.toLocaleString()} @ ₦${effectiveRate}/$1)`
+    );
 
-    if (discountPercent > 0) {
-      finalPriceAmount = Math.max(50, Math.round(basePriceAmount * (1 - discountPercent / 100)));
-    }
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { tier: planId },
+    });
 
-    // Check or create Stripe Customer
-    let customerId = user.stripeCustomerId;
-    if (!customerId) {
-      try {
-        const customer = await stripe.customers.create({
-          email: user.email,
-          name: user.name || undefined,
-          metadata: { userId: user.id },
-        });
-        customerId = customer.id;
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { stripeCustomerId: customerId },
-        });
-      } catch (custErr: any) {
-        console.warn("[Billing] Stripe customer create non-fatal warning:", custErr.message);
-      }
-    }
-
-    const lineItem = {
-      price_data: {
-        currency: "usd",
-        product_data: {
-          name: `DynamicQR ${plan.name} Plan${
-            discountPercent > 0 ? ` (${discountPercent}% OFF with ${promoCodeStr})` : ""
-          }`,
-          description: `AI-powered dynamic QR codes, analytics, and ${plan.monthlyAiBudget}/mo AI budget.${
-            discountPercent > 0 ? ` Promo code ${promoCodeStr} applied.` : ""
-          }`,
-        },
-        unit_amount: finalPriceAmount,
-        recurring: {
-          interval: interval === "year" ? "year" : "month",
-        },
-      },
-      quantity: 1,
-    };
-
-    const sessionParams: any = {
-      line_items: [lineItem],
-      mode: "subscription",
-      success_url: `${origin}/billing/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/pricing`,
-      metadata: {
+    const tierConfig = TIER_CONFIGS[planId] || TIER_CONFIGS.pro;
+    await prisma.aiCredit.upsert({
+      where: { userId: user.id },
+      create: {
         userId: user.id,
-        tier: planId,
-        promoCode: promoCodeStr || undefined,
-        discountPercent: discountPercent > 0 ? String(discountPercent) : undefined,
+        monthlyLimitUsd: tierConfig.monthlyLimitUsd,
+        usedThisMonth: 0,
       },
-    };
+      update: {
+        monthlyLimitUsd: tierConfig.monthlyLimitUsd,
+      },
+    });
 
-    if (customerId) {
-      sessionParams.customer = customerId;
-    } else {
-      sessionParams.customer_email = user.email;
-    }
-
-    const session = await stripe.checkout.sessions.create(sessionParams);
-
-    // Increment redemption count
     if (appliedPromoRecord) {
       await prisma.promoCode.update({
         where: { id: appliedPromoRecord.id },
@@ -165,9 +168,21 @@ export async function POST(req: NextRequest) {
       }).catch(() => {});
     }
 
-    return NextResponse.json({ url: session.url });
+    const redirectParams = new URLSearchParams({
+      tier: planId,
+      mode: "dev",
+      amountNgn: String(finalPriceNgn),
+      ...(promoCodeStr ? { promo: promoCodeStr, discount: String(discountPercent) } : {}),
+    });
+
+    return NextResponse.json({
+      url: `${origin}/billing/success?${redirectParams.toString()}`,
+    });
   } catch (error: any) {
-    console.error("[Stripe Checkout Error]:", error);
-    return NextResponse.json({ error: error.message || "Failed to create checkout session" }, { status: 500 });
+    console.error("[Paystack Checkout Error]:", error);
+    return NextResponse.json(
+      { error: error.message || "Failed to create checkout session" },
+      { status: 500 }
+    );
   }
 }

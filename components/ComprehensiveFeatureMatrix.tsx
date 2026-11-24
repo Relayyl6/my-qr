@@ -1301,7 +1301,7 @@ export default function ComprehensiveFeatureMatrix() {
             <p className="text-[12.5px] text-[#11140F]/80">Static redirect only &middot; No mobile landing pages &middot; No device sensing &middot; No vector kits</p>
           </div>
           <div className="p-3.5 rounded-xl bg-emerald-50/80 border border-emerald-500/30 space-y-1 ring-1 ring-emerald-500/20">
-            <span className="text-[11px] uppercase tracking-wider text-emerald-800 font-mono font-bold">DynamicQR Pro ($5/mo)</span>
+            <span className="text-[11px] uppercase tracking-wider text-emerald-800 font-mono font-bold">DynamicQR Pro ($6/mo)</span>
             <p className="text-[12.5px] text-[#11140F] font-medium">Autonomous Ingress &middot; 50 links &middot; 300 DPI kits &middot; Fast Edge &middot; Verified Domains</p>
           </div>
         </div>
@@ -1386,15 +1386,15 @@ export default function ComprehensiveFeatureMatrix() {
                 </th>
                 <th className="py-3.5 px-4 text-center text-[12.5px] font-bold text-[#2F6B4F] uppercase tracking-wider w-36 bg-[#2F6B4F]/5">
                   Pro
-                  <span className="block text-[11px] font-normal text-[#2F6B4F]/70 font-mono lowercase">$5/mo</span>
+                  <span className="block text-[11px] font-normal text-[#2F6B4F]/70 font-mono lowercase">$6/mo</span>
                 </th>
                 <th className="py-3.5 px-4 text-center text-[12.5px] font-bold text-blue-900 uppercase tracking-wider w-36 bg-blue-50/50">
                   Plus
-                  <span className="block text-[11px] font-normal text-blue-800/70 font-mono lowercase">$12/mo</span>
+                  <span className="block text-[11px] font-normal text-blue-800/70 font-mono lowercase">$13/mo</span>
                 </th>
                 <th className="py-3.5 px-4 text-center text-[12.5px] font-bold text-purple-900 uppercase tracking-wider w-40 bg-purple-50/50">
                   Ultra
-                  <span className="block text-[11px] font-normal text-purple-800/70 font-mono lowercase">$20/mo &middot; all</span>
+                  <span className="block text-[11px] font-normal text-purple-800/70 font-mono lowercase">$21/mo &middot; all</span>
                 </th>
               </tr>
             </thead>

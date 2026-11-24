@@ -20,6 +20,17 @@ function PricingTableContent({ currentTier, isLoggedIn }: PricingTableProps) {
   const searchParams = useSearchParams();
   const [interval, setInterval] = useState<'month' | 'year'>('month');
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [fxRate, setFxRate] = useState<number>(1400);
+
+  // Fetch live buffered FX rate for Paystack NGN pricing
+  useEffect(() => {
+    fetch('/api/billing/rates')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.effectiveFxRate) setFxRate(data.effectiveFxRate);
+      })
+      .catch(() => {});
+  }, []);
 
   // Promo code states
   const [promoInput, setPromoInput] = useState('');
@@ -127,21 +138,24 @@ function PricingTableContent({ currentTier, isLoggedIn }: PricingTableProps) {
     return { discounted, isDiscounted: true };
   };
 
-  // Prices
-  // Pro: $5/mo, $4/mo annual ($48/yr)
-  const proMonthly = calcPrice(5);
-  const proAnnualMonthly = calcPrice(4);
-  const proAnnualTotal = calcPrice(48);
+  // Prices with $1 markup across paid tiers
+  // Pro: $6/mo, $5/mo annual ($60/yr)
+  const proMonthly = calcPrice(6);
+  const proAnnualMonthly = calcPrice(5);
+  const proAnnualTotal = calcPrice(60);
 
-  // Plus: $12/mo, $10/mo annual ($120/yr)
-  const plusMonthly = calcPrice(12);
-  const plusAnnualMonthly = calcPrice(10);
-  const plusAnnualTotal = calcPrice(120);
+  // Plus: $13/mo, $11/mo annual ($132/yr)
+  const plusMonthly = calcPrice(13);
+  const plusAnnualMonthly = calcPrice(11);
+  const plusAnnualTotal = calcPrice(132);
 
-  // Ultra: $20/mo, $16/mo annual ($200/yr)
-  const ultraMonthly = calcPrice(20);
-  const ultraAnnualMonthly = calcPrice(16);
-  const ultraAnnualTotal = calcPrice(200);
+  // Ultra: $21/mo, $17/mo annual ($212/yr)
+  const ultraMonthly = calcPrice(21);
+  const ultraAnnualMonthly = calcPrice(17);
+  const ultraAnnualTotal = calcPrice(212);
+
+  // Naira conversions rounded to 100 NGN
+  const calcNgn = (usdAmount: number) => Math.ceil((usdAmount * fxRate) / 100) * 100;
 
   return (
     <div className="space-y-8">
@@ -350,15 +364,21 @@ function PricingTableContent({ currentTier, isLoggedIn }: PricingTableProps) {
                 </span>
                 {(interval === 'year' ? proAnnualMonthly.isDiscounted : proMonthly.isDiscounted) && (
                   <span className="text-lg line-through text-[#11140F]/40 dark:text-white/40 font-medium">
-                    ${interval === 'year' ? '4' : '5'}
+                    ${interval === 'year' ? '5' : '6'}
                   </span>
                 )}
                 <span className="text-[13px] text-[#11140F]/50 dark:text-white/50">/month</span>
               </div>
+              <div className="mt-1 flex items-center gap-1.5 flex-wrap">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-[#2F6B4F]/10 dark:bg-[#34D399]/15 text-[#2F6B4F] dark:text-[#34D399] font-mono text-[11px] font-bold">
+                  ₦{calcNgn(interval === 'year' ? proAnnualTotal.discounted : proMonthly.discounted).toLocaleString()} {interval === 'year' ? '/yr' : '/mo'}
+                </span>
+                <span className="text-[10px] text-[#11140F]/50 dark:text-white/50">via Paystack</span>
+              </div>
               {interval === 'year' && (
                 <div className="mt-1 text-[11px] font-medium text-[#2F6B4F] dark:text-[#34D399]">
                   Billed annually (${proAnnualTotal.discounted}/yr
-                  {proAnnualTotal.isDiscounted && <span className="line-through text-[#11140F]/40 dark:text-white/40 ml-1">$48</span>})
+                  {proAnnualTotal.isDiscounted && <span className="line-through text-[#11140F]/40 dark:text-white/40 ml-1">$60</span>})
                 </div>
               )}
             </div>
@@ -427,7 +447,7 @@ function PricingTableContent({ currentTier, isLoggedIn }: PricingTableProps) {
                 'Current Plan'
               ) : (
                 <>
-                  Upgrade to Pro
+                  Upgrade with Paystack
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -459,15 +479,21 @@ function PricingTableContent({ currentTier, isLoggedIn }: PricingTableProps) {
                 </span>
                 {(interval === 'year' ? plusAnnualMonthly.isDiscounted : plusMonthly.isDiscounted) && (
                   <span className="text-lg line-through text-[#11140F]/40 dark:text-white/40 font-medium">
-                    ${interval === 'year' ? '10' : '12'}
+                    ${interval === 'year' ? '11' : '13'}
                   </span>
                 )}
                 <span className="text-[13px] text-[#11140F]/50 dark:text-white/50">/month</span>
               </div>
+              <div className="mt-1 flex items-center gap-1.5 flex-wrap">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 font-mono text-[11px] font-bold">
+                  ₦{calcNgn(interval === 'year' ? plusAnnualTotal.discounted : plusMonthly.discounted).toLocaleString()} {interval === 'year' ? '/yr' : '/mo'}
+                </span>
+                <span className="text-[10px] text-[#11140F]/50 dark:text-white/50">via Paystack</span>
+              </div>
               {interval === 'year' && (
                 <div className="mt-1 text-[11px] font-medium text-[#2F6B4F] dark:text-[#34D399]">
                   Billed annually (${plusAnnualTotal.discounted}/yr
-                  {plusAnnualTotal.isDiscounted && <span className="line-through text-[#11140F]/40 dark:text-white/40 ml-1">$120</span>})
+                  {plusAnnualTotal.isDiscounted && <span className="line-through text-[#11140F]/40 dark:text-white/40 ml-1">$132</span>})
                 </div>
               )}
             </div>
@@ -536,7 +562,7 @@ function PricingTableContent({ currentTier, isLoggedIn }: PricingTableProps) {
                 'Current Plan'
               ) : (
                 <>
-                  Upgrade to Plus
+                  Upgrade with Paystack
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -568,15 +594,21 @@ function PricingTableContent({ currentTier, isLoggedIn }: PricingTableProps) {
                 </span>
                 {(interval === 'year' ? ultraAnnualMonthly.isDiscounted : ultraMonthly.isDiscounted) && (
                   <span className="text-lg line-through text-[#11140F]/40 dark:text-white/40 font-medium">
-                    ${interval === 'year' ? '16' : '20'}
+                    ${interval === 'year' ? '17' : '21'}
                   </span>
                 )}
                 <span className="text-[13px] text-[#11140F]/50 dark:text-white/50">/month</span>
               </div>
+              <div className="mt-1 flex items-center gap-1.5 flex-wrap">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-purple-50 dark:bg-purple-950/40 text-purple-900 dark:text-purple-300 font-mono text-[11px] font-bold">
+                  ₦{calcNgn(interval === 'year' ? ultraAnnualTotal.discounted : ultraMonthly.discounted).toLocaleString()} {interval === 'year' ? '/yr' : '/mo'}
+                </span>
+                <span className="text-[10px] text-[#11140F]/50 dark:text-white/50">via Paystack</span>
+              </div>
               {interval === 'year' && (
                 <div className="mt-1 text-[11px] font-medium text-[#2F6B4F] dark:text-[#34D399]">
                   Billed annually (${ultraAnnualTotal.discounted}/yr
-                  {ultraAnnualTotal.isDiscounted && <span className="line-through text-[#11140F]/40 dark:text-white/40 ml-1">$200</span>})
+                  {ultraAnnualTotal.isDiscounted && <span className="line-through text-[#11140F]/40 dark:text-white/40 ml-1">$212</span>})
                 </div>
               )}
             </div>
@@ -645,13 +677,25 @@ function PricingTableContent({ currentTier, isLoggedIn }: PricingTableProps) {
                 'Current Plan'
               ) : (
                 <>
-                  Upgrade to Ultra
+                  Upgrade with Paystack
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Paystack Payment Trust & Currency Guarantee */}
+      <div className="max-w-2xl mx-auto text-center p-4 rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5] dark:bg-white/5 space-y-2">
+        <div className="flex items-center justify-center gap-2 text-xs font-semibold text-[#11140F] dark:text-white">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>Secured by Paystack • Instant Automated Provisioning</span>
+        </div>
+        <p className="text-[12px] text-[#11140F]/70 dark:text-white/70 leading-relaxed">
+          Accepting Debit &amp; Credit Cards (Mastercard, Visa, Verve), Bank Transfers, USSD, and Apple Pay.
+          All subscription fees are converted to Naira using the platform’s live buffered exchange rate (~₦{fxRate.toLocaleString()}/$1) with zero hidden transaction markups.
+        </p>
       </div>
     </div>
   );

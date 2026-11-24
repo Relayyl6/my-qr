@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { DomainPricingConfig } from '@/lib/domains/fxEngine';
 import { adminSavePricingConfig, adminRefreshLiveFx } from '@/app/domains-actions';
-import { WHOLESALE_USD_PRICING, SUPPORTED_TLDS } from '@/lib/domains/namelaunch';
+import { WHOLESALE_USD_PRICING, SUPPORTED_TLDS } from '@/lib/domains/constants';
 
 export default function AdminDomainPricingManager({
   initialConfig,

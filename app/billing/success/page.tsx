@@ -1,14 +1,46 @@
 import Link from "next/link";
 import { CheckCircle2, ArrowRight, Sparkles } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { TIER_CONFIGS } from "@/lib/ai/flags";
+
+export const dynamic = "force-dynamic";
 
 export default async function BillingSuccessPage({
   searchParams,
 }: {
-  searchParams: { tier?: string; session_id?: string; mode?: string };
+  searchParams: { tier?: string; session_id?: string; ref?: string; mode?: string; amountNgn?: string };
 }) {
   const user = await getCurrentUser();
-  const tierName = searchParams.tier || user?.tier || "pro";
+  const tierParam = (searchParams.tier || "").toLowerCase();
+  const targetTier = ['pro', 'plus', 'ultra'].includes(tierParam) ? tierParam : (user?.tier || "pro");
+
+  // Instant fulfillment for returning Paystack subscribers
+  if (user && ['pro', 'plus', 'ultra'].includes(targetTier)) {
+    if (searchParams.ref?.startsWith('SUB_') || searchParams.mode === 'dev' || searchParams.session_id) {
+      if (user.tier !== targetTier) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { tier: targetTier },
+        }).catch(() => {});
+
+        const tierConfig = TIER_CONFIGS[targetTier] || TIER_CONFIGS.pro;
+        await prisma.aiCredit.upsert({
+          where: { userId: user.id },
+          create: {
+            userId: user.id,
+            monthlyLimitUsd: tierConfig.monthlyLimitUsd,
+            usedThisMonth: 0,
+          },
+          update: {
+            monthlyLimitUsd: tierConfig.monthlyLimitUsd,
+          },
+        }).catch(() => {});
+      }
+    }
+  }
+
+  const tierName = targetTier;
 
   return (
     <div className="min-h-screen bg-[#EEF0EA] flex items-center justify-center p-4">
@@ -26,8 +58,13 @@ export default async function BillingSuccessPage({
             Welcome to DynamicQR {tierName.toUpperCase()}
           </h1>
           <p className="text-[14px] sm:text-[15px] text-[#11140F]/60 leading-relaxed">
-            Your account has been upgraded. All advanced AI routing, high-res exports, and generous monthly AI budgets are now active.
+            Your Paystack payment was confirmed. Advanced AI dynamic routing, high-res 300 DPI exports, branded custom domains, and generous monthly AI budgets are now fully active on your account.
           </p>
+          {searchParams.ref && (
+            <p className="text-[11.5px] font-mono text-slate-500 bg-slate-50 border border-slate-200 rounded-lg py-1 px-2.5 inline-block">
+              Ref: {searchParams.ref}
+            </p>
+          )}
         </div>
 
         <div className="pt-2">

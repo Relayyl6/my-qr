@@ -21,8 +21,8 @@ export const PLANS: Record<string, PlanDetails> = {
   pro: {
     id: "pro",
     name: "Pro",
-    monthlyPrice: 5,
-    yearlyPrice: 48, // $4/mo billed yearly ($48/yr)
+    monthlyPrice: 6, // $5 + $1 markup
+    yearlyPrice: 60, // $5/mo billed yearly ($60/yr, +$12/yr markup)
     monthlyAiBudget: 5.0,
     maxLinks: 50,
     priceIdMonthly: process.env.STRIPE_PRICE_PRO_MONTHLY,
@@ -31,8 +31,8 @@ export const PLANS: Record<string, PlanDetails> = {
   plus: {
     id: "plus",
     name: "Plus",
-    monthlyPrice: 12,
-    yearlyPrice: 120, // $10/mo billed yearly ($120/yr)
+    monthlyPrice: 13, // $12 + $1 markup
+    yearlyPrice: 132, // $11/mo billed yearly ($132/yr, +$12/yr markup)
     monthlyAiBudget: 15.0,
     maxLinks: 500,
     priceIdMonthly: process.env.STRIPE_PRICE_PLUS_MONTHLY,
@@ -41,11 +41,25 @@ export const PLANS: Record<string, PlanDetails> = {
   ultra: {
     id: "ultra",
     name: "Ultra",
-    monthlyPrice: 20,
-    yearlyPrice: 200, // ~$16/mo billed yearly ($200/yr)
+    monthlyPrice: 21, // $20 + $1 markup
+    yearlyPrice: 212, // ~$17.67/mo billed yearly ($212/yr, +$12/yr markup)
     monthlyAiBudget: 50.0,
     maxLinks: 999999,
     priceIdMonthly: process.env.STRIPE_PRICE_ULTRA_MONTHLY,
     priceIdYearly: process.env.STRIPE_PRICE_ULTRA_YEARLY,
   },
 };
+
+/**
+ * Calculates Paystack Naira price using the active scaled FX engine rate
+ */
+export function calculatePlanNgnPrice(
+  planId: string,
+  interval: "month" | "year",
+  effectiveFxRate: number = 1400
+): { usdPrice: number; ngnPrice: number } {
+  const plan = PLANS[planId] || PLANS.pro;
+  const usdPrice = interval === "year" ? plan.yearlyPrice : plan.monthlyPrice;
+  const ngnPrice = Math.ceil((usdPrice * effectiveFxRate) / 100) * 100;
+  return { usdPrice, ngnPrice };
+}

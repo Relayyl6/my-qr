@@ -29,7 +29,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
-import { DomainSearchResult, BUDGET_TLDS } from '@/lib/domains/namelaunch';
+import { DomainSearchResult, BUDGET_TLDS } from '@/lib/domains/constants';
 import {
   getUserDomainOrders,
   confirmOrderPayment,

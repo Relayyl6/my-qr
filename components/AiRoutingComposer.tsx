@@ -748,14 +748,14 @@ export default function AiRoutingComposer({
                 <div className="space-y-1 text-[12.5px] flex-1">
                   <h4 className="font-bold text-amber-950">Autonomous Ingress Scheduling is a Pro Feature</h4>
                   <p className="text-amber-800/80 leading-relaxed">
-                    Auto-switching destination URLs by hour and day of week is available on Pro ($5/mo), Plus, and Ultra plans. Never touch your printed acrylic table tents or posters again when menus and promotions change.
+                    Auto-switching destination URLs by hour and day of week is available on Pro ($6/mo), Plus, and Ultra plans. Never touch your printed acrylic table tents or posters again when menus and promotions change.
                   </p>
                   <div className="pt-2">
                     <Link
                       href="/pricing"
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-900 text-white font-semibold text-[11.5px] hover:bg-amber-950 transition-colors"
                     >
-                      <span>Upgrade to Pro ($5/mo)</span>
+                      <span>Upgrade to Pro ($6/mo)</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
                   </div>

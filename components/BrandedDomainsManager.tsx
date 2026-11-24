@@ -272,7 +272,7 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
                           <span>Don't own a domain yet?</span>
                         </div>
                         <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-snug">
-                          Buy a branded domain directly on DynamicQR (from ₦4,500/yr with free custom business email &amp; 0-config automatic DNS) via NameLaunch.
+                          Buy a branded domain directly on DynamicQR (from ₦7,500/yr with free custom business email &amp; 0-config automatic DNS) via NameLaunch.
                         </p>
                         <a
                           href="#workspace?section=namelaunch"
