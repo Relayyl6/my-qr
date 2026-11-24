@@ -1,5 +1,6 @@
 import dns from 'dns';
 import { promisify } from 'util';
+import { getDomainPricingConfig, calculateDomainPrice, DomainPricingConfig } from './fxEngine';
 
 const resolveNs = promisify(dns.resolveNs);
 const resolveSoa = promisify(dns.resolveSoa);
@@ -34,11 +35,25 @@ export const WHOLESALE_USD_PRICING: Record<string, number> = {
   io: 34.00,
 };
 
-export function calculateNgnPricing(wholesaleUsd: number): DomainPricing {
-  const fxRate = Number(process.env.USD_TO_NGN_RATE || 1650);
+export function calculateNgnPricing(
+  wholesaleUsd: number,
+  tld: string = 'xyz',
+  config?: DomainPricingConfig
+): DomainPricing {
+  if (config) {
+    const calc = calculateDomainPrice(wholesaleUsd, tld, config);
+    return {
+      wholesaleUsd,
+      wholesaleNgn: calc.wholesaleNgn,
+      platformFeeNgn: calc.platformMarkupNgn,
+      totalNgn: calc.finalPriceNgn,
+    };
+  }
+
+  // Fallback buffered rate calculation
+  const fxRate = Number(process.env.USD_TO_NGN_RATE || 1400);
   const platformFeeNgn = Number(process.env.PLATFORM_MARKUP_NGN || 2500);
   const wholesaleNgn = Math.ceil(wholesaleUsd * fxRate);
-  // Round up to nearest ₦100 for clean storefront numbers
   const totalNgn = Math.ceil((wholesaleNgn + platformFeeNgn) / 100) * 100;
 
   return {
@@ -90,6 +105,9 @@ export async function searchDomains(rawQuery: string): Promise<DomainSearchResul
   const dnaUsername = process.env.DNA_USERNAME;
   const dnaPassword = process.env.DNA_PASSWORD;
 
+  // Load active dynamic pricing & scaled FX configuration
+  const pricingConfig = await getDomainPricingConfig().catch(() => null);
+
   if (dnaUsername && dnaPassword) {
     try {
       const dnaRes = await fetch('https://api.domainnameapi.com/api/Domain/CheckAvailability', {
@@ -105,14 +123,14 @@ export async function searchDomains(rawQuery: string): Promise<DomainSearchResul
       const dnaData = await dnaRes.json();
       if (dnaData && Array.isArray(dnaData.data)) {
         return dnaData.data.map((item: any) => {
-          const tld = item.TLD || item.DomainName.split('.').pop();
+          const tld = item.TLD || item.DomainName.split('.').pop() || 'xyz';
           const available = item.Status?.toLowerCase() === 'available' || item.IsAvailable === true;
           const wholesaleUsd = Number(item.Price || WHOLESALE_USD_PRICING[tld] || 10.0);
           return {
             domain: item.DomainName || `${label}.${tld}`,
             tld,
             available,
-            pricing: available ? calculateNgnPricing(wholesaleUsd) : null,
+            pricing: available ? calculateNgnPricing(wholesaleUsd, tld, pricingConfig || undefined) : null,
           };
         });
       }
@@ -133,7 +151,7 @@ export async function searchDomains(rawQuery: string): Promise<DomainSearchResul
         domain,
         tld,
         available,
-        pricing: available ? calculateNgnPricing(wholesaleUsd) : null,
+        pricing: available ? calculateNgnPricing(wholesaleUsd, tld, pricingConfig || undefined) : null,
       };
     })
   );

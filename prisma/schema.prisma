@@ -430,6 +430,18 @@ model DomainOrder {
   nameservers       String[] // Cloudflare nameservers
   dnsRecordsBackup  Json?
   errorMessage      String?
+
+  // Namecheap & GoDaddy Fleet Operabilities
+  autoRenew         Boolean  @default(true)
+  whoisPrivacy      Boolean  @default(true)
+  transferLocked    Boolean  @default(true)
+  eppCode           String?  // Domain transfer authorization code
+  customNameservers String[] // Optional custom external nameservers
+  urlRedirectUrl    String?  // Web / URL Forwarding destination
+  urlRedirectType   String?  @default("301") // '301' | '302' | 'cloaked'
+  emailAliases      Json?    // Multi-alias list [{ alias, forwardTo, enabled }]
+  expiresAt         DateTime? // Domain expiration date
+
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 

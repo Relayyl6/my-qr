@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
 import { calculateNgnPricing, WHOLESALE_USD_PRICING } from '@/lib/domains/namelaunch';
+import { getDomainPricingConfig } from '@/lib/domains/fxEngine';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,7 +28,14 @@ export async function POST(req: Request) {
 
     const tld = domainName.split('.').pop() || 'com';
     const wholesaleUsd = WHOLESALE_USD_PRICING[tld] || 10.5;
-    const pricing = calculateNgnPricing(wholesaleUsd);
+    const pricingConfig = await getDomainPricingConfig().catch(() => null);
+    const pricing = calculateNgnPricing(wholesaleUsd, tld, pricingConfig || undefined);
+    const effectiveRate = pricingConfig
+      ? pricingConfig.mode === 'manual_override'
+        ? pricingConfig.manualOverrideRate
+        : pricingConfig.bufferedRate
+      : 1400;
+
     const reference = `DOM_${crypto.randomBytes(8).toString('hex').toUpperCase()}`;
 
     // 1. Create order in PostgreSQL
@@ -38,7 +46,7 @@ export async function POST(req: Request) {
         domainName,
         desiredAlias,
         wholesaleUsd: pricing.wholesaleUsd,
-        exchangeRate: Number(process.env.USD_TO_NGN_RATE || 1650),
+        exchangeRate: effectiveRate,
         platformMarkupNgn: pricing.platformFeeNgn,
         totalPaidNgn: pricing.totalNgn,
         paystackRef: reference,

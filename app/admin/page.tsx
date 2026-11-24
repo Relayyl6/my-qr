@@ -27,6 +27,8 @@ import AdminPromoManager from '@/components/AdminPromoManager';
 import AdminPlatformMailingList from '@/components/AdminPlatformMailingList';
 import AdminReportsManager from '@/components/AdminReportsManager';
 import AdminDomainOrdersManager from '@/components/AdminDomainOrdersManager';
+import AdminDomainPricingManager from '@/components/AdminDomainPricingManager';
+import { getDomainPricingConfig } from '@/lib/domains/fxEngine';
 import { adminGetSystemConfig, adminGetAuditLogs, adminGetPromoConfig, adminGetPromoCodes, adminGetReports } from '@/app/admin/actions';
 
 export const dynamic = 'force-dynamic';
@@ -61,6 +63,7 @@ export default async function AdminDashboardPage() {
     platformBroadcasts,
     abuseReports,
     domainOrders,
+    domainPricingConfig,
   ] = await Promise.all([
     prisma.user.count(),
     prisma.user.count({ where: { tier: 'free' } }),
@@ -153,6 +156,7 @@ export default async function AdminDashboardPage() {
       orderBy: { createdAt: 'desc' },
       take: 50,
     }),
+    getDomainPricingConfig(),
   ]);
 
   // Calculate MRR & ARR Run Rate
@@ -426,6 +430,9 @@ export default async function AdminDashboardPage() {
             </table>
           </div>
         </div>
+
+        {/* FX Exchange Rate Engine & Scaled Markup Sovereignty */}
+        <AdminDomainPricingManager initialConfig={domainPricingConfig} />
 
         {/* NameLaunch Domain Registrar & Custom Email Fleet */}
         <AdminDomainOrdersManager initialOrders={domainOrders as any} />

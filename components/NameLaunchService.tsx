@@ -17,14 +17,32 @@ import {
   RefreshCw,
   Sliders,
   Check,
+  Lock,
+  Unlock,
+  Share2,
+  Copy,
+  Plus,
+  Trash2,
+  Server,
+  Key,
+  ShieldCheck,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { DomainSearchResult, BUDGET_TLDS } from '@/lib/domains/namelaunch';
 import {
   getUserDomainOrders,
   confirmOrderPayment,
   linkDomainToQrWorkspace,
+  updateDomainFleetSettings,
+  setDomainWebForwarding,
+  addDomainEmailAlias,
+  removeDomainEmailAlias,
+  requestDomainEppCode,
+  updateDomainCustomNameservers,
 } from '@/app/domains-actions';
 import DnsManagerModal from './DnsManagerModal';
+import DomainFleetOperabilities from './DomainFleetOperabilities';
 
 interface Props {
   user: {
@@ -66,6 +84,7 @@ export default function NameLaunchService({ user, isAdmin = false }: Props) {
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [selectedDnsOrder, setSelectedDnsOrder] = useState<any | null>(null);
   const [linkingOrderId, setLinkingOrderId] = useState<string | null>(null);
+  const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
   const [actionAlert, setActionAlert] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
   // Load orders on mount
@@ -634,6 +653,20 @@ export default function NameLaunchService({ user, isAdmin = false }: Props) {
 
                         <button
                           type="button"
+                          onClick={() => setExpandedOrderId(expandedOrderId === ord.id ? null : ord.id)}
+                          className="px-3 py-1.5 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#1A1F16] text-xs font-semibold hover:bg-black/5 dark:hover:bg-white/5 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                        >
+                          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>WHOIS &amp; Security</span>
+                          {expandedOrderId === ord.id ? (
+                            <ChevronUp className="w-3 h-3 text-[#11140F]/50 dark:text-white/50" />
+                          ) : (
+                            <ChevronDown className="w-3 h-3 text-[#11140F]/50 dark:text-white/50" />
+                          )}
+                        </button>
+
+                        <button
+                          type="button"
                           onClick={() => handleLinkToWorkspace(ord)}
                           disabled={linkingOrderId === ord.id}
                           className="px-3 py-1.5 rounded-xl bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] text-xs font-semibold hover:bg-[#2A2E25] dark:hover:bg-white/90 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs disabled:opacity-50"
@@ -652,6 +685,16 @@ export default function NameLaunchService({ user, isAdmin = false }: Props) {
                         <span>Nameservers: {ord.nameservers.join(', ')}</span>
                         <span>Ref: {ord.paystackRef}</span>
                       </div>
+                    )}
+
+                    {/* Expandable Namecheap & GoDaddy Operabilities Suite */}
+                    {expandedOrderId === ord.id && (
+                      <DomainFleetOperabilities
+                        order={ord}
+                        onOrderUpdated={(updated) =>
+                          setOrders((prev) => prev.map((o) => (o.id === ord.id ? updated : o)))
+                        }
+                      />
                     )}
                   </div>
                 ))}
