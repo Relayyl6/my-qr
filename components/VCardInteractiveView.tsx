@@ -961,7 +961,7 @@ export default function VCardInteractiveView({
         <div className="w-full max-w-md mx-auto pt-6 pb-4 text-center space-y-4">
           <div>
             <Link
-              href="/?section=vcard#workspace"
+              href="/join?ref=vcard"
               className="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-white text-[#11140F] font-semibold text-sm hover:bg-white/90 shadow-md transition-all hover:scale-105 active:scale-95 cursor-pointer"
             >
               Get your own DynamicQR
@@ -1063,13 +1063,17 @@ export default function VCardInteractiveView({
             {shareViewMode === 'preview' ? (
               <div className="space-y-4">
                 {/* Hyper-Detailed Open Graph / Social Link Preview Card */}
-                <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-white/20 transition-all flex items-center gap-3.5 text-left">
-                  <div className="relative w-12 h-12 min-w-[48px] min-h-[48px] max-w-[48px] max-h-[48px] rounded-full overflow-hidden border-2 border-white/20 shrink-0 bg-black flex items-center justify-center">
+                <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-white/20 transition-all flex items-center gap-3.5 text-left overflow-hidden">
+                  <div
+                    style={{ width: 48, height: 48, minWidth: 48, minHeight: 48, maxWidth: 48, maxHeight: 48 }}
+                    className="relative w-12 h-12 min-w-[48px] min-h-[48px] max-w-[48px] max-h-[48px] rounded-full overflow-hidden border-2 border-white/20 shrink-0 bg-black flex items-center justify-center"
+                  >
                     {avatarUrl && !avatarError ? (
                       <img
                         src={avatarSrc || avatarUrl}
                         alt={fullName}
-                        className="w-full h-full object-cover block rounded-full"
+                        style={{ width: 48, height: 48, minWidth: 48, minHeight: 48, maxWidth: 48, maxHeight: 48, objectFit: 'cover' }}
+                        className="w-12 h-12 min-w-[48px] min-h-[48px] max-w-[48px] max-h-[48px] rounded-full object-cover block"
                         onError={handleAvatarError}
                       />
                     ) : (

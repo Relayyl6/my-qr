@@ -64,6 +64,7 @@ export async function generateMetadata({
       'theme-color': spec.accentColor || '#10B981',
       'profile:first_name': item.title.split(' ')[0] || item.title,
       'profile:last_name': item.title.split(' ').slice(1).join(' ') || '',
+      'profile:username': slug,
     },
   };
 }
@@ -95,9 +96,33 @@ export default async function VCardPublicPage({
   const isOwner = Boolean(currentUser?.id && currentUser.id === item.userId);
 
   const spec = (item.spec as any) || {};
+  const rawImage = spec.avatarUrl || spec.logoUrl || spec.bannerUrl;
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ProfilePage',
+    name: `${item.title} — Digital Contact Card`,
+    url: `${APP_URL}/c/${slug}`,
+    mainEntity: {
+      '@type': 'Person',
+      name: item.title,
+      jobTitle: spec.title || undefined,
+      worksFor: spec.company ? { '@type': 'Organization', name: spec.company } : undefined,
+      description: spec.bio || undefined,
+      image: rawImage ? getOptimizedStorageUrl(rawImage) : undefined,
+      email: spec.email ? `mailto:${spec.email}` : undefined,
+      telephone: spec.phone || undefined,
+      url: spec.website || `${APP_URL}/c/${slug}`,
+    },
+  };
 
   return (
-    <VCardInteractiveView
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <VCardInteractiveView
       itemId={item.id}
       isOwner={isOwner}
       slug={slug}
@@ -131,5 +156,6 @@ export default async function VCardPublicPage({
       customLinks={Array.isArray(spec.customLinks) ? spec.customLinks : []}
       rawSpec={spec}
     />
+    </>
   );
 }

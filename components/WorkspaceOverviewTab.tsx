@@ -1083,7 +1083,7 @@ export default function WorkspaceOverviewTab({
           </div>
 
           {/* Interactive Chat Stream & Quick Inquiries */}
-          <div className={`flex-1 min-h-[140px] my-2 overflow-y-auto pr-1.5 space-y-2.5 ${
+          <div className={`flex-1 min-h-[140px] max-h-[230px] my-2 overflow-y-auto scroll-smooth pr-1.5 space-y-2.5 scrollbar-thin scrollbar-thumb-white/10 ${
             copilotChat.length === 0 ? 'flex flex-col justify-end' : ''
           }`}>
             {copilotChat.length === 0 ? (

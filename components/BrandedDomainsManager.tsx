@@ -229,55 +229,55 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 pt-1">
                   {/* Step 1 */}
-                  <div className="p-4 rounded-xl bg-white dark:bg-[#1C2218] border border-[#11140F]/10 dark:border-white/10 space-y-2 shadow-2xs flex flex-col justify-between">
+                  <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#1C2218] border border-slate-200 dark:border-white/10 space-y-2 shadow-2xs flex flex-col justify-between">
                     <div className="space-y-2">
-                      <div className="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-2 text-[13px]">
+                      <div className="font-bold text-emerald-800 dark:text-emerald-400 flex items-center gap-2 text-[13px]">
                         <span className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[11px] font-bold shrink-0">1</span>
                         Step 1: Pick the address you want
                       </div>
-                      <p className="text-[12px] text-[#11140F]/75 dark:text-white/75 leading-relaxed">
-                        In the input box under <strong>Branded Domains</strong>, type the web address you want for your QR codes (e.g. <code className="font-mono text-emerald-700 dark:text-emerald-300 font-semibold px-1 py-0.5 rounded bg-black/5 dark:bg-white/10">qr.yourcompany.com</code> or <code className="font-mono text-emerald-700 dark:text-emerald-300 font-semibold px-1 py-0.5 rounded bg-black/5 dark:bg-white/10">links.yourcompany.com</code>).
+                      <p className="text-[12px] text-slate-800 dark:text-slate-200 leading-relaxed font-normal">
+                        In the input box under <strong>Branded Domains</strong>, type the web address you want for your QR codes (e.g. <code className="font-mono text-emerald-900 dark:text-emerald-300 font-bold px-1.5 py-0.5 rounded bg-slate-200/80 dark:bg-white/10 border border-slate-300 dark:border-white/10">qr.yourcompany.com</code> or <code className="font-mono text-emerald-900 dark:text-emerald-300 font-bold px-1.5 py-0.5 rounded bg-slate-200/80 dark:bg-white/10 border border-slate-300 dark:border-white/10">links.yourcompany.com</code>).
                       </p>
                     </div>
-                    <div className="pt-2 text-[12px] font-semibold text-emerald-600 dark:text-emerald-400">
+                    <div className="pt-2 text-[12px] font-bold text-emerald-800 dark:text-emerald-400">
                       &bull; Click <strong>"Add Domain"</strong>.
                     </div>
                   </div>
 
                   {/* Step 2 */}
-                  <div className="p-4 rounded-xl bg-white dark:bg-[#1C2218] border border-[#11140F]/10 dark:border-white/10 space-y-2.5 shadow-2xs">
-                    <div className="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-2 text-[13px]">
+                  <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#1C2218] border border-slate-200 dark:border-white/10 space-y-2.5 shadow-2xs">
+                    <div className="font-bold text-emerald-800 dark:text-emerald-400 flex items-center gap-2 text-[13px]">
                       <span className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[11px] font-bold shrink-0">2</span>
                       Step 2: Copy the 2 lines to where you bought your website
                     </div>
-                    <div className="text-[12px] text-[#11140F]/75 dark:text-white/75 space-y-2 leading-snug">
-                      <p className="text-[11.5px]">DynamicQR will immediately give you two lines of text:</p>
-                      <div className="p-2.5 rounded-lg bg-[#F7F8F5] dark:bg-black/40 border border-[#11140F]/10 dark:border-white/10 font-mono text-[11px] space-y-1.5 text-[#11140F] dark:text-white">
+                    <div className="text-[12px] text-slate-800 dark:text-slate-200 space-y-2 leading-snug">
+                      <p className="text-[11.5px] font-medium text-slate-800 dark:text-slate-200">DynamicQR will immediately give you two lines of text:</p>
+                      <div className="p-2.5 rounded-lg bg-white dark:bg-black/50 border border-slate-200 dark:border-white/10 font-mono text-[11px] space-y-1.5 text-slate-900 dark:text-white shadow-2xs">
                         <div>
-                          <strong className="text-emerald-700 dark:text-emerald-400">Line 1 (CNAME):</strong> tells the internet to send people to DynamicQR.
+                          <strong className="text-emerald-800 dark:text-emerald-400 font-bold">Line 1 (CNAME):</strong> tells the internet to send people to DynamicQR.
                         </div>
                         <div>
-                          <strong className="text-emerald-700 dark:text-emerald-400">Line 2 (TXT):</strong> proves that you own this website.
+                          <strong className="text-emerald-800 dark:text-emerald-400 font-bold">Line 2 (TXT):</strong> proves that you own this website.
                         </div>
                       </div>
-                      <p className="text-[11.5px] leading-relaxed">
+                      <p className="text-[11.5px] leading-relaxed font-normal text-slate-800 dark:text-slate-200">
                         Log into your domain account (GoDaddy, Namecheap, Cloudflare, etc.), go to your <strong>DNS Settings</strong>, and paste those 2 lines.
                       </p>
                     </div>
                   </div>
 
                   {/* Step 3 */}
-                  <div className="p-4 rounded-xl bg-white dark:bg-[#1C2218] border border-[#11140F]/10 dark:border-white/10 space-y-2 shadow-2xs flex flex-col justify-between">
+                  <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#1C2218] border border-slate-200 dark:border-white/10 space-y-2 shadow-2xs flex flex-col justify-between">
                     <div className="space-y-2">
-                      <div className="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-2 text-[13px]">
+                      <div className="font-bold text-emerald-800 dark:text-emerald-400 flex items-center gap-2 text-[13px]">
                         <span className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[11px] font-bold shrink-0">3</span>
                         Step 3: Click "Instant Verify (Test Mode)"
                       </div>
-                      <p className="text-[12px] text-[#11140F]/75 dark:text-white/75 leading-relaxed">
-                        Click the green <strong>"Instant Verify (Test Mode)"</strong> button in DynamicQR. The badge turns to <span className="text-emerald-700 dark:text-emerald-400 font-bold">Active & Verified</span>.
+                      <p className="text-[12px] text-slate-800 dark:text-slate-200 leading-relaxed font-normal">
+                        Click the green <strong>"Instant Verify (Test Mode)"</strong> button in DynamicQR. The badge turns to <span className="text-emerald-800 dark:text-emerald-400 font-bold">Active & Verified</span>.
                       </p>
                     </div>
-                    <div className="pt-2 p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[11.5px] text-emerald-800 dark:text-emerald-300 leading-snug">
+                    <div className="pt-2 p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-[11.5px] text-emerald-900 dark:text-emerald-300 leading-snug font-medium">
                       <strong>Done!</strong> Whenever you create a new QR code in your workspace, select your domain from the dropdown and your QR codes will be generated under your brand.
                     </div>
                   </div>

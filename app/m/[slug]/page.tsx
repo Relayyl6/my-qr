@@ -91,15 +91,48 @@ export default async function MenuPublicPage({
     .catch(() => {});
 
   const spec = (item.spec as any) || {};
+  const rawImage = spec.bannerUrl || spec.coverUrl || spec.logoUrl;
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Restaurant',
+    name: item.title,
+    url: `${APP_URL}/m/${slug}`,
+    image: rawImage ? getOptimizedStorageUrl(rawImage) : undefined,
+    hasMenu: {
+      '@type': 'Menu',
+      name: `${item.title} Menu`,
+      hasMenuSection: (spec.sections || []).map((sec: any) => ({
+        '@type': 'MenuSection',
+        name: sec.name || 'Category',
+        hasMenuItem: (sec.items || []).map((dish: any) => ({
+          '@type': 'MenuItem',
+          name: dish.name || 'Dish',
+          description: dish.description || undefined,
+          offers: {
+            '@type': 'Offer',
+            price: dish.price || 0,
+            priceCurrency: spec.currency || 'USD',
+          },
+        })),
+      })),
+    },
+  };
 
   return (
-    <MenuInteractiveView
-      title={item.title}
-      currency={spec.currency || '$'}
-      sections={spec.sections || []}
-      bannerUrl={spec.bannerUrl || ''}
-      logoUrl={spec.logoUrl || ''}
-      showBranding={spec.showBranding !== false}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <MenuInteractiveView
+        title={item.title}
+        currency={spec.currency || '$'}
+        sections={spec.sections || []}
+        bannerUrl={spec.bannerUrl || ''}
+        logoUrl={spec.logoUrl || ''}
+        showBranding={spec.showBranding !== false}
+      />
+    </>
   );
 }

@@ -30,12 +30,14 @@ import {
   Share2,
   TrendingUp,
   Video,
+  AtSign,
 } from 'lucide-react';
 import BulkImportWizard from './BulkImportWizard';
 import AccountSettingsModal from './AccountSettingsModal';
 import EntryPromoModal from './EntryPromoModal';
 import MicroSaasHub from './MicroSaasHub';
 import WorkspaceOverviewTab from './WorkspaceOverviewTab';
+import NameLaunchService from './NameLaunchService';
 import { getOptimizedStorageUrl } from '@/lib/media';
 import { signOut } from '@/app/auth-actions';
 import { getStoredPreferences } from '@/lib/theme';
@@ -50,7 +52,8 @@ export type WorkspaceSection =
   | 'vcard'
   | 'shortener'
   | 'menu'
-  | 'wifi';
+  | 'wifi'
+  | 'namelaunch';
 
 const VALID_SECTIONS: WorkspaceSection[] = [
   'all',
@@ -63,6 +66,7 @@ const VALID_SECTIONS: WorkspaceSection[] = [
   'shortener',
   'menu',
   'wifi',
+  'namelaunch',
 ];
 
 function QrMark({ className = 'w-5 h-5', fill = '#11140F' }: { className?: string; fill?: string }) {
@@ -365,6 +369,13 @@ export default function WorkspaceShell({
           id: 'wifi' as WorkspaceSection,
           label: 'Dynamic Guest Wi-Fi',
           icon: Wifi,
+        },
+        {
+          id: 'namelaunch' as WorkspaceSection,
+          label: 'Domains & Email (₦)',
+          icon: AtSign,
+          badge: 'Paystack',
+          badgeColor: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
         },
       ],
     },
@@ -1145,6 +1156,7 @@ export default function WorkspaceShell({
                 } catch (e) {}
               }}
             />
+            <NameLaunchService user={user} isAdmin={isAdmin} />
             {linkCreationAndList}
           </div>
         )}
@@ -1208,6 +1220,13 @@ export default function WorkspaceShell({
                 } catch (e) {}
               }}
             />
+          </div>
+        )}
+
+        {/* VIEW 11: NAMELAUNCH DOMAINS & BUSINESS EMAIL (PAYSTACK STOREFRONT) */}
+        {activeSection === 'namelaunch' && (
+          <div className="space-y-6">
+            <NameLaunchService user={user} isAdmin={isAdmin} />
           </div>
         )}
       </main>

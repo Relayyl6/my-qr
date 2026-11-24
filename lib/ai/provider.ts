@@ -268,23 +268,21 @@ export class GeminiProvider implements AIProvider {
 
     // Frontier reasoning cascade
     const heavyCascade = [
-      "gemini-4-argon",
-      "gemini-3.8-flash",
-      "gemini-3.7-flash",
-      "gemini-3.6-flash",
       "gemini-3.5-flash",
       "gemini-3.5-flash-lite",
-      "gemini-flash-lite-latest",
+      "gemini-flash-latest",
+      "gemini-3.8-flash",
+      "gemini-2.5-pro",
+      "gemini-4-argon",
     ];
 
     // Ultra-low latency operational cascade (sub-3s guarantee)
     const fastCascade = [
-      "gemini-3.6-flash",
-      "gemini-3.5-flash-lite",
-      "gemini-flash-lite-latest",
       "gemini-3.5-flash",
+      "gemini-3.5-flash-lite",
+      "gemini-flash-latest",
+      "gemini-flash-lite-latest",
       "gemini-3.8-flash",
-      "gemini-4-argon",
     ];
 
     const baseList = isHeavyReasoning ? heavyCascade : fastCascade;
@@ -296,10 +294,10 @@ export class GeminiProvider implements AIProvider {
   }
 
   private resolveModel(model?: string): string {
-    if (!model) return "gemini-3.6-flash";
+    if (!model) return "gemini-3.5-flash";
     const m = model.toLowerCase();
     if (m.startsWith("gpt-") || m.startsWith("claude-") || m.includes("mini") || m.includes("4o")) {
-      return "gemini-3.6-flash";
+      return "gemini-3.5-flash";
     }
     if (m.includes("argon") || m.includes("gemini-4")) return "gemini-4-argon";
     if (m.includes("3.8")) return "gemini-3.8-flash";

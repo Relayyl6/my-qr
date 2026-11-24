@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
       peakMonthScans = 0,
     } = workspaceContext;
 
-    const systemPrompt = `You are the DynamicQR Workspace Copilot, an analytical, high-intelligence operations copilot for the user's QR routing, digital cards, and micro-saas ecosystem.
+    const systemPrompt = `You are the DynamicQR Workspace Copilot, an analytical, high-intelligence operations copilot for the user's QR routing, digital cards, domains, and micro-saas ecosystem.
 
 CURRENT REAL WORKSPACE CONTEXT:
 - User: ${user?.name || user?.email || 'Workspace Member'} (${user?.tier || 'Free'} Tier)
@@ -58,9 +58,9 @@ CURRENT REAL WORKSPACE CONTEXT:
 - Instant Wi-Fi Cards: ${wifisCount}
 
 STRICT CONSTRAINTS (MANDATORY):
-1. LENGTH LIMIT: Keep your answer strictly between 2 to 4 sentences (under 80 words). Be dense with facts, direct, and actionable.
-2. ABSOLUTELY NO EMOJIS: Do NOT use any emojis under any circumstances. No smileys, no fire, no chart icons, no decorative Unicode symbols. Pure plain text only.
-3. CONTEXTUAL RELEVANCE: Answer directly using the real workspace telemetry numbers and names provided above.
+1. LENGTH LIMIT: Keep your answer strictly between 2 to 3 concise sentences (max 75 words). Be direct, dense with facts, and immediately actionable.
+2. ABSOLUTELY NO EMOJIS: Do NOT use any emojis under any circumstances. No smileys, no fire, no rocket, no checkmarks, no unicode emoticons. Plain text only.
+3. CONVERSATIONAL CONTEXT: If the user asks a short inquiry like 'how', 'what', 'how does this work', or 'guide me', explain how DynamicQR routes scans dynamically, lets them update destinations anytime, and captures leads with digital cards.
 4. NO FILLER: Never start with conversational pleasantries like "Sure!", "Certainly!", "Hello!", or "I would be happy to help". Answer immediately.`;
 
     const conversationSnippet = history
@@ -79,6 +79,7 @@ STRICT CONSTRAINTS (MANDATORY):
       const aiResult = await provider.generateText({
         system: systemPrompt,
         prompt,
+        model: 'gemini-3.5-flash',
         temperature: 0.2,
       });
       reply = stripEmojis(aiResult.text);
@@ -87,7 +88,11 @@ STRICT CONSTRAINTS (MANDATORY):
 
       // Deterministic analytical fallback without emojis
       const lower = query.toLowerCase();
-      if (lower.includes('lead') || lower.includes('subscriber') || lower.includes('contact') || lower.includes('audience')) {
+      if (lower === 'how' || lower.includes('how does') || lower.includes('how to') || lower.includes('guide')) {
+        reply = 'DynamicQR routes scans through smart dynamic shortlinks, letting you change destination URLs anytime without reprinting physical QR materials. Select any QR link or micro-saas card to update targets, review scan metrics, or attach a custom domain.';
+      } else if (lower.includes('domain') || lower.includes('cname') || lower.includes('brand')) {
+        reply = 'To add a custom domain, visit the Branded Domains section, enter your subdomain, and add the CNAME and TXT records at your registrar. You can also register domains and custom business email forwarding directly via NameLaunch with Paystack.';
+      } else if (lower.includes('lead') || lower.includes('subscriber') || lower.includes('contact') || lower.includes('audience')) {
         reply = subscribersCount > 0
           ? `You have ${subscribersCount} captured leads in your ${mailingListName} list. Recent contacts include ${recentLeads.slice(0, 2).join(', ') || 'VIP subscribers'}.`
           : `You currently have zero captured leads in your workspace. Connect your VIP mailing list to capture leads from dynamic QR scans.`;
@@ -102,7 +107,7 @@ STRICT CONSTRAINTS (MANDATORY):
           ? `You have ${vcardsCount} digital vCards deployed with contact exchange and one-tap address book saving enabled.`
           : `You currently have zero digital vCards active. Create one in the Micro-SaaS tab to launch your digital card.`;
       } else {
-        reply = `Workspace status shows ${linksCount} active QR links, ${subscribersCount} captured leads, and ${totalScans} total redirects. Routing health is at ${healthScore} percent with ${topLinkTitle} leading engagement.`;
+        reply = `Workspace status shows ${linksCount} active QR links, ${subscribersCount} captured leads, and ${totalScans} total redirects with ${healthScore} percent routing health. What specific link or workflow would you like to review?`;
       }
     }
 
