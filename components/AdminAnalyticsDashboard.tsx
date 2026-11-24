@@ -213,7 +213,7 @@ export default function AdminAnalyticsDashboard({ initialData }: Props) {
           <p className="text-2xl sm:text-3xl font-bold text-[#11140F] tracking-tight">
             {data.totalScans.toLocaleString()}
           </p>
-          <p className="text-[11px] text-[#11140F]/50">307 Edge redirects</p>
+          <p className="text-[11px] text-[#11140F]/50">Edge redirects</p>
         </div>
 
         <div className="rounded-2xl border border-[#11140F]/10 bg-white p-4 shadow-xs space-y-1">

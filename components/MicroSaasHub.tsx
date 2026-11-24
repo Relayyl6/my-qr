@@ -2533,9 +2533,9 @@ export default function MicroSaasHub({
           defaultHeadline={printVcard.title}
           defaultHeaderTag="SCAN MY CONTACT CARD"
           defaultSubline="Tap to save my contact details instantly"
-          defaultFooterNote="Digital Business Card • DynamicQR"
+          defaultFooterNote="Powered by Dynamic QR"
           defaultTemplate="card-badge"
-          featureBannerText="Print on physical business cards or badge holders. When scanned, contacts are instantly saved to the customer's phone — no app required."
+          featureBannerText="Print on physical business cards or badge holders. When scanned, contacts are instantly saved to the customer's phone with zero friction."
         />
       )}
 
@@ -2551,7 +2551,7 @@ export default function MicroSaasHub({
           defaultHeadline={printLink.title}
           defaultHeaderTag="SCAN TO OPEN"
           defaultSubline="Instant smart redirect — iOS & Android aware"
-          defaultFooterNote="307 Edge Redirect • No app required"
+          defaultFooterNote="Powered by Dynamic QR"
           defaultTemplate="table-tent"
           featureBannerText="Print on marketing materials, packaging, or displays. This smart link automatically routes iOS to App Store and Android to Play Store."
         />
@@ -2569,7 +2569,7 @@ export default function MicroSaasHub({
           defaultHeadline={printMenu.title}
           defaultHeaderTag="SCAN FOR MENU"
           defaultSubline="View our full menu on your phone"
-          defaultFooterNote="Contactless dining • No app required • Always up-to-date"
+          defaultFooterNote="Powered by Dynamic QR"
           defaultTemplate="table-tent"
           featureBannerText="Place on dining tables, counters, or at the door. Customers scan to view your live-updated menu without ever reprinting."
         />
@@ -2587,7 +2587,7 @@ export default function MicroSaasHub({
           defaultHeadline="Connect to Guest Wi-Fi"
           defaultHeaderTag="FREE WI-FI"
           defaultSubline={printWifi.spec?.ssid || 'Guest Network'}
-          defaultFooterNote="One tap • No password typing • Instant connection"
+          defaultFooterNote="Powered by Dynamic QR"
           defaultTemplate="card-badge"
           featureBannerText="Print on tabletop tent cards or at the entrance. Guests scan once and are instantly connected — no password required."
         />

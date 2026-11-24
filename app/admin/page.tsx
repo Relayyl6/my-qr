@@ -254,7 +254,7 @@ export default async function AdminDashboardPage() {
               {totalScansCount.toLocaleString()}
             </p>
             <p className="text-[11.5px] text-[#11140F]/50">
-              Served via 307 edge redirects
+              Served via edge redirects
             </p>
           </div>
         </div>

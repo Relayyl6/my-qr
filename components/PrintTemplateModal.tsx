@@ -806,7 +806,7 @@ export default function PrintTemplateModal({
                         </span>
                       </div>
                       <p className="text-[11px] text-[#11140F]/55">
-                        "No app required • Instant redirect"
+                        "Powered by Dynamic QR"
                       </p>
                     </div>
                     {canCustomizeElements ? (

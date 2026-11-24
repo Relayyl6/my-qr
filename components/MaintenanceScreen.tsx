@@ -76,7 +76,7 @@ export default function MaintenanceScreen() {
               <Zap className="w-3.5 h-3.5" />
               <span>100% Operational</span>
             </div>
-            <p className="text-[11px] text-white/50">Sub-10ms 307 Edge Redirects</p>
+            <p className="text-[11px] text-white/50">Sub-10ms Instant Edge Ingress</p>
           </div>
 
           <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/10 space-y-1">

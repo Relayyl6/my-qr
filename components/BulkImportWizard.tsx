@@ -60,7 +60,7 @@ export function createLocalFallback(items: { destinationUrl: string; label?: str
       {
         campaignName: 'Bulk Marketing Ingestion',
         category: 'Promotional & Social',
-        suggestedStrategy: 'High-speed 307 edge redirects with real-time analytics tracking.',
+        suggestedStrategy: 'High-speed edge redirects with real-time analytics tracking.',
         items: items.map((it, idx) => {
           let slug = `asset-${idx + 1}`;
           try {
@@ -111,7 +111,7 @@ export default function BulkImportWizard({
 
         <div className="space-y-4">
           <p className="text-[14px] text-[#11140F]/70 leading-relaxed">
-            AI Bulk Link Ingestion automatically clusters CSV/text batches into organized campaigns, generates semantic shortcodes, and deploys high-speed 307 routing rules in bulk.
+            AI Bulk Link Ingestion automatically clusters CSV/text batches into organized campaigns, generates semantic shortcodes, and deploys high-speed routing rules in bulk.
           </p>
           <div className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-4 space-y-2 text-[12.5px] text-emerald-900">
             <p className="font-semibold">Included on Pro, Plus & Ultra Plans:</p>

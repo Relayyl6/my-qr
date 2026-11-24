@@ -2246,7 +2246,7 @@ export default function CustomerMailingListManager({
           defaultHeadline={selectedList.headline || `Join ${selectedList.name}`}
           defaultHeaderTag={selectedList.badgeText ? selectedList.badgeText.toUpperCase() : 'SCAN TO SUBSCRIBE'}
           defaultSubline={selectedList.description || 'Enter your email for exclusive updates'}
-          defaultFooterNote="Instant confirmation • Zero spam • Unsubscribe anytime"
+          defaultFooterNote="Powered by Dynamic QR"
           defaultTemplate="table-tent"
           featureBannerText="Print this QR code on retail counters, packaging, or table tents. When customers scan, they enter their email on a branded mobile form with automated double opt-in."
         />

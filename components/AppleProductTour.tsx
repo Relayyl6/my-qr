@@ -136,7 +136,7 @@ const INDUSTRIES: Record<
     routeRules: ['Apple iOS → App Store Handoff', 'Android → Google Play Store', 'Desktop Browsers → Interactive Web Demo'],
     benefitLabel: 'App Install Conversion',
     benefitValue: '+38%',
-    secondaryBenefit: 'Sub-10ms 307 Edge Redirect',
+    secondaryBenefit: 'Sub-10ms Instant Edge Routing',
   },
 };
 
