@@ -284,7 +284,7 @@ export default function HeaderNav({
                 }`}
                 title="Quick Search & Command Palette (⌘K / Ctrl+K)"
               >
-                <Search className="w-4 h-4 sm:w-[17px] sm:h-[17px] text-emerald-400 group-hover:scale-110 transition-transform shrink-0" />
+                <Search className="w-[18px] h-[18px] text-emerald-400 group-hover:scale-110 transition-transform shrink-0 stroke-[2.25]" />
                 <span className="hidden lg:inline text-[12.5px] font-medium text-white/75 dark:text-white/75 group-hover:text-white ml-2">
                   Search...
                 </span>
