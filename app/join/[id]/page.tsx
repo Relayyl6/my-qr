@@ -6,9 +6,9 @@ import CustomerJoinView from '@/components/CustomerJoinView';
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string } | Promise<{ id: string }>;
 }) {
-  const { id } = await params;
+  const { id } = await Promise.resolve(params);
   const list = await prisma.customerMailList.findUnique({
     where: { id },
   });
@@ -59,9 +59,9 @@ export async function generateMetadata({
 export default async function CustomerJoinPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string } | Promise<{ id: string }>;
 }) {
-  const { id } = await params;
+  const { id } = await Promise.resolve(params);
 
   const list = await prisma.customerMailList.findUnique({
     where: { id },

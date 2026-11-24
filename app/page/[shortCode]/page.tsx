@@ -15,11 +15,12 @@ export async function generateMetadata({
   const result = await getLandingPageByShortCode(params.shortCode);
   if (!result) return { title: "Page Not Found — DynamicQR" };
 
-  const { spec } = result;
-  const pageTitle = `${spec.businessName || "Exclusive Landing Page"} | DynamicQR`;
-  const pageDesc = spec.bio || spec.headline || "Official mobile destination powered by DynamicQR.";
+  const spec = result.spec as any;
+  const heroBlock = Array.isArray(spec.blocks) ? spec.blocks.find((b: any) => b.type === 'hero') : null;
+  const pageTitle = `${spec.businessName || heroBlock?.title || 'Exclusive Landing Page'} | DynamicQR`;
+  const pageDesc = spec.bio || heroBlock?.subtitle || 'Official mobile destination powered by DynamicQR.';
   const canonicalUrl = `${APP_URL}/page/${params.shortCode}`;
-  const rawImage = spec.heroImageUrl || spec.logoUrl;
+  const rawImage = heroBlock?.avatarUrl || spec.heroImageUrl || spec.logoUrl;
   const ogImageUrl = rawImage ? getOptimizedStorageUrl(rawImage) : `${APP_URL}/icon.svg`;
 
   return {
@@ -51,7 +52,7 @@ export async function generateMetadata({
       images: [ogImageUrl],
     },
     other: {
-      "theme-color": spec.themeColor || "#10B981",
+      "theme-color": spec.theme?.accentColor || spec.themeColor || "#10B981",
     },
   };
 }

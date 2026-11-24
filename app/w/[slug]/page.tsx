@@ -6,9 +6,9 @@ import WifiInteractiveView from '@/components/WifiInteractiveView';
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: { slug: string } | Promise<{ slug: string }>;
 }) {
-  const { slug } = await params;
+  const { slug } = await Promise.resolve(params);
   const item = await prisma.microSaasItem.findUnique({
     where: { slug },
   });
@@ -64,9 +64,9 @@ export async function generateMetadata({
 export default async function WifiPublicPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: { slug: string } | Promise<{ slug: string }>;
 }) {
-  const { slug } = await params;
+  const { slug } = await Promise.resolve(params);
 
   const item = await prisma.microSaasItem.findUnique({
     where: { slug },
