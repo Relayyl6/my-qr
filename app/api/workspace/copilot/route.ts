@@ -115,6 +115,7 @@ STRICT CONSTRAINTS (MANDATORY):
     return NextResponse.json({
       text: 'Workspace telemetry routing is operational across all active dynamic QR destinations and micro-saas services.',
       source: 'fallback',
+      error: err?.message || String(err),
     });
   }
 }
