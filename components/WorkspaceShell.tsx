@@ -28,6 +28,8 @@ import {
   Eye,
   CheckCircle2,
   Share2,
+  TrendingUp,
+  Video,
 } from 'lucide-react';
 import BulkImportWizard from './BulkImportWizard';
 import AccountSettingsModal from './AccountSettingsModal';
@@ -400,15 +402,25 @@ export default function WorkspaceShell({
 
         <div className="flex items-center gap-2">
           {isAdmin && (
-            <button
-              type="button"
-              onClick={() => setShowPromoModalPreview(true)}
-              className="p-1.5 rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#11140F] text-xs font-semibold text-[#11140F] dark:text-white flex items-center gap-1"
-              title="Preview Entry Promo Modal"
-            >
-              <Eye className="w-3.5 h-3.5 text-emerald-600" />
-              <span className="hidden sm:inline">Modal</span>
-            </button>
+            <>
+              <Link
+                href="/admin"
+                className="px-2 py-1 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs font-semibold flex items-center gap-1 shadow-2xs hover:bg-emerald-500/20 transition-colors"
+                title="Super-Admin Sovereign Console"
+              >
+                <Shield className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                <span className="text-[10px] font-mono uppercase font-bold hidden xs:inline">Admin</span>
+              </Link>
+              <button
+                type="button"
+                onClick={() => setShowPromoModalPreview(true)}
+                className="p-1.5 rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#11140F] text-xs font-semibold text-[#11140F] dark:text-white flex items-center gap-1"
+                title="Preview Entry Promo Modal"
+              >
+                <Eye className="w-3.5 h-3.5 text-emerald-600" />
+                <span className="hidden sm:inline">Modal</span>
+              </button>
+            </>
           )}
           <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-500/20">
             {tierName}
@@ -688,6 +700,32 @@ export default function WorkspaceShell({
                   <Activity className="w-4 h-4 shrink-0" />
                   {!sidebarCollapsed && <span className="truncate flex-1 text-left">AI Telemetry</span>}
                 </Link>
+
+                <Link
+                  href="/admin/analytics"
+                  className={`rounded-xl text-xs font-medium transition-all ${
+                    sidebarCollapsed
+                      ? 'w-10 h-10 flex items-center justify-center mx-auto text-blue-700 dark:text-blue-400 hover:bg-blue-500/10'
+                      : 'w-full flex items-center gap-3 px-3 py-2.5 text-blue-700 dark:text-blue-400 hover:bg-blue-500/10'
+                  }`}
+                  title="Analytics Hub"
+                >
+                  <TrendingUp className="w-4 h-4 shrink-0" />
+                  {!sidebarCollapsed && <span className="truncate flex-1 text-left">Analytics Hub</span>}
+                </Link>
+
+                <Link
+                  href="/admin/sessions"
+                  className={`rounded-xl text-xs font-medium transition-all ${
+                    sidebarCollapsed
+                      ? 'w-10 h-10 flex items-center justify-center mx-auto text-rose-700 dark:text-rose-400 hover:bg-rose-500/10'
+                      : 'w-full flex items-center gap-3 px-3 py-2.5 text-rose-700 dark:text-rose-400 hover:bg-rose-500/10'
+                  }`}
+                  title="Session Replay"
+                >
+                  <Video className="w-4 h-4 shrink-0" />
+                  {!sidebarCollapsed && <span className="truncate flex-1 text-left">Session Replay</span>}
+                </Link>
               </>
             )}
           </div>
@@ -891,19 +929,87 @@ export default function WorkspaceShell({
                 </div>
                 <Link
                   href="/product-tour"
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-[#11140F]/70 dark:text-white/70"
+                  onClick={() => setMobileDrawerOpen(false)}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-[#11140F]/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5 transition-all"
                 >
                   <Compass className="w-4 h-4 text-emerald-500" />
                   <span>Product Tour</span>
                 </Link>
                 <Link
                   href="/pricing"
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-[#11140F]/70 dark:text-white/70"
+                  onClick={() => setMobileDrawerOpen(false)}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-[#11140F]/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5 transition-all"
                 >
-                  <CreditCard className="w-4 h-4" />
+                  <CreditCard className="w-4 h-4 text-blue-500" />
                   <span>Pricing Plans</span>
                 </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileDrawerOpen(false);
+                    setShowBulkModal(true);
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-[#11140F]/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5 transition-all text-left cursor-pointer"
+                >
+                  <Layers className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                  <span>Bulk Import (AI)</span>
+                </button>
               </div>
+
+              {isAdmin && (
+                <div className="pt-2 border-t border-[#11140F]/10 dark:border-white/10 space-y-1">
+                  <div className="text-[10px] font-mono uppercase tracking-wider font-bold text-emerald-600 dark:text-emerald-400 px-2 flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <Shield className="w-3 h-3" />
+                      ADMIN SOVEREIGNTY
+                    </span>
+                    <span className="text-[8.5px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-mono font-bold">
+                      PROD
+                    </span>
+                  </div>
+
+                  <Link
+                    href="/admin"
+                    onClick={() => setMobileDrawerOpen(false)}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Shield className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      <span className="truncate">Admin Console</span>
+                    </div>
+                    <span className="text-[8.5px] px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-mono font-bold">
+                      SUPER
+                    </span>
+                  </Link>
+
+                  <Link
+                    href="/admin/ai-usage"
+                    onClick={() => setMobileDrawerOpen(false)}
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-purple-700 dark:text-purple-400 hover:bg-purple-500/10 transition-all"
+                  >
+                    <Activity className="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0" />
+                    <span className="truncate">AI Telemetry</span>
+                  </Link>
+
+                  <Link
+                    href="/admin/analytics"
+                    onClick={() => setMobileDrawerOpen(false)}
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-blue-700 dark:text-blue-400 hover:bg-blue-500/10 transition-all"
+                  >
+                    <TrendingUp className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                    <span className="truncate">Analytics Hub</span>
+                  </Link>
+
+                  <Link
+                    href="/admin/sessions"
+                    onClick={() => setMobileDrawerOpen(false)}
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-rose-700 dark:text-rose-400 hover:bg-rose-500/10 transition-all"
+                  >
+                    <Video className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
+                    <span className="truncate">Session Replay</span>
+                  </Link>
+                </div>
+              )}
             </div>
 
             {user && (
