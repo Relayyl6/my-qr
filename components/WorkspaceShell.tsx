@@ -1045,7 +1045,7 @@ export default function WorkspaceShell({
 
         {/* VIEW 2: EXECUTIVE LIVE OVERVIEW TAB (Single Page Desktop Fit) */}
         {activeSection === 'overview' && (
-          <div className="w-full h-full flex flex-col min-h-0">
+          <div className="w-full h-full flex flex-col min-h-0 overflow-y-auto lg:overflow-visible">
             <WorkspaceOverviewTab
               user={user!}
               isAdmin={isAdmin}

@@ -669,7 +669,7 @@ export default function WorkspaceOverviewTab({
   const selectedMonthBar = displayedBars[selectedBarIndex] || displayedBars[peakMonthIndex];
 
   return (
-    <div className="w-full h-full flex flex-col justify-between gap-2.5 sm:gap-3 text-white font-sans select-none overflow-hidden max-w-[1680px] mx-auto bg-[#090A0E]">
+    <div className="w-full lg:h-full flex flex-col justify-between gap-3 sm:gap-3.5 text-white font-sans select-none overflow-y-auto lg:overflow-hidden max-w-[1680px] mx-auto bg-[#090A0E] px-1 sm:px-2 py-1">
       
       {/* 1. TOP HEADER ISLAND: TITLE + OPERATIONAL SEARCH + USER PROFILE */}
       <div className="flex items-center justify-between gap-4 shrink-0 px-1 pt-1">
@@ -1160,10 +1160,10 @@ export default function WorkspaceOverviewTab({
         </div>
 
         {/* CARD 2: ECOSYSTEM SERVICE DISTRIBUTION (SEGMENTED DONUT - 100% REAL SERVICES) */}
-        <div className="rounded-[24px] bg-[#0E1017] border border-white/[0.065] p-4 sm:p-5 flex flex-col justify-between shadow-[0_20px_45px_rgba(0,0,0,0.65)] min-h-[200px] lg:min-h-0 relative overflow-hidden">
+        <div className="rounded-[24px] bg-[#0E1017] border border-white/[0.065] p-3.5 sm:p-5 flex flex-col justify-between shadow-[0_20px_45px_rgba(0,0,0,0.65)] min-h-[220px] lg:min-h-0 relative overflow-hidden">
           
           {/* Header */}
-          <div className="flex items-center justify-between shrink-0">
+          <div className="flex items-center justify-between shrink-0 pb-1.5 border-b border-white/[0.04]">
             <div className="flex items-center gap-2">
               <h3 className="text-xs font-bold text-white tracking-tight">
                 Service Distribution
@@ -1178,13 +1178,13 @@ export default function WorkspaceOverviewTab({
           </div>
 
           {/* Donut Chart & Real Legend Row */}
-          <div className="flex items-center justify-between gap-3 py-1 flex-1 min-h-0">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 py-1 flex-1 min-h-0">
             
             {/* SVG Segmented Donut with Dynamic Tooltip */}
-            <div className="relative w-28 h-28 sm:w-32 sm:h-32 shrink-0 flex items-center justify-center">
+            <div className="relative w-26 h-26 sm:w-32 sm:h-32 shrink-0 flex items-center justify-center my-0.5 sm:my-0">
               
               {/* Floating Tooltip Pill pointing to Top Service */}
-              <div className="absolute -top-1 right-0 z-10 px-1.5 py-0.5 rounded-full bg-[#1E2029] border border-white/10 text-[8.5px] font-semibold text-white shadow-lg whitespace-nowrap flex items-center gap-1">
+              <div className="absolute -top-1 right-0 z-10 px-2 py-0.5 rounded-full bg-[#1E2029] border border-white/10 text-[8.5px] font-semibold text-white shadow-lg whitespace-nowrap flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: topService.color }} />
                 <span>{topService.name} ({topService.percentage}%)</span>
               </div>
@@ -1228,23 +1228,23 @@ export default function WorkspaceOverviewTab({
               </div>
             </div>
 
-            {/* Real Service Legend List (Clickable to navigate to tool) */}
-            <div className="space-y-1 text-[10px] flex-1 min-w-0 pr-1">
+            {/* Real Service Legend List (2-col grid on mobile, 1-col list on tablet/desktop) */}
+            <div className="grid grid-cols-2 sm:grid-cols-1 gap-1 text-[10px] w-full sm:flex-1 sm:min-w-0 pr-1">
               {distributionData.map((d) => (
                 <button
                   key={d.name}
                   type="button"
                   onClick={() => onNavigateSection(d.code)}
-                  className="flex items-center justify-between gap-2 w-full text-left hover:bg-white/5 px-1 py-0.5 rounded-md transition-colors cursor-pointer group"
+                  className="flex items-center justify-between gap-1.5 w-full text-left hover:bg-white/5 px-2 py-1 rounded-lg transition-colors cursor-pointer group bg-white/[0.02] sm:bg-transparent border border-white/[0.03] sm:border-transparent"
                   title={`Navigate to ${d.name} (${d.rawCount} assets, ${d.scans} scans)`}
                 >
                   <div className="flex items-center gap-1.5 min-w-0">
                     <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
-                    <span className="text-white/70 group-hover:text-white truncate text-[9.5px]">
-                      {d.name} ({d.rawCount})
+                    <span className="text-white/70 group-hover:text-white truncate text-[10px]">
+                      {d.name}
                     </span>
                   </div>
-                  <span className="font-mono text-white/40 group-hover:text-white text-[9px]">
+                  <span className="font-mono text-white/40 group-hover:text-white text-[9.5px] shrink-0">
                     {d.percentage}%
                   </span>
                 </button>
@@ -1264,10 +1264,10 @@ export default function WorkspaceOverviewTab({
         </div>
 
         {/* CARD 3: REAL LIVE TELEMETRY & SUBSCRIBER STREAM (100% REAL DATABASE EVENTS) */}
-        <div className="rounded-[24px] bg-[#0E1017] border border-white/[0.065] p-4 sm:p-5 flex flex-col justify-between shadow-[0_20px_45px_rgba(0,0,0,0.65)] min-h-[200px] lg:min-h-0 relative overflow-hidden">
+        <div className="rounded-[24px] bg-[#0E1017] border border-white/[0.065] p-3.5 sm:p-5 flex flex-col justify-between shadow-[0_20px_45px_rgba(0,0,0,0.65)] min-h-[220px] lg:min-h-0 relative overflow-hidden">
           
           {/* Header */}
-          <div className="flex items-center justify-between shrink-0">
+          <div className="flex items-center justify-between shrink-0 pb-1.5 border-b border-white/[0.04]">
             <div className="flex items-center gap-2">
               <h3 className="text-xs font-bold text-white tracking-tight">
                 Live Routing Telemetry & Leads
@@ -1284,71 +1284,61 @@ export default function WorkspaceOverviewTab({
           </div>
 
           {/* Routing Health Score Segmented Meter */}
-          <div className="flex items-center justify-between gap-2 py-1 shrink-0">
-            <span className="text-[10px] text-white/60 font-medium">
+          <div className="flex items-center justify-between gap-3 py-1.5 shrink-0">
+            <span className="text-[11px] text-white/70 font-medium">
               Routing Health Score
             </span>
-            <div className="flex items-center gap-0.5 flex-1 max-w-[140px] px-2">
-              {Array.from({ length: 22 }).map((_, i) => {
-                const activeTicks = Math.round((healthScore / 100) * 22);
-                return (
-                  <div
-                    key={i}
-                    className={`flex-1 h-3 rounded-xs ${
-                      i < activeTicks ? 'bg-[#10B981]' : 'bg-white/10'
-                    }`}
-                  />
-                );
-              })}
+            <div className="flex items-center gap-2 flex-1 max-w-[140px]">
+              <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
+                <div
+                  className="h-full bg-emerald-400 rounded-full transition-all duration-500"
+                  style={{ width: `${healthScore}%` }}
+                />
+              </div>
+              <span className="text-xs font-bold text-emerald-400 font-mono shrink-0">
+                {healthScore}%
+              </span>
             </div>
-            <span className="text-xs font-bold text-emerald-400 font-mono">
-              {healthScore}%
-            </span>
           </div>
 
-          {/* Real Live Activity Rows from Database */}
+          {/* Real Live Activity Rows from Database (Clean 2-line layout that never truncates or cramps) */}
           <div className="space-y-1.5 py-1">
             {filteredFeed.map((row) => (
               <div
                 key={row.id}
-                className="flex items-center gap-2 sm:gap-2.5 text-xs p-2 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors min-w-0"
+                className="p-2 sm:p-2.5 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors min-w-0"
               >
-                {/* Col 1: Time & subtext */}
-                <div className="w-[68px] shrink-0 leading-tight truncate">
-                  <span className="text-[11px] font-semibold text-white block truncate">
+                {/* Line 1: Badge + Title + Time */}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-semibold tracking-tight border shrink-0"
+                      style={{
+                        backgroundColor: `${row.statusColor}18`,
+                        borderColor: `${row.statusColor}35`,
+                        color: row.statusColor,
+                      }}
+                    >
+                      <span
+                        className="w-1.5 h-1.5 rounded-full shrink-0"
+                        style={{ backgroundColor: row.statusColor }}
+                      />
+                      <span>{row.status}</span>
+                    </span>
+                    <span className="text-[11.5px] text-white/90 font-medium truncate block" title={row.tooltip || row.title}>
+                      {row.title}
+                    </span>
+                  </div>
+
+                  <span className="text-[10px] text-white/40 shrink-0 font-mono whitespace-nowrap">
                     {row.time}
                   </span>
-                  <span className="text-[9px] text-white/40 block truncate">{row.subtext}</span>
                 </div>
 
-                {/* Col 2: Status pill badge with clear dedicated background & border */}
-                <div className="shrink-0">
-                  <span
-                    className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9.5px] font-semibold tracking-tight border"
-                    style={{
-                      backgroundColor: `${row.statusColor}18`,
-                      borderColor: `${row.statusColor}35`,
-                      color: row.statusColor,
-                    }}
-                  >
-                    <span
-                      className="w-1.5 h-1.5 rounded-full shrink-0"
-                      style={{ backgroundColor: row.statusColor }}
-                    />
-                    <span className="whitespace-nowrap">{row.status}</span>
-                  </span>
-                </div>
-
-                {/* Col 3: Title / Name */}
-                <div className="min-w-0 flex-1 px-1">
-                  <span className="text-[11px] text-white/90 font-medium truncate block" title={row.tooltip || row.title}>
-                    {row.title}
-                  </span>
-                </div>
-
-                {/* Col 4: Meta / Location / List Name */}
-                <div className="shrink-0 text-right max-w-[85px] sm:max-w-[120px]">
-                  <span className="text-[10px] font-mono text-white/50 truncate block" title={row.meta}>
+                {/* Line 2: Subtext + Meta details with comfortable room */}
+                <div className="flex items-center justify-between gap-2 mt-1 text-[10px] text-white/45 pl-0.5">
+                  <span className="truncate">{row.subtext}</span>
+                  <span className="font-mono truncate text-right max-w-[150px]" title={row.meta}>
                     {row.meta}
                   </span>
                 </div>
@@ -1357,7 +1347,7 @@ export default function WorkspaceOverviewTab({
           </div>
 
           {/* Bottom Link (Unblurred for Ultra) */}
-          <div className="pt-1 border-t border-white/5 flex items-center justify-between shrink-0">
+          <div className="pt-1.5 border-t border-white/5 flex items-center justify-between shrink-0">
             <button
               type="button"
               onClick={() => onNavigateSection('mailing')}

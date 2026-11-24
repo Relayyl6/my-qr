@@ -461,16 +461,16 @@ export default function LinkList({
                             href={`/api/links/${link.id}/export`}
                             download
                             title="Download complete scan history as CSV"
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#11140F]/15 bg-white hover:bg-[#EEF0EA] text-[11px] font-medium text-[#11140F]/75 transition-colors"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/10 hover:bg-[#EEF0EA] dark:hover:bg-white/15 text-[11px] font-medium text-[#11140F]/75 dark:text-white/80 transition-colors"
                           >
-                            <Download className="w-3 h-3 text-[#11140F]/60" />
+                            <Download className="w-3 h-3 text-[#11140F]/60 dark:text-white/60" />
                             Export CSV
                           </a>
                         ) : (
                           <a
                             href="/pricing"
                             title="Unlock CSV scan history downloads on Pro, Plus, or Ultra"
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#11140F]/10 bg-[#11140F]/[0.03] text-[11px] font-medium text-[#11140F]/45 hover:text-[#11140F] transition-colors"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#11140F]/10 dark:border-white/10 bg-[#11140F]/[0.03] dark:bg-white/5 text-[11px] font-medium text-[#11140F]/45 dark:text-white/45 hover:text-[#11140F] dark:hover:text-white transition-colors"
                           >
                             <Download className="w-3 h-3 opacity-40" />
                             CSV (Pro)

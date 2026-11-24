@@ -67,26 +67,26 @@ export default function AiProgressTracker({
   }, [stages.length]);
 
   return (
-    <div className="rounded-2xl border border-emerald-500/20 bg-gradient-to-b from-emerald-50/40 via-white to-white p-5 shadow-lg space-y-4">
+    <div className="rounded-2xl border border-emerald-500/20 bg-gradient-to-b from-emerald-50/40 via-white to-white dark:from-emerald-950/20 dark:via-[#0E1017] dark:to-[#0E1017] p-5 shadow-lg space-y-4">
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
-            <Sparkles className="w-4 h-4 text-emerald-600 animate-pulse" />
+            <Sparkles className="w-4 h-4 text-emerald-600 dark:text-emerald-400 animate-pulse" />
           </div>
           <div>
-            <h4 className="text-[14px] font-semibold text-[#11140F] flex items-center gap-2">
+            <h4 className="text-[14px] font-semibold text-[#11140F] dark:text-white flex items-center gap-2">
               {title}
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-emerald-100 text-emerald-800">
+              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300">
                 ACTIVE
               </span>
             </h4>
-            <p className="text-[12px] text-[#11140F]/60">{subtitle}</p>
+            <p className="text-[12px] text-[#11140F]/60 dark:text-white/60">{subtitle}</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 font-mono text-[11px] text-[#11140F]/50 bg-[#11140F]/5 px-2.5 py-1 rounded-lg shrink-0">
-          <Clock className="w-3 h-3 text-emerald-600" />
+        <div className="flex items-center gap-1.5 font-mono text-[11px] text-[#11140F]/50 dark:text-white/50 bg-[#11140F]/5 dark:bg-white/5 px-2.5 py-1 rounded-lg shrink-0">
+          <Clock className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
           <span>{elapsedSeconds.toFixed(1)}s elapsed</span>
         </div>
       </div>
@@ -94,17 +94,17 @@ export default function AiProgressTracker({
       {/* Progress Bar */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between text-[11.5px]">
-          <span className="font-medium text-emerald-950 flex items-center gap-1.5">
+          <span className="font-medium text-emerald-950 dark:text-emerald-200 flex items-center gap-1.5">
             <span>{stages[currentStageIndex]?.label || 'Finalizing...'}</span>
             {elapsedSeconds > 15 && (
-              <span className="text-[10px] text-emerald-700 font-normal">
+              <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-normal">
                 (deep synthesis in progress...)
               </span>
             )}
           </span>
-          <span className="font-mono font-bold text-emerald-700">{progressPercent}%</span>
+          <span className="font-mono font-bold text-emerald-700 dark:text-emerald-400">{progressPercent}%</span>
         </div>
-        <div className="w-full h-2 rounded-full bg-[#11140F]/10 overflow-hidden">
+        <div className="w-full h-2 rounded-full bg-[#11140F]/10 dark:bg-white/10 overflow-hidden">
           <div
             className="h-full bg-gradient-to-r from-emerald-500 to-[#2F6B4F] rounded-full transition-all duration-300 ease-out"
             style={{ width: `${progressPercent}%` }}
@@ -113,7 +113,7 @@ export default function AiProgressTracker({
       </div>
 
       {/* Stage Micro-Steps */}
-      <div className="space-y-2 pt-1 border-t border-[#11140F]/5">
+      <div className="space-y-2 pt-1 border-t border-[#11140F]/5 dark:border-white/5">
         {stages.map((stage, idx) => {
           const isDone = idx < currentStageIndex;
           const isCurrent = idx === currentStageIndex;
@@ -126,19 +126,19 @@ export default function AiProgressTracker({
             >
               <div className="mt-0.5 shrink-0">
                 {isDone ? (
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                 ) : isCurrent ? (
-                  <Loader2 className="w-3.5 h-3.5 text-emerald-600 animate-spin" />
+                  <Loader2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 animate-spin" />
                 ) : (
-                  <div className="w-3.5 h-3.5 rounded-full border border-[#11140F]/30" />
+                  <div className="w-3.5 h-3.5 rounded-full border border-[#11140F]/30 dark:border-white/30" />
                 )}
               </div>
               <div className="min-w-0">
-                <span className={isCurrent ? 'text-emerald-950' : 'text-[#11140F]'}>
+                <span className={isCurrent ? 'text-emerald-950 dark:text-emerald-200' : 'text-[#11140F] dark:text-white/80'}>
                   {stage.label}
                 </span>
                 {isCurrent && (
-                  <span className="block text-[11px] text-[#11140F]/50 truncate">
+                  <span className="block text-[11px] text-[#11140F]/50 dark:text-white/40 truncate">
                     {stage.detail}
                   </span>
                 )}
@@ -154,9 +154,9 @@ export default function AiProgressTracker({
           <button
             type="button"
             onClick={onForceComplete}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-300 bg-white text-emerald-800 text-[11.5px] font-medium hover:bg-emerald-50 transition-colors cursor-pointer shadow-xs"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-300 dark:border-emerald-500/30 bg-white dark:bg-[#141720] text-emerald-800 dark:text-emerald-300 text-[11.5px] font-medium hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors cursor-pointer shadow-xs"
           >
-            <Zap className="w-3 h-3 text-emerald-600" />
+            <Zap className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
             Fast-Track with Instant Engine
           </button>
         </div>
