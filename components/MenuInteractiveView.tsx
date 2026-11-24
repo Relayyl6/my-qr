@@ -221,7 +221,7 @@ export default function MenuInteractiveView({
                         alt={item.title}
                         loading="lazy"
                         decoding="async"
-                        className="w-20 h-20 sm:w-22 sm:h-22 rounded-xl object-cover shrink-0 border border-[#11140F]/8 shadow-xs bg-black/5"
+                        className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl object-cover shrink-0 border border-[#11140F]/8 shadow-xs bg-black/5"
                       />
                     )}
 

@@ -793,7 +793,7 @@ export default function VCardInteractiveView({
           <div className="text-center space-y-2.5 !-mt-12 sm:!-mt-14 relative z-20">
             <div
               style={{ borderColor: activeTheme.accent }}
-              className={`w-22 h-22 sm:w-24 sm:h-24 mx-auto rounded-full overflow-hidden shadow-2xl border-2 ${activeTheme.cardBg === 'bg-white' ? 'ring-white' : 'ring-black/70'} ring-4 shrink-0 relative bg-black flex items-center justify-center`}
+              className={`w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-full overflow-hidden shadow-2xl border-2 ${activeTheme.cardBg === 'bg-white' ? 'ring-white' : 'ring-black/70'} ring-4 shrink-0 relative bg-black flex items-center justify-center`}
             >
               {/* Fallback initials */}
               <span className="text-xl sm:text-2xl font-bold tracking-wider text-white select-none">
@@ -938,7 +938,7 @@ export default function VCardInteractiveView({
         <div className="w-full max-w-md mx-auto pt-6 pb-4 text-center space-y-4">
           <div>
             <Link
-              href="/"
+              href="/?section=vcard#workspace"
               className="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-white text-[#11140F] font-semibold text-sm hover:bg-white/90 shadow-md transition-all hover:scale-105 active:scale-95 cursor-pointer"
             >
               Get your own DynamicQR
@@ -987,7 +987,7 @@ export default function VCardInteractiveView({
               About this account
             </button>
             <span>&bull;</span>
-            <Link href="/" className="hover:text-white transition-colors">
+            <Link href="/?section=vcard#workspace" className="hover:text-white transition-colors">
               More from DynamicQR
             </Link>
           </div>
@@ -1041,12 +1041,12 @@ export default function VCardInteractiveView({
               <div className="space-y-4">
                 {/* Hyper-Detailed Open Graph / Social Link Preview Card */}
                 <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-white/20 transition-all flex items-center gap-3.5 text-left">
-                  <div className="w-13 h-13 rounded-full overflow-hidden border-2 border-white/20 shrink-0 bg-black flex items-center justify-center">
+                  <div className="relative w-12 h-12 min-w-[48px] min-h-[48px] max-w-[48px] max-h-[48px] rounded-full overflow-hidden border-2 border-white/20 shrink-0 bg-black flex items-center justify-center">
                     {avatarUrl && !avatarError ? (
                       <img
                         src={avatarSrc || avatarUrl}
                         alt={fullName}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover block rounded-full"
                         onError={handleAvatarError}
                       />
                     ) : (
