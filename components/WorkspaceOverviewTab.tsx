@@ -248,6 +248,33 @@ export default function WorkspaceOverviewTab({
     return Math.ceil(maxVal / 50) * 50;
   }, [displayedBars]);
 
+  // Compute real period-over-period scan growth percentage from displayedBars
+  const scanGrowth = useMemo(() => {
+    const nonZeroIndices = displayedBars
+      .map((b, i) => (b.value > 0 ? i : -1))
+      .filter((i) => i !== -1);
+
+    if (nonZeroIndices.length === 0) {
+      return { percentText: '0.0%', isPositive: true, isNeutral: true };
+    }
+
+    const latestIdx = nonZeroIndices[nonZeroIndices.length - 1];
+    const currentVal = displayedBars[latestIdx]?.value || 0;
+    const prevVal = latestIdx > 0 ? displayedBars[latestIdx - 1]?.value || 0 : 0;
+
+    if (prevVal === 0) {
+      return { percentText: '+100%', isPositive: true, isNeutral: false };
+    }
+
+    const rawPct = ((currentVal - prevVal) / prevVal) * 100;
+    const formatted = `${rawPct >= 0 ? '+' : ''}${rawPct.toFixed(1)}%`;
+    return {
+      percentText: formatted,
+      isPositive: rawPct >= 0,
+      isNeutral: false,
+    };
+  }, [displayedBars]);
+
   const ySteps = useMemo(() => [
     peakMonthlyScans,
     Math.round(peakMonthlyScans * 0.75),
@@ -775,8 +802,17 @@ export default function WorkspaceOverviewTab({
                 <span className="text-xs font-medium text-white/50 whitespace-nowrap">
                   total scans
                 </span>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-400 text-[11px] font-semibold whitespace-nowrap shrink-0">
-                  +18.4%
+                <span
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold whitespace-nowrap shrink-0 ${
+                    scanGrowth.isNeutral
+                      ? 'bg-white/10 text-white/60'
+                      : scanGrowth.isPositive
+                      ? 'bg-emerald-500/15 text-emerald-400'
+                      : 'bg-rose-500/15 text-rose-400'
+                  }`}
+                  title="Period-over-period scan growth"
+                >
+                  {scanGrowth.percentText}
                 </span>
                 <span className="text-[11px] text-white/40 hidden md:inline whitespace-nowrap">
                   across {links.length} links &amp; {microSaasItems.length} active tools
