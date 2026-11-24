@@ -37,10 +37,13 @@ export default function HomeTabs({
     const prefs = getStoredPreferences();
     const handleHash = () => {
       const hash = window.location.hash.toLowerCase();
+      const search = (typeof window !== 'undefined' ? window.location.search : '').toLowerCase();
       if (
         hash === '#workspace' ||
         hash.startsWith('#workspace?') ||
-        hash.startsWith('#workspace/')
+        hash.startsWith('#workspace/') ||
+        search.includes('section=') ||
+        search.includes('tab=')
       ) {
         setActiveTab('workspace');
         if (typeof window !== 'undefined') {

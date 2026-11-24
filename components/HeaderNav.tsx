@@ -277,18 +277,18 @@ export default function HeaderNav({
               <button
                 type="button"
                 onClick={() => setSearchModalOpen(true)}
-                className={`flex items-center justify-center w-7.5 h-7.5 sm:w-auto sm:px-3 sm:py-1.5 rounded-full border transition-all cursor-pointer shadow-xs group ${
+                className={`flex items-center justify-center w-9 h-9 lg:w-auto lg:h-9 lg:px-3 rounded-full border transition-all cursor-pointer shadow-xs group shrink-0 ${
                   isDark
                     ? 'bg-white/[0.08] hover:bg-white/[0.14] border-white/15 text-white'
                     : 'bg-white/90 dark:bg-white/[0.08] hover:bg-white dark:hover:bg-white/[0.14] border-[#11140F]/12 dark:border-white/15 text-[#11140F] dark:text-white'
                 }`}
                 title="Quick Search & Command Palette (⌘K / Ctrl+K)"
               >
-                <Search className="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform shrink-0" />
-                <span className="hidden lg:inline text-[12px] font-medium text-white/75 dark:text-white/75 group-hover:text-white ml-2">
+                <Search className="w-4 h-4 sm:w-[17px] sm:h-[17px] text-emerald-400 group-hover:scale-110 transition-transform shrink-0" />
+                <span className="hidden lg:inline text-[12.5px] font-medium text-white/75 dark:text-white/75 group-hover:text-white ml-2">
                   Search...
                 </span>
-                <kbd className="hidden xl:inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[9.5px] font-mono font-medium border bg-white/10 border-white/15 text-white/60 ml-2">
+                <kbd className="hidden xl:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9.5px] font-mono font-medium border bg-white/10 border-white/15 text-white/60 ml-2">
                   <span>⌘</span>K
                 </kbd>
               </button>
@@ -298,7 +298,7 @@ export default function HeaderNav({
                   <button
                     type="button"
                     onClick={() => setUserMenuOpen((prev) => !prev)}
-                    className={`flex items-center gap-1.5 sm:gap-2 p-0.5 sm:pl-1.5 sm:pr-3 sm:py-1 rounded-full border transition-all cursor-pointer shadow-xs group ${
+                    className={`flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 w-9 h-9 sm:w-auto sm:h-9 p-0 sm:pl-1 sm:pr-3 rounded-full border transition-all cursor-pointer shadow-xs group shrink-0 ${
                       isDark
                         ? 'bg-white/[0.08] hover:bg-white/[0.14] border-white/15 text-white'
                         : 'bg-white/90 dark:bg-white/[0.08] hover:bg-white dark:hover:bg-white/[0.14] border-[#11140F]/12 dark:border-white/15 text-[#11140F] dark:text-white'
@@ -308,7 +308,7 @@ export default function HeaderNav({
                     title={displayName}
                   >
                     {/* User Avatar Circle with Image or Initial Fallback */}
-                    <div className="w-7 h-7 rounded-full overflow-hidden bg-gradient-to-tr from-emerald-600 via-teal-500 to-emerald-400 text-white font-bold text-xs flex items-center justify-center shadow-xs ring-1 ring-white/20 shrink-0">
+                    <div className="w-7 h-7 sm:w-7 sm:h-7 rounded-full overflow-hidden bg-gradient-to-tr from-emerald-600 via-teal-500 to-emerald-400 text-white font-bold text-xs flex items-center justify-center shadow-xs ring-1 ring-white/20 shrink-0">
                       {avatarUrl && !avatarError ? (
                         <img
                           src={getOptimizedStorageUrl(avatarUrl)}

@@ -157,17 +157,27 @@ export default function WorkspaceShell({
     let targetSection: WorkspaceSection | null = null;
     let targetMicroTab: 'mailing' | 'vcard' | 'shortener' | 'menu' | 'wifi' | null = null;
 
-    // 1. Check URL hash (e.g. #workspace?section=vcard or #workspace/vcard)
-    const hash = window.location.hash;
-    if (hash.includes('section=')) {
-      const match = hash.match(/section=([a-z0-9_-]+)/i);
-      if (match && VALID_SECTIONS.includes(match[1] as WorkspaceSection)) {
-        targetSection = match[1] as WorkspaceSection;
+    // 1. Check URL search params or hash (e.g. ?section=vcard or #workspace?section=vcard)
+    try {
+      const searchParams = new URLSearchParams(window.location.search);
+      const searchSec = (searchParams.get('section') || searchParams.get('tab')) as WorkspaceSection | null;
+      if (searchSec && VALID_SECTIONS.includes(searchSec)) {
+        targetSection = searchSec;
       }
-    } else if (hash.startsWith('#workspace/')) {
-      const sub = hash.replace('#workspace/', '').toLowerCase() as WorkspaceSection;
-      if (VALID_SECTIONS.includes(sub)) {
-        targetSection = sub;
+    } catch (e) {}
+
+    const hash = window.location.hash;
+    if (!targetSection) {
+      if (hash.includes('section=')) {
+        const match = hash.match(/section=([a-z0-9_-]+)/i);
+        if (match && VALID_SECTIONS.includes(match[1] as WorkspaceSection)) {
+          targetSection = match[1] as WorkspaceSection;
+        }
+      } else if (hash.startsWith('#workspace/')) {
+        const sub = hash.replace('#workspace/', '').toLowerCase() as WorkspaceSection;
+        if (VALID_SECTIONS.includes(sub)) {
+          targetSection = sub;
+        }
       }
     }
 

@@ -693,10 +693,10 @@ export default function VCardInteractiveView({
               <button
                 type="button"
                 onClick={handleOpenSettings}
-                className="w-full py-2.5 px-3 rounded-xl border border-dashed border-emerald-500/30 hover:border-emerald-500/70 bg-emerald-500/5 hover:bg-emerald-500/10 text-emerald-300 hover:text-white text-xs font-medium flex items-center justify-center gap-2 transition-all cursor-pointer"
+                className="w-full py-2 px-3 rounded-xl border border-white/10 hover:border-white/20 bg-white/[0.03] hover:bg-white/[0.06] text-white/70 hover:text-white text-xs font-medium flex items-center justify-center gap-2 transition-all cursor-pointer"
               >
-                <Settings className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Card Settings: Add Instagram, WhatsApp & Mini Linktree</span>
+                <Settings className="w-3.5 h-3.5 text-white/60" />
+                <span>Card Settings & Links</span>
               </button>
             </div>
           )}
@@ -877,82 +877,80 @@ export default function VCardInteractiveView({
         </div>
       )}
 
-      {/* Modal 3: Card Operability & Mini Linktree Settings (Owner only) */}
+      {/* Modal 3: Card Settings & Mini Linktree (Owner only) */}
       {showSettingsModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="w-full max-w-lg bg-[#121411] text-white border border-white/15 rounded-2xl p-6 sm:p-7 shadow-2xl space-y-5 relative max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-emerald-500/15 flex items-center justify-center text-[#34D399]">
-                  <Settings className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-white">Card Settings & Operability</h3>
-                  <p className="text-[11px] text-white/50">Configure action buttons, WhatsApp, Instagram & mini Linktree</p>
-                </div>
+          <div className="w-full max-w-lg bg-[#111310] text-white border border-white/10 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 relative max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+              <div>
+                <h3 className="text-sm font-semibold text-white">Card Settings</h3>
+                <p className="text-[11px] text-white/50">Manage contact actions, featured links, and profile details</p>
               </div>
               <button
                 type="button"
                 onClick={() => setShowSettingsModal(false)}
-                className="text-white/50 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+                className="p-1 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Navigation Tabs */}
-            <div className="flex items-center gap-1.5 p-1 bg-white/5 rounded-xl border border-white/10 text-xs">
+            {/* Navigation Tabs - Sleek, Uncluttered Segmented Control */}
+            <div className="grid grid-cols-3 gap-1 p-1 bg-white/[0.04] rounded-xl border border-white/5 text-xs">
               <button
                 type="button"
                 onClick={() => setSettingsTab('actions')}
-                className={`flex-1 py-1.5 px-3 rounded-lg font-semibold transition-all cursor-pointer ${
+                className={`py-1.5 px-2 rounded-lg font-medium transition-all cursor-pointer text-center truncate ${
                   settingsTab === 'actions'
-                    ? 'bg-[#34D399] text-[#11140F] shadow-xs'
-                    : 'text-white/70 hover:text-white'
+                    ? 'bg-white text-black font-semibold shadow-xs'
+                    : 'text-white/60 hover:text-white hover:bg-white/[0.03]'
                 }`}
               >
-                ⚡ Quick Actions
+                Actions
               </button>
               <button
                 type="button"
                 onClick={() => setSettingsTab('linktree')}
-                className={`flex-1 py-1.5 px-3 rounded-lg font-semibold transition-all cursor-pointer ${
+                className={`py-1.5 px-2 rounded-lg font-medium transition-all cursor-pointer text-center truncate ${
                   settingsTab === 'linktree'
-                    ? 'bg-[#34D399] text-[#11140F] shadow-xs'
-                    : 'text-white/70 hover:text-white'
+                    ? 'bg-white text-black font-semibold shadow-xs'
+                    : 'text-white/60 hover:text-white hover:bg-white/[0.03]'
                 }`}
               >
-                🔗 Mini Linktree ({editForm.customLinks.length})
+                Links {editForm.customLinks.length > 0 && `(${editForm.customLinks.length})`}
               </button>
               <button
                 type="button"
                 onClick={() => setSettingsTab('profile')}
-                className={`flex-1 py-1.5 px-3 rounded-lg font-semibold transition-all cursor-pointer ${
+                className={`py-1.5 px-2 rounded-lg font-medium transition-all cursor-pointer text-center truncate ${
                   settingsTab === 'profile'
-                    ? 'bg-[#34D399] text-[#11140F] shadow-xs'
-                    : 'text-white/70 hover:text-white'
+                    ? 'bg-white text-black font-semibold shadow-xs'
+                    : 'text-white/60 hover:text-white hover:bg-white/[0.03]'
                 }`}
               >
-                👤 Role & Social
+                Profile
               </button>
             </div>
 
             <form onSubmit={handleSaveSettings} className="space-y-4">
+              {/* TAB 1: ACTIONS */}
               {settingsTab === 'actions' && (
-                <div className="space-y-3.5">
-                  <div className="p-3 bg-white/[0.03] rounded-xl border border-white/10 space-y-3">
+                <div className="space-y-3">
+                  {/* WhatsApp */}
+                  <div className="space-y-1">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-bold text-white flex items-center gap-1.5">
-                        <MessageCircle className="w-4 h-4 text-[#25D366]" />
+                      <label className="text-[11px] font-medium text-white/70 flex items-center gap-1.5">
+                        <MessageCircle className="w-3.5 h-3.5 text-[#25D366]" />
                         <span>WhatsApp Number or Link</span>
                       </label>
                       {editForm.phone && editForm.whatsapp !== editForm.phone && (
                         <button
                           type="button"
                           onClick={() => setEditForm({ ...editForm, whatsapp: editForm.phone })}
-                          className="text-[10px] font-mono text-[#34D399] hover:underline cursor-pointer"
+                          className="text-[10px] text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer"
                         >
-                          Use Phone Number
+                          Use phone number
                         </button>
                       )}
                     </div>
@@ -961,100 +959,100 @@ export default function VCardInteractiveView({
                       value={editForm.whatsapp}
                       onChange={(e) => setEditForm({ ...editForm, whatsapp: e.target.value })}
                       placeholder="+234 906 498 2841 or wa.me/..."
-                      className="w-full px-3 py-2 text-xs rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399]"
-                    />
-                    <p className="text-[10px] text-white/50">
-                      Renders a prominent green WhatsApp button in your contact action grid.
-                    </p>
-                  </div>
-
-                  <div className="p-3 bg-white/[0.03] rounded-xl border border-white/10 space-y-3">
-                    <label className="text-xs font-bold text-white flex items-center gap-1.5">
-                      <Instagram className="w-4 h-4 text-[#E1306C]" />
-                      <span>Instagram Handle or URL</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={editForm.instagram}
-                      onChange={(e) => setEditForm({ ...editForm, instagram: e.target.value })}
-                      placeholder="@yourusername or https://instagram.com/..."
-                      className="w-full px-3 py-2 text-xs rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399]"
-                    />
-                    <p className="text-[10px] text-white/50">
-                      Renders a dedicated Instagram action tile in the card grid.
-                    </p>
-                  </div>
-
-                  <div className="p-3 bg-white/[0.03] rounded-xl border border-white/10 space-y-3">
-                    <label className="text-xs font-bold text-white flex items-center gap-1.5">
-                      <Send className="w-4 h-4 text-[#29B6F6]" />
-                      <span>Telegram Username or Link</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={editForm.telegram}
-                      onChange={(e) => setEditForm({ ...editForm, telegram: e.target.value })}
-                      placeholder="@yourhandle or https://t.me/..."
-                      className="w-full px-3 py-2 text-xs rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399]"
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white placeholder-white/25 focus:outline-hidden focus:border-white/30 transition-colors"
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  {/* Instagram & Telegram */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-white/80">Phone Number (Call / SMS)</label>
+                      <label className="text-[11px] font-medium text-white/70 flex items-center gap-1.5">
+                        <Instagram className="w-3.5 h-3.5 text-[#E1306C]" />
+                        <span>Instagram Handle or URL</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={editForm.instagram}
+                        onChange={(e) => setEditForm({ ...editForm, instagram: e.target.value })}
+                        placeholder="@username or url"
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white placeholder-white/25 focus:outline-hidden focus:border-white/30 transition-colors"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-medium text-white/70 flex items-center gap-1.5">
+                        <Send className="w-3.5 h-3.5 text-[#29B6F6]" />
+                        <span>Telegram Username or Link</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={editForm.telegram}
+                        onChange={(e) => setEditForm({ ...editForm, telegram: e.target.value })}
+                        placeholder="@handle or t.me/..."
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white placeholder-white/25 focus:outline-hidden focus:border-white/30 transition-colors"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Phone & Email */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-medium text-white/70">Phone (Call / SMS)</label>
                       <input
                         type="tel"
                         value={editForm.phone}
                         onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
                         placeholder="+234..."
-                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399]"
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white placeholder-white/25 focus:outline-hidden focus:border-white/30 transition-colors"
                       />
                     </div>
+
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-white/80">Email Address</label>
+                      <label className="text-[11px] font-medium text-white/70">Email Address</label>
                       <input
                         type="email"
                         value={editForm.email}
                         onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                        placeholder="you@domain.com"
-                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399]"
+                        placeholder="you@example.com"
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white placeholder-white/25 focus:outline-hidden focus:border-white/30 transition-colors"
                       />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  {/* Website & Address */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-white/80">Website or Portfolio</label>
+                      <label className="text-[11px] font-medium text-white/70">Website or Portfolio</label>
                       <input
                         type="text"
                         value={editForm.website}
                         onChange={(e) => setEditForm({ ...editForm, website: e.target.value })}
-                        placeholder="https://yourportfolio.com"
-                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399]"
+                        placeholder="https://..."
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white placeholder-white/25 focus:outline-hidden focus:border-white/30 transition-colors"
                       />
                     </div>
+
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-white/80">Office Address / Location</label>
+                      <label className="text-[11px] font-medium text-white/70">Office Address / Location</label>
                       <input
                         type="text"
                         value={editForm.address}
                         onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
                         placeholder="e.g. Lagos, Nigeria"
-                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399]"
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white placeholder-white/25 focus:outline-hidden focus:border-white/30 transition-colors"
                       />
                     </div>
                   </div>
                 </div>
               )}
 
+              {/* TAB 2: MINI LINKTREE */}
               {settingsTab === 'linktree' && (
-                <div className="space-y-3.5">
+                <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="text-xs font-bold text-white block">Mini Linktree Links</span>
-                      <p className="text-[10px] text-white/50">
-                        Add interactive button links for your portfolios, stores, calendars, or products.
-                      </p>
+                      <span className="text-xs font-semibold text-white block">Featured Links</span>
+                      <p className="text-[10px] text-white/50">Custom buttons displayed on your contact card</p>
                     </div>
                     <button
                       type="button"
@@ -1067,17 +1065,17 @@ export default function VCardInteractiveView({
                           ],
                         })
                       }
-                      className="px-2.5 py-1.5 rounded-xl bg-[#34D399]/20 hover:bg-[#34D399]/30 text-[#34D399] border border-[#34D399]/30 text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors"
+                      className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[11px] font-medium flex items-center gap-1 cursor-pointer transition-colors"
                     >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Add Link</span>
+                      <Plus className="w-3 h-3" />
+                      <span>Add link</span>
                     </button>
                   </div>
 
                   {editForm.customLinks.length === 0 ? (
-                    <div className="p-6 text-center border-2 border-dashed border-white/10 rounded-2xl space-y-2">
-                      <Link2 className="w-6 h-6 mx-auto text-white/30" />
-                      <p className="text-xs text-white/60">No custom Linktree links added yet.</p>
+                    <div className="py-8 text-center border border-dashed border-white/10 rounded-2xl space-y-1.5">
+                      <Link2 className="w-5 h-5 mx-auto text-white/30" />
+                      <p className="text-xs text-white/50">No custom links added yet</p>
                       <button
                         type="button"
                         onClick={() =>
@@ -1085,26 +1083,24 @@ export default function VCardInteractiveView({
                             ...editForm,
                             customLinks: [
                               ...editForm.customLinks,
-                              { id: Date.now().toString(), title: 'My Work / Portfolio', url: 'https://' },
+                              { id: Date.now().toString(), title: 'My Portfolio', url: 'https://' },
                             ],
                           })
                         }
-                        className="text-xs text-[#34D399] font-bold hover:underline cursor-pointer"
+                        className="text-[11px] text-emerald-400 hover:text-emerald-300 font-medium cursor-pointer"
                       >
-                        + Add your first custom link
+                        + Add your first link
                       </button>
                     </div>
                   ) : (
-                    <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+                    <div className="space-y-2 max-h-60 overflow-y-auto pr-0.5">
                       {editForm.customLinks.map((link, idx) => (
                         <div
                           key={link.id || idx}
-                          className="p-3 rounded-xl bg-white/5 border border-white/10 space-y-2 relative group"
+                          className="p-2.5 rounded-xl bg-white/[0.03] border border-white/10 space-y-1.5 relative group"
                         >
                           <div className="flex items-center justify-between gap-2">
-                            <span className="text-[10px] font-mono text-white/40 uppercase">
-                              Link #{idx + 1}
-                            </span>
+                            <span className="text-[10px] text-white/40 font-mono">Link {idx + 1}</span>
                             <button
                               type="button"
                               onClick={() => {
@@ -1112,8 +1108,8 @@ export default function VCardInteractiveView({
                                 next.splice(idx, 1);
                                 setEditForm({ ...editForm, customLinks: next });
                               }}
-                              className="text-white/40 hover:text-red-400 p-0.5 rounded transition-colors cursor-pointer"
-                              title="Delete Link"
+                              className="text-white/30 hover:text-red-400 p-0.5 rounded transition-colors cursor-pointer"
+                              title="Remove"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -1128,7 +1124,7 @@ export default function VCardInteractiveView({
                                 setEditForm({ ...editForm, customLinks: next });
                               }}
                               placeholder="Title (e.g. Schedule Call)"
-                              className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399]"
+                              className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-white/10 bg-white/[0.03] text-white placeholder-white/25 focus:outline-hidden focus:border-white/30"
                             />
                             <input
                               type="url"
@@ -1138,8 +1134,8 @@ export default function VCardInteractiveView({
                                 next[idx] = { ...next[idx], url: e.target.value };
                                 setEditForm({ ...editForm, customLinks: next });
                               }}
-                              placeholder="https://calendly.com/..."
-                              className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399]"
+                              placeholder="https://..."
+                              className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-white/10 bg-white/[0.03] text-white placeholder-white/25 focus:outline-hidden focus:border-white/30"
                             />
                           </div>
                         </div>
@@ -1149,84 +1145,85 @@ export default function VCardInteractiveView({
                 </div>
               )}
 
+              {/* TAB 3: PROFILE & SOCIAL */}
               {settingsTab === 'profile' && (
                 <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-white/80">Job Title</label>
+                      <label className="text-[11px] font-medium text-white/70">Job Title</label>
                       <input
                         type="text"
                         value={editForm.title}
                         onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                        placeholder="e.g. Lead Designer"
-                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399]"
+                        placeholder="e.g. Developer"
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white placeholder-white/25 focus:outline-hidden focus:border-white/30 transition-colors"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-white/80">Company / Organization</label>
+                      <label className="text-[11px] font-medium text-white/70">Company</label>
                       <input
                         type="text"
                         value={editForm.company}
                         onChange={(e) => setEditForm({ ...editForm, company: e.target.value })}
-                        placeholder="e.g. Acme Corp"
-                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399]"
+                        placeholder="e.g. DynamicQR"
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white placeholder-white/25 focus:outline-hidden focus:border-white/30 transition-colors"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-white/80">Bio / Pitch</label>
+                    <label className="text-[11px] font-medium text-white/70">Bio / Summary</label>
                     <textarea
                       rows={3}
                       value={editForm.bio}
                       onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
                       placeholder="Brief pitch about what you build..."
-                      className="w-full px-3 py-2 text-xs rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399] resize-none"
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white placeholder-white/25 focus:outline-hidden focus:border-white/30 transition-colors resize-none"
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3 pt-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-white/80">LinkedIn URL</label>
+                      <label className="text-[11px] font-medium text-white/70">LinkedIn</label>
                       <input
                         type="text"
                         value={editForm.linkedin}
                         onChange={(e) => setEditForm({ ...editForm, linkedin: e.target.value })}
-                        placeholder="https://linkedin.com/in/..."
-                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399]"
+                        placeholder="linkedin.com/in/..."
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white placeholder-white/25 focus:outline-hidden focus:border-white/30 transition-colors"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-white/80">Twitter / X Handle</label>
+                      <label className="text-[11px] font-medium text-white/70">Twitter / X</label>
                       <input
                         type="text"
                         value={editForm.twitter}
                         onChange={(e) => setEditForm({ ...editForm, twitter: e.target.value })}
                         placeholder="@handle"
-                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399]"
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white placeholder-white/25 focus:outline-hidden focus:border-white/30 transition-colors"
                       />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-white/80">GitHub Username</label>
+                      <label className="text-[11px] font-medium text-white/70">GitHub</label>
                       <input
                         type="text"
                         value={editForm.github}
                         onChange={(e) => setEditForm({ ...editForm, github: e.target.value })}
-                        placeholder="github username"
-                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399]"
+                        placeholder="username"
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white placeholder-white/25 focus:outline-hidden focus:border-white/30 transition-colors"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-white/80">YouTube Channel</label>
+                      <label className="text-[11px] font-medium text-white/70">YouTube</label>
                       <input
                         type="text"
                         value={editForm.youtube}
                         onChange={(e) => setEditForm({ ...editForm, youtube: e.target.value })}
-                        placeholder="youtube channel"
-                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399]"
+                        placeholder="channel"
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white placeholder-white/25 focus:outline-hidden focus:border-white/30 transition-colors"
                       />
                     </div>
                   </div>
@@ -1234,22 +1231,23 @@ export default function VCardInteractiveView({
               )}
 
               {settingsError && (
-                <div className="p-3 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 text-xs">
+                <div className="p-2.5 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 text-xs">
                   {settingsError}
                 </div>
               )}
 
               {settingsSuccess && (
-                <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
-                  <Check className="w-4 h-4" />
-                  <span>Card settings and mini Linktree saved successfully!</span>
+                <div className="p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
+                  <Check className="w-3.5 h-3.5" />
+                  <span>Settings saved successfully</span>
                 </div>
               )}
 
+              {/* Modal Footer with Clean Layout and Direct Open Hub Link */}
               <div className="flex items-center justify-between pt-3 border-t border-white/10">
                 <Link
-                  href="/dashboard/microsaas?tab=vcard"
-                  className="text-[11px] font-mono text-white/50 hover:text-white flex items-center gap-1 transition-colors"
+                  href="/#workspace?section=vcard"
+                  className="text-[11px] text-white/50 hover:text-white flex items-center gap-1 transition-colors"
                 >
                   <span>Open Hub</span>
                   <ExternalLink className="w-3 h-3" />
@@ -1259,14 +1257,14 @@ export default function VCardInteractiveView({
                   <button
                     type="button"
                     onClick={() => setShowSettingsModal(false)}
-                    className="px-4 py-2 rounded-xl text-xs font-semibold text-white/60 hover:text-white cursor-pointer"
+                    className="px-3.5 py-1.5 rounded-lg text-xs font-medium text-white/60 hover:text-white transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={savingSettings}
-                    className="px-5 py-2.5 rounded-xl bg-[#34D399] text-[#11140F] text-xs font-bold hover:bg-[#34D399]/90 transition-all flex items-center gap-1.5 disabled:opacity-50 cursor-pointer shadow-lg"
+                    className="px-4 py-1.5 rounded-lg bg-white text-black hover:bg-white/90 text-xs font-semibold transition-all flex items-center gap-1.5 disabled:opacity-50 cursor-pointer shadow-xs"
                   >
                     {savingSettings ? (
                       <>
