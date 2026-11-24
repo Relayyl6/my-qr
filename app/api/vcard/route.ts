@@ -63,6 +63,12 @@ export async function POST(req: NextRequest) {
       linkedin,
       twitter,
       instagram,
+      whatsapp,
+      telegram,
+      address,
+      github,
+      youtube,
+      customLinks,
     } = body;
 
     if (!firstName || !email) {
@@ -85,9 +91,15 @@ export async function POST(req: NextRequest) {
       email,
       website: website || "",
       bio: bio || "",
+      address: address || "",
+      whatsapp: whatsapp || "",
+      telegram: telegram || "",
       linkedin: linkedin || "",
       twitter: twitter || "",
       instagram: instagram || "",
+      github: github || "",
+      youtube: youtube || "",
+      customLinks: Array.isArray(customLinks) ? customLinks : [],
       avatarUrl: body.avatarUrl || null,
       logoUrl: body.logoUrl || null,
       bannerUrl: body.bannerUrl || null,

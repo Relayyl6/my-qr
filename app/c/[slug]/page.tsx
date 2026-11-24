@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
+import { getCurrentUser } from '@/lib/auth';
 import VCardInteractiveView from '@/components/VCardInteractiveView';
 
 export async function generateMetadata({
@@ -45,10 +46,15 @@ export default async function VCardPublicPage({
     })
     .catch(() => {});
 
+  const currentUser = await getCurrentUser().catch(() => null);
+  const isOwner = Boolean(currentUser?.id && currentUser.id === item.userId);
+
   const spec = (item.spec as any) || {};
 
   return (
     <VCardInteractiveView
+      itemId={item.id}
+      isOwner={isOwner}
       slug={slug}
       fullName={item.title}
       title={spec.title || ''}
@@ -67,12 +73,14 @@ export default async function VCardPublicPage({
       logoUrl={spec.logoUrl || ''}
       bannerUrl={spec.bannerUrl || ''}
       socials={{
-        linkedin: spec.linkedin,
-        twitter: spec.twitter,
-        instagram: spec.instagram,
-        github: spec.github,
-        youtube: spec.youtube,
+        linkedin: spec.linkedin || '',
+        twitter: spec.twitter || '',
+        instagram: spec.instagram || '',
+        github: spec.github || '',
+        youtube: spec.youtube || '',
       }}
+      customLinks={Array.isArray(spec.customLinks) ? spec.customLinks : []}
+      rawSpec={spec}
     />
   );
 }

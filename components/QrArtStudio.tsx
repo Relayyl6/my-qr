@@ -493,18 +493,18 @@ export default function QrArtStudio({
   };
 
   return (
-    <div className="rounded-3xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#0E1017] p-5 sm:p-7 shadow-2xl space-y-5 max-w-2xl w-full max-h-[92vh] overflow-y-auto text-[#11140F] dark:text-white">
+    <div className="rounded-3xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#121610] p-5 sm:p-7 shadow-2xl space-y-5 max-w-2xl w-full max-h-[92vh] overflow-y-auto text-[#11140F] dark:text-white">
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-[#11140F]/10">
+      <div className="flex items-center justify-between pb-3 border-b border-[#11140F]/10 dark:border-white/10">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-purple-500/10 flex items-center justify-center">
-            <Palette className="w-4.5 h-4.5 text-purple-600" />
+          <div className="w-8 h-8 rounded-xl bg-purple-500/10 dark:bg-purple-500/20 flex items-center justify-center">
+            <Palette className="w-4.5 h-4.5 text-purple-600 dark:text-purple-400" />
           </div>
           <div>
             <h3 className="text-[16px] font-semibold text-[#11140F] dark:text-white flex items-center gap-2">
-              AI QR Art Studio for <span className="font-mono text-purple-700">/id/{shortCode}</span>
+              AI QR Art Studio for <span className="font-mono text-purple-600 dark:text-purple-400">/id/{shortCode}</span>
             </h3>
-            <p className="text-[12px] text-[#11140F]/55 dark:text-white/50">
+            <p className="text-[12px] text-[#11140F]/55 dark:text-white/60">
               Generative scannable artwork with radiant multi-stop gradients & brand emblems
             </p>
           </div>
@@ -512,7 +512,7 @@ export default function QrArtStudio({
         {onClose && (
           <button
             onClick={onClose}
-            className="text-[#11140F]/40 hover:text-[#11140F] p-1.5 rounded-xl hover:bg-[#11140F]/5 transition-colors"
+            className="text-[#11140F]/40 dark:text-white/40 hover:text-[#11140F] dark:hover:text-white p-1.5 rounded-xl hover:bg-[#11140F]/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -521,40 +521,49 @@ export default function QrArtStudio({
 
       {/* Style Inspirations Bar */}
       <div className="space-y-2">
-        <span className="text-[11px] uppercase tracking-wider font-bold text-[#11140F]/55 dark:text-white/50 block">
+        <span className="text-[11px] uppercase tracking-wider font-bold text-[#11140F]/60 dark:text-white/60 block">
           Curated Art Profiles:
         </span>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {ART_PRESETS.map((p, idx) => (
-            <button
-              key={idx}
-              type="button"
-              onClick={() => handleApplyPreset(p)}
-              className={`p-2.5 rounded-xl text-left border transition-all cursor-pointer flex items-center gap-2.5 ${
-                styleSpec.artisticStyle === p.name
-                  ? 'border-[#11140F] ring-2 ring-[#11140F]/15 shadow-xs bg-[#11140F]/[0.02]'
-                  : 'border-[#11140F]/10 hover:border-[#11140F]/30 bg-white'
-              }`}
-            >
-              <div
-                className="w-4.5 h-4.5 rounded-full shrink-0 shadow-2xs border border-white"
-                style={{
-                  background: `linear-gradient(135deg, ${p.gradientColors[0]}, ${p.gradientColors[1]})`,
-                }}
-              />
-              <div className="min-w-0">
-                <span className="text-[12px] font-semibold text-[#11140F] block truncate">
-                  {p.name}
-                </span>
-              </div>
-            </button>
-          ))}
+          {ART_PRESETS.map((p, idx) => {
+            const isSelected = styleSpec.artisticStyle === p.name;
+            return (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => handleApplyPreset(p)}
+                className={`p-2.5 rounded-xl text-left border transition-all cursor-pointer flex items-center gap-2.5 ${
+                  isSelected
+                    ? 'border-emerald-500 dark:border-emerald-400 ring-2 ring-emerald-500/25 bg-emerald-500/10 dark:bg-emerald-500/15 shadow-xs'
+                    : 'border-[#11140F]/10 dark:border-white/10 hover:border-[#11140F]/30 dark:hover:border-white/30 bg-white dark:bg-white/[0.04]'
+                }`}
+              >
+                <div
+                  className="w-4.5 h-4.5 rounded-full shrink-0 shadow-2xs border border-white/80"
+                  style={{
+                    background: `linear-gradient(135deg, ${p.gradientColors[0]}, ${p.gradientColors[1]})`,
+                  }}
+                />
+                <div className="min-w-0">
+                  <span
+                    className={`text-[12px] font-semibold block truncate ${
+                      isSelected
+                        ? 'text-emerald-700 dark:text-emerald-300 font-bold'
+                        : 'text-[#11140F] dark:text-white'
+                    }`}
+                  >
+                    {p.name}
+                  </span>
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* Prompt input */}
       <div className="space-y-1.5">
-        <label className="text-[12px] font-semibold text-[#11140F]/70">
+        <label className="text-[12px] font-semibold text-[#11140F]/80 dark:text-white/80">
           Artistic Direction Prompt:
         </label>
         <textarea
@@ -562,16 +571,16 @@ export default function QrArtStudio({
           value={promptText}
           onChange={(e) => setPromptText(e.target.value)}
           placeholder="Describe your desired palette, mood, and brand texture..."
-          className="w-full rounded-xl border border-[#11140F]/15 bg-[#11140F]/[0.02] p-3 text-[13px] text-[#11140F] placeholder:text-[#11140F]/30 outline-none focus:border-[#11140F] transition-colors resize-none"
+          className="w-full rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.05] p-3 text-[13px] text-[#11140F] dark:text-white placeholder:text-[#11140F]/40 dark:placeholder:text-white/40 outline-none focus:border-emerald-500 dark:focus:border-emerald-400 transition-colors resize-none shadow-2xs"
         />
         <div className="flex justify-end">
           <button
             type="button"
             onClick={handleGenerate}
             disabled={loading || !promptText.trim()}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#11140F] text-white text-[12.5px] font-medium hover:bg-[#2A2E25] transition-colors disabled:opacity-50 cursor-pointer shadow-sm"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#11140F] dark:bg-emerald-600 text-white text-[12.5px] font-semibold hover:bg-[#2A2E25] dark:hover:bg-emerald-500 transition-colors disabled:opacity-50 cursor-pointer shadow-sm"
           >
-            <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+            <Sparkles className="w-3.5 h-3.5 text-emerald-400 dark:text-emerald-200" />
             Synthesize QR Art with AI
           </button>
         </div>
@@ -586,12 +595,14 @@ export default function QrArtStudio({
       )}
 
       {/* Center Emblem Selector */}
-      <div className="p-3.5 rounded-2xl bg-[#11140F]/[0.02] border border-[#11140F]/10 space-y-2">
+      <div className="p-3.5 rounded-2xl bg-[#11140F]/[0.02] dark:bg-white/[0.03] border border-[#11140F]/10 dark:border-white/10 space-y-2">
         <div className="flex items-center justify-between">
-          <span className="text-[11px] uppercase tracking-wider font-bold text-[#11140F]/60">
+          <span className="text-[11px] uppercase tracking-wider font-bold text-[#11140F]/65 dark:text-white/70">
             Center Brand Emblem:
           </span>
-          <span className="text-[11px] text-emerald-700 font-mono">Excavated with Level H (30%)</span>
+          <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono font-medium">
+            Excavated with Level H (30%)
+          </span>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {(
@@ -611,8 +622,8 @@ export default function QrArtStudio({
               onClick={() => setCenterEmblem(item.id)}
               className={`px-3 py-1.5 rounded-xl text-[11.5px] font-semibold transition-all cursor-pointer ${
                 centerEmblem === item.id
-                  ? 'bg-[#11140F] text-white shadow-xs'
-                  : 'bg-white border border-[#11140F]/10 text-[#11140F]/70 hover:bg-[#11140F]/5'
+                  ? 'bg-emerald-600 text-white shadow-xs font-bold'
+                  : 'bg-white dark:bg-white/[0.05] border border-[#11140F]/10 dark:border-white/10 text-[#11140F]/70 dark:text-white/70 hover:bg-[#11140F]/5 dark:hover:bg-white/10'
               }`}
             >
               {item.label}
@@ -623,7 +634,7 @@ export default function QrArtStudio({
 
       {/* Canvas / Render Preview */}
       {!loading && (
-        <div className="flex flex-col sm:flex-row items-center gap-6 p-5 rounded-2xl bg-slate-50/70 border border-slate-200/80">
+        <div className="flex flex-col sm:flex-row items-center gap-6 p-5 rounded-2xl bg-slate-50/70 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/10">
           {/* Visual QR Container with SVG Gradient Defs */}
           <div
             ref={qrRef}
@@ -670,16 +681,16 @@ export default function QrArtStudio({
 
           <div className="space-y-3.5 flex-1 min-w-0">
             <div>
-              <span className="text-[11px] uppercase tracking-wider text-[#11140F]/50 font-bold">
+              <span className="text-[11px] uppercase tracking-wider text-[#11140F]/50 dark:text-white/50 font-bold">
                 Active Art Profile
               </span>
-              <p className="text-[16px] font-bold text-[#11140F]">{styleSpec.artisticStyle}</p>
+              <p className="text-[16px] font-bold text-[#11140F] dark:text-white">{styleSpec.artisticStyle}</p>
               <div className="flex items-center gap-2 mt-1">
                 <span
                   className="w-3 h-3 rounded-full"
                   style={{ backgroundColor: styleSpec.gradientColors[0] }}
                 />
-                <span className="text-[11px] font-mono text-[#11140F]/60">
+                <span className="text-[11px] font-mono text-[#11140F]/60 dark:text-white/60">
                   {styleSpec.gradientColors[0]} → {styleSpec.gradientColors[1]}
                 </span>
               </div>
@@ -687,25 +698,25 @@ export default function QrArtStudio({
 
             {/* Scannability Rating */}
             {scannability && (
-              <div className="space-y-1.5 p-3 rounded-xl bg-white border border-[#11140F]/10">
+              <div className="space-y-1.5 p-3 rounded-xl bg-white dark:bg-white/[0.04] border border-[#11140F]/10 dark:border-white/10">
                 <div className="flex items-center justify-between text-[12px]">
-                  <span className="flex items-center gap-1.5 font-semibold text-[#11140F]/85">
-                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  <span className="flex items-center gap-1.5 font-semibold text-[#11140F]/85 dark:text-white/85">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                     ISO Scannability Score
                   </span>
-                  <span className="font-bold text-emerald-700 font-mono">
+                  <span className="font-bold text-emerald-600 dark:text-emerald-400 font-mono">
                     {scannability.score}/100
                   </span>
                 </div>
-                <div className="w-full h-2 rounded-full bg-[#11140F]/10 overflow-hidden">
+                <div className="w-full h-2 rounded-full bg-[#11140F]/10 dark:bg-white/10 overflow-hidden">
                   <div
-                    className="h-full bg-emerald-600 rounded-full transition-all duration-300"
+                    className="h-full bg-emerald-600 dark:bg-emerald-400 rounded-full transition-all duration-300"
                     style={{ width: `${scannability.score}%` }}
                   />
                 </div>
-                <p className="text-[11px] text-[#11140F]/55 flex items-center justify-between">
+                <p className="text-[11px] text-[#11140F]/55 dark:text-white/55 flex items-center justify-between">
                   <span>Contrast Ratio: {scannability.contrastRatio}:1</span>
-                  <span className="font-medium text-emerald-800">Verified Readable</span>
+                  <span className="font-medium text-emerald-600 dark:text-emerald-400">Verified Readable</span>
                 </p>
               </div>
             )}
@@ -715,7 +726,7 @@ export default function QrArtStudio({
               <button
                 type="button"
                 onClick={handleDownloadPng}
-                className="px-3.5 py-2 rounded-xl bg-[#11140F] text-white text-[12px] font-semibold hover:bg-[#2A2E25] transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
+                className="px-3.5 py-2 rounded-xl bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] text-[12px] font-semibold hover:bg-[#2A2E25] dark:hover:bg-white/90 transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
               >
                 <Download className="w-3.5 h-3.5" />
                 Download Print PNG (300 DPI)
@@ -723,18 +734,18 @@ export default function QrArtStudio({
               <button
                 type="button"
                 onClick={handleDownloadSvg}
-                className="px-3 py-2 rounded-xl border border-[#11140F]/15 bg-white text-[#11140F] text-[12px] font-medium hover:bg-[#EEF0EA] transition-colors flex items-center gap-1.5 cursor-pointer"
+                className="px-3 py-2 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.05] text-[#11140F] dark:text-white text-[12px] font-medium hover:bg-[#EEF0EA] dark:hover:bg-white/10 transition-colors flex items-center gap-1.5 cursor-pointer"
                 title="Download scalable SVG for Figma, Illustrator, or print presses"
               >
-                <FileCode className="w-3.5 h-3.5 text-[#2F6B4F]" />
+                <FileCode className="w-3.5 h-3.5 text-[#2F6B4F] dark:text-emerald-400" />
                 Vector SVG
               </button>
               <button
                 type="button"
                 onClick={handleSaveArtwork}
-                className="px-3 py-2 rounded-xl border border-[#11140F]/15 bg-white text-[#11140F] text-[12px] font-medium hover:bg-[#11140F]/5 transition-colors flex items-center gap-1 cursor-pointer"
+                className="px-3 py-2 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.05] text-[#11140F] dark:text-white text-[12px] font-medium hover:bg-[#11140F]/5 dark:hover:bg-white/10 transition-colors flex items-center gap-1 cursor-pointer"
               >
-                {saved ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : null}
+                {saved ? <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> : null}
                 {saved ? 'Saved to Vault' : 'Save Style'}
               </button>
             </div>

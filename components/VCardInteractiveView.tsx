@@ -17,12 +17,29 @@ import {
   Check,
   Loader2,
   Sparkles,
+  Instagram,
+  Send,
+  Link2,
+  Settings,
+  Plus,
+  Trash2,
+  Edit2,
+  ArrowRight,
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { APP_URL } from '@/lib/config';
 import { getOptimizedStorageUrl } from '@/lib/media';
 
+export interface CustomLink {
+  id?: string;
+  title: string;
+  url: string;
+  subtitle?: string;
+}
+
 export interface VCardProps {
+  itemId?: string;
+  isOwner?: boolean;
   slug: string;
   fullName: string;
   title: string;
@@ -47,9 +64,35 @@ export interface VCardProps {
     github?: string;
     youtube?: string;
   };
+  customLinks?: CustomLink[];
+  rawSpec?: any;
+}
+
+function formatInstagramUrl(val: string) {
+  if (!val) return '';
+  const trimmed = val.trim();
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+  return `https://instagram.com/${trimmed.replace(/^@/, '')}`;
+}
+
+function formatWhatsAppUrl(val: string) {
+  if (!val) return '';
+  const trimmed = val.trim();
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+  const digits = trimmed.replace(/[^0-9]/g, '');
+  return `https://wa.me/${digits}`;
+}
+
+function formatTelegramUrl(val: string) {
+  if (!val) return '';
+  const trimmed = val.trim();
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+  return `https://t.me/${trimmed.replace(/^@/, '')}`;
 }
 
 export default function VCardInteractiveView({
+  itemId,
+  isOwner = false,
   slug,
   fullName,
   title,
@@ -68,9 +111,71 @@ export default function VCardInteractiveView({
   logoUrl,
   bannerUrl,
   socials,
+  customLinks = [],
+  rawSpec,
 }: VCardProps) {
   const [showQrModal, setShowQrModal] = useState(false);
   const [showExchangeModal, setShowExchangeModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [settingsTab, setSettingsTab] = useState<'actions' | 'linktree' | 'profile'>('actions');
+
+  // Active Dynamic Card States
+  const [activePhone, setActivePhone] = useState(phone || '');
+  const [activeEmail, setActiveEmail] = useState(email || '');
+  const [activeWebsite, setActiveWebsite] = useState(website || '');
+  const [activeBio, setActiveBio] = useState(bio || '');
+  const [activeTitle, setActiveTitle] = useState(title || '');
+  const [activeCompany, setActiveCompany] = useState(company || '');
+  const [activeWhatsapp, setActiveWhatsapp] = useState(whatsapp || '');
+  const [activeTelegram, setActiveTelegram] = useState(telegram || '');
+  const [activeAddress, setActiveAddress] = useState(address || '');
+  const [activeInstagram, setActiveInstagram] = useState(socials?.instagram || '');
+  const [activeLinkedin, setActiveLinkedin] = useState(socials?.linkedin || '');
+  const [activeTwitter, setActiveTwitter] = useState(socials?.twitter || '');
+  const [activeGithub, setActiveGithub] = useState(socials?.github || '');
+  const [activeYoutube, setActiveYoutube] = useState(socials?.youtube || '');
+  const [activeCustomLinks, setActiveCustomLinks] = useState<CustomLink[]>(customLinks || []);
+
+  // Settings Edit State
+  const [editForm, setEditForm] = useState({
+    title: title || '',
+    company: company || '',
+    bio: bio || '',
+    phone: phone || '',
+    email: email || '',
+    website: website || '',
+    whatsapp: whatsapp || '',
+    telegram: telegram || '',
+    address: address || '',
+    instagram: socials?.instagram || '',
+    linkedin: socials?.linkedin || '',
+    twitter: socials?.twitter || '',
+    github: socials?.github || '',
+    youtube: socials?.youtube || '',
+    customLinks: customLinks || [] as CustomLink[],
+  });
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [settingsSuccess, setSettingsSuccess] = useState(false);
+  const [settingsError, setSettingsError] = useState<string | null>(null);
+
+  // Sync props to state if props update
+  useEffect(() => {
+    setActivePhone(phone || '');
+    setActiveEmail(email || '');
+    setActiveWebsite(website || '');
+    setActiveBio(bio || '');
+    setActiveTitle(title || '');
+    setActiveCompany(company || '');
+    setActiveWhatsapp(whatsapp || '');
+    setActiveTelegram(telegram || '');
+    setActiveAddress(address || '');
+    setActiveInstagram(socials?.instagram || '');
+    setActiveLinkedin(socials?.linkedin || '');
+    setActiveTwitter(socials?.twitter || '');
+    setActiveGithub(socials?.github || '');
+    setActiveYoutube(socials?.youtube || '');
+    setActiveCustomLinks(customLinks || []);
+  }, [phone, email, website, bio, title, company, whatsapp, telegram, address, socials, customLinks]);
 
   // Exchange contact state
   const [exchangeName, setExchangeName] = useState('');
@@ -95,6 +200,99 @@ export default function VCardInteractiveView({
   useEffect(() => {
     setLogoSrc(getOptimizedStorageUrl(logoUrl) || logoUrl || '');
   }, [logoUrl]);
+
+  const handleOpenSettings = () => {
+    setEditForm({
+      title: activeTitle,
+      company: activeCompany,
+      bio: activeBio,
+      phone: activePhone,
+      email: activeEmail,
+      website: activeWebsite,
+      whatsapp: activeWhatsapp,
+      telegram: activeTelegram,
+      address: activeAddress,
+      instagram: activeInstagram,
+      linkedin: activeLinkedin,
+      twitter: activeTwitter,
+      github: activeGithub,
+      youtube: activeYoutube,
+      customLinks: [...activeCustomLinks],
+    });
+    setSettingsError(null);
+    setSettingsSuccess(false);
+    setShowSettingsModal(true);
+  };
+
+  const handleSaveSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!itemId) {
+      setSettingsError('Card ID is missing');
+      return;
+    }
+    setSavingSettings(true);
+    setSettingsError(null);
+    try {
+      const cleanCustomLinks = editForm.customLinks.filter((l) => l.title.trim() && l.url.trim());
+      const updatedSpec = {
+        ...(rawSpec || {}),
+        title: editForm.title,
+        company: editForm.company,
+        bio: editForm.bio,
+        phone: editForm.phone,
+        email: editForm.email,
+        website: editForm.website,
+        whatsapp: editForm.whatsapp,
+        telegram: editForm.telegram,
+        address: editForm.address,
+        instagram: editForm.instagram,
+        linkedin: editForm.linkedin,
+        twitter: editForm.twitter,
+        github: editForm.github,
+        youtube: editForm.youtube,
+        customLinks: cleanCustomLinks,
+      };
+
+      const res = await fetch(`/api/microsaas/${itemId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          spec: updatedSpec,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to save card settings');
+      }
+
+      setActiveTitle(editForm.title);
+      setActiveCompany(editForm.company);
+      setActiveBio(editForm.bio);
+      setActivePhone(editForm.phone);
+      setActiveEmail(editForm.email);
+      setActiveWebsite(editForm.website);
+      setActiveWhatsapp(editForm.whatsapp);
+      setActiveTelegram(editForm.telegram);
+      setActiveAddress(editForm.address);
+      setActiveInstagram(editForm.instagram);
+      setActiveLinkedin(editForm.linkedin);
+      setActiveTwitter(editForm.twitter);
+      setActiveGithub(editForm.github);
+      setActiveYoutube(editForm.youtube);
+      setActiveCustomLinks(cleanCustomLinks);
+
+      setSettingsSuccess(true);
+      setTimeout(() => {
+        setShowSettingsModal(false);
+        setSettingsSuccess(false);
+      }, 1000);
+    } catch (err: any) {
+      setSettingsError(err.message || 'Error updating card settings');
+    } finally {
+      setSavingSettings(false);
+    }
+  };
 
   const handleAvatarError = () => {
     if (avatarSrc !== avatarUrl && avatarUrl) {
@@ -235,14 +433,28 @@ export default function VCardInteractiveView({
                 <span>Share QR</span>
               </button>
 
-              <button
-                type="button"
-                onClick={() => setShowExchangeModal(true)}
-                className="px-3 py-1.5 rounded-xl bg-black/60 hover:bg-black/80 text-white font-medium text-xs border border-white/20 transition-all flex items-center gap-1.5 cursor-pointer shadow-lg backdrop-blur-md"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-[#34D399]" />
-                <span>Exchange Info</span>
-              </button>
+              <div className="flex items-center gap-2">
+                {isOwner && (
+                  <button
+                    type="button"
+                    onClick={handleOpenSettings}
+                    className="px-2.5 py-1.5 rounded-xl bg-black/60 hover:bg-black/80 text-white font-medium text-xs border border-white/20 hover:border-emerald-400/50 transition-all flex items-center gap-1.5 cursor-pointer shadow-lg backdrop-blur-md"
+                    title="Customize Quick Actions & Mini Linktree"
+                  >
+                    <Settings className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Settings</span>
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => setShowExchangeModal(true)}
+                  className="px-3 py-1.5 rounded-xl bg-black/60 hover:bg-black/80 text-white font-medium text-xs border border-white/20 transition-all flex items-center gap-1.5 cursor-pointer shadow-lg backdrop-blur-md"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-[#34D399]" />
+                  <span>Exchange Info</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -274,17 +486,17 @@ export default function VCardInteractiveView({
               <h1 className={`text-2xl font-black ${activeTheme.text} tracking-tight`}>
                 {fullName}
               </h1>
-              {title && (
+              {activeTitle && (
                 <p style={{ color: activeTheme.accent }} className="text-sm font-semibold mt-0.5">
-                  {title}
+                  {activeTitle}
                 </p>
               )}
-              {company && (
+              {activeCompany && (
                 <div className="inline-flex items-center justify-center gap-2 mt-1.5 px-3 py-1 rounded-xl bg-white/5 border border-white/10 shadow-xs max-w-full">
                   {logoUrl && (
                     <img
                       src={logoSrc}
-                      alt={company}
+                      alt={activeCompany}
                       loading="lazy"
                       decoding="async"
                       onError={() => {
@@ -294,15 +506,15 @@ export default function VCardInteractiveView({
                     />
                   )}
                   <p className={`text-xs font-bold uppercase tracking-wider truncate ${activeTheme.subtext}`}>
-                    {company}
+                    {activeCompany}
                   </p>
                 </div>
               )}
             </div>
 
-            {bio && (
+            {activeBio && (
               <p className={`text-xs sm:text-[13px] ${activeTheme.subtext} leading-relaxed max-w-xs mx-auto pt-1`}>
-                {bio}
+                {activeBio}
               </p>
             )}
           </div>
@@ -319,93 +531,182 @@ export default function VCardInteractiveView({
             </a>
           </div>
 
-          {/* Extended Action Grid: Call, SMS, WhatsApp, Email, Telegram, Maps */}
+          {/* Extended Action Grid: Call, WhatsApp, Instagram, SMS, Email, Telegram, Website, Directions */}
           <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 pt-1">
-            {phone && (
+            {activePhone && (
               <a
-                href={`tel:${phone}`}
-                className="p-3 rounded-md bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
+                href={`tel:${activePhone}`}
+                className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
               >
-                <div className="w-8 h-8 rounded-md bg-white/10 mx-auto flex items-center justify-center text-white group-hover:scale-105 transition-transform">
+                <div className="w-8 h-8 rounded-lg bg-white/10 mx-auto flex items-center justify-center text-white group-hover:scale-105 transition-transform">
                   <Phone className="w-4 h-4" />
                 </div>
-                <span className="text-[11px] font-semibold text-white/80 block mt-1.5">Call</span>
+                <span className="text-[11px] font-semibold text-white/80 block mt-1.5 truncate">Call</span>
               </a>
             )}
 
-            {phone && (
+            {activeWhatsapp && (
               <a
-                href={`sms:${phone}`}
-                className="p-3 rounded-md bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
-              >
-                <div className="w-8 h-8 rounded-md bg-white/10 mx-auto flex items-center justify-center text-white group-hover:scale-105 transition-transform">
-                  <MessageSquare className="w-4 h-4" />
-                </div>
-                <span className="text-[11px] font-semibold text-white/80 block mt-1.5">SMS</span>
-              </a>
-            )}
-
-            {whatsapp && (
-              <a
-                href={`https://wa.me/${whatsapp.replace(/[^0-9]/g, '')}`}
+                href={formatWhatsAppUrl(activeWhatsapp)}
                 target="_blank"
                 rel="noreferrer"
-                className="p-3 rounded-md bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
+                className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
               >
-                <div className="w-8 h-8 rounded-md bg-[#25D366]/20 mx-auto flex items-center justify-center text-[#25D366] group-hover:scale-105 transition-transform">
+                <div className="w-8 h-8 rounded-lg bg-[#25D366]/20 mx-auto flex items-center justify-center text-[#25D366] group-hover:scale-105 transition-transform">
                   <MessageCircle className="w-4 h-4" />
                 </div>
-                <span className="text-[11px] font-semibold text-white/80 block mt-1.5">WhatsApp</span>
+                <span className="text-[11px] font-semibold text-white/80 block mt-1.5 truncate">WhatsApp</span>
               </a>
             )}
 
-            {email && (
+            {activeInstagram && (
               <a
-                href={`mailto:${email}`}
-                className="p-3 rounded-md bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
+                href={formatInstagramUrl(activeInstagram)}
+                target="_blank"
+                rel="noreferrer"
+                className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
               >
-                <div className="w-8 h-8 rounded-md bg-white/10 mx-auto flex items-center justify-center text-white group-hover:scale-105 transition-transform">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-amber-500/20 via-rose-500/20 to-purple-500/20 text-[#E1306C] mx-auto flex items-center justify-center group-hover:scale-105 transition-transform border border-[#E1306C]/20">
+                  <Instagram className="w-4 h-4" />
+                </div>
+                <span className="text-[11px] font-semibold text-white/80 block mt-1.5 truncate">Instagram</span>
+              </a>
+            )}
+
+            {activePhone && (
+              <a
+                href={`sms:${activePhone}`}
+                className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
+              >
+                <div className="w-8 h-8 rounded-lg bg-white/10 mx-auto flex items-center justify-center text-white group-hover:scale-105 transition-transform">
+                  <MessageSquare className="w-4 h-4" />
+                </div>
+                <span className="text-[11px] font-semibold text-white/80 block mt-1.5 truncate">SMS</span>
+              </a>
+            )}
+
+            {activeEmail && (
+              <a
+                href={`mailto:${activeEmail}`}
+                className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
+              >
+                <div className="w-8 h-8 rounded-lg bg-white/10 mx-auto flex items-center justify-center text-white group-hover:scale-105 transition-transform">
                   <Mail className="w-4 h-4" />
                 </div>
-                <span className="text-[11px] font-semibold text-white/80 block mt-1.5">Email</span>
+                <span className="text-[11px] font-semibold text-white/80 block mt-1.5 truncate">Email</span>
               </a>
             )}
 
-            {address && (
+            {activeTelegram && (
               <a
-                href={`https://maps.google.com/?q=${encodeURIComponent(address)}`}
+                href={formatTelegramUrl(activeTelegram)}
                 target="_blank"
                 rel="noreferrer"
-                className="p-3 rounded-md bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
+                className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
               >
-                <div className="w-8 h-8 rounded-md bg-white/10 mx-auto flex items-center justify-center text-white group-hover:scale-105 transition-transform">
-                  <MapPin className="w-4 h-4" />
+                <div className="w-8 h-8 rounded-lg bg-[#0088cc]/20 mx-auto flex items-center justify-center text-[#29B6F6] group-hover:scale-105 transition-transform">
+                  <Send className="w-4 h-4" />
                 </div>
-                <span className="text-[11px] font-semibold text-white/80 block mt-1.5">Directions</span>
+                <span className="text-[11px] font-semibold text-white/80 block mt-1.5 truncate">Telegram</span>
               </a>
             )}
 
-            {website && (
+            {activeWebsite && (
               <a
-                href={website.startsWith('http') ? website : `https://${website}`}
+                href={activeWebsite.startsWith('http') ? activeWebsite : `https://${activeWebsite}`}
                 target="_blank"
                 rel="noreferrer"
-                className="p-3 rounded-md bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
+                className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
               >
-                <div className="w-8 h-8 rounded-md bg-white/10 mx-auto flex items-center justify-center text-white group-hover:scale-105 transition-transform">
+                <div className="w-8 h-8 rounded-lg bg-white/10 mx-auto flex items-center justify-center text-white group-hover:scale-105 transition-transform">
                   <Globe className="w-4 h-4" />
                 </div>
-                <span className="text-[11px] font-semibold text-white/80 block mt-1.5">Website</span>
+                <span className="text-[11px] font-semibold text-white/80 block mt-1.5 truncate">Website</span>
+              </a>
+            )}
+
+            {activeAddress && (
+              <a
+                href={`https://maps.google.com/?q=${encodeURIComponent(activeAddress)}`}
+                target="_blank"
+                rel="noreferrer"
+                className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
+              >
+                <div className="w-8 h-8 rounded-lg bg-white/10 mx-auto flex items-center justify-center text-white group-hover:scale-105 transition-transform">
+                  <MapPin className="w-4 h-4" />
+                </div>
+                <span className="text-[11px] font-semibold text-white/80 block mt-1.5 truncate">Directions</span>
               </a>
             )}
           </div>
 
+          {/* Mini Linktree: Custom Featured Links */}
+          {activeCustomLinks && activeCustomLinks.length > 0 && (
+            <div className="space-y-2 pt-2 border-t border-white/10">
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 text-white/70">
+                  <Sparkles className="w-3 h-3 text-[#34D399]" />
+                  Featured Links
+                </span>
+                <span className="text-[10px] font-mono text-white/40">
+                  {activeCustomLinks.length} {activeCustomLinks.length === 1 ? 'Link' : 'Links'}
+                </span>
+              </div>
+              <div className="space-y-2">
+                {activeCustomLinks.map((link, idx) => (
+                  <a
+                    key={link.id || idx}
+                    href={link.url.startsWith('http') ? link.url : `https://${link.url}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#34D399]/40 transition-all text-left shadow-xs"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-[#34D399] group-hover:scale-105 transition-transform shrink-0">
+                        <Link2 className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-white truncate group-hover:text-[#34D399] transition-colors">
+                          {link.title}
+                        </p>
+                        {link.subtitle ? (
+                          <p className="text-[10px] text-white/50 truncate">
+                            {link.subtitle}
+                          </p>
+                        ) : (
+                          <p className="text-[10px] text-white/40 truncate font-mono">
+                            {link.url.replace(/^https?:\/\//, '')}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <ExternalLink className="w-3.5 h-3.5 text-white/40 group-hover:text-white transition-colors shrink-0" />
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Owner Quick Settings Action Bar */}
+          {isOwner && (
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={handleOpenSettings}
+                className="w-full py-2.5 px-3 rounded-xl border border-dashed border-emerald-500/30 hover:border-emerald-500/70 bg-emerald-500/5 hover:bg-emerald-500/10 text-emerald-300 hover:text-white text-xs font-medium flex items-center justify-center gap-2 transition-all cursor-pointer"
+              >
+                <Settings className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Card Settings: Add Instagram, WhatsApp & Mini Linktree</span>
+              </button>
+            </div>
+          )}
+
           {/* Social Links Bar */}
-          {Object.values(socials).some(Boolean) && (
+          {(activeLinkedin || activeTwitter || activeGithub || activeYoutube) && (
             <div className="pt-3 border-t border-white/10 flex flex-wrap items-center justify-center gap-3">
-              {socials.linkedin && (
+              {activeLinkedin && (
                 <a
-                  href={socials.linkedin}
+                  href={activeLinkedin.startsWith('http') ? activeLinkedin : `https://linkedin.com/in/${activeLinkedin.replace(/^@/, '')}`}
                   target="_blank"
                   rel="noreferrer"
                   className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 flex items-center justify-center text-white transition-colors"
@@ -413,9 +714,9 @@ export default function VCardInteractiveView({
                   <span className="font-bold text-xs">in</span>
                 </a>
               )}
-              {socials.twitter && (
+              {activeTwitter && (
                 <a
-                  href={socials.twitter}
+                  href={activeTwitter.startsWith('http') ? activeTwitter : `https://x.com/${activeTwitter.replace(/^@/, '')}`}
                   target="_blank"
                   rel="noreferrer"
                   className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 flex items-center justify-center text-white transition-colors"
@@ -423,24 +724,24 @@ export default function VCardInteractiveView({
                   <span className="font-bold text-xs">𝕏</span>
                 </a>
               )}
-              {socials.instagram && (
+              {activeGithub && (
                 <a
-                  href={socials.instagram}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 flex items-center justify-center text-white transition-colors"
-                >
-                  <span className="font-bold text-xs">ig</span>
-                </a>
-              )}
-              {socials.github && (
-                <a
-                  href={socials.github}
+                  href={activeGithub.startsWith('http') ? activeGithub : `https://github.com/${activeGithub.replace(/^@/, '')}`}
                   target="_blank"
                   rel="noreferrer"
                   className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 flex items-center justify-center text-white transition-colors"
                 >
                   <span className="font-bold text-xs">gh</span>
+                </a>
+              )}
+              {activeYoutube && (
+                <a
+                  href={activeYoutube.startsWith('http') ? activeYoutube : `https://youtube.com/${activeYoutube.replace(/^@/, '')}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 flex items-center justify-center text-white transition-colors"
+                >
+                  <span className="font-bold text-xs text-red-400">▶</span>
                 </a>
               )}
             </div>
@@ -572,6 +873,416 @@ export default function VCardInteractiveView({
               </form>
             )}
 
+          </div>
+        </div>
+      )}
+
+      {/* Modal 3: Card Operability & Mini Linktree Settings (Owner only) */}
+      {showSettingsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="w-full max-w-lg bg-[#121411] text-white border border-white/15 rounded-2xl p-6 sm:p-7 shadow-2xl space-y-5 relative max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/15 flex items-center justify-center text-[#34D399]">
+                  <Settings className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white">Card Settings & Operability</h3>
+                  <p className="text-[11px] text-white/50">Configure action buttons, WhatsApp, Instagram & mini Linktree</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowSettingsModal(false)}
+                className="text-white/50 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Navigation Tabs */}
+            <div className="flex items-center gap-1.5 p-1 bg-white/5 rounded-xl border border-white/10 text-xs">
+              <button
+                type="button"
+                onClick={() => setSettingsTab('actions')}
+                className={`flex-1 py-1.5 px-3 rounded-lg font-semibold transition-all cursor-pointer ${
+                  settingsTab === 'actions'
+                    ? 'bg-[#34D399] text-[#11140F] shadow-xs'
+                    : 'text-white/70 hover:text-white'
+                }`}
+              >
+                ⚡ Quick Actions
+              </button>
+              <button
+                type="button"
+                onClick={() => setSettingsTab('linktree')}
+                className={`flex-1 py-1.5 px-3 rounded-lg font-semibold transition-all cursor-pointer ${
+                  settingsTab === 'linktree'
+                    ? 'bg-[#34D399] text-[#11140F] shadow-xs'
+                    : 'text-white/70 hover:text-white'
+                }`}
+              >
+                🔗 Mini Linktree ({editForm.customLinks.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setSettingsTab('profile')}
+                className={`flex-1 py-1.5 px-3 rounded-lg font-semibold transition-all cursor-pointer ${
+                  settingsTab === 'profile'
+                    ? 'bg-[#34D399] text-[#11140F] shadow-xs'
+                    : 'text-white/70 hover:text-white'
+                }`}
+              >
+                👤 Role & Social
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveSettings} className="space-y-4">
+              {settingsTab === 'actions' && (
+                <div className="space-y-3.5">
+                  <div className="p-3 bg-white/[0.03] rounded-xl border border-white/10 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-white flex items-center gap-1.5">
+                        <MessageCircle className="w-4 h-4 text-[#25D366]" />
+                        <span>WhatsApp Number or Link</span>
+                      </label>
+                      {editForm.phone && editForm.whatsapp !== editForm.phone && (
+                        <button
+                          type="button"
+                          onClick={() => setEditForm({ ...editForm, whatsapp: editForm.phone })}
+                          className="text-[10px] font-mono text-[#34D399] hover:underline cursor-pointer"
+                        >
+                          Use Phone Number
+                        </button>
+                      )}
+                    </div>
+                    <input
+                      type="text"
+                      value={editForm.whatsapp}
+                      onChange={(e) => setEditForm({ ...editForm, whatsapp: e.target.value })}
+                      placeholder="+234 906 498 2841 or wa.me/..."
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399]"
+                    />
+                    <p className="text-[10px] text-white/50">
+                      Renders a prominent green WhatsApp button in your contact action grid.
+                    </p>
+                  </div>
+
+                  <div className="p-3 bg-white/[0.03] rounded-xl border border-white/10 space-y-3">
+                    <label className="text-xs font-bold text-white flex items-center gap-1.5">
+                      <Instagram className="w-4 h-4 text-[#E1306C]" />
+                      <span>Instagram Handle or URL</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={editForm.instagram}
+                      onChange={(e) => setEditForm({ ...editForm, instagram: e.target.value })}
+                      placeholder="@yourusername or https://instagram.com/..."
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399]"
+                    />
+                    <p className="text-[10px] text-white/50">
+                      Renders a dedicated Instagram action tile in the card grid.
+                    </p>
+                  </div>
+
+                  <div className="p-3 bg-white/[0.03] rounded-xl border border-white/10 space-y-3">
+                    <label className="text-xs font-bold text-white flex items-center gap-1.5">
+                      <Send className="w-4 h-4 text-[#29B6F6]" />
+                      <span>Telegram Username or Link</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={editForm.telegram}
+                      onChange={(e) => setEditForm({ ...editForm, telegram: e.target.value })}
+                      placeholder="@yourhandle or https://t.me/..."
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399]"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-white/80">Phone Number (Call / SMS)</label>
+                      <input
+                        type="tel"
+                        value={editForm.phone}
+                        onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                        placeholder="+234..."
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399]"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-white/80">Email Address</label>
+                      <input
+                        type="email"
+                        value={editForm.email}
+                        onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                        placeholder="you@domain.com"
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399]"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-white/80">Website or Portfolio</label>
+                      <input
+                        type="text"
+                        value={editForm.website}
+                        onChange={(e) => setEditForm({ ...editForm, website: e.target.value })}
+                        placeholder="https://yourportfolio.com"
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399]"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-white/80">Office Address / Location</label>
+                      <input
+                        type="text"
+                        value={editForm.address}
+                        onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
+                        placeholder="e.g. Lagos, Nigeria"
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399]"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {settingsTab === 'linktree' && (
+                <div className="space-y-3.5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-bold text-white block">Mini Linktree Links</span>
+                      <p className="text-[10px] text-white/50">
+                        Add interactive button links for your portfolios, stores, calendars, or products.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setEditForm({
+                          ...editForm,
+                          customLinks: [
+                            ...editForm.customLinks,
+                            { id: Date.now().toString(), title: '', url: '' },
+                          ],
+                        })
+                      }
+                      className="px-2.5 py-1.5 rounded-xl bg-[#34D399]/20 hover:bg-[#34D399]/30 text-[#34D399] border border-[#34D399]/30 text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add Link</span>
+                    </button>
+                  </div>
+
+                  {editForm.customLinks.length === 0 ? (
+                    <div className="p-6 text-center border-2 border-dashed border-white/10 rounded-2xl space-y-2">
+                      <Link2 className="w-6 h-6 mx-auto text-white/30" />
+                      <p className="text-xs text-white/60">No custom Linktree links added yet.</p>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setEditForm({
+                            ...editForm,
+                            customLinks: [
+                              ...editForm.customLinks,
+                              { id: Date.now().toString(), title: 'My Work / Portfolio', url: 'https://' },
+                            ],
+                          })
+                        }
+                        className="text-xs text-[#34D399] font-bold hover:underline cursor-pointer"
+                      >
+                        + Add your first custom link
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+                      {editForm.customLinks.map((link, idx) => (
+                        <div
+                          key={link.id || idx}
+                          className="p-3 rounded-xl bg-white/5 border border-white/10 space-y-2 relative group"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-[10px] font-mono text-white/40 uppercase">
+                              Link #{idx + 1}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const next = [...editForm.customLinks];
+                                next.splice(idx, 1);
+                                setEditForm({ ...editForm, customLinks: next });
+                              }}
+                              className="text-white/40 hover:text-red-400 p-0.5 rounded transition-colors cursor-pointer"
+                              title="Delete Link"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <input
+                              type="text"
+                              value={link.title}
+                              onChange={(e) => {
+                                const next = [...editForm.customLinks];
+                                next[idx] = { ...next[idx], title: e.target.value };
+                                setEditForm({ ...editForm, customLinks: next });
+                              }}
+                              placeholder="Title (e.g. Schedule Call)"
+                              className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399]"
+                            />
+                            <input
+                              type="url"
+                              value={link.url}
+                              onChange={(e) => {
+                                const next = [...editForm.customLinks];
+                                next[idx] = { ...next[idx], url: e.target.value };
+                                setEditForm({ ...editForm, customLinks: next });
+                              }}
+                              placeholder="https://calendly.com/..."
+                              className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399]"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {settingsTab === 'profile' && (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-white/80">Job Title</label>
+                      <input
+                        type="text"
+                        value={editForm.title}
+                        onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                        placeholder="e.g. Lead Designer"
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399]"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-white/80">Company / Organization</label>
+                      <input
+                        type="text"
+                        value={editForm.company}
+                        onChange={(e) => setEditForm({ ...editForm, company: e.target.value })}
+                        placeholder="e.g. Acme Corp"
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399]"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-white/80">Bio / Pitch</label>
+                    <textarea
+                      rows={3}
+                      value={editForm.bio}
+                      onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
+                      placeholder="Brief pitch about what you build..."
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399] resize-none"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 pt-1">
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-white/80">LinkedIn URL</label>
+                      <input
+                        type="text"
+                        value={editForm.linkedin}
+                        onChange={(e) => setEditForm({ ...editForm, linkedin: e.target.value })}
+                        placeholder="https://linkedin.com/in/..."
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399]"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-white/80">Twitter / X Handle</label>
+                      <input
+                        type="text"
+                        value={editForm.twitter}
+                        onChange={(e) => setEditForm({ ...editForm, twitter: e.target.value })}
+                        placeholder="@handle"
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399]"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-white/80">GitHub Username</label>
+                      <input
+                        type="text"
+                        value={editForm.github}
+                        onChange={(e) => setEditForm({ ...editForm, github: e.target.value })}
+                        placeholder="github username"
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399]"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-white/80">YouTube Channel</label>
+                      <input
+                        type="text"
+                        value={editForm.youtube}
+                        onChange={(e) => setEditForm({ ...editForm, youtube: e.target.value })}
+                        placeholder="youtube channel"
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 focus:outline-hidden focus:border-[#34D399]"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {settingsError && (
+                <div className="p-3 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 text-xs">
+                  {settingsError}
+                </div>
+              )}
+
+              {settingsSuccess && (
+                <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
+                  <Check className="w-4 h-4" />
+                  <span>Card settings and mini Linktree saved successfully!</span>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between pt-3 border-t border-white/10">
+                <Link
+                  href="/dashboard/microsaas?tab=vcard"
+                  className="text-[11px] font-mono text-white/50 hover:text-white flex items-center gap-1 transition-colors"
+                >
+                  <span>Open Hub</span>
+                  <ExternalLink className="w-3 h-3" />
+                </Link>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowSettingsModal(false)}
+                    className="px-4 py-2 rounded-xl text-xs font-semibold text-white/60 hover:text-white cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={savingSettings}
+                    className="px-5 py-2.5 rounded-xl bg-[#34D399] text-[#11140F] text-xs font-bold hover:bg-[#34D399]/90 transition-all flex items-center gap-1.5 disabled:opacity-50 cursor-pointer shadow-lg"
+                  >
+                    {savingSettings ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Saving...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Save Changes</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </form>
           </div>
         </div>
       )}

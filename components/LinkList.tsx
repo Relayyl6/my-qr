@@ -494,6 +494,7 @@ export default function LinkList({
             shortCode={activeRouterLink.link.shortCode}
             defaultDestination={activeRouterLink.link.destinationUrl}
             userTier={userTier}
+            isAdmin={isAdmin}
             initialTab={activeRouterLink.tab}
             onClose={() => setActiveRouterLink(null)}
           />

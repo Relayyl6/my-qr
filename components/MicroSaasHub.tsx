@@ -111,6 +111,15 @@ export default function MicroSaasHub({
     email: '',
     website: '',
     bio: '',
+    whatsapp: '',
+    telegram: '',
+    address: '',
+    instagram: '',
+    linkedin: '',
+    twitter: '',
+    github: '',
+    youtube: '',
+    customLinks: [] as Array<{ id: string; title: string; url: string }>,
     avatarUrl: '',
     logoUrl: '',
     bannerUrl: '',
@@ -172,6 +181,15 @@ export default function MicroSaasHub({
     website: '',
     bio: '',
     slug: '',
+    whatsapp: '',
+    telegram: '',
+    address: '',
+    instagram: '',
+    linkedin: '',
+    twitter: '',
+    github: '',
+    youtube: '',
+    customLinks: [] as Array<{ id: string; title: string; url: string }>,
     avatarUrl: '',
     logoUrl: '',
     bannerUrl: '',
@@ -294,15 +312,43 @@ export default function MicroSaasHub({
     setActionLoading(true);
     setErrorMsg(null);
     try {
+      const cleanCustomLinks = vcardForm.customLinks.filter(
+        (l) => l.title.trim() && l.url.trim()
+      );
       const res = await fetch('/api/vcard', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(vcardForm),
+        body: JSON.stringify({
+          ...vcardForm,
+          customLinks: cleanCustomLinks,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to create digital vCard');
       setShowVCardModal(false);
-      setVcardForm({ firstName: '', lastName: '', title: '', company: '', phone: '', email: '', website: '', bio: '', slug: '', avatarUrl: '', logoUrl: '', bannerUrl: '' });
+      setVcardForm({
+        firstName: '',
+        lastName: '',
+        title: '',
+        company: '',
+        phone: '',
+        email: '',
+        website: '',
+        bio: '',
+        slug: '',
+        whatsapp: '',
+        telegram: '',
+        address: '',
+        instagram: '',
+        linkedin: '',
+        twitter: '',
+        github: '',
+        youtube: '',
+        customLinks: [],
+        avatarUrl: '',
+        logoUrl: '',
+        bannerUrl: '',
+      });
       setSuccessMsg('Digital vCard created successfully!');
       setTimeout(() => setSuccessMsg(null), 3000);
       fetchItems();
@@ -400,6 +446,15 @@ export default function MicroSaasHub({
       email: spec.email || '',
       website: spec.website || '',
       bio: spec.bio || '',
+      whatsapp: spec.whatsapp || '',
+      telegram: spec.telegram || '',
+      address: spec.address || '',
+      instagram: spec.instagram || '',
+      linkedin: spec.linkedin || '',
+      twitter: spec.twitter || '',
+      github: spec.github || '',
+      youtube: spec.youtube || '',
+      customLinks: Array.isArray(spec.customLinks) ? spec.customLinks : [],
       avatarUrl: spec.avatarUrl || '',
       logoUrl: spec.logoUrl || '',
       bannerUrl: spec.bannerUrl || '',
@@ -413,6 +468,9 @@ export default function MicroSaasHub({
     setActionLoading(true);
     setErrorMsg(null);
     try {
+      const cleanCustomLinks = editVcardForm.customLinks.filter(
+        (l) => l.title.trim() && l.url.trim()
+      );
       const res = await fetch(`/api/microsaas/${editingItem.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -421,6 +479,7 @@ export default function MicroSaasHub({
           spec: {
             ...editingItem.spec,
             ...editVcardForm,
+            customLinks: cleanCustomLinks,
           },
         }),
       });
@@ -1493,6 +1552,145 @@ export default function MicroSaasHub({
                 />
               </div>
 
+              {/* Direct Messaging & Operability */}
+              <div className="pt-2 border-t border-[#11140F]/10 dark:border-white/10 space-y-3">
+                <span className="text-[11px] font-bold text-[#11140F] dark:text-white uppercase tracking-wider block">
+                  Action Tiles & Messaging (Operability)
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">WhatsApp Number</label>
+                      {vcardForm.phone && vcardForm.whatsapp !== vcardForm.phone && (
+                        <button
+                          type="button"
+                          onClick={() => setVcardForm({ ...vcardForm, whatsapp: vcardForm.phone })}
+                          className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono hover:underline cursor-pointer"
+                        >
+                          Use Phone
+                        </button>
+                      )}
+                    </div>
+                    <input
+                      type="text"
+                      value={vcardForm.whatsapp}
+                      onChange={(e) => setVcardForm({ ...vcardForm, whatsapp: e.target.value })}
+                      placeholder="+234..."
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Instagram Handle</label>
+                    <input
+                      type="text"
+                      value={vcardForm.instagram}
+                      onChange={(e) => setVcardForm({ ...vcardForm, instagram: e.target.value })}
+                      placeholder="@yourusername"
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Telegram Username</label>
+                    <input
+                      type="text"
+                      value={vcardForm.telegram}
+                      onChange={(e) => setVcardForm({ ...vcardForm, telegram: e.target.value })}
+                      placeholder="@yourusername"
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Office Address / Location</label>
+                    <input
+                      type="text"
+                      value={vcardForm.address}
+                      onChange={(e) => setVcardForm({ ...vcardForm, address: e.target.value })}
+                      placeholder="e.g. Lagos, Nigeria"
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Mini Linktree Links */}
+              <div className="pt-2 border-t border-[#11140F]/10 dark:border-white/10 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-[11px] font-bold text-[#11140F] dark:text-white uppercase tracking-wider block">
+                      Mini Linktree Links ({vcardForm.customLinks.length})
+                    </span>
+                    <span className="text-[10px] text-[#11140F]/50 dark:text-white/50 block">
+                      Custom link buttons on your card profile.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setVcardForm({
+                        ...vcardForm,
+                        customLinks: [
+                          ...vcardForm.customLinks,
+                          { id: Date.now().toString(), title: '', url: '' },
+                        ],
+                      })
+                    }
+                    className="py-1 px-2.5 rounded-lg bg-emerald-600/10 dark:bg-emerald-400/10 text-emerald-700 dark:text-emerald-300 border border-emerald-600/20 text-xs font-semibold hover:bg-emerald-600/20 transition-all flex items-center gap-1 cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add Link</span>
+                  </button>
+                </div>
+
+                {vcardForm.customLinks.length > 0 && (
+                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                    {vcardForm.customLinks.map((link, idx) => (
+                      <div
+                        key={link.id || idx}
+                        className="p-2.5 rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5] dark:bg-white/[0.02] flex items-center gap-2"
+                      >
+                        <input
+                          type="text"
+                          value={link.title}
+                          onChange={(e) => {
+                            const next = [...vcardForm.customLinks];
+                            next[idx] = { ...next[idx], title: e.target.value };
+                            setVcardForm({ ...vcardForm, customLinks: next });
+                          }}
+                          placeholder="Title (e.g. Portfolio)"
+                          className="w-1/2 px-2.5 py-1.5 text-xs rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white"
+                        />
+                        <input
+                          type="url"
+                          value={link.url}
+                          onChange={(e) => {
+                            const next = [...vcardForm.customLinks];
+                            next[idx] = { ...next[idx], url: e.target.value };
+                            setVcardForm({ ...vcardForm, customLinks: next });
+                          }}
+                          placeholder="https://..."
+                          className="flex-1 px-2.5 py-1.5 text-xs rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const next = [...vcardForm.customLinks];
+                            next.splice(idx, 1);
+                            setVcardForm({ ...vcardForm, customLinks: next });
+                          }}
+                          className="text-[#11140F]/40 dark:text-white/40 hover:text-red-500 p-1 cursor-pointer"
+                          title="Remove Link"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Custom Slug (Optional)</label>
                 <div className="flex items-center gap-1.5">
@@ -2020,6 +2218,178 @@ export default function MicroSaasHub({
                   onChange={(e) => setEditVcardForm({ ...editVcardForm, bio: e.target.value })}
                   className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500 resize-none"
                 />
+              </div>
+
+              {/* Direct Messaging & Quick Action Tiles (Operability) */}
+              <div className="pt-2 border-t border-[#11140F]/10 dark:border-white/10 space-y-3">
+                <span className="text-[11px] font-bold text-[#11140F] dark:text-white uppercase tracking-wider block">
+                  Direct Action Tiles & Messaging
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">WhatsApp Number / Link</label>
+                      {editVcardForm.phone && editVcardForm.whatsapp !== editVcardForm.phone && (
+                        <button
+                          type="button"
+                          onClick={() => setEditVcardForm({ ...editVcardForm, whatsapp: editVcardForm.phone })}
+                          className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono hover:underline cursor-pointer"
+                        >
+                          Use Phone
+                        </button>
+                      )}
+                    </div>
+                    <input
+                      type="text"
+                      value={editVcardForm.whatsapp}
+                      onChange={(e) => setEditVcardForm({ ...editVcardForm, whatsapp: e.target.value })}
+                      placeholder="+234 906 498 2841"
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Instagram Handle / Link</label>
+                    <input
+                      type="text"
+                      value={editVcardForm.instagram}
+                      onChange={(e) => setEditVcardForm({ ...editVcardForm, instagram: e.target.value })}
+                      placeholder="@yourusername or instagram.com/..."
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Telegram Username / Link</label>
+                    <input
+                      type="text"
+                      value={editVcardForm.telegram}
+                      onChange={(e) => setEditVcardForm({ ...editVcardForm, telegram: e.target.value })}
+                      placeholder="@yourusername"
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Office Address / Location (Directions)</label>
+                    <input
+                      type="text"
+                      value={editVcardForm.address}
+                      onChange={(e) => setEditVcardForm({ ...editVcardForm, address: e.target.value })}
+                      placeholder="e.g. Lagos, Nigeria"
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">LinkedIn URL</label>
+                    <input
+                      type="text"
+                      value={editVcardForm.linkedin}
+                      onChange={(e) => setEditVcardForm({ ...editVcardForm, linkedin: e.target.value })}
+                      placeholder="linkedin.com/in/..."
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Twitter / X Handle</label>
+                    <input
+                      type="text"
+                      value={editVcardForm.twitter}
+                      onChange={(e) => setEditVcardForm({ ...editVcardForm, twitter: e.target.value })}
+                      placeholder="@handle"
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">GitHub Username</label>
+                    <input
+                      type="text"
+                      value={editVcardForm.github}
+                      onChange={(e) => setEditVcardForm({ ...editVcardForm, github: e.target.value })}
+                      placeholder="username"
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Mini Linktree Custom Links Builder */}
+              <div className="pt-2 border-t border-[#11140F]/10 dark:border-white/10 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-[11px] font-bold text-[#11140F] dark:text-white uppercase tracking-wider block">
+                      Mini Linktree Links ({editVcardForm.customLinks.length})
+                    </span>
+                    <span className="text-[10px] text-[#11140F]/50 dark:text-white/50 block">
+                      Interactive link buttons displayed on your vCard profile.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setEditVcardForm({
+                        ...editVcardForm,
+                        customLinks: [
+                          ...editVcardForm.customLinks,
+                          { id: Date.now().toString(), title: '', url: '' },
+                        ],
+                      })
+                    }
+                    className="py-1 px-2.5 rounded-lg bg-emerald-600/10 dark:bg-emerald-400/10 text-emerald-700 dark:text-emerald-300 border border-emerald-600/20 text-xs font-semibold hover:bg-emerald-600/20 transition-all flex items-center gap-1 cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add Link</span>
+                  </button>
+                </div>
+
+                {editVcardForm.customLinks.length > 0 && (
+                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                    {editVcardForm.customLinks.map((link, idx) => (
+                      <div
+                        key={link.id || idx}
+                        className="p-2.5 rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5] dark:bg-white/[0.02] flex items-center gap-2"
+                      >
+                        <input
+                          type="text"
+                          value={link.title}
+                          onChange={(e) => {
+                            const next = [...editVcardForm.customLinks];
+                            next[idx] = { ...next[idx], title: e.target.value };
+                            setEditVcardForm({ ...editVcardForm, customLinks: next });
+                          }}
+                          placeholder="Title (e.g. Portfolio)"
+                          className="w-1/2 px-2.5 py-1.5 text-xs rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white"
+                        />
+                        <input
+                          type="url"
+                          value={link.url}
+                          onChange={(e) => {
+                            const next = [...editVcardForm.customLinks];
+                            next[idx] = { ...next[idx], url: e.target.value };
+                            setEditVcardForm({ ...editVcardForm, customLinks: next });
+                          }}
+                          placeholder="https://..."
+                          className="flex-1 px-2.5 py-1.5 text-xs rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const next = [...editVcardForm.customLinks];
+                            next.splice(idx, 1);
+                            setEditVcardForm({ ...editVcardForm, customLinks: next });
+                          }}
+                          className="text-[#11140F]/40 dark:text-white/40 hover:text-red-500 p-1 cursor-pointer"
+                          title="Remove Link"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Media & Image Uploads */}
