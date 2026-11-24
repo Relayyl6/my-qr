@@ -44,6 +44,35 @@ export async function confirmOrderPayment(paystackRef: string) {
     return { success: true, order, message: 'Domain is already active' };
   }
 
+  // Verify transaction status if payment gateway secret key is configured
+  const paystackSecret = process.env.PAYSTACK_SECRET_KEY;
+  if (paystackSecret && !paystackSecret.includes('placeholder') && order.status === 'PENDING_PAYMENT') {
+    try {
+      const verifyRes = await fetch(
+        `https://api.paystack.co/transaction/verify/${encodeURIComponent(paystackRef)}`,
+        {
+          headers: { Authorization: `Bearer ${paystackSecret}` },
+          cache: 'no-store',
+        }
+      );
+      const verifyData = await verifyRes.json();
+      if (!verifyData.status || verifyData.data?.status !== 'success') {
+        return {
+          success: false,
+          order,
+          message: 'Payment has not been completed yet. Complete checkout to activate your domain.',
+        };
+      }
+    } catch (verifyErr: any) {
+      console.error('Payment verification error:', verifyErr);
+      return {
+        success: false,
+        order,
+        message: 'Unable to verify payment status right now. Please try again.',
+      };
+    }
+  }
+
   try {
     await prisma.domainOrder.update({
       where: { id: order.id },
@@ -102,8 +131,12 @@ export async function linkDomainToQrWorkspace(orderId: string) {
   const order = await prisma.domainOrder.findUnique({ where: { id: orderId } });
   if (!order) return { success: false, message: 'Order not found' };
 
-  if (order.userId && order.userId !== user.id) {
+  if (order.userId && order.userId !== user.id && order.userEmail !== user.email.toLowerCase()) {
     return { success: false, message: 'Access denied' };
+  }
+
+  if (order.status !== 'ACTIVE' && order.status !== 'PAID_AWAITING_FUNDS') {
+    return { success: false, message: 'Complete payment before linking this domain to your workspace.' };
   }
 
   await prisma.customDomain.upsert({
@@ -123,6 +156,26 @@ export async function linkDomainToQrWorkspace(orderId: string) {
 
   revalidatePath('/');
   return { success: true, message: `Domain ${order.domainName} linked to your QR Workspace!` };
+}
+
+export async function cancelPendingDomainOrder(orderId: string) {
+  const user = await getCurrentUser();
+  if (!user) return { success: false, message: 'Unauthorized' };
+
+  const order = await prisma.domainOrder.findUnique({ where: { id: orderId } });
+  if (!order) return { success: false, message: 'Order not found' };
+
+  if (order.userId && order.userId !== user.id && order.userEmail !== user.email.toLowerCase()) {
+    return { success: false, message: 'Access denied' };
+  }
+
+  if (order.status !== 'PENDING_PAYMENT') {
+    return { success: false, message: 'Only unpaid orders can be canceled.' };
+  }
+
+  await prisma.domainOrder.delete({ where: { id: orderId } });
+  revalidatePath('/');
+  return { success: true, message: `Order for ${order.domainName} has been removed.` };
 }
 
 export async function adminRetryDomainProvision(orderId: string) {

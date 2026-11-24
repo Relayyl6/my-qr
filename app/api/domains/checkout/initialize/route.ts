@@ -12,52 +12,125 @@ export async function POST(req: Request) {
     const user = await getCurrentUser();
     const body = await req.json();
 
-    const domainName = String(body.domainName || '').trim().toLowerCase();
-    const desiredAlias = String(body.desiredAlias || 'hello')
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9._-]/g, '');
-    const userEmail = String(body.userEmail || user?.email || '').trim().toLowerCase();
+    const reference = `DOM_${crypto.randomBytes(8).toString('hex').toUpperCase()}`;
+    let order: any = null;
+    let domainName = '';
+    let desiredAlias = 'hello';
+    let userEmail = '';
+    let totalPaidNgn = 0;
 
-    if (!domainName.includes('.') || !userEmail.includes('@')) {
-      return NextResponse.json(
-        { error: 'Valid domain name and forwarding email are required.' },
-        { status: 400 }
-      );
+    // Option A: Resume payment for an existing PENDING_PAYMENT order
+    if (body.orderId) {
+      const existing = await prisma.domainOrder.findUnique({
+        where: { id: String(body.orderId) },
+      });
+
+      if (!existing) {
+        return NextResponse.json({ error: 'Order not found.' }, { status: 404 });
+      }
+      if (existing.status !== 'PENDING_PAYMENT') {
+        return NextResponse.json({ error: 'This order is already paid or active.' }, { status: 400 });
+      }
+      if (
+        existing.userId &&
+        user &&
+        existing.userId !== user.id &&
+        existing.userEmail !== user.email.toLowerCase()
+      ) {
+        return NextResponse.json({ error: 'Unauthorized.' }, { status: 403 });
+      }
+
+      order = await prisma.domainOrder.update({
+        where: { id: existing.id },
+        data: {
+          paystackRef: reference,
+          userId: user?.id || existing.userId,
+        },
+      });
+
+      domainName = order.domainName;
+      desiredAlias = order.desiredAlias;
+      userEmail = order.userEmail;
+      totalPaidNgn = order.totalPaidNgn;
+    } else {
+      // Option B: Create or update pending order for domain + email
+      domainName = String(body.domainName || '').trim().toLowerCase();
+      desiredAlias = String(body.desiredAlias || 'hello')
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9._-]/g, '');
+      userEmail = String(body.userEmail || user?.email || '').trim().toLowerCase();
+
+      if (!domainName.includes('.') || !userEmail.includes('@')) {
+        return NextResponse.json(
+          { error: 'Valid domain name and forwarding email are required.' },
+          { status: 400 }
+        );
+      }
+
+      const tld = domainName.split('.').pop() || 'com';
+      const wholesaleUsd = WHOLESALE_USD_PRICING[tld] || 10.5;
+      const pricingConfig = await getDomainPricingConfig().catch(() => null);
+      const pricing = calculateNgnPricing(wholesaleUsd, tld, pricingConfig || undefined);
+      const effectiveRate = pricingConfig
+        ? pricingConfig.mode === 'manual_override'
+          ? pricingConfig.manualOverrideRate
+          : pricingConfig.bufferedRate
+        : 1400;
+
+      // Reuse existing PENDING_PAYMENT order for the same domain & customer if present
+      const existingPending = await prisma.domainOrder.findFirst({
+        where: {
+          domainName,
+          status: 'PENDING_PAYMENT',
+          OR: [
+            ...(user ? [{ userId: user.id }] : []),
+            { userEmail },
+          ],
+        },
+      });
+
+      if (existingPending) {
+        order = await prisma.domainOrder.update({
+          where: { id: existingPending.id },
+          data: {
+            userId: user?.id || existingPending.userId,
+            userEmail,
+            desiredAlias,
+            wholesaleUsd: pricing.wholesaleUsd,
+            exchangeRate: effectiveRate,
+            platformMarkupNgn: pricing.platformFeeNgn,
+            totalPaidNgn: pricing.totalNgn,
+            paystackRef: reference,
+          },
+        });
+      } else {
+        order = await prisma.domainOrder.create({
+          data: {
+            userId: user?.id || null,
+            userEmail,
+            domainName,
+            desiredAlias,
+            wholesaleUsd: pricing.wholesaleUsd,
+            exchangeRate: effectiveRate,
+            platformMarkupNgn: pricing.platformFeeNgn,
+            totalPaidNgn: pricing.totalNgn,
+            paystackRef: reference,
+            status: 'PENDING_PAYMENT',
+          },
+        });
+      }
+
+      totalPaidNgn = pricing.totalNgn;
     }
 
-    const tld = domainName.split('.').pop() || 'com';
-    const wholesaleUsd = WHOLESALE_USD_PRICING[tld] || 10.5;
-    const pricingConfig = await getDomainPricingConfig().catch(() => null);
-    const pricing = calculateNgnPricing(wholesaleUsd, tld, pricingConfig || undefined);
-    const effectiveRate = pricingConfig
-      ? pricingConfig.mode === 'manual_override'
-        ? pricingConfig.manualOverrideRate
-        : pricingConfig.bufferedRate
-      : 1400;
-
-    const reference = `DOM_${crypto.randomBytes(8).toString('hex').toUpperCase()}`;
-
-    // 1. Create order in PostgreSQL
-    const order = await prisma.domainOrder.create({
-      data: {
-        userId: user?.id || null,
-        userEmail,
-        domainName,
-        desiredAlias,
-        wholesaleUsd: pricing.wholesaleUsd,
-        exchangeRate: effectiveRate,
-        platformMarkupNgn: pricing.platformFeeNgn,
-        totalPaidNgn: pricing.totalNgn,
-        paystackRef: reference,
-        status: 'PENDING_PAYMENT',
-      },
-    });
-
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://my-qr-sandy.vercel.app';
+    const appUrl =
+      req.headers.get('origin') ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      'https://my-qr-sandy.vercel.app';
     const paystackSecret = process.env.PAYSTACK_SECRET_KEY;
 
-    // 2. If Paystack Live/Test key is available, initialize Paystack transaction
+    // 2. If Paystack Live/Test key is available, initialize transaction
     if (paystackSecret && !paystackSecret.includes('placeholder')) {
       const paystackRes = await fetch('https://api.paystack.co/transaction/initialize', {
         method: 'POST',
@@ -67,7 +140,7 @@ export async function POST(req: Request) {
         },
         body: JSON.stringify({
           email: userEmail,
-          amount: pricing.totalNgn * 100, // Naira to Kobo
+          amount: totalPaidNgn * 100, // Naira to Kobo
           currency: 'NGN',
           reference,
           callback_url: `${appUrl}/?section=namelaunch&ref=${reference}`,
@@ -93,23 +166,22 @@ export async function POST(req: Request) {
 
       const paystackData = await paystackRes.json();
       if (!paystackData.status) {
-        throw new Error(paystackData.message || 'Paystack initialization failed');
+        throw new Error(paystackData.message || 'Checkout initialization failed');
       }
 
       return NextResponse.json({
         authorizationUrl: paystackData.data.authorization_url,
         reference,
-        amountNgn: pricing.totalNgn,
+        amountNgn: totalPaidNgn,
       });
     }
 
-    // 3. Fallback Test/Sandbox Mode (when Paystack key is pending setup in environment):
-    // Provide direct instant test simulation route
+    // 3. Fallback Sandbox Mode (when gateway key is pending setup in environment)
     const testCallbackUrl = `${appUrl}/?section=namelaunch&ref=${reference}&test_paid=true`;
     return NextResponse.json({
       authorizationUrl: testCallbackUrl,
       reference,
-      amountNgn: pricing.totalNgn,
+      amountNgn: totalPaidNgn,
       isSimulation: true,
     });
   } catch (error: any) {
