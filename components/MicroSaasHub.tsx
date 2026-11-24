@@ -2528,29 +2528,29 @@ export default function MicroSaasHub({
                 </div>
               </div>
 
-              <div className="p-3 bg-[#F7F8F5] rounded-xl space-y-2 border border-[#11140F]/8">
-                <span className="text-[11px] font-semibold text-[#11140F] block">Marketing UTM Parameters</span>
+              <div className="p-3 bg-[#F7F8F5] dark:bg-white/[0.03] rounded-xl space-y-2 border border-[#11140F]/8 dark:border-white/10">
+                <span className="text-[11px] font-semibold text-[#11140F] dark:text-white block">Marketing UTM Parameters</span>
                 <div className="grid grid-cols-3 gap-2">
                   <input
                     type="text"
                     value={editShortenerForm.utmSource}
                     onChange={(e) => setEditShortenerForm({ ...editShortenerForm, utmSource: e.target.value })}
                     placeholder="utm_source"
-                    className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-[#11140F]/15 bg-white"
+                    className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white placeholder-[#11140F]/30 dark:placeholder-white/30"
                   />
                   <input
                     type="text"
                     value={editShortenerForm.utmMedium}
                     onChange={(e) => setEditShortenerForm({ ...editShortenerForm, utmMedium: e.target.value })}
                     placeholder="utm_medium"
-                    className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-[#11140F]/15 bg-white"
+                    className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white placeholder-[#11140F]/30 dark:placeholder-white/30"
                   />
                   <input
                     type="text"
                     value={editShortenerForm.utmCampaign}
                     onChange={(e) => setEditShortenerForm({ ...editShortenerForm, utmCampaign: e.target.value })}
                     placeholder="utm_campaign"
-                    className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-[#11140F]/15 bg-white"
+                    className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white placeholder-[#11140F]/30 dark:placeholder-white/30"
                   />
                 </div>
               </div>
@@ -2611,7 +2611,7 @@ export default function MicroSaasHub({
                   <select
                     value={editMenuForm.currency}
                     onChange={(e) => setEditMenuForm({ ...editMenuForm, currency: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 bg-white"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white"
                   >
                     <option value="$">$ (USD / CAD / AUD)</option>
                     <option value="€">€ (EUR)</option>
@@ -2641,13 +2641,13 @@ export default function MicroSaasHub({
               {/* Sections & Items Management */}
               <div className="space-y-4 pt-1">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-[#11140F] uppercase tracking-wider">
+                  <label className="text-xs font-bold text-[#11140F] dark:text-white uppercase tracking-wider">
                     Menu Sections & Dishes ({editMenuForm.sections.length} categories)
                   </label>
                   <button
                     type="button"
                     onClick={handleAddSection}
-                    className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-[#F7F8F5] hover:bg-[#EEF0EA] text-[#2F6B4F] flex items-center gap-1 cursor-pointer"
+                    className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-[#F7F8F5] dark:bg-white/10 hover:bg-[#EEF0EA] dark:hover:bg-white/15 text-[#2F6B4F] dark:text-emerald-400 flex items-center gap-1 cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Add Section</span>
@@ -2655,7 +2655,7 @@ export default function MicroSaasHub({
                 </div>
 
                 {editMenuForm.sections.map((section, sIdx) => (
-                  <div key={sIdx} className="p-3.5 rounded-2xl bg-[#F7F8F5] border border-[#11140F]/8 space-y-3">
+                  <div key={sIdx} className="p-3.5 rounded-2xl bg-[#F7F8F5] dark:bg-white/[0.03] border border-[#11140F]/8 dark:border-white/10 space-y-3">
                     <div className="flex items-center justify-between gap-2">
                       <input
                         type="text"
@@ -2665,14 +2665,14 @@ export default function MicroSaasHub({
                           updated[sIdx].name = e.target.value;
                           setEditMenuForm({ ...editMenuForm, sections: updated });
                         }}
-                        className="text-xs font-bold text-[#11140F] bg-white px-2.5 py-1.5 rounded-lg border border-[#11140F]/15 w-full max-w-xs"
+                        className="text-xs font-bold text-[#11140F] dark:text-white bg-white dark:bg-[#14161F] px-2.5 py-1.5 rounded-lg border border-[#11140F]/15 dark:border-white/15 w-full max-w-xs"
                         placeholder="Section Category Name"
                       />
                       <div className="flex items-center gap-1">
                         <button
                           type="button"
                           onClick={() => handleAddDish(sIdx)}
-                          className="px-2 py-1 text-[11px] font-semibold bg-white border border-[#11140F]/15 rounded-md hover:bg-gray-50 text-[#11140F] flex items-center gap-1 cursor-pointer"
+                          className="px-2 py-1 text-[11px] font-semibold bg-white dark:bg-white/10 border border-[#11140F]/15 dark:border-white/15 rounded-md hover:bg-gray-50 dark:hover:bg-white/15 text-[#11140F] dark:text-white flex items-center gap-1 cursor-pointer"
                         >
                           <Plus className="w-3 h-3" />
                           <span>Dish</span>
@@ -2692,7 +2692,7 @@ export default function MicroSaasHub({
                       {section.items.map((dish, dIdx) => (
                         <div
                           key={dish.id || dIdx}
-                          className="p-3 bg-white rounded-xl border border-[#11140F]/8 space-y-2.5"
+                          className="p-3 bg-white dark:bg-[#14161F] rounded-xl border border-[#11140F]/8 dark:border-white/10 space-y-2.5"
                         >
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                             <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -2705,7 +2705,7 @@ export default function MicroSaasHub({
                                   setEditMenuForm({ ...editMenuForm, sections: updated });
                                 }}
                                 placeholder="Dish name"
-                                className="text-xs font-semibold px-2 py-1 rounded border border-[#11140F]/10"
+                                className="text-xs font-semibold px-2 py-1 rounded border border-[#11140F]/10 dark:border-white/15 bg-white dark:bg-[#1a1d26] text-[#11140F] dark:text-white"
                               />
                               <input
                                 type="text"
@@ -2716,7 +2716,7 @@ export default function MicroSaasHub({
                                   setEditMenuForm({ ...editMenuForm, sections: updated });
                                 }}
                                 placeholder="Price"
-                                className="text-xs px-2 py-1 rounded border border-[#11140F]/10 font-mono"
+                                className="text-xs px-2 py-1 rounded border border-[#11140F]/10 dark:border-white/15 bg-white dark:bg-[#1a1d26] text-[#11140F] dark:text-white font-mono"
                               />
                               <input
                                 type="text"
@@ -2727,7 +2727,7 @@ export default function MicroSaasHub({
                                   setEditMenuForm({ ...editMenuForm, sections: updated });
                                 }}
                                 placeholder="Description"
-                                className="text-xs px-2 py-1 rounded border border-[#11140F]/10 text-gray-600"
+                                className="text-xs px-2 py-1 rounded border border-[#11140F]/10 dark:border-white/15 bg-white dark:bg-[#1a1d26] text-gray-600 dark:text-white/70"
                               />
                             </div>
 
@@ -2798,7 +2798,7 @@ export default function MicroSaasHub({
       {/* EDIT MODAL 4: DYNAMIC WI-FI */}
       {showEditModal === 'wifi' && editingItem && (
         <div className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl border border-[#11140F]/10 shadow-2xl max-w-md w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-[#0E1017] rounded-3xl border border-[#11140F]/10 dark:border-white/10 shadow-2xl max-w-md w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto text-[#11140F] dark:text-white">
             <div className="flex items-center justify-between border-b border-[#11140F]/10 dark:border-white/10 pb-4">
               <div className="flex items-center gap-2">
                 <Wifi className="w-5 h-5 text-[#2F6B4F]" />
@@ -3041,20 +3041,20 @@ export default function MicroSaasHub({
                     <button
                       type="button"
                       onClick={() => exportLeadsCsv(leadsModalCard)}
-                      className="px-3 py-1.5 rounded-xl bg-[#11140F] hover:bg-[#2A2E25] text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs"
+                      className="px-3 py-1.5 rounded-xl bg-[#11140F] dark:bg-emerald-600 dark:hover:bg-emerald-500 hover:bg-[#2A2E25] text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs"
                     >
                       <Download className="w-3.5 h-3.5" />
                       <span>Export CSV</span>
                     </button>
                   </div>
 
-                  <div className="divide-y divide-gray-100 border border-gray-200 rounded-2xl overflow-hidden">
+                  <div className="divide-y divide-gray-100 dark:divide-white/10 border border-gray-200 dark:border-white/10 rounded-2xl overflow-hidden">
                     {leadsModalCard.spec.leads.map((lead: any, idx: number) => (
-                      <div key={idx} className="p-3.5 bg-white hover:bg-gray-50/80 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div key={idx} className="p-3.5 bg-white dark:bg-[#14161F] hover:bg-gray-50/80 dark:hover:bg-white/[0.04] transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div className="space-y-0.5">
-                          <div className="text-xs font-bold text-[#11140F] flex items-center gap-2">
+                          <div className="text-xs font-bold text-[#11140F] dark:text-white flex items-center gap-2">
                             <span>{lead.fullName}</span>
-                            <span className="text-[10px] font-mono text-gray-400 font-normal">
+                            <span className="text-[10px] font-mono text-gray-400 dark:text-white/40 font-normal">
                               {new Date(lead.createdAt || Date.now()).toLocaleDateString(undefined, {
                                 month: 'short',
                                 day: 'numeric',
@@ -3064,14 +3064,14 @@ export default function MicroSaasHub({
                               })}
                             </span>
                           </div>
-                          <div className="text-xs text-gray-600 flex items-center gap-3 flex-wrap">
+                          <div className="text-xs text-gray-600 dark:text-white/60 flex items-center gap-3 flex-wrap">
                             <span>📧 {lead.email}</span>
                             {lead.phone && <span>📞 {lead.phone}</span>}
                           </div>
                         </div>
                         <a
                           href={`mailto:${lead.email}?subject=Nice to connect!`}
-                          className="px-2.5 py-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg shrink-0 self-start sm:self-auto"
+                          className="px-2.5 py-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 rounded-lg shrink-0 self-start sm:self-auto"
                         >
                           Send Email
                         </a>

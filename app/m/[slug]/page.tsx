@@ -1,5 +1,7 @@
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
+import { APP_URL } from '@/lib/config';
+import { getOptimizedStorageUrl } from '@/lib/media';
 import MenuInteractiveView from '@/components/MenuInteractiveView';
 
 export async function generateMetadata({
@@ -16,9 +18,41 @@ export async function generateMetadata({
     return { title: 'Menu Not Found | DynamicQR' };
   }
 
+  const spec = (item.spec as any) || {};
+  const pageTitle = `${item.title} — Contactless Digital Menu`;
+  const pageDesc = spec.description || `Explore the live contactless menu for ${item.title}. View delicious dishes, pricing, and ingredients directly on your phone.`;
+  const canonicalUrl = `${APP_URL}/m/${slug}`;
+  const rawImage = spec.coverUrl || spec.logoUrl;
+  const ogImageUrl = rawImage ? getOptimizedStorageUrl(rawImage) : `${APP_URL}/icon.svg`;
+
   return {
-    title: `${item.title} — Digital Menu`,
-    description: `Explore the contactless menu for ${item.title}. View fresh dishes, pricing, and dietary options.`,
+    metadataBase: new URL(APP_URL),
+    title: pageTitle,
+    description: pageDesc,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title: pageTitle,
+      description: pageDesc,
+      url: canonicalUrl,
+      siteName: 'DynamicQR',
+      type: 'website',
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: `${item.title} Digital Menu`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: pageTitle,
+      description: pageDesc,
+      images: [ogImageUrl],
+    },
   };
 }
 

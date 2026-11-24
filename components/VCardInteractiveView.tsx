@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import {
   Phone,
@@ -25,10 +25,85 @@ import {
   Trash2,
   Edit2,
   ArrowRight,
+  Flag,
+  Copy,
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { APP_URL } from '@/lib/config';
 import { getOptimizedStorageUrl } from '@/lib/media';
+
+// --- Brand SVG Glyphs (Linktree Style Circular Icons) ---
+function FacebookGlyph({ className = 'w-5 h-5' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+    </svg>
+  );
+}
+
+function XGlyph({ className = 'w-5 h-5' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  );
+}
+
+function WhatsAppGlyph({ className = 'w-5 h-5' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.225 8.225 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.196 8.196 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.25.7-.72 1.33-1.4 1.71-.58.32-1.32.48-2.64.08-1.57-.48-3.03-1.44-4.18-2.58-1.14-1.15-2.1-2.6-2.58-4.18-.4-1.32-.24-2.06.08-2.64.38-.68 1.01-1.15 1.71-1.4.22-.08.47-.1.7-.02.26.09.43.37.54.61.35.79.84 1.95.94 2.15.11.22.13.43.02.66-.11.23-.22.42-.38.61-.17.18-.34.33-.48.49-.16.18-.19.33-.09.52.4.77 1.05 1.63 1.83 2.38.75.78 1.61 1.43 2.38 1.83.19.1.34.07.52-.09.16-.14.31-.31.49-.48.19-.16.38-.27.61-.38.23-.11.44-.09.66.02.2.1 1.36.59 2.15.94.24.11.52.28.61.54.08.23.06.48-.02.7" />
+    </svg>
+  );
+}
+
+function TikTokGlyph({ className = 'w-5 h-5' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.29 0 .58.04.85.12V9.41a6.33 6.33 0 0 0-.85-.06 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 10.78 4.48 6.27 6.27 0 0 0 1.9-4.5V9.08a8.16 8.16 0 0 0 5.17 1.83V7.47a4.85 4.85 0 0 1-1.4-.78z" />
+    </svg>
+  );
+}
+
+function SpotifyGlyph({ className = 'w-5 h-5' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.586 14.424a.623.623 0 0 1-.857.206c-2.348-1.435-5.304-1.76-8.785-.964a.625.625 0 1 1-.278-1.218c3.807-.872 7.075-.5 9.714 1.119a.623.623 0 0 1 .206.857zm1.224-2.72a.78.78 0 0 1-1.073.257c-2.688-1.652-6.786-2.131-9.965-1.166a.78.78 0 1 1-.453-1.492c3.632-1.103 8.147-.568 11.234 1.328a.78.78 0 0 1 .257 1.073zm.105-2.835C14.692 8.947 9.38 8.77 6.287 9.71a.936.936 0 1 1-.543-1.792c3.555-1.079 9.428-.87 13.197 1.368a.937.937 0 0 1-.941 1.624z" />
+    </svg>
+  );
+}
+
+function YouTubeGlyph({ className = 'w-5 h-5' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M21.58 7.19a2.76 2.76 0 0 0-1.94-1.95C17.92 4.7 12 4.7 12 4.7s-5.92 0-7.64.54A2.76 2.76 0 0 0 2.42 7.19 28.96 28.96 0 0 0 2 12a28.96 28.96 0 0 0 .42 4.81 2.76 2.76 0 0 0 1.94 1.95c1.72.54 7.64.54 7.64.54s5.92 0 7.64-.54a2.76 2.76 0 0 0 1.94-1.95 28.96 28.96 0 0 0 .42-4.81 28.96 28.96 0 0 0-.42-4.81zM9.75 15.02V8.98L15.5 12l-5.75 3.02z" />
+    </svg>
+  );
+}
+
+function AppleMusicGlyph({ className = 'w-5 h-5' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
+    </svg>
+  );
+}
+
+function LinkedInGlyph({ className = 'w-5 h-5' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.45a1.6 1.6 0 1 0 1.6 1.6 1.6 1.6 0 0 0-1.6-1.6z" />
+    </svg>
+  );
+}
+
+function GitHubGlyph({ className = 'w-5 h-5' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0 0 22 12.017C22 6.484 17.522 2 12 2z" />
+    </svg>
+  );
+}
 
 export interface CustomLink {
   id?: string;
@@ -63,6 +138,10 @@ export interface VCardProps {
     instagram?: string;
     github?: string;
     youtube?: string;
+    tiktok?: string;
+    spotify?: string;
+    facebook?: string;
+    appleMusic?: string;
   };
   customLinks?: CustomLink[];
   rawSpec?: any;
@@ -90,6 +169,13 @@ function formatTelegramUrl(val: string) {
   return `https://t.me/${trimmed.replace(/^@/, '')}`;
 }
 
+function formatSocialUrl(val: string, prefixDomain: string) {
+  if (!val) return '';
+  const trimmed = val.trim();
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+  return `https://${prefixDomain}${trimmed.replace(/^@/, '')}`;
+}
+
 export default function VCardInteractiveView({
   itemId,
   isOwner = false,
@@ -114,7 +200,13 @@ export default function VCardInteractiveView({
   customLinks = [],
   rawSpec,
 }: VCardProps) {
-  const [showQrModal, setShowQrModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareViewMode, setShareViewMode] = useState<'preview' | 'qr'>('preview');
+  const [copied, setCopied] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportReason, setReportReason] = useState('spam');
+  const [reportSuccess, setReportSuccess] = useState(false);
+  const [showCookieModal, setShowCookieModal] = useState(false);
   const [showExchangeModal, setShowExchangeModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [settingsTab, setSettingsTab] = useState<'actions' | 'linktree' | 'profile'>('actions');
@@ -134,6 +226,10 @@ export default function VCardInteractiveView({
   const [activeTwitter, setActiveTwitter] = useState(socials?.twitter || '');
   const [activeGithub, setActiveGithub] = useState(socials?.github || '');
   const [activeYoutube, setActiveYoutube] = useState(socials?.youtube || '');
+  const [activeTiktok, setActiveTiktok] = useState(socials?.tiktok || '');
+  const [activeSpotify, setActiveSpotify] = useState(socials?.spotify || '');
+  const [activeFacebook, setActiveFacebook] = useState(socials?.facebook || '');
+  const [activeAppleMusic, setActiveAppleMusic] = useState(socials?.appleMusic || '');
   const [activeCustomLinks, setActiveCustomLinks] = useState<CustomLink[]>(customLinks || []);
 
   // Settings Edit State
@@ -152,6 +248,10 @@ export default function VCardInteractiveView({
     twitter: socials?.twitter || '',
     github: socials?.github || '',
     youtube: socials?.youtube || '',
+    tiktok: socials?.tiktok || '',
+    spotify: socials?.spotify || '',
+    facebook: socials?.facebook || '',
+    appleMusic: socials?.appleMusic || '',
     customLinks: customLinks || [] as CustomLink[],
   });
   const [savingSettings, setSavingSettings] = useState(false);
@@ -174,6 +274,10 @@ export default function VCardInteractiveView({
     setActiveTwitter(socials?.twitter || '');
     setActiveGithub(socials?.github || '');
     setActiveYoutube(socials?.youtube || '');
+    setActiveTiktok(socials?.tiktok || '');
+    setActiveSpotify(socials?.spotify || '');
+    setActiveFacebook(socials?.facebook || '');
+    setActiveAppleMusic(socials?.appleMusic || '');
     setActiveCustomLinks(customLinks || []);
   }, [phone, email, website, bio, title, company, whatsapp, telegram, address, socials, customLinks]);
 
@@ -217,6 +321,10 @@ export default function VCardInteractiveView({
       twitter: activeTwitter,
       github: activeGithub,
       youtube: activeYoutube,
+      tiktok: activeTiktok,
+      spotify: activeSpotify,
+      facebook: activeFacebook,
+      appleMusic: activeAppleMusic,
       customLinks: [...activeCustomLinks],
     });
     setSettingsError(null);
@@ -250,6 +358,10 @@ export default function VCardInteractiveView({
         twitter: editForm.twitter,
         github: editForm.github,
         youtube: editForm.youtube,
+        tiktok: editForm.tiktok,
+        spotify: editForm.spotify,
+        facebook: editForm.facebook,
+        appleMusic: editForm.appleMusic,
         customLinks: cleanCustomLinks,
       };
 
@@ -280,6 +392,10 @@ export default function VCardInteractiveView({
       setActiveTwitter(editForm.twitter);
       setActiveGithub(editForm.github);
       setActiveYoutube(editForm.youtube);
+      setActiveTiktok(editForm.tiktok);
+      setActiveSpotify(editForm.spotify);
+      setActiveFacebook(editForm.facebook);
+      setActiveAppleMusic(editForm.appleMusic);
       setActiveCustomLinks(cleanCustomLinks);
 
       setSettingsSuccess(true);
@@ -310,6 +426,218 @@ export default function VCardInteractiveView({
     .toUpperCase() || 'QR';
 
   const cardUrl = typeof window !== 'undefined' ? window.location.href : `${APP_URL}/c/${slug}`;
+
+  const handleCopyLink = () => {
+    if (typeof window !== 'undefined') {
+      navigator.clipboard.writeText(cardUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleShareNative = async () => {
+    if (typeof window !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({
+          title: `${fullName} • Digital Business Card`,
+          text: `Connect with ${fullName} on DynamicQR:`,
+          url: cardUrl,
+        });
+      } catch (err) {
+        // User cancelled or unsupported
+      }
+    } else {
+      handleCopyLink();
+    }
+  };
+
+  const circularActions = useMemo(() => {
+    const list: Array<{
+      id: string;
+      title: string;
+      href: string;
+      icon: any;
+      color: string;
+    }> = [];
+
+    if (activePhone) {
+      list.push({
+        id: 'call',
+        title: 'Call',
+        href: `tel:${activePhone}`,
+        icon: Phone,
+        color: 'hover:text-emerald-400 hover:border-emerald-500/40',
+      });
+    }
+
+    if (activeWhatsapp) {
+      list.push({
+        id: 'whatsapp',
+        title: 'WhatsApp',
+        href: formatWhatsAppUrl(activeWhatsapp),
+        icon: WhatsAppGlyph,
+        color: 'hover:text-[#25D366] hover:border-[#25D366]/40',
+      });
+    }
+
+    if (activeInstagram) {
+      list.push({
+        id: 'instagram',
+        title: 'Instagram',
+        href: formatSocialUrl(activeInstagram, 'instagram.com/'),
+        icon: Instagram,
+        color: 'hover:text-[#E1306C] hover:border-[#E1306C]/40',
+      });
+    }
+
+    if (activeTiktok) {
+      list.push({
+        id: 'tiktok',
+        title: 'TikTok',
+        href: formatSocialUrl(activeTiktok, 'tiktok.com/@'),
+        icon: TikTokGlyph,
+        color: 'hover:text-[#ff0050] hover:border-[#ff0050]/40',
+      });
+    }
+
+    if (activeSpotify) {
+      list.push({
+        id: 'spotify',
+        title: 'Spotify',
+        href: formatSocialUrl(activeSpotify, 'open.spotify.com/'),
+        icon: SpotifyGlyph,
+        color: 'hover:text-[#1DB954] hover:border-[#1DB954]/40',
+      });
+    }
+
+    if (activeYoutube) {
+      list.push({
+        id: 'youtube',
+        title: 'YouTube',
+        href: formatSocialUrl(activeYoutube, 'youtube.com/'),
+        icon: YouTubeGlyph,
+        color: 'hover:text-[#FF0000] hover:border-[#FF0000]/40',
+      });
+    }
+
+    if (activeAppleMusic) {
+      list.push({
+        id: 'applemusic',
+        title: 'Apple Music',
+        href: formatSocialUrl(activeAppleMusic, 'music.apple.com/'),
+        icon: AppleMusicGlyph,
+        color: 'hover:text-[#FC3C44] hover:border-[#FC3C44]/40',
+      });
+    }
+
+    if (activeTwitter) {
+      list.push({
+        id: 'x',
+        title: 'X',
+        href: formatSocialUrl(activeTwitter, 'x.com/'),
+        icon: XGlyph,
+        color: 'hover:text-white hover:border-white/40',
+      });
+    }
+
+    if (activeLinkedin) {
+      list.push({
+        id: 'linkedin',
+        title: 'LinkedIn',
+        href: formatSocialUrl(activeLinkedin, 'linkedin.com/in/'),
+        icon: LinkedInGlyph,
+        color: 'hover:text-[#0A66C2] hover:border-[#0A66C2]/40',
+      });
+    }
+
+    if (activeFacebook) {
+      list.push({
+        id: 'facebook',
+        title: 'Facebook',
+        href: formatSocialUrl(activeFacebook, 'facebook.com/'),
+        icon: FacebookGlyph,
+        color: 'hover:text-[#1877F2] hover:border-[#1877F2]/40',
+      });
+    }
+
+    if (activeGithub) {
+      list.push({
+        id: 'github',
+        title: 'GitHub',
+        href: formatSocialUrl(activeGithub, 'github.com/'),
+        icon: GitHubGlyph,
+        color: 'hover:text-white hover:border-white/40',
+      });
+    }
+
+    if (activeEmail) {
+      list.push({
+        id: 'email',
+        title: 'Email',
+        href: `mailto:${activeEmail}`,
+        icon: Mail,
+        color: 'hover:text-sky-400 hover:border-sky-500/40',
+      });
+    }
+
+    if (activePhone) {
+      list.push({
+        id: 'sms',
+        title: 'SMS',
+        href: `sms:${activePhone}`,
+        icon: MessageSquare,
+        color: 'hover:text-teal-400 hover:border-teal-500/40',
+      });
+    }
+
+    if (activeTelegram) {
+      list.push({
+        id: 'telegram',
+        title: 'Telegram',
+        href: formatTelegramUrl(activeTelegram),
+        icon: Send,
+        color: 'hover:text-[#29B6F6] hover:border-[#29B6F6]/40',
+      });
+    }
+
+    if (activeWebsite) {
+      list.push({
+        id: 'website',
+        title: 'Website',
+        href: activeWebsite.startsWith('http') ? activeWebsite : `https://${activeWebsite}`,
+        icon: Globe,
+        color: 'hover:text-emerald-400 hover:border-emerald-500/40',
+      });
+    }
+
+    if (activeAddress) {
+      list.push({
+        id: 'directions',
+        title: 'Directions',
+        href: `https://maps.google.com/?q=${encodeURIComponent(activeAddress)}`,
+        icon: MapPin,
+        color: 'hover:text-rose-400 hover:border-rose-500/40',
+      });
+    }
+
+    return list;
+  }, [
+    activePhone,
+    activeWhatsapp,
+    activeInstagram,
+    activeTiktok,
+    activeSpotify,
+    activeYoutube,
+    activeAppleMusic,
+    activeTwitter,
+    activeLinkedin,
+    activeFacebook,
+    activeGithub,
+    activeEmail,
+    activeTelegram,
+    activeWebsite,
+    activeAddress,
+  ]);
 
   // Theme styling definitions
   const themeStyles: Record<string, { bg: string; cardBg: string; text: string; subtext: string; border: string; accent: string }> = {
@@ -426,11 +754,14 @@ export default function VCardInteractiveView({
             <div className="absolute top-4 inset-x-4 sm:inset-x-6 flex items-center justify-between z-20">
               <button
                 type="button"
-                onClick={() => setShowQrModal(true)}
+                onClick={() => {
+                  setShareViewMode('preview');
+                  setShowShareModal(true);
+                }}
                 className="px-2.5 py-1.5 rounded-xl bg-black/60 hover:bg-black/80 text-white/95 hover:text-white border border-white/20 transition-all flex items-center gap-1.5 text-xs font-mono cursor-pointer backdrop-blur-md shadow-lg"
               >
                 <QrCode className="w-4 h-4" />
-                <span>Share QR</span>
+                <span>Share</span>
               </button>
 
               <div className="flex items-center gap-2">
@@ -531,114 +862,28 @@ export default function VCardInteractiveView({
             </a>
           </div>
 
-          {/* Extended Action Grid: Call, WhatsApp, Instagram, SMS, Email, Telegram, Website, Directions */}
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 pt-1">
-            {activePhone && (
-              <a
-                href={`tel:${activePhone}`}
-                className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
-              >
-                <div className="w-8 h-8 rounded-lg bg-white/10 mx-auto flex items-center justify-center text-white group-hover:scale-105 transition-transform">
-                  <Phone className="w-4 h-4" />
-                </div>
-                <span className="text-[11px] font-semibold text-white/80 block mt-1.5 truncate">Call</span>
-              </a>
-            )}
-
-            {activeWhatsapp && (
-              <a
-                href={formatWhatsAppUrl(activeWhatsapp)}
-                target="_blank"
-                rel="noreferrer"
-                className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
-              >
-                <div className="w-8 h-8 rounded-lg bg-[#25D366]/20 mx-auto flex items-center justify-center text-[#25D366] group-hover:scale-105 transition-transform">
-                  <MessageCircle className="w-4 h-4" />
-                </div>
-                <span className="text-[11px] font-semibold text-white/80 block mt-1.5 truncate">WhatsApp</span>
-              </a>
-            )}
-
-            {activeInstagram && (
-              <a
-                href={formatInstagramUrl(activeInstagram)}
-                target="_blank"
-                rel="noreferrer"
-                className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
-              >
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-amber-500/20 via-rose-500/20 to-purple-500/20 text-[#E1306C] mx-auto flex items-center justify-center group-hover:scale-105 transition-transform border border-[#E1306C]/20">
-                  <Instagram className="w-4 h-4" />
-                </div>
-                <span className="text-[11px] font-semibold text-white/80 block mt-1.5 truncate">Instagram</span>
-              </a>
-            )}
-
-            {activePhone && (
-              <a
-                href={`sms:${activePhone}`}
-                className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
-              >
-                <div className="w-8 h-8 rounded-lg bg-white/10 mx-auto flex items-center justify-center text-white group-hover:scale-105 transition-transform">
-                  <MessageSquare className="w-4 h-4" />
-                </div>
-                <span className="text-[11px] font-semibold text-white/80 block mt-1.5 truncate">SMS</span>
-              </a>
-            )}
-
-            {activeEmail && (
-              <a
-                href={`mailto:${activeEmail}`}
-                className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
-              >
-                <div className="w-8 h-8 rounded-lg bg-white/10 mx-auto flex items-center justify-center text-white group-hover:scale-105 transition-transform">
-                  <Mail className="w-4 h-4" />
-                </div>
-                <span className="text-[11px] font-semibold text-white/80 block mt-1.5 truncate">Email</span>
-              </a>
-            )}
-
-            {activeTelegram && (
-              <a
-                href={formatTelegramUrl(activeTelegram)}
-                target="_blank"
-                rel="noreferrer"
-                className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
-              >
-                <div className="w-8 h-8 rounded-lg bg-[#0088cc]/20 mx-auto flex items-center justify-center text-[#29B6F6] group-hover:scale-105 transition-transform">
-                  <Send className="w-4 h-4" />
-                </div>
-                <span className="text-[11px] font-semibold text-white/80 block mt-1.5 truncate">Telegram</span>
-              </a>
-            )}
-
-            {activeWebsite && (
-              <a
-                href={activeWebsite.startsWith('http') ? activeWebsite : `https://${activeWebsite}`}
-                target="_blank"
-                rel="noreferrer"
-                className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
-              >
-                <div className="w-8 h-8 rounded-lg bg-white/10 mx-auto flex items-center justify-center text-white group-hover:scale-105 transition-transform">
-                  <Globe className="w-4 h-4" />
-                </div>
-                <span className="text-[11px] font-semibold text-white/80 block mt-1.5 truncate">Website</span>
-              </a>
-            )}
-
-            {activeAddress && (
-              <a
-                href={`https://maps.google.com/?q=${encodeURIComponent(activeAddress)}`}
-                target="_blank"
-                rel="noreferrer"
-                className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-center transition-all group"
-              >
-                <div className="w-8 h-8 rounded-lg bg-white/10 mx-auto flex items-center justify-center text-white group-hover:scale-105 transition-transform">
-                  <MapPin className="w-4 h-4" />
-                </div>
-                <span className="text-[11px] font-semibold text-white/80 block mt-1.5 truncate">Directions</span>
-              </a>
-            )}
-          </div>
+          {/* Centered Circular Brand Glyphs Row (Linktree Style) */}
+          {circularActions.length > 0 && (
+            <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
+              {circularActions.map((action) => {
+                const Icon = action.icon;
+                const isDirect = action.id === 'call' || action.id === 'sms' || action.id === 'email';
+                return (
+                  <a
+                    key={action.id}
+                    href={action.href}
+                    target={isDirect ? undefined : '_blank'}
+                    rel={isDirect ? undefined : 'noopener noreferrer'}
+                    title={action.title}
+                    aria-label={action.title}
+                    className={`w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 flex items-center justify-center text-white/90 ${action.color} transition-all transform hover:scale-110 active:scale-95 shadow-md backdrop-blur-xs`}
+                  >
+                    <Icon className="w-5 h-5 shrink-0" />
+                  </a>
+                );
+              })}
+            </div>
+          )}
 
           {/* Mini Linktree: Custom Featured Links */}
           {activeCustomLinks && activeCustomLinks.length > 0 && (
@@ -687,93 +932,424 @@ export default function VCardInteractiveView({
             </div>
           )}
 
-
-          {/* Social Links Bar */}
-          {(activeLinkedin || activeTwitter || activeGithub || activeYoutube) && (
-            <div className="pt-3 border-t border-white/10 flex flex-wrap items-center justify-center gap-3">
-              {activeLinkedin && (
-                <a
-                  href={activeLinkedin.startsWith('http') ? activeLinkedin : `https://linkedin.com/in/${activeLinkedin.replace(/^@/, '')}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 flex items-center justify-center text-white transition-colors"
-                >
-                  <span className="font-bold text-xs">in</span>
-                </a>
-              )}
-              {activeTwitter && (
-                <a
-                  href={activeTwitter.startsWith('http') ? activeTwitter : `https://x.com/${activeTwitter.replace(/^@/, '')}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 flex items-center justify-center text-white transition-colors"
-                >
-                  <span className="font-bold text-xs">𝕏</span>
-                </a>
-              )}
-              {activeGithub && (
-                <a
-                  href={activeGithub.startsWith('http') ? activeGithub : `https://github.com/${activeGithub.replace(/^@/, '')}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 flex items-center justify-center text-white transition-colors"
-                >
-                  <span className="font-bold text-xs">gh</span>
-                </a>
-              )}
-              {activeYoutube && (
-                <a
-                  href={activeYoutube.startsWith('http') ? activeYoutube : `https://youtube.com/${activeYoutube.replace(/^@/, '')}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 flex items-center justify-center text-white transition-colors"
-                >
-                  <span className="font-bold text-xs text-red-400">▶</span>
-                </a>
-              )}
-            </div>
-          )}
-
         </div>
 
-        {/* Powered by DynamicQR Footer Badge */}
-        {showBranding && (
-          <div className="text-center pt-1">
-            <a
-              href={APP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/10 border border-white/10 text-[11px] text-white/60 hover:text-white transition-colors"
+        {/* Linktree-Style Footer (Reference Image 1 / Image 10) */}
+        <div className="w-full max-w-md mx-auto pt-6 pb-4 text-center space-y-4">
+          <div>
+            <Link
+              href="/"
+              className="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-white text-[#11140F] font-semibold text-sm hover:bg-white/90 shadow-md transition-all hover:scale-105 active:scale-95 cursor-pointer"
             >
-              <span>Powered by</span>
-              <strong className="text-white underline">Dynamic QR</strong>
-            </a>
+              Get your own DynamicQR
+            </Link>
           </div>
-        )}
+          <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[11px] text-white/50">
+            <button
+              type="button"
+              onClick={() => setShowCookieModal(true)}
+              className="hover:text-white transition-colors cursor-pointer"
+            >
+              Cookie Preferences
+            </button>
+            <span>&bull;</span>
+            <button
+              type="button"
+              onClick={() => {
+                setReportSuccess(false);
+                setShowReportModal(true);
+              }}
+              className="hover:text-white transition-colors cursor-pointer"
+            >
+              Report
+            </button>
+            <span>&bull;</span>
+            <Link href="/privacy" className="hover:text-white transition-colors">
+              Privacy
+            </Link>
+            <span>&bull;</span>
+            <Link href="/product-tour" className="hover:text-white transition-colors">
+              Explore
+            </Link>
+            <span>&bull;</span>
+            <Link href="/terms" className="hover:text-white transition-colors">
+              Terms
+            </Link>
+            <span>&bull;</span>
+            <button
+              type="button"
+              onClick={() => {
+                setShareViewMode('preview');
+                setShowShareModal(true);
+              }}
+              className="hover:text-white transition-colors cursor-pointer"
+            >
+              About this account
+            </button>
+            <span>&bull;</span>
+            <Link href="/" className="hover:text-white transition-colors">
+              More from DynamicQR
+            </Link>
+          </div>
+        </div>
 
       </div>
 
-      {/* Modal 1: Fullscreen QR Share */}
-      {showQrModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
-          <div className="w-full max-w-sm bg-white rounded-lg p-6 shadow-2xl text-center space-y-4 relative">
-            <button
-              onClick={() => setShowQrModal(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-900 p-1"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div>
-              <h3 className="text-lg font-bold text-gray-900">{fullName}</h3>
-              <p className="text-xs text-gray-500">Scan to save contact directly to phone</p>
+      {/* Modal 1: Rich Share Link & QR Modal (Reference Image 3) */}
+      {showShareModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-[#131518] text-white rounded-3xl p-6 sm:p-7 shadow-2xl space-y-5 border border-white/10 relative max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-2 border-b border-white/10">
+              <h3 className="text-base font-bold text-white">Share link</h3>
+              <button
+                type="button"
+                onClick={() => setShowShareModal(false)}
+                className="p-1 rounded-full text-white/50 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
-            <div className="p-4 bg-gray-50 rounded-md inline-block border border-gray-100 shadow-inner">
-              <QRCodeSVG value={cardUrl} size={220} level="M" />
+            {/* Mode Switcher: Social Preview vs QR Code */}
+            <div className="grid grid-cols-2 gap-1 p-1 bg-white/[0.04] rounded-xl border border-white/5 text-xs">
+              <button
+                type="button"
+                onClick={() => setShareViewMode('preview')}
+                className={`py-1.5 px-3 rounded-lg font-medium transition-all cursor-pointer text-center ${
+                  shareViewMode === 'preview'
+                    ? 'bg-white text-black font-semibold shadow-xs'
+                    : 'text-white/60 hover:text-white hover:bg-white/[0.03]'
+                }`}
+              >
+                Social & Preview
+              </button>
+              <button
+                type="button"
+                onClick={() => setShareViewMode('qr')}
+                className={`py-1.5 px-3 rounded-lg font-medium transition-all cursor-pointer text-center ${
+                  shareViewMode === 'qr'
+                    ? 'bg-white text-black font-semibold shadow-xs'
+                    : 'text-white/60 hover:text-white hover:bg-white/[0.03]'
+                }`}
+              >
+                Scannable QR
+              </button>
             </div>
 
-            <p className="text-[11px] text-gray-400 font-mono">{cardUrl}</p>
+            {shareViewMode === 'preview' ? (
+              <div className="space-y-4">
+                {/* Hyper-Detailed Open Graph / Social Link Preview Card */}
+                <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-white/20 transition-all flex items-center gap-3.5 text-left">
+                  <div className="w-13 h-13 rounded-full overflow-hidden border-2 border-white/20 shrink-0 bg-black flex items-center justify-center">
+                    {avatarUrl && !avatarError ? (
+                      <img
+                        src={avatarSrc || avatarUrl}
+                        alt={fullName}
+                        className="w-full h-full object-cover"
+                        onError={handleAvatarError}
+                      />
+                    ) : (
+                      <span className="text-sm font-bold text-white">{initials}</span>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1 space-y-0.5">
+                    <p className="text-sm font-bold text-white truncate">{fullName}</p>
+                    <p className="text-[11px] text-emerald-400 font-mono truncate">
+                      {cardUrl.replace(/^https?:\/\//, '')}
+                    </p>
+                    <p className="text-[11px] text-white/60 truncate">
+                      {activeBio || `${activeTitle || 'Digital Card'} • ${activeCompany || 'DynamicQR'}`}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Circular Share Buttons Row (Linktree Style: Copy, X, WhatsApp, Facebook, LinkedIn, Native Share) */}
+                <div className="pt-2">
+                  <p className="text-[11px] font-semibold text-white/50 uppercase tracking-wider text-center mb-3">
+                    Share directly to channels
+                  </p>
+                  <div className="flex items-center justify-center gap-3 flex-wrap">
+                    {/* Copy Link Button */}
+                    <button
+                      type="button"
+                      onClick={handleCopyLink}
+                      className="flex flex-col items-center gap-1.5 group cursor-pointer"
+                      title="Copy link"
+                    >
+                      <div className={`w-12 h-12 rounded-full border flex items-center justify-center transition-all ${
+                        copied
+                          ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400'
+                          : 'bg-white/10 hover:bg-white/20 border-white/15 text-white'
+                      }`}>
+                        {copied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
+                      </div>
+                      <span className="text-[10px] text-white/70 group-hover:text-white transition-colors">
+                        {copied ? 'Copied!' : 'Copy link'}
+                      </span>
+                    </button>
+
+                    {/* X (Twitter) */}
+                    <a
+                      href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(cardUrl)}&text=${encodeURIComponent(`Check out ${fullName}'s digital vCard on DynamicQR:`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center gap-1.5 group"
+                      title="Share to X"
+                    >
+                      <div className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 flex items-center justify-center text-white transition-all group-hover:scale-105">
+                        <XGlyph className="w-5 h-5" />
+                      </div>
+                      <span className="text-[10px] text-white/70 group-hover:text-white transition-colors">
+                        X
+                      </span>
+                    </a>
+
+                    {/* WhatsApp */}
+                    <a
+                      href={`https://wa.me/?text=${encodeURIComponent(`Connect with ${fullName} on DynamicQR: ${cardUrl}`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center gap-1.5 group"
+                      title="Share via WhatsApp"
+                    >
+                      <div className="w-12 h-12 rounded-full bg-[#25D366]/15 hover:bg-[#25D366]/25 border border-[#25D366]/30 flex items-center justify-center text-[#25D366] transition-all group-hover:scale-105">
+                        <WhatsAppGlyph className="w-5 h-5" />
+                      </div>
+                      <span className="text-[10px] text-white/70 group-hover:text-white transition-colors">
+                        WhatsApp
+                      </span>
+                    </a>
+
+                    {/* Facebook */}
+                    <a
+                      href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(cardUrl)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center gap-1.5 group"
+                      title="Share to Facebook"
+                    >
+                      <div className="w-12 h-12 rounded-full bg-[#1877F2]/15 hover:bg-[#1877F2]/25 border border-[#1877F2]/30 flex items-center justify-center text-[#1877F2] transition-all group-hover:scale-105">
+                        <FacebookGlyph className="w-5 h-5" />
+                      </div>
+                      <span className="text-[10px] text-white/70 group-hover:text-white transition-colors">
+                        Facebook
+                      </span>
+                    </a>
+
+                    {/* LinkedIn */}
+                    <a
+                      href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(cardUrl)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex flex-col items-center gap-1.5 group"
+                      title="Share to LinkedIn"
+                    >
+                      <div className="w-12 h-12 rounded-full bg-[#0A66C2]/15 hover:bg-[#0A66C2]/25 border border-[#0A66C2]/30 flex items-center justify-center text-[#0A66C2] transition-all group-hover:scale-105">
+                        <LinkedInGlyph className="w-5 h-5" />
+                      </div>
+                      <span className="text-[10px] text-white/70 group-hover:text-white transition-colors">
+                        LinkedIn
+                      </span>
+                    </a>
+
+                    {/* More / Native Share */}
+                    <button
+                      type="button"
+                      onClick={handleShareNative}
+                      className="flex flex-col items-center gap-1.5 group cursor-pointer"
+                      title="More share options"
+                    >
+                      <div className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 flex items-center justify-center text-white transition-all group-hover:scale-105">
+                        <Share2 className="w-5 h-5" />
+                      </div>
+                      <span className="text-[10px] text-white/70 group-hover:text-white transition-colors">
+                        More
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* QR Code Mode */
+              <div className="space-y-4 text-center">
+                <div className="p-4 bg-white rounded-2xl inline-block shadow-inner mx-auto border border-white/20">
+                  <QRCodeSVG value={cardUrl} size={220} level="M" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs text-white/80 font-medium">Scan to connect instantly</p>
+                  <p className="text-[11px] text-white/40 font-mono break-all">{cardUrl}</p>
+                </div>
+                <div>
+                  <button
+                    type="button"
+                    onClick={handleCopyLink}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/15 transition-all cursor-pointer"
+                  >
+                    {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                    <span>{copied ? 'Link Copied to Clipboard' : 'Copy Card Link'}</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Promotional Banner: Join [Name] on DynamicQR */}
+            <div className="pt-2">
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-white/[0.06] via-white/[0.03] to-transparent border border-white/10 space-y-3">
+                <p className="text-xs font-bold text-white">Join {fullName} on DynamicQR</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <Link
+                    href="/join"
+                    className="py-2 px-3 rounded-xl bg-white text-black font-bold text-xs text-center hover:bg-white/90 transition-all shadow-xs"
+                  >
+                    Sign up free
+                  </Link>
+                  <Link
+                    href="/product-tour"
+                    className="py-2 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-white font-medium text-xs text-center border border-white/10 transition-all"
+                  >
+                    Find out more
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer Report Link */}
+            <div className="pt-1 text-center border-t border-white/10">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowShareModal(false);
+                  setReportSuccess(false);
+                  setShowReportModal(true);
+                }}
+                className="inline-flex items-center gap-1.5 text-[11px] text-white/40 hover:text-white/80 transition-colors cursor-pointer"
+              >
+                <Flag className="w-3 h-3" />
+                <span>Report link</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Report Account */}
+      {showReportModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="w-full max-w-sm bg-[#131518] text-white rounded-3xl p-6 shadow-2xl space-y-4 border border-white/10 relative">
+            <div className="flex items-center justify-between pb-2 border-b border-white/10">
+              <div className="flex items-center gap-2">
+                <Flag className="w-4 h-4 text-amber-400" />
+                <h3 className="text-sm font-bold text-white">Report profile</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowReportModal(false)}
+                className="p-1 rounded-full text-white/50 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {reportSuccess ? (
+              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-center space-y-2">
+                <Check className="w-6 h-6 text-emerald-400 mx-auto" />
+                <p className="text-xs font-semibold text-emerald-300">Thank you for your report</p>
+                <p className="text-[11px] text-white/60">
+                  Our trust & safety team will review this profile promptly.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-xs text-white/60">
+                  Help us understand what is wrong with this profile:
+                </p>
+                <div className="space-y-1.5 text-xs">
+                  {[
+                    { id: 'spam', label: 'Spam, scam, or commercial abuse' },
+                    { id: 'impersonation', label: 'Impersonation or false identity' },
+                    { id: 'inappropriate', label: 'Inappropriate or harmful content' },
+                    { id: 'copyright', label: 'Intellectual property infringement' },
+                  ].map((opt) => (
+                    <label
+                      key={opt.id}
+                      className="flex items-center gap-2 p-2.5 rounded-xl bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] cursor-pointer"
+                    >
+                      <input
+                        type="radio"
+                        name="reportReason"
+                        checked={reportReason === opt.id}
+                        onChange={() => setReportReason(opt.id)}
+                        className="text-emerald-500 focus:ring-emerald-500"
+                      />
+                      <span className="text-white/80">{opt.label}</span>
+                    </label>
+                  ))}
+                </div>
+                <div className="flex items-center justify-end gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowReportModal(false)}
+                    className="px-3 py-1.5 rounded-xl text-xs text-white/60 hover:text-white"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setReportSuccess(true)}
+                    className="px-4 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold transition-colors cursor-pointer"
+                  >
+                    Submit Report
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Cookie Preferences */}
+      {showCookieModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="w-full max-w-sm bg-[#131518] text-white rounded-3xl p-6 shadow-2xl space-y-4 border border-white/10 relative">
+            <div className="flex items-center justify-between pb-2 border-b border-white/10">
+              <h3 className="text-sm font-bold text-white">Cookie Preferences</h3>
+              <button
+                type="button"
+                onClick={() => setShowCookieModal(false)}
+                className="p-1 rounded-full text-white/50 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <p className="text-xs text-white/60 leading-relaxed">
+              DynamicQR uses essential cookies to authenticate sessions, securely route QR traffic, and collect anonymous telemetry.
+            </p>
+            <div className="space-y-2 pt-1 text-xs">
+              <div className="p-2.5 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-between">
+                <div>
+                  <p className="font-semibold text-white">Strictly Necessary</p>
+                  <p className="text-[10px] text-white/50">Required for routing & auth</p>
+                </div>
+                <span className="text-[10px] font-mono text-emerald-400 font-bold">Always Active</span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-between">
+                <div>
+                  <p className="font-semibold text-white">Performance & Telemetry</p>
+                  <p className="text-[10px] text-white/50">Anonymous scan analytics</p>
+                </div>
+                <input type="checkbox" defaultChecked className="rounded text-emerald-500" />
+              </div>
+            </div>
+            <div className="pt-2 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setShowCookieModal(false)}
+                className="w-full py-2 rounded-xl bg-white text-black font-bold text-xs hover:bg-white/90 transition-colors"
+              >
+                Save Preferences
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -1210,6 +1786,52 @@ export default function VCardInteractiveView({
                         value={editForm.youtube}
                         onChange={(e) => setEditForm({ ...editForm, youtube: e.target.value })}
                         placeholder="channel"
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white placeholder-white/25 focus:outline-hidden focus:border-white/30 transition-colors"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-medium text-white/70">TikTok</label>
+                      <input
+                        type="text"
+                        value={editForm.tiktok}
+                        onChange={(e) => setEditForm({ ...editForm, tiktok: e.target.value })}
+                        placeholder="@username"
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white placeholder-white/25 focus:outline-hidden focus:border-white/30 transition-colors"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-medium text-white/70">Spotify</label>
+                      <input
+                        type="text"
+                        value={editForm.spotify}
+                        onChange={(e) => setEditForm({ ...editForm, spotify: e.target.value })}
+                        placeholder="Spotify URL or artist link"
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white placeholder-white/25 focus:outline-hidden focus:border-white/30 transition-colors"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-medium text-white/70">Facebook</label>
+                      <input
+                        type="text"
+                        value={editForm.facebook}
+                        onChange={(e) => setEditForm({ ...editForm, facebook: e.target.value })}
+                        placeholder="facebook.com/..."
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white placeholder-white/25 focus:outline-hidden focus:border-white/30 transition-colors"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-medium text-white/70">Apple Music</label>
+                      <input
+                        type="text"
+                        value={editForm.appleMusic}
+                        onChange={(e) => setEditForm({ ...editForm, appleMusic: e.target.value })}
+                        placeholder="music.apple.com/..."
                         className="w-full px-3 py-2 text-xs rounded-xl border border-white/10 bg-white/[0.03] text-white placeholder-white/25 focus:outline-hidden focus:border-white/30 transition-colors"
                       />
                     </div>

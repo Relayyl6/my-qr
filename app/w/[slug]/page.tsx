@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
+import { APP_URL } from '@/lib/config';
 import WifiInteractiveView from '@/components/WifiInteractiveView';
 
 export async function generateMetadata({
@@ -17,10 +18,38 @@ export async function generateMetadata({
   }
 
   const spec = (item.spec as any) || {};
+  const pageTitle = `Connect to ${item.title} — Instant Wi-Fi Access`;
+  const pageDesc = `Fast contactless Wi-Fi access for ${item.title} (SSID: ${spec.ssid || item.title}). Tap to join network or scan QR code.`;
+  const canonicalUrl = `${APP_URL}/w/${slug}`;
 
   return {
-    title: `Connect to ${item.title} — Instant Wi-Fi Access`,
-    description: `Fast contactless Wi-Fi access for ${item.title}. Scan QR code to connect instantly or copy network password.`,
+    metadataBase: new URL(APP_URL),
+    title: pageTitle,
+    description: pageDesc,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title: pageTitle,
+      description: pageDesc,
+      url: canonicalUrl,
+      siteName: 'DynamicQR',
+      type: 'website',
+      images: [
+        {
+          url: `${APP_URL}/icon.svg`,
+          width: 800,
+          height: 800,
+          alt: `${item.title} Wi-Fi`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary',
+      title: pageTitle,
+      description: pageDesc,
+      images: [`${APP_URL}/icon.svg`],
+    },
   };
 }
 

@@ -4,6 +4,7 @@ import { Suspense } from 'react';
 import SiteVisitorTracker from '@/components/SiteVisitorTracker';
 import EntryPromoModal from '@/components/EntryPromoModal';
 import ThemeProvider from '@/components/ThemeProvider';
+import { APP_URL } from '@/lib/config';
 import './globals.css';
 
 const inter = Inter({ 
@@ -20,12 +21,37 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: 'DynamicQR — Intelligent Dynamic QR Code Routing',
-  description: 'A QR code you print once. A destination you can change forever. Intelligent dynamic QR routing with live scan analytics.',
+  metadataBase: new URL(APP_URL),
+  title: {
+    default: 'DynamicQR — Intelligent Dynamic QR Code Routing & Micro-SaaS Hub',
+    template: '%s | DynamicQR',
+  },
+  description: 'A QR code you print once. A destination you can change forever. Intelligent dynamic QR routing with live scan analytics, digital vCards, menus, and Wi-Fi.',
   icons: {
     icon: '/icon.svg',
     shortcut: '/icon.svg',
     apple: '/icon.svg',
+  },
+  openGraph: {
+    title: 'DynamicQR — Intelligent Dynamic QR Code Routing & Micro-SaaS Hub',
+    description: 'A QR code you print once. A destination you can change forever. Intelligent dynamic QR routing with live scan analytics, digital vCards, menus, and Wi-Fi.',
+    url: APP_URL,
+    siteName: 'DynamicQR',
+    images: [
+      {
+        url: `${APP_URL}/icon.svg`,
+        width: 800,
+        height: 800,
+        alt: 'DynamicQR Logo',
+      },
+    ],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'DynamicQR — Intelligent Dynamic QR Code Routing',
+    description: 'A QR code you print once. A destination you can change forever.',
+    images: [`${APP_URL}/icon.svg`],
   },
 };
 

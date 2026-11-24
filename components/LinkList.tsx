@@ -250,7 +250,7 @@ export default function LinkList({
                         href={shortUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-[11px] sm:text-[13px] text-[#11140F]/70 dark:text-white/70 hover:text-[#11140F] dark:hover:text-white transition-colors truncate font-mono min-w-0 flex-1"
+                        className="text-[11px] sm:text-[13px] text-[#11140F]/80 dark:text-emerald-400 font-medium hover:underline transition-colors truncate font-mono min-w-0 flex-1"
                         style={{ fontFamily: 'var(--font-mono)' }}
                       >
                         {shortUrl.replace(/^https?:\/\//, '')}
@@ -325,11 +325,11 @@ export default function LinkList({
                         </p>
                       </div>
                     ) : (
-                      <div className="rounded-lg bg-[#EEF0EA] dark:bg-white/[0.05] border border-transparent dark:border-white/10 p-2 min-w-0 w-full overflow-hidden">
-                        <p className="text-[9px] text-[#11140F]/40 dark:text-white/40 uppercase tracking-wider font-medium">
+                      <div className="rounded-lg bg-[#EEF0EA] dark:bg-white/[0.04] border border-[#11140F]/10 dark:border-white/10 p-2 min-w-0 w-full overflow-hidden">
+                        <p className="text-[9px] text-[#11140F]/60 dark:text-white/40 uppercase tracking-wider font-semibold">
                           Destination
                         </p>
-                        <p className="truncate text-[11px] sm:text-[12px] font-medium text-[#11140F]/80 dark:text-white/80 mt-0.5" title={link.destinationUrl}>
+                        <p className="truncate text-[11px] sm:text-[12px] font-medium text-[#11140F]/90 dark:text-white/90 mt-0.5" title={link.destinationUrl}>
                           {link.destinationUrl}
                         </p>
                       </div>
@@ -383,8 +383,8 @@ export default function LinkList({
                           onClick={() => setActiveRouterLink({ link, tab: 'schedule' })}
                           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-medium transition-colors cursor-pointer ${
                             link.routingRules?.some((r) => (r.conditions as any[]).some((c) => c.type === 'schedule'))
-                              ? 'border-emerald-500 bg-emerald-100/90 hover:bg-emerald-200/90 text-emerald-950 font-semibold shadow-xs'
-                              : 'border-emerald-600/30 bg-emerald-50/60 hover:bg-emerald-100/80 text-emerald-900'
+                              ? 'border-emerald-500 bg-emerald-100/90 dark:bg-emerald-950/40 hover:bg-emerald-200/90 dark:hover:bg-emerald-900/50 text-emerald-950 dark:text-emerald-300 font-semibold shadow-xs'
+                              : 'border-emerald-600/30 dark:border-emerald-500/30 bg-emerald-50/60 dark:bg-emerald-950/20 hover:bg-emerald-100/80 dark:hover:bg-emerald-900/30 text-emerald-900 dark:text-emerald-300'
                           }`}
                         >
                           <Clock className="w-3 h-3 text-emerald-700 shrink-0" />
