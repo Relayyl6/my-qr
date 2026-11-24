@@ -687,19 +687,6 @@ export default function VCardInteractiveView({
             </div>
           )}
 
-          {/* Owner Quick Settings Action Bar */}
-          {isOwner && (
-            <div className="pt-2">
-              <button
-                type="button"
-                onClick={handleOpenSettings}
-                className="w-full py-2 px-3 rounded-xl border border-white/10 hover:border-white/20 bg-white/[0.03] hover:bg-white/[0.06] text-white/70 hover:text-white text-xs font-medium flex items-center justify-center gap-2 transition-all cursor-pointer"
-              >
-                <Settings className="w-3.5 h-3.5 text-white/60" />
-                <span>Card Settings & Links</span>
-              </button>
-            </div>
-          )}
 
           {/* Social Links Bar */}
           {(activeLinkedin || activeTwitter || activeGithub || activeYoutube) && (
