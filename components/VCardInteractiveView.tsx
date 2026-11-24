@@ -247,7 +247,7 @@ export default function VCardInteractiveView({
           </div>
 
           {/* Profile Details: Avatar overlapping banner bottom edge */}
-          <div className="text-center space-y-3 -mt-16 sm:-mt-18 relative z-20">
+          <div className="text-center space-y-3 !-mt-14 sm:!-mt-16 relative z-20">
             <div
               style={{ borderColor: activeTheme.accent }}
               className={`w-24 h-24 sm:w-28 sm:h-28 mx-auto rounded-full overflow-hidden shadow-2xl border-3 ${activeTheme.cardBg === 'bg-white' ? 'ring-white' : 'ring-black/80'} ring-4 shrink-0 relative bg-black flex items-center justify-center`}
