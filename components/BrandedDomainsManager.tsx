@@ -211,58 +211,75 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
           ) : (
             <>
               {/* How Custom Branded Domains Work in 3 Steps */}
-              <div className="rounded-2xl bg-[#F7F8F5] dark:bg-[#151912] border border-[#11140F]/10 dark:border-white/10 p-5 space-y-4 text-[12.5px] text-[#11140F]/85 dark:text-white/85">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="rounded-2xl bg-[#F7F8F5] dark:bg-[#151912] border border-[#11140F]/10 dark:border-white/10 p-5 sm:p-6 space-y-4 text-[12.5px] text-[#11140F]/85 dark:text-white/85">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1 border-b border-[#11140F]/10 dark:border-white/10">
                   <div>
-                    <div className="font-bold text-[14px] text-[#11140F] dark:text-white flex items-center gap-2">
+                    <div className="font-bold text-[14.5px] text-[#11140F] dark:text-white flex items-center gap-2">
                       <Globe className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                      What is a Branded Domain & How Does It Work?
+                      If you own a domain (e.g. from GoDaddy, Namecheap, Cloudflare, or Google) and want to use it:
                     </div>
                     <p className="text-[12px] text-[#11140F]/65 dark:text-white/65 mt-0.5">
-                      <strong>100% Optional:</strong> By default, your QR codes already work out of the box with <code className="font-mono text-emerald-600 dark:text-emerald-400">my-qr-sandy.vercel.app</code>. Connect a domain only if you want your own company website name on the link (e.g. <code className="font-mono text-emerald-600 dark:text-emerald-400">qr.yourcompany.com</code>).
+                      <strong>Optional:</strong> By default, all QR codes work instantly with <code className="font-mono text-emerald-600 dark:text-emerald-400">my-qr-sandy.vercel.app</code>. Connect a custom domain only if you want your own company brand on the link.
                     </p>
                   </div>
                   <span className="text-[11px] font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full font-bold self-start sm:self-auto shrink-0">
-                    Plain English Guide
+                    Setup Guide
                   </span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 pt-1">
                   {/* Step 1 */}
-                  <div className="p-4 rounded-xl bg-white dark:bg-[#1C2218] border border-[#11140F]/10 dark:border-white/10 space-y-2 shadow-2xs">
-                    <div className="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-2 text-[13px]">
-                      <span className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[11px] font-bold shrink-0">1</span>
-                      Pick your link address
+                  <div className="p-4 rounded-xl bg-white dark:bg-[#1C2218] border border-[#11140F]/10 dark:border-white/10 space-y-2 shadow-2xs flex flex-col justify-between">
+                    <div className="space-y-2">
+                      <div className="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-2 text-[13px]">
+                        <span className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[11px] font-bold shrink-0">1</span>
+                        Step 1: Pick the address you want
+                      </div>
+                      <p className="text-[12px] text-[#11140F]/75 dark:text-white/75 leading-relaxed">
+                        In the input box under <strong>Branded Domains</strong>, type the web address you want for your QR codes (e.g. <code className="font-mono text-emerald-700 dark:text-emerald-300 font-semibold px-1 py-0.5 rounded bg-black/5 dark:bg-white/10">qr.yourcompany.com</code> or <code className="font-mono text-emerald-700 dark:text-emerald-300 font-semibold px-1 py-0.5 rounded bg-black/5 dark:bg-white/10">links.yourcompany.com</code>).
+                      </p>
                     </div>
-                    <p className="text-[12px] text-[#11140F]/70 dark:text-white/70 leading-relaxed">
-                      Type the address you want for your QR codes below (e.g. <code className="font-mono text-emerald-700 dark:text-emerald-300 font-semibold px-1 py-0.5 rounded bg-black/5 dark:bg-white/10">qr.yourcompany.com</code>) and click <strong>"Add Domain"</strong>.
-                    </p>
+                    <div className="pt-2 text-[12px] font-semibold text-emerald-600 dark:text-emerald-400">
+                      &bull; Click <strong>"Add Domain"</strong>.
+                    </div>
                   </div>
 
                   {/* Step 2 */}
-                  <div className="p-4 rounded-xl bg-white dark:bg-[#1C2218] border border-[#11140F]/10 dark:border-white/10 space-y-2 shadow-2xs">
+                  <div className="p-4 rounded-xl bg-white dark:bg-[#1C2218] border border-[#11140F]/10 dark:border-white/10 space-y-2.5 shadow-2xs">
                     <div className="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-2 text-[13px]">
                       <span className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[11px] font-bold shrink-0">2</span>
-                      Copy 2 lines to your domain
+                      Step 2: Copy the 2 lines to where you bought your website
                     </div>
-                    <div className="text-[11.5px] text-[#11140F]/75 dark:text-white/75 space-y-1.5 leading-snug">
-                      <p>Log into where you bought your website (GoDaddy, Namecheap, Cloudflare, etc.) ➔ click <strong>DNS</strong> ➔ paste these 2 lines:</p>
-                      <div className="p-2 rounded-lg bg-[#F7F8F5] dark:bg-black/40 border border-[#11140F]/10 dark:border-white/10 font-mono text-[11px] space-y-1 text-[#11140F] dark:text-white">
-                        <div><strong>• Line 1 (CNAME):</strong> Host <code className="text-emerald-600 dark:text-emerald-400 font-bold">qr</code> &rarr; <code className="text-[#11140F] dark:text-white">cname.vercel-dns.com</code></div>
-                        <div><strong>• Line 2 (TXT):</strong> Host <code className="text-emerald-600 dark:text-emerald-400 font-bold">_dynamicqr.qr</code> &rarr; verification key</div>
+                    <div className="text-[12px] text-[#11140F]/75 dark:text-white/75 space-y-2 leading-snug">
+                      <p className="text-[11.5px]">DynamicQR will immediately give you two lines of text:</p>
+                      <div className="p-2.5 rounded-lg bg-[#F7F8F5] dark:bg-black/40 border border-[#11140F]/10 dark:border-white/10 font-mono text-[11px] space-y-1.5 text-[#11140F] dark:text-white">
+                        <div>
+                          <strong className="text-emerald-700 dark:text-emerald-400">Line 1 (CNAME):</strong> tells the internet to send people to DynamicQR.
+                        </div>
+                        <div>
+                          <strong className="text-emerald-700 dark:text-emerald-400">Line 2 (TXT):</strong> proves that you own this website.
+                        </div>
                       </div>
+                      <p className="text-[11.5px] leading-relaxed">
+                        Log into your domain account (GoDaddy, Namecheap, Cloudflare, etc.), go to your <strong>DNS Settings</strong>, and paste those 2 lines.
+                      </p>
                     </div>
                   </div>
 
                   {/* Step 3 */}
-                  <div className="p-4 rounded-xl bg-white dark:bg-[#1C2218] border border-[#11140F]/10 dark:border-white/10 space-y-2 shadow-2xs">
-                    <div className="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-2 text-[13px]">
-                      <span className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[11px] font-bold shrink-0">3</span>
-                      Instant-Verify & Launch
+                  <div className="p-4 rounded-xl bg-white dark:bg-[#1C2218] border border-[#11140F]/10 dark:border-white/10 space-y-2 shadow-2xs flex flex-col justify-between">
+                    <div className="space-y-2">
+                      <div className="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-2 text-[13px]">
+                        <span className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[11px] font-bold shrink-0">3</span>
+                        Step 3: Click "Instant Verify (Test Mode)"
+                      </div>
+                      <p className="text-[12px] text-[#11140F]/75 dark:text-white/75 leading-relaxed">
+                        Click the green <strong>"Instant Verify (Test Mode)"</strong> button in DynamicQR. The badge turns to <span className="text-emerald-700 dark:text-emerald-400 font-bold">Active & Verified</span>.
+                      </p>
                     </div>
-                    <p className="text-[12px] text-[#11140F]/70 dark:text-white/70 leading-relaxed">
-                      Click the green <strong>"Instant Verify (Test Mode)"</strong> button. It activates immediately! Then create any QR code and select your domain from the dropdown.
-                    </p>
+                    <div className="pt-2 p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[11.5px] text-emerald-800 dark:text-emerald-300 leading-snug">
+                      <strong>Done!</strong> Whenever you create a new QR code in your workspace, select your domain from the dropdown and your QR codes will be generated under your brand.
+                    </div>
                   </div>
                 </div>
               </div>
