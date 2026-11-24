@@ -25,7 +25,8 @@ import AdminDomainRow from '@/components/AdminDomainRow';
 import AdminSovereigntyControls from '@/components/AdminSovereigntyControls';
 import AdminPromoManager from '@/components/AdminPromoManager';
 import AdminPlatformMailingList from '@/components/AdminPlatformMailingList';
-import { adminGetSystemConfig, adminGetAuditLogs, adminGetPromoConfig, adminGetPromoCodes } from '@/app/admin/actions';
+import AdminReportsManager from '@/components/AdminReportsManager';
+import { adminGetSystemConfig, adminGetAuditLogs, adminGetPromoConfig, adminGetPromoCodes, adminGetReports } from '@/app/admin/actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -57,6 +58,7 @@ export default async function AdminDashboardPage() {
     promoCodes,
     platformSubscribers,
     platformBroadcasts,
+    abuseReports,
   ] = await Promise.all([
     prisma.user.count(),
     prisma.user.count({ where: { tier: 'free' } }),
@@ -144,6 +146,7 @@ export default async function AdminDashboardPage() {
         createdAt: true,
       },
     }),
+    adminGetReports(),
   ]);
 
   // Calculate MRR & ARR Run Rate
@@ -417,6 +420,9 @@ export default async function AdminDashboardPage() {
             </table>
           </div>
         </div>
+
+        {/* Trust & Safety Abuse Reports */}
+        <AdminReportsManager initialReports={abuseReports} />
 
         {/* Platform-Wide Mailing List & Newsletter Subscribers */}
         <AdminPlatformMailingList

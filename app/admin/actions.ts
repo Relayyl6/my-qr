@@ -589,3 +589,64 @@ export async function adminDeletePlatformCampaign(id: string) {
   revalidatePath('/admin');
   return { success: true };
 }
+
+export interface PlatformAbuseReport {
+  id: string;
+  targetType: string;
+  targetSlug: string;
+  targetTitle: string;
+  targetUrl: string;
+  reason: string;
+  details?: string;
+  reporterIp?: string;
+  timestamp: string;
+  status: 'pending' | 'reviewed' | 'dismissed';
+}
+
+export async function adminGetReports(): Promise<PlatformAbuseReport[]> {
+  await verifyAdmin();
+  try {
+    const record = await prisma.aiCache.findUnique({
+      where: { key: 'platform_abuse_reports' },
+    });
+    if (record && record.value && Array.isArray(record.value)) {
+      return record.value as any;
+    }
+  } catch (e) {
+    console.warn('[adminGetReports] Error fetching reports:', e);
+  }
+  return [];
+}
+
+export async function adminUpdateReportStatus(
+  reportId: string,
+  newStatus: 'pending' | 'reviewed' | 'dismissed'
+) {
+  const admin = await verifyAdmin();
+  try {
+    const record = await prisma.aiCache.findUnique({
+      where: { key: 'platform_abuse_reports' },
+    });
+    const reports: PlatformAbuseReport[] = record && Array.isArray(record.value) ? (record.value as any) : [];
+    const updated = reports.map((r) => (r.id === reportId ? { ...r, status: newStatus } : r));
+
+    await prisma.aiCache.upsert({
+      where: { key: 'platform_abuse_reports' },
+      create: {
+        key: 'platform_abuse_reports',
+        value: updated as any,
+        expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+      },
+      update: {
+        value: updated as any,
+        expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+      },
+    });
+
+    await logAdminAction(admin.email, `Report ${reportId} marked as ${newStatus}`);
+    revalidatePath('/admin');
+    return { success: true };
+  } catch (e: any) {
+    return { error: e.message || 'Failed to update report status.' };
+  }
+}

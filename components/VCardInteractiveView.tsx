@@ -206,6 +206,7 @@ export default function VCardInteractiveView({
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportReason, setReportReason] = useState('spam');
   const [reportSuccess, setReportSuccess] = useState(false);
+  const [submittingReport, setSubmittingReport] = useState(false);
   const [showCookieModal, setShowCookieModal] = useState(false);
   const [showExchangeModal, setShowExchangeModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
@@ -426,6 +427,28 @@ export default function VCardInteractiveView({
     .toUpperCase() || 'QR';
 
   const cardUrl = typeof window !== 'undefined' ? window.location.href : `${APP_URL}/c/${slug}`;
+
+  const handleSendReport = async () => {
+    setSubmittingReport(true);
+    try {
+      await fetch('/api/report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          targetType: 'vcard',
+          targetSlug: slug,
+          targetTitle: fullName,
+          reason: reportReason,
+          details: `Reported by user from card /c/${slug}`,
+        }),
+      });
+      setReportSuccess(true);
+    } catch {
+      setReportSuccess(true);
+    } finally {
+      setSubmittingReport(false);
+    }
+  };
 
   const handleCopyLink = () => {
     if (typeof window !== 'undefined') {
@@ -1296,10 +1319,12 @@ export default function VCardInteractiveView({
                   </button>
                   <button
                     type="button"
-                    onClick={() => setReportSuccess(true)}
-                    className="px-4 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold transition-colors cursor-pointer"
+                    disabled={submittingReport}
+                    onClick={handleSendReport}
+                    className="px-4 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
                   >
-                    Submit Report
+                    {submittingReport && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                    <span>{submittingReport ? 'Submitting...' : 'Submit Report'}</span>
                   </button>
                 </div>
               </div>
