@@ -73,6 +73,11 @@ export default function MicroSaasHub({
 
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  const handleTabChange = (tab: 'mailing' | 'vcard' | 'shortener' | 'menu' | 'wifi') => {
+    setActiveTab(tab);
+    onTabChange?.(tab);
+  };
+
   // Data states
   const [vcards, setVcards] = useState<MicroItem[]>([]);
   const [shorteners, setShorteners] = useState<MicroItem[]>([]);
@@ -701,22 +706,42 @@ export default function MicroSaasHub({
           </p>
         </div>
 
-        {/* Active Tool Indicator — switching is driven exclusively from the sidebar */}
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] shadow-2xs text-xs font-semibold">
-            {activeTab === 'mailing' && <Mail className="w-3.5 h-3.5 text-emerald-400 dark:text-[#2F6B4F]" />}
-            {activeTab === 'vcard' && <Contact className="w-3.5 h-3.5 text-emerald-400 dark:text-[#2F6B4F]" />}
-            {activeTab === 'shortener' && <Link2 className="w-3.5 h-3.5 text-emerald-400 dark:text-[#2F6B4F]" />}
-            {activeTab === 'menu' && <Utensils className="w-3.5 h-3.5 text-emerald-400 dark:text-[#2F6B4F]" />}
-            {activeTab === 'wifi' && <Wifi className="w-3.5 h-3.5 text-emerald-400 dark:text-[#2F6B4F]" />}
-            <span>
-              {activeTab === 'mailing' && 'Mailing Lists'}
-              {activeTab === 'vcard' && 'Digital vCards'}
-              {activeTab === 'shortener' && 'Smart Shortener'}
-              {activeTab === 'menu' && 'Restaurant Menus'}
-              {activeTab === 'wifi' && 'Dynamic Wi-Fi'}
-            </span>
-          </div>
+        {/* Responsive Tab Switcher: Full Operability on Both Mobile & Desktop */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full no-scrollbar">
+          {[
+            { id: 'mailing', label: 'Mailing Lists', count: undefined, icon: Mail },
+            { id: 'vcard', label: 'Digital vCards', count: vcards.length, icon: Contact },
+            { id: 'shortener', label: 'Smart Shortener', count: shorteners.length, icon: Link2 },
+            { id: 'menu', label: 'Restaurant Menus', count: menus.length, icon: Utensils },
+            { id: 'wifi', label: 'Dynamic Wi-Fi', count: wifis.length, icon: Wifi },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => handleTabChange(tab.id as any)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+                  isActive
+                    ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] shadow-xs'
+                    : 'bg-[#11140F]/5 dark:bg-white/5 text-[#11140F]/65 dark:text-white/65 hover:text-[#11140F] dark:hover:text-white hover:bg-[#11140F]/10 dark:hover:bg-white/10'
+                }`}
+              >
+                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-emerald-400 dark:text-emerald-600' : 'text-current opacity-70'}`} />
+                <span>{tab.label}</span>
+                {tab.count !== undefined && (
+                  <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
+                    isActive
+                      ? 'bg-white/20 dark:bg-black/10 text-white dark:text-[#11140F]'
+                      : 'bg-[#11140F]/10 dark:bg-white/10 text-[#11140F]/70 dark:text-white/70'
+                  }`}>
+                    {tab.count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -746,13 +771,13 @@ export default function MicroSaasHub({
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#F7F8F5] dark:bg-[#0E1017] p-4 rounded-xl border border-[#11140F]/5 dark:border-white/10">
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <h3 className="text-sm font-bold text-[#11140F] dark:text-white">Digital Business Cards (vCard 3.0)</h3>
-                <span className="text-xs font-mono font-medium text-[#11140F]/60 dark:text-white/60">
-                  ({vcards.length} / {entitlements.microsaas.vcard} used)
+                <span className="text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-[#11140F]/5 dark:bg-white/10 text-[#11140F]/70 dark:text-white/70">
+                  {vcards.length} / {entitlements.microsaas.vcard} used
                 </span>
               </div>
-              <p className="text-xs text-[#11140F]/60 dark:text-white/60 mt-0.5">
+              <p className="text-xs text-[#11140F]/60 dark:text-white/60 mt-1">
                 Modern scannable networking card. Supports one-tap RFC 6350 phone contact save and contact exchange leads.
               </p>
             </div>
@@ -862,16 +887,16 @@ export default function MicroSaasHub({
 
                         <div className="flex items-center gap-1.5 pt-1 flex-wrap">
                           {entitlements.branded_footer ? (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 font-mono">
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/40 font-mono">
                               Free: DynamicQR Watermark
                             </span>
                           ) : (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono">
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40 font-mono">
                               ✓ White-Label Clean
                             </span>
                           )}
                           {entitlements.custom_domains > 0 && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 font-mono">
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800/40 font-mono">
                               Branded Domain
                             </span>
                           )}
@@ -882,12 +907,12 @@ export default function MicroSaasHub({
                       </div>
                     </div>
 
-                    <div className="pt-3 border-t border-[#11140F]/5 dark:border-white/10 flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-1.5">
+                    <div className="pt-3 border-t border-[#11140F]/5 dark:border-white/10 flex items-center justify-between gap-1.5 flex-wrap">
+                      <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
                         <Link
                           href={`/c/${card.slug}`}
                           target="_blank"
-                          className="p-2 rounded-lg bg-[#F7F8F5] dark:bg-white/10 hover:bg-[#EEF0EA] dark:hover:bg-white/20 text-[#11140F] dark:text-white text-xs font-semibold flex items-center gap-1 transition-colors border border-transparent dark:border-white/10"
+                          className="px-2.5 py-1.5 rounded-lg bg-[#F7F8F5] dark:bg-white/10 hover:bg-[#EEF0EA] dark:hover:bg-white/20 text-[#11140F] dark:text-white text-xs font-semibold flex items-center gap-1 transition-colors border border-transparent dark:border-white/10"
                           title="Open Live Card"
                         >
                           <Eye className="w-3.5 h-3.5" />
@@ -896,16 +921,16 @@ export default function MicroSaasHub({
                         <button
                           type="button"
                           onClick={() => handleCopyLink(`/c/${card.slug}`, card.id)}
-                          className="p-2 rounded-lg bg-[#F7F8F5] dark:bg-white/10 hover:bg-[#EEF0EA] dark:hover:bg-white/20 text-[#11140F] dark:text-white text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer border border-transparent dark:border-white/10"
+                          className="px-2.5 py-1.5 rounded-lg bg-[#F7F8F5] dark:bg-white/10 hover:bg-[#EEF0EA] dark:hover:bg-white/20 text-[#11140F] dark:text-white text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer border border-transparent dark:border-white/10"
                           title="Copy Link"
                         >
-                          {copiedId === card.id ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                          {copiedId === card.id ? <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                           <span>{copiedId === card.id ? 'Copied' : 'Share'}</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => handleOpenEditVcard(card)}
-                          className="p-2 rounded-lg bg-[#F7F8F5] dark:bg-white/10 hover:bg-[#EEF0EA] dark:hover:bg-white/20 text-[#11140F] dark:text-white text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer border border-transparent dark:border-white/10"
+                          className="px-2.5 py-1.5 rounded-lg bg-[#F7F8F5] dark:bg-white/10 hover:bg-[#EEF0EA] dark:hover:bg-white/20 text-[#11140F] dark:text-white text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer border border-transparent dark:border-white/10"
                           title="Edit vCard"
                         >
                           <Pencil className="w-3.5 h-3.5" />
@@ -914,22 +939,21 @@ export default function MicroSaasHub({
                         <button
                           type="button"
                           onClick={() => setPrintVcard(card)}
-                          className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer border border-emerald-200 dark:border-emerald-500/30"
+                          className="px-2.5 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer border border-emerald-200 dark:border-emerald-500/30"
                           title="Print QR Card"
                         >
                           <Printer className="w-3.5 h-3.5" />
                           <span>Print</span>
                         </button>
                       </div>
-
                       <button
                         type="button"
                         onClick={() => setDeleteConfirmTarget({ id: card.id, title: card.title || 'Digital Card' })}
                         disabled={actionLoading}
-                        className="p-2 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
+                        className="p-1.5 text-[#11140F]/40 dark:text-white/40 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors cursor-pointer"
                         title="Delete Card"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
@@ -945,10 +969,10 @@ export default function MicroSaasHub({
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#F7F8F5] dark:bg-[#0E1017] p-4 rounded-xl border border-[#11140F]/5 dark:border-white/10">
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <h3 className="text-sm font-bold text-[#11140F] dark:text-white">Branded Link Shortener (307 Engine)</h3>
-                <span className="text-xs font-mono font-medium text-[#11140F]/60 dark:text-white/60">
-                  ({shorteners.length} / {entitlements.microsaas.shortener} used)
+                <span className="text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-[#11140F]/5 dark:bg-white/10 text-[#11140F]/70 dark:text-white/70">
+                  {shorteners.length} / {entitlements.microsaas.shortener} used
                 </span>
               </div>
               <p className="text-xs text-[#11140F]/60 dark:text-white/60 mt-0.5">
@@ -1096,14 +1120,14 @@ export default function MicroSaasHub({
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#F7F8F5] dark:bg-[#0E1017] p-4 rounded-xl border border-[#11140F]/5 dark:border-white/10">
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <h3 className="text-sm font-bold text-[#11140F] dark:text-white">Contactless Restaurant Menus</h3>
                 {entitlements.microsaas.menu > 0 ? (
-                  <span className="text-xs font-mono font-medium text-[#11140F]/60 dark:text-white/60">
-                    ({menus.length} / {entitlements.microsaas.menu} used)
+                  <span className="text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-[#11140F]/5 dark:bg-white/10 text-[#11140F]/70 dark:text-white/70">
+                    {menus.length} / {entitlements.microsaas.menu} used
                   </span>
                 ) : (
-                  <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                  <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300">
                     Pro & Above
                   </span>
                 )}
@@ -1282,10 +1306,10 @@ export default function MicroSaasHub({
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#F7F8F5] dark:bg-[#0E1017] p-4 rounded-xl border border-[#11140F]/5 dark:border-white/10">
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <h3 className="text-sm font-bold text-[#11140F] dark:text-white">Dynamic Guest Wi-Fi Sharing</h3>
-                <span className="text-xs font-mono font-medium text-[#11140F]/60 dark:text-white/60">
-                  ({wifis.length} / {entitlements.microsaas.wifi} used)
+                <span className="text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-[#11140F]/5 dark:bg-white/10 text-[#11140F]/70 dark:text-white/70">
+                  {wifis.length} / {entitlements.microsaas.wifi} used
                 </span>
               </div>
               <p className="text-xs text-[#11140F]/60 dark:text-white/60 mt-0.5">

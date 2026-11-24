@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   Sparkles,
   Search,
@@ -26,6 +26,7 @@ import {
   Database,
   ShieldCheck,
   CheckCircle2,
+  RotateCcw,
 } from 'lucide-react';
 import { getOptimizedStorageUrl } from '@/lib/media';
 
@@ -561,9 +562,13 @@ export default function WorkspaceOverviewTab({
 
   // 6. REAL AI COPILOT INTERACTION (Fully dynamic, zero hardcoded strings)
   const [copilotInput, setCopilotInput] = useState('');
-  const [copilotExpanded, setCopilotExpanded] = useState(false);
   const [copilotChat, setCopilotChat] = useState<Array<{ role: 'user' | 'assistant'; text: string }>>([]);
   const [copilotLoading, setCopilotLoading] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [copilotChat, copilotLoading]);
 
   // Dynamic AI Synthesis constructed strictly from present database records
   const dynamicAiSynthesis = useMemo(() => {
@@ -587,8 +592,8 @@ export default function WorkspaceOverviewTab({
     }
 
     let base = parts.length > 0
-      ? `Your DynamicQR network is active with ${parts.join(', ')}.`
-      : 'Your DynamicQR workspace is live and ready. Create your first dynamic QR link or micro-service to begin routing traffic.';
+      ? `Your network is active with ${parts.join(', ')}.`
+      : 'Your DynamicQR workspace is live and ready to route traffic.';
 
     if (totalSubscribers > 0) {
       const listName = mailLists[0]?.name ? ` in '${mailLists[0].name}'` : '';
@@ -603,50 +608,58 @@ export default function WorkspaceOverviewTab({
     return base;
   }, [links, vcards, shorteners, menus, wifis, mailLists, totalSubscribers, topLink]);
 
-  const handleCopilotSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!copilotInput.trim() || copilotLoading) return;
-    const q = copilotInput.trim();
+  const sendCopilotPrompt = (text: string) => {
+    const q = text.trim();
+    if (!q || copilotLoading) return;
     setCopilotInput('');
     setCopilotChat((prev) => [...prev, { role: 'user', text: q }]);
     setCopilotLoading(true);
 
     setTimeout(() => {
       const lower = q.toLowerCase();
-      let reply = `Your DynamicQR network has ${links.length} active QR links and ${microSaasItems.length} micro-service endpoints with ${totalScansVolume} total recorded redirects.`;
-      if (topLink && (topLink.scanCount || 0) > 0) {
-        reply += ` Top performing route is "${topLink.label || topLink.shortCode}" with ${topLink.scanCount} scans.`;
-      }
-
-      if (lower.includes('lead') || lower.includes('subscriber') || lower.includes('vip')) {
+      let reply = '';
+      if (lower.includes('lead') || lower.includes('subscriber') || lower.includes('vip') || lower.includes('contact') || lower.includes('audience')) {
         if (totalSubscribers > 0) {
           const listName = mailLists[0]?.name || 'Mailing List';
-          const latestEmail = customerContacts[0]?.email ? ` Latest contact captured: ${customerContacts[0].email}.` : '';
+          const latestEmail = customerContacts[0]?.email ? ` Latest contact: ${customerContacts[0].email}.` : '';
           reply = `You have ${totalSubscribers} captured leads in your "${listName}" list.${latestEmail}`;
         } else {
           reply = `You currently have 0 captured leads. Connect a VIP mailing list to capture subscribers from dynamic QR pages.`;
         }
-      } else if (lower.includes('vcard') || lower.includes('contact')) {
+      } else if (lower.includes('vcard') || lower.includes('card')) {
         if (vcards.length > 0) {
           const cardName = vcards[0]?.title || vcards[0]?.slug || 'vCard';
-          reply = `vCard "${cardName}" is active with ${vcards[0]?.scansCount || 0} scans and direct contact downloads.`;
+          reply = `vCard "${cardName}" is active with ${vcards[0]?.scansCount || 0} scans at /c/${vcards[0]?.slug}. One-tap phone saving and custom links are live.`;
         } else {
           reply = `You have 0 digital vCards deployed.`;
         }
-      } else if (lower.includes('shortener') || lower.includes('link')) {
+      } else if (lower.includes('top') || lower.includes('best') || lower.includes('route')) {
+        if (topLink && (topLink.scanCount || 0) > 0) {
+          reply = `Top route is "${topLink.label || topLink.shortCode}" with ${topLink.scanCount} scans, redirecting to ${topLink.destinationUrl}.`;
+        } else {
+          reply = `Your dynamic links have not recorded scans yet. Share a QR code to start tracking traffic!`;
+        }
+      } else if (lower.includes('scan') || lower.includes('traffic') || lower.includes('volume') || lower.includes('stat')) {
+        const peakMonth = [...monthlyBuckets].sort((a, b) => b.value - a.value)[0];
+        reply = `Total recorded scans across your network: ${totalScansVolume} scans across ${links.length} active links. Peak monthly volume was in ${peakMonth?.month || 'recent months'} (${peakMonth?.value || 0} scans).`;
+      } else if (lower.includes('shortener') || lower.includes('short')) {
         if (shorteners.length > 0) {
           const shortName = shorteners[0]?.title || shorteners[0]?.slug || 'Shortener';
           reply = `Branded shortener "${shortName}" has generated ${shorteners[0]?.scansCount || 0} high-speed redirects.`;
         } else {
           reply = `You have 0 branded shorteners deployed.`;
         }
-      } else if (lower.includes('scan') || lower.includes('traffic')) {
-        const peakMonth = [...monthlyBuckets].sort((a, b) => b.value - a.value)[0];
-        reply = `Total recorded scans across your account: ${totalScansVolume} scans. Peak monthly volume was in ${peakMonth?.month || 'the current period'} (${peakMonth?.value || 0} scans).`;
+      } else {
+        reply = `Network status: ${links.length} active QR links, ${totalSubscribers} VIP leads, and ${totalScansVolume} total recorded redirects. System routing health is at ${healthScore}%.`;
       }
       setCopilotChat((prev) => [...prev, { role: 'assistant', text: reply }]);
       setCopilotLoading(false);
-    }, 600);
+    }, 400);
+  };
+
+  const handleCopilotSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    sendCopilotPrompt(copilotInput);
   };
 
   const displayName = user?.name || user?.email?.split('@')[0] || 'User';
@@ -1022,69 +1035,108 @@ export default function WorkspaceOverviewTab({
       {/* 3. LOWER BENTO ROW (42% Height): COPILOT (1/3) + ECOSYSTEM DONUT (1/3) + LIVE ACTIVITY (1/3) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-3.5 flex-1 min-h-0">
         
-        {/* CARD 1: AI CAMPAIGN COPILOT ("How can I help you?") */}
-        <div className="rounded-[24px] bg-[#0E1017] border border-white/[0.065] p-4 sm:p-5 flex flex-col justify-between shadow-[0_20px_45px_rgba(0,0,0,0.65)] min-h-[200px] lg:min-h-0 relative overflow-hidden">
+        {/* CARD 1: WORKSPACE COPILOT (Interactive Q&A & Operational Assistant) */}
+        <div className="rounded-[24px] bg-[#0E1017] border border-white/[0.065] p-3.5 sm:p-4 flex flex-col justify-between shadow-[0_20px_45px_rgba(0,0,0,0.65)] min-h-[220px] lg:min-h-0 relative overflow-hidden">
           
           {/* Header */}
-          <div className="flex items-center justify-between shrink-0">
-            <div className="flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-              <h3 className="text-xs font-bold text-white tracking-tight">
-                How can I help you?
-              </h3>
+          <div className="flex items-center justify-between shrink-0 pb-2 border-b border-white/[0.05]">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+                <Sparkles className="w-3.5 h-3.5" />
+              </div>
+              <div className="flex items-center gap-1.5">
+                <h3 className="text-xs font-bold text-white tracking-tight">
+                  Workspace Copilot
+                </h3>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" title="Online" />
+              </div>
             </div>
-            <button
-              type="button"
-              onClick={() => onNavigateSection('analyst')}
-              className="p-1 rounded-md text-white/40 hover:text-white transition-colors cursor-pointer"
-              title="Expand AI Campaign Analyst"
-            >
-              <Maximize2 className="w-3 h-3" />
-            </button>
-          </div>
 
-          {/* Real Dynamic AI Synthesis based on user's actual database records */}
-          <div className="space-y-1 py-1">
-            <span className="text-[10px] font-semibold text-purple-400 uppercase tracking-wider block">
-              AI Routing Synthesis
-            </span>
-            <p className="text-[10.5px] text-white/70 leading-snug">
-              {dynamicAiSynthesis}{' '}
+            <div className="flex items-center gap-1">
+              {copilotChat.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setCopilotChat([])}
+                  className="px-2 py-0.5 rounded-md text-[10px] text-white/40 hover:text-white hover:bg-white/5 transition-colors cursor-pointer flex items-center gap-1"
+                  title="Clear conversation"
+                >
+                  <RotateCcw className="w-2.5 h-2.5" />
+                  <span>Reset</span>
+                </button>
+              )}
               <button
                 type="button"
-                onClick={() => setCopilotExpanded(!copilotExpanded)}
-                className="text-[#4E82EE] font-medium hover:underline inline cursor-pointer"
+                onClick={() => onNavigateSection('analyst')}
+                className="p-1 rounded-md text-white/40 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+                title="Open Full AI Campaign Analyst"
               >
-                Read more
+                <Maximize2 className="w-3 h-3" />
               </button>
-            </p>
+            </div>
           </div>
 
-          {/* Two Real Operational Metric Chips */}
-          <div className="grid grid-cols-2 gap-2 shrink-0">
-            <div className="p-2 rounded-xl bg-[#141720] border border-white/[0.06]">
-              <span className="text-[9.5px] text-white/40 block leading-tight">
-                Active QR Routes
-              </span>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-base font-bold text-white font-mono">{links.length}</span>
-                <span className="px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[9px] font-semibold">
-                  Live
-                </span>
-              </div>
-            </div>
+          {/* Interactive Chat Stream & Quick Inquiries */}
+          <div className="flex-1 min-h-0 my-2 overflow-y-auto pr-1 space-y-2.5 no-scrollbar flex flex-col justify-end">
+            {copilotChat.length === 0 ? (
+              <div className="space-y-2 py-1">
+                <p className="text-[11px] text-white/70 leading-relaxed font-normal">
+                  {dynamicAiSynthesis}
+                </p>
 
-            <div className="p-2 rounded-xl bg-[#141720] border border-white/[0.06]">
-              <span className="text-[9.5px] text-white/40 block leading-tight">
-                Captured VIP Leads
-              </span>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-base font-bold text-white font-mono">{totalSubscribers}</span>
-                <span className="px-1.5 py-0.2 rounded-full bg-sky-500/20 text-sky-400 border border-sky-500/30 text-[9px] font-semibold">
-                  Active
-                </span>
+                {/* Instant Tap Prompt Pills */}
+                <div className="pt-1">
+                  <span className="text-[9.5px] uppercase tracking-wider font-mono text-white/35 block mb-1.5">
+                    Quick Insights
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {[
+                      { label: '📊 Total Scans', query: 'What is my total scan traffic?' },
+                      { label: '🔥 Top Route', query: 'What is my best performing link?' },
+                      { label: '👥 VIP Leads', query: 'How many captured leads do I have?' },
+                      { label: '📇 My vCard', query: 'Show me my active digital vCards' },
+                    ].map((pill) => (
+                      <button
+                        key={pill.label}
+                        type="button"
+                        onClick={() => sendCopilotPrompt(pill.query)}
+                        className="px-2.5 py-1 rounded-full bg-white/[0.04] hover:bg-purple-500/15 border border-white/[0.06] hover:border-purple-500/30 text-[10.5px] text-white/75 hover:text-purple-200 transition-all cursor-pointer whitespace-nowrap active:scale-95"
+                      >
+                        {pill.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="space-y-2">
+                {copilotChat.map((msg, idx) => (
+                  <div
+                    key={idx}
+                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-[88%] text-[11px] leading-relaxed rounded-2xl px-3 py-1.5 ${
+                        msg.role === 'user'
+                          ? 'bg-purple-600/25 border border-purple-500/30 text-purple-100 rounded-br-xs'
+                          : 'bg-[#141720] border border-white/[0.08] text-white/90 rounded-bl-xs'
+                      }`}
+                    >
+                      {msg.text}
+                    </div>
+                  </div>
+                ))}
+
+                {copilotLoading && (
+                  <div className="flex justify-start">
+                    <div className="bg-[#141720] border border-white/[0.08] rounded-2xl rounded-bl-xs px-3 py-1.5 text-[11px] text-white/50 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-ping" />
+                      <span>Analyzing live network...</span>
+                    </div>
+                  </div>
+                )}
+                <div ref={chatEndRef} />
+              </div>
+            )}
           </div>
 
           {/* Interactive Input Bar */}
@@ -1093,15 +1145,15 @@ export default function WorkspaceOverviewTab({
               type="text"
               value={copilotInput}
               onChange={(e) => setCopilotInput(e.target.value)}
-              placeholder="Ask Copilot about your links, scans, or leads..."
-              className="w-full pl-3 pr-8 py-1.5 text-xs rounded-full bg-[#141720] border border-white/[0.06] text-white placeholder:text-white/40 focus:outline-none focus:border-purple-500/30 transition-all shadow-inner"
+              placeholder="Ask Copilot about links, scans, or leads..."
+              className="w-full pl-3.5 pr-8 py-2 text-xs rounded-xl bg-[#141720] border border-white/[0.08] text-white placeholder:text-white/40 focus:outline-none focus:border-purple-500/40 focus:ring-1 focus:ring-purple-500/20 transition-all shadow-inner"
             />
             <button
               type="submit"
               disabled={!copilotInput.trim() || copilotLoading}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white/60 hover:text-white cursor-pointer disabled:opacity-30"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-white/50 hover:text-purple-300 disabled:opacity-20 transition-colors cursor-pointer"
             >
-              <Send className="w-3 h-3" />
+              <Send className="w-3.5 h-3.5" />
             </button>
           </form>
 
