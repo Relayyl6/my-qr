@@ -252,8 +252,8 @@ export default function LinkForm({ customDomains = [] }: LinkFormProps) {
             placeholder="promo-2026"
           />
         </div>
-        <p className="mt-1.5 text-[11px] text-[#11140F]/50 dark:text-white/50 break-all leading-normal" style={{ fontFamily: 'var(--font-mono)' }}>
-          Preview: <span className="text-[#11140F]/80 dark:text-emerald-400 font-medium break-all">
+        <p className="mt-1.5 text-[11px] text-[#11140F]/50 dark:text-white/50 break-words leading-normal" style={{ fontFamily: 'var(--font-mono)' }}>
+          Preview: <span className="text-[#11140F]/80 dark:text-emerald-400 font-medium break-words">
             {selectedDomainId !== 'default'
               ? `https://${customDomains.find((d) => d.id === selectedDomainId)?.domain || 'qr.yourbrand.com'}`
               : (origin || APP_URL)}/id/{shortCode || 'promo-2024'}

@@ -1259,39 +1259,43 @@ export default function WorkspaceOverviewTab({
             {filteredFeed.map((row) => (
               <div
                 key={row.id}
-                className="grid grid-cols-[72px_68px_1fr_auto] items-center gap-2.5 text-xs p-2 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors"
+                className="flex items-center gap-2 sm:gap-2.5 text-xs p-2 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors min-w-0"
               >
                 {/* Col 1: Time & subtext */}
-                <div className="leading-tight truncate">
+                <div className="w-[68px] shrink-0 leading-tight truncate">
                   <span className="text-[11px] font-semibold text-white block truncate">
                     {row.time}
                   </span>
                   <span className="text-[9px] text-white/40 block truncate">{row.subtext}</span>
                 </div>
 
-                {/* Col 2: Status with indicator dot */}
-                <div className="flex items-center gap-1.5 shrink-0 overflow-hidden">
+                {/* Col 2: Status pill badge with clear dedicated background & border */}
+                <div className="shrink-0">
                   <span
-                    className="w-1.5 h-1.5 rounded-full shrink-0"
-                    style={{ backgroundColor: row.statusColor }}
-                  />
-                  <span
-                    className="text-[10px] font-medium truncate"
-                    style={{ color: row.statusColor }}
+                    className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9.5px] font-semibold tracking-tight border"
+                    style={{
+                      backgroundColor: `${row.statusColor}18`,
+                      borderColor: `${row.statusColor}35`,
+                      color: row.statusColor,
+                    }}
                   >
-                    {row.status}
+                    <span
+                      className="w-1.5 h-1.5 rounded-full shrink-0"
+                      style={{ backgroundColor: row.statusColor }}
+                    />
+                    <span className="whitespace-nowrap">{row.status}</span>
                   </span>
                 </div>
 
                 {/* Col 3: Title / Name */}
-                <div className="min-w-0 flex-1">
+                <div className="min-w-0 flex-1 px-1">
                   <span className="text-[11px] text-white/90 font-medium truncate block" title={row.tooltip || row.title}>
                     {row.title}
                   </span>
                 </div>
 
                 {/* Col 4: Meta / Location / List Name */}
-                <div className="shrink-0 text-right max-w-[85px] sm:max-w-[110px]">
+                <div className="shrink-0 text-right max-w-[85px] sm:max-w-[120px]">
                   <span className="text-[10px] font-mono text-white/50 truncate block" title={row.meta}>
                     {row.meta}
                   </span>
