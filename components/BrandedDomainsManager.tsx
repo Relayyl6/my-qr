@@ -212,13 +212,18 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
             <>
               {/* How Custom Branded Domains Work in 3 Steps */}
               <div className="rounded-2xl bg-[#F7F8F5] dark:bg-[#151912] border border-[#11140F]/10 dark:border-white/10 p-5 space-y-4 text-[12.5px] text-[#11140F]/85 dark:text-white/85">
-                <div className="flex items-center justify-between">
-                  <div className="font-bold text-[14px] text-[#11140F] dark:text-white flex items-center gap-2">
-                    <Globe className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                    How Custom Branded Domains Work in 3 Steps
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <div className="font-bold text-[14px] text-[#11140F] dark:text-white flex items-center gap-2">
+                      <Globe className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      What is a Branded Domain & How Does It Work?
+                    </div>
+                    <p className="text-[12px] text-[#11140F]/65 dark:text-white/65 mt-0.5">
+                      <strong>100% Optional:</strong> By default, your QR codes already work out of the box with <code className="font-mono text-emerald-600 dark:text-emerald-400">my-qr-sandy.vercel.app</code>. Connect a domain only if you want your own company website name on the link (e.g. <code className="font-mono text-emerald-600 dark:text-emerald-400">qr.yourcompany.com</code>).
+                    </p>
                   </div>
-                  <span className="text-[11px] font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full font-bold">
-                    Setup Guide
+                  <span className="text-[11px] font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full font-bold self-start sm:self-auto shrink-0">
+                    Plain English Guide
                   </span>
                 </div>
 
@@ -227,10 +232,10 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
                   <div className="p-4 rounded-xl bg-white dark:bg-[#1C2218] border border-[#11140F]/10 dark:border-white/10 space-y-2 shadow-2xs">
                     <div className="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-2 text-[13px]">
                       <span className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[11px] font-bold shrink-0">1</span>
-                      Enter Subdomain
+                      Pick your link address
                     </div>
                     <p className="text-[12px] text-[#11140F]/70 dark:text-white/70 leading-relaxed">
-                      Type your desired subdomain below (e.g. <code className="font-mono text-emerald-700 dark:text-emerald-300 font-semibold px-1 py-0.5 rounded bg-black/5 dark:bg-white/10">qr.yourcompany.com</code>) and click <strong>"Add Domain"</strong>.
+                      Type the address you want for your QR codes below (e.g. <code className="font-mono text-emerald-700 dark:text-emerald-300 font-semibold px-1 py-0.5 rounded bg-black/5 dark:bg-white/10">qr.yourcompany.com</code>) and click <strong>"Add Domain"</strong>.
                     </p>
                   </div>
 
@@ -238,13 +243,13 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
                   <div className="p-4 rounded-xl bg-white dark:bg-[#1C2218] border border-[#11140F]/10 dark:border-white/10 space-y-2 shadow-2xs">
                     <div className="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-2 text-[13px]">
                       <span className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[11px] font-bold shrink-0">2</span>
-                      Add 2 DNS Records
+                      Copy 2 lines to your domain
                     </div>
                     <div className="text-[11.5px] text-[#11140F]/75 dark:text-white/75 space-y-1.5 leading-snug">
-                      <p>In your registrar (Cloudflare, GoDaddy, Namecheap):</p>
+                      <p>Log into where you bought your website (GoDaddy, Namecheap, Cloudflare, etc.) ➔ click <strong>DNS</strong> ➔ paste these 2 lines:</p>
                       <div className="p-2 rounded-lg bg-[#F7F8F5] dark:bg-black/40 border border-[#11140F]/10 dark:border-white/10 font-mono text-[11px] space-y-1 text-[#11140F] dark:text-white">
-                        <div><strong>• CNAME:</strong> Host <code className="text-emerald-600 dark:text-emerald-400 font-bold">qr</code> &rarr; <code className="text-[#11140F] dark:text-white">cname.vercel-dns.com</code></div>
-                        <div><strong>• TXT:</strong> Host <code className="text-emerald-600 dark:text-emerald-400 font-bold">_dynamicqr.qr</code> &rarr; verification key</div>
+                        <div><strong>• Line 1 (CNAME):</strong> Host <code className="text-emerald-600 dark:text-emerald-400 font-bold">qr</code> &rarr; <code className="text-[#11140F] dark:text-white">cname.vercel-dns.com</code></div>
+                        <div><strong>• Line 2 (TXT):</strong> Host <code className="text-emerald-600 dark:text-emerald-400 font-bold">_dynamicqr.qr</code> &rarr; verification key</div>
                       </div>
                     </div>
                   </div>
@@ -253,10 +258,10 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
                   <div className="p-4 rounded-xl bg-white dark:bg-[#1C2218] border border-[#11140F]/10 dark:border-white/10 space-y-2 shadow-2xs">
                     <div className="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-2 text-[13px]">
                       <span className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[11px] font-bold shrink-0">3</span>
-                      Verify DNS & Deploy
+                      Instant-Verify & Launch
                     </div>
                     <p className="text-[12px] text-[#11140F]/70 dark:text-white/70 leading-relaxed">
-                      Click <strong>"Verify DNS"</strong> or <strong>"Instant Verify (Test Mode)"</strong>. Once <span className="text-emerald-700 dark:text-emerald-400 font-bold">Active & Verified</span>, select it when creating links to serve QR codes on your domain!
+                      Click the green <strong>"Instant Verify (Test Mode)"</strong> button. It activates immediately! Then create any QR code and select your domain from the dropdown.
                     </p>
                   </div>
                 </div>
