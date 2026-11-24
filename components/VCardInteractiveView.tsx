@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Phone,
@@ -78,11 +78,23 @@ export default function VCardInteractiveView({
   const [exchangePhone, setExchangePhone] = useState('');
   const [exchanging, setExchanging] = useState(false);
   const [exchangeSuccess, setExchangeSuccess] = useState(false);
-  const [avatarLoaded, setAvatarLoaded] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
-  const [avatarSrc, setAvatarSrc] = useState(getOptimizedStorageUrl(avatarUrl));
-  const [logoSrc, setLogoSrc] = useState(getOptimizedStorageUrl(logoUrl));
-  const [bannerSrc, setBannerSrc] = useState(getOptimizedStorageUrl(bannerUrl));
+  const [avatarSrc, setAvatarSrc] = useState(getOptimizedStorageUrl(avatarUrl) || avatarUrl || '');
+  const [logoSrc, setLogoSrc] = useState(getOptimizedStorageUrl(logoUrl) || logoUrl || '');
+  const [bannerSrc, setBannerSrc] = useState(getOptimizedStorageUrl(bannerUrl) || bannerUrl || '');
+
+  useEffect(() => {
+    setAvatarSrc(getOptimizedStorageUrl(avatarUrl) || avatarUrl || '');
+    setAvatarError(false);
+  }, [avatarUrl]);
+
+  useEffect(() => {
+    setBannerSrc(getOptimizedStorageUrl(bannerUrl) || bannerUrl || '');
+  }, [bannerUrl]);
+
+  useEffect(() => {
+    setLogoSrc(getOptimizedStorageUrl(logoUrl) || logoUrl || '');
+  }, [logoUrl]);
 
   const handleAvatarError = () => {
     if (avatarSrc !== avatarUrl && avatarUrl) {
@@ -190,69 +202,70 @@ export default function VCardInteractiveView({
         
         {/* Main Card */}
         <div className={`${activeTheme.cardBg} rounded-2xl border ${activeTheme.border} p-6 sm:p-8 shadow-xl space-y-6 relative overflow-hidden backdrop-blur-md`}>
-          {/* Cover Banner */}
-          {bannerUrl ? (
-            <div className="-mx-6 -mt-6 sm:-mx-8 sm:-mt-8 mb-4 h-36 w-[calc(100%+3rem)] sm:w-[calc(100%+4rem)] overflow-hidden relative bg-black/20">
+          {/* Header Cover Banner - Background for top buttons with overlapping avatar */}
+          <div className="-mx-6 -mt-6 sm:-mx-8 sm:-mt-8 relative h-44 sm:h-48 overflow-hidden rounded-t-2xl bg-[#090A09]">
+            {bannerUrl ? (
               <img
-                src={bannerSrc}
+                src={bannerSrc || bannerUrl}
                 alt="Cover Banner"
                 loading="eager"
                 decoding="async"
                 onError={() => {
                   if (bannerSrc !== bannerUrl && bannerUrl) setBannerSrc(bannerUrl);
                 }}
-                className="w-full h-full object-cover transition-opacity duration-300"
+                className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-            </div>
-          ) : (
-            <div className="-mx-6 -mt-6 sm:-mx-8 sm:-mt-8 mb-4 h-24 w-[calc(100%+3rem)] sm:w-[calc(100%+4rem)] overflow-hidden relative bg-gradient-to-br from-white/[0.04] via-transparent to-black/30 border-b border-white/5">
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-500/10 via-transparent to-transparent" />
-            </div>
-          )}
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-emerald-950/70 via-[#101914] to-[#0A0E0C] relative">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-500/20 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:16px_16px]" />
+              </div>
+            )}
+            {/* Subtle gradient vignette to blend into card */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/35 pointer-events-none" />
 
-          {/* Top Actions: QR Share & Exchange */}
-          <div className="flex items-center justify-between relative z-10">
-            <button
-              onClick={() => setShowQrModal(true)}
-              className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white/90 hover:text-white border border-white/15 transition-colors flex items-center gap-1.5 text-xs font-mono cursor-pointer backdrop-blur-xs shadow-xs"
-            >
-              <QrCode className="w-4 h-4" />
-              <span>Share QR</span>
-            </button>
+            {/* Top Action Buttons: Floating directly over the banner */}
+            <div className="absolute top-4 inset-x-4 sm:inset-x-6 flex items-center justify-between z-20">
+              <button
+                type="button"
+                onClick={() => setShowQrModal(true)}
+                className="px-2.5 py-1.5 rounded-xl bg-black/60 hover:bg-black/80 text-white/95 hover:text-white border border-white/20 transition-all flex items-center gap-1.5 text-xs font-mono cursor-pointer backdrop-blur-md shadow-lg"
+              >
+                <QrCode className="w-4 h-4" />
+                <span>Share QR</span>
+              </button>
 
-            <button
-              onClick={() => setShowExchangeModal(true)}
-              className="px-3 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-white font-medium text-xs border border-white/20 transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs backdrop-blur-xs"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-[#34D399]" />
-              <span>Exchange Info</span>
-            </button>
+              <button
+                type="button"
+                onClick={() => setShowExchangeModal(true)}
+                className="px-3 py-1.5 rounded-xl bg-black/60 hover:bg-black/80 text-white font-medium text-xs border border-white/20 transition-all flex items-center gap-1.5 cursor-pointer shadow-lg backdrop-blur-md"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-[#34D399]" />
+                <span>Exchange Info</span>
+              </button>
+            </div>
           </div>
 
-          {/* Profile Details */}
-          <div className="text-center space-y-3 pt-1">
+          {/* Profile Details: Avatar overlapping banner bottom edge */}
+          <div className="text-center space-y-3 -mt-16 sm:-mt-18 relative z-20">
             <div
               style={{ borderColor: activeTheme.accent }}
-              className="w-24 h-24 mx-auto rounded-full overflow-hidden shadow-xl border-2 ring-4 ring-white/10 shrink-0 relative bg-black/40 flex items-center justify-center"
+              className={`w-24 h-24 sm:w-28 sm:h-28 mx-auto rounded-full overflow-hidden shadow-2xl border-3 ${activeTheme.cardBg === 'bg-white' ? 'ring-white' : 'ring-black/80'} ring-4 shrink-0 relative bg-black flex items-center justify-center`}
             >
-              {/* Always present fallback initials */}
+              {/* Fallback initials */}
               <span className="text-2xl sm:text-3xl font-extrabold tracking-wider text-white select-none">
                 {initials}
               </span>
 
-              {/* High-res image smoothly fades in when loaded */}
+              {/* Profile Image: crisp render over initials */}
               {avatarUrl && !avatarError && (
                 <img
-                  src={avatarSrc}
+                  src={avatarSrc || avatarUrl}
                   alt={fullName}
                   loading="eager"
                   decoding="async"
-                  onLoad={() => setAvatarLoaded(true)}
                   onError={handleAvatarError}
-                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
-                    avatarLoaded ? 'opacity-100' : 'opacity-0'
-                  }`}
+                  className="absolute inset-0 w-full h-full object-cover z-10"
                 />
               )}
             </div>

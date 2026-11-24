@@ -53,6 +53,69 @@ export const COLOR_PALETTES = [
   { name: 'Amber Gold', hex: '#B45309' },
 ];
 
+function drawCenterQrBadge(
+  ctx: CanvasRenderingContext2D,
+  centerX: number,
+  centerY: number,
+  qrSize: number,
+  logoType: CenterLogoType
+) {
+  if (logoType === 'none') return;
+
+  const badgeRadius = qrSize * 0.088;
+
+  ctx.save();
+  // 1. Crisp white circular badge backing with subtle border
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, badgeRadius, 0, Math.PI * 2);
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fill();
+  ctx.lineWidth = Math.max(2, Math.round(badgeRadius * 0.08));
+  ctx.strokeStyle = 'rgba(17, 20, 15, 0.2)';
+  ctx.stroke();
+
+  // 2. Icon drawing scaled inside 24x24 viewBox
+  const iconSize = badgeRadius * 1.25;
+  ctx.translate(centerX, centerY);
+  const scale = iconSize / 24;
+  ctx.scale(scale, scale);
+  ctx.translate(-12, -12);
+
+  if (logoType === 'star') {
+    const starPath = new Path2D(
+      'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'
+    );
+    ctx.fillStyle = '#F59E0B';
+    ctx.fill(starPath);
+  } else if (logoType === 'utensils') {
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#11140F';
+    ctx.stroke(new Path2D('M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2 M7 2v20 M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7'));
+  } else if (logoType === 'wifi') {
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#2563EB';
+    ctx.stroke(new Path2D('M12 20h.01 M2 8.82a15 15 0 0 1 20 0 M5 12.86a10 10 0 0 1 14 0 M8.5 16.43a5 5 0 0 1 7 0'));
+  } else if (logoType === 'coffee') {
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#92400E';
+    ctx.stroke(new Path2D('M10 2v2 M14 2v2 M17 8h1a4 4 0 1 1 0 8h-1 M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z M6 2v2'));
+  } else if (logoType === 'bag') {
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#2F6B4F';
+    ctx.stroke(new Path2D('M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z M3 6h18 M16 10a4 4 0 0 1-8 0'));
+  }
+
+  ctx.restore();
+}
+
 export default function PrintTemplateModal({
   isOpen,
   onClose,
@@ -72,7 +135,7 @@ export default function PrintTemplateModal({
   const [headline, setHeadline] = useState(defaultHeadline || label || 'Scan to Open');
   const [headerTag, setHeaderTag] = useState(defaultHeaderTag || 'OFFICIAL SCAN POINT');
   const [subline, setSubline] = useState(defaultSubline || 'Point your camera at this code');
-  const [footerNote, setFooterNote] = useState(defaultFooterNote || 'No app required • Instant redirect');
+  const [footerNote, setFooterNote] = useState(defaultFooterNote || 'Powered by Dynamic QR');
   const [accentColor, setAccentColor] = useState('#11140F');
   const [centerLogo, setCenterLogo] = useState<CenterLogoType>('none');
 
@@ -82,7 +145,7 @@ export default function PrintTemplateModal({
       setHeadline(defaultHeadline || label || 'Scan to Open');
       if (defaultHeaderTag) setHeaderTag(defaultHeaderTag);
       if (defaultSubline) setSubline(defaultSubline);
-      if (defaultFooterNote) setFooterNote(defaultFooterNote);
+      setFooterNote(defaultFooterNote || 'Powered by Dynamic QR');
     }
   }, [isOpen, url, defaultHeadline, defaultHeaderTag, defaultSubline, defaultFooterNote, defaultTemplate, label]);
 
@@ -206,6 +269,26 @@ export default function PrintTemplateModal({
             .gap-4 { gap: 20px; }
             .my-2 { margin-top: 14px; margin-bottom: 14px; }
             .inline-block { display: inline-block; }
+            .relative { position: relative; }
+            .absolute { position: absolute; }
+            .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+            .pointer-events-none { pointer-events: none; }
+            .justify-center { justify-content: center; }
+            .w-7 { width: 28px; }
+            .h-7 { height: 28px; }
+            .w-5 { width: 20px; }
+            .h-5 { height: 20px; }
+            .w-4 { width: 16px; }
+            .h-4 { height: 16px; }
+            .w-3 { width: 12px; }
+            .h-3 { height: 12px; }
+            .bg-white { background-color: #ffffff; }
+            .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+            .shadow-xs { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+            .text-amber-500 { color: #f59e0b; }
+            .fill-amber-500 { fill: #f59e0b; }
+            .text-blue-600 { color: #2563eb; }
+            .text-amber-800 { color: #92400e; }
             svg { display: block; margin: 0 auto; }
           </style>
         </head>
@@ -296,7 +379,11 @@ export default function PrintTemplateModal({
         }
 
         // QR Image
-        ctx.drawImage(img, width - 320, (height - 260) / 2, 260, 260);
+        const qrSize = 260;
+        const qrX = width - 320;
+        const qrY = (height - qrSize) / 2;
+        ctx.drawImage(img, qrX, qrY, qrSize, qrSize);
+        drawCenterQrBadge(ctx, qrX + qrSize / 2, qrY + qrSize / 2, qrSize, centerLogo);
       } else {
         ctx.textAlign = 'center';
         let currentY = 80;
@@ -324,8 +411,10 @@ export default function PrintTemplateModal({
 
         // Centered QR Image
         const qrSize = isSign ? 440 : isFullPoster ? 500 : 380;
+        const qrX = (width - qrSize) / 2;
         const qrY = (height - qrSize) / 2 + 20;
-        ctx.drawImage(img, (width - qrSize) / 2, qrY, qrSize, qrSize);
+        ctx.drawImage(img, qrX, qrY, qrSize, qrSize);
+        drawCenterQrBadge(ctx, qrX + qrSize / 2, qrY + qrSize / 2, qrSize, centerLogo);
 
         if (showShortCode) {
           ctx.fillStyle = accentColor;
@@ -592,7 +681,7 @@ export default function PrintTemplateModal({
                         value={footerNote}
                         onChange={(e) => setFooterNote(e.target.value)}
                         className="w-full px-3 py-2 text-[12.5px] border border-[#11140F]/15 rounded-xl outline-none focus:border-[#11140F]"
-                        placeholder="Free guest Wi-Fi"
+                        placeholder="Powered by Dynamic QR"
                       />
                     </div>
                   )}
