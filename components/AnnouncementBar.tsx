@@ -101,42 +101,47 @@ export default function AnnouncementBar({ initialBanner }: AnnouncementBarProps)
     <aside
       ref={barRef}
       aria-label="Announcement"
-      className="sticky top-0 isolate z-50 w-full bg-gradient-to-r from-[#11140F] via-[#1a2218] to-[#11140F] text-white px-4 py-2.5 text-xs sm:text-[13px] border-b border-white/10 shadow-xs flex items-center justify-between"
+      className="sticky top-0 isolate z-50 w-full bg-gradient-to-r from-[#11140F] via-[#1a2218] to-[#11140F] text-white px-3 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-[12.5px] border-b border-white/10 shadow-xs flex items-center justify-between"
     >
-      <div className="max-w-[1240px] mx-auto w-full flex items-center justify-center gap-3 text-center pr-6 flex-wrap">
+      <div className="max-w-[1240px] mx-auto w-full flex items-center justify-center gap-2 sm:gap-3 text-center pr-6 sm:pr-8 overflow-hidden">
         {banner.badgeText?.trim() && (
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#2F6B4F]/40 border border-[#34D399]/30 text-[#34D399] font-mono text-[11px] font-bold uppercase tracking-wider">
-            <Tag className="w-3 h-3" />
+          <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#2F6B4F]/40 border border-[#34D399]/30 text-[#34D399] font-mono text-[10px] sm:text-[11px] font-bold uppercase tracking-wider shrink-0">
+            <Tag className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
             {banner.badgeText.trim()}
           </span>
         )}
-        {banner.messageText?.trim() && (
-          <span className="text-white/90">
+        <div className="flex items-center gap-1.5 sm:gap-2 truncate font-medium">
+          {banner.badgeText?.trim() && (
+            <span className="sm:hidden text-[#34D399] font-bold shrink-0">
+              🏷️
+            </span>
+          )}
+          <span className="text-white/90 truncate">
             {banner.messageText.trim()}{' '}
             {banner.promoCode?.trim() && (
-              <code className="font-mono bg-white/15 px-1.5 py-0.5 rounded text-white font-bold select-all">
+              <code className="font-mono bg-white/15 px-1.5 py-0.5 rounded text-white font-bold select-all text-[10px] sm:text-[11px]">
                 {banner.promoCode.trim()}
               </code>
             )}
           </span>
-        )}
-        {(banner.ctaText?.trim() || banner.ctaUrl) && (
-          <Link
-            href={targetUrl}
-            className="inline-flex items-center gap-1 font-semibold text-[#34D399] hover:text-[#34D399]/80 transition-colors ml-1 underline underline-offset-4 cursor-pointer"
-          >
-            {banner.ctaText?.trim() || 'Claim Offer'}
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        )}
+          {(banner.ctaText?.trim() || banner.ctaUrl) && (
+            <Link
+              href={targetUrl}
+              className="inline-flex items-center gap-0.5 sm:gap-1 font-semibold text-[#34D399] hover:text-[#34D399]/80 transition-colors shrink-0 underline underline-offset-2 ml-0.5 sm:ml-1"
+            >
+              <span>{banner.ctaText?.trim() || 'Claim'}</span>
+              <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+            </Link>
+          )}
+        </div>
       </div>
       <button
         type="button"
         onClick={handleDismiss}
-        className="absolute right-3 text-white/50 hover:text-white transition-colors p-1 rounded-md cursor-pointer"
+        className="absolute right-2 sm:right-3 text-white/50 hover:text-white transition-colors p-1 rounded-md cursor-pointer shrink-0"
         aria-label="Dismiss banner"
       >
-        <X className="w-4 h-4" />
+        <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
       </button>
     </aside>
   );
