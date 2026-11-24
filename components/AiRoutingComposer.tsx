@@ -1159,7 +1159,7 @@ export default function AiRoutingComposer({
         {activeTab === 'ai' && (
           <div className="space-y-4">
             <div className="space-y-2">
-              <span className="text-[11px] uppercase tracking-wider font-bold text-[#11140F]/55 block">
+              <span className="text-[11px] uppercase tracking-wider font-bold text-[#11140F]/60 dark:text-white/60 block">
                 Quick Presets:
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -1168,13 +1168,13 @@ export default function AiRoutingComposer({
                     key={idx}
                     type="button"
                     onClick={() => setPromptText(p.prompt)}
-                    className="p-2.5 rounded-xl text-left border border-[#11140F]/10 hover:border-emerald-600/40 hover:bg-emerald-50/30 transition-all cursor-pointer group"
+                    className="p-2.5 rounded-xl text-left border border-[#11140F]/10 dark:border-white/10 hover:border-emerald-600/40 dark:hover:border-emerald-500/40 hover:bg-emerald-50/30 dark:hover:bg-white/[0.04] bg-white dark:bg-white/[0.03] transition-all cursor-pointer group"
                   >
-                    <div className="flex items-center justify-between text-[12px] font-semibold text-[#11140F] group-hover:text-emerald-900">
+                    <div className="flex items-center justify-between text-[12px] font-semibold text-[#11140F] dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400">
                       <span>{p.name}</span>
-                      <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity text-emerald-600" />
+                      <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <p className="text-[11px] text-[#11140F]/55 line-clamp-1 mt-0.5">
+                    <p className="text-[11px] text-[#11140F]/55 dark:text-white/60 line-clamp-1 mt-0.5">
                       {p.prompt}
                     </p>
                   </button>
@@ -1183,9 +1183,9 @@ export default function AiRoutingComposer({
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[12.5px] font-semibold text-[#11140F]/80 flex items-center justify-between">
+              <label className="text-[12.5px] font-semibold text-[#11140F]/80 dark:text-white/80 flex items-center justify-between">
                 <span>Describe your routing in everyday words:</span>
-                <span className="text-[10.5px] text-purple-700 font-medium bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200">
+                <span className="text-[10.5px] text-purple-700 dark:text-purple-300 font-medium bg-purple-50 dark:bg-purple-900/40 px-2 py-0.5 rounded-full border border-purple-200 dark:border-purple-700/50">
                   Simple English, Slang & Shorthand Supported
                 </span>
               </label>
@@ -1194,7 +1194,7 @@ export default function AiRoutingComposer({
                 value={promptText}
                 onChange={(e) => setPromptText(e.target.value)}
                 placeholder='e.g. "Morning time breakfast, afternoon lunch, night dinner" or "Weekdays go to company website, weekends send them to my WhatsApp" or "iPhone to App Store, Android to Play Store"'
-                className="w-full rounded-xl border border-[#11140F]/15 bg-[#11140F]/[0.02] p-3 text-[13px] text-[#11140F] placeholder:text-[#11140F]/35 outline-none focus:border-purple-600 focus:bg-white transition-all resize-none shadow-xs"
+                className="w-full rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.05] p-3 text-[13px] text-[#11140F] dark:text-white placeholder:text-[#11140F]/35 dark:placeholder:text-white/40 outline-none focus:border-purple-600 dark:focus:border-purple-400 transition-all resize-none shadow-xs"
               />
             </div>
 
@@ -1203,10 +1203,19 @@ export default function AiRoutingComposer({
                 type="button"
                 onClick={() => handleCompile()}
                 disabled={loading || !promptText.trim()}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#11140F] text-white text-[12.5px] font-semibold hover:bg-[#2A2E25] transition-colors disabled:opacity-50 cursor-pointer shadow-sm"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#11140F] dark:bg-emerald-600 text-white text-[12.5px] font-semibold hover:bg-[#2A2E25] dark:hover:bg-emerald-500 transition-colors disabled:opacity-50 cursor-pointer shadow-sm"
               >
-                <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-                Compile Rules with AI
+                {loading ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Compiling Rules…</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-400 dark:text-emerald-200" />
+                    <span>Compile Rules with AI</span>
+                  </>
+                )}
               </button>
             </div>
 
@@ -1225,26 +1234,26 @@ export default function AiRoutingComposer({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="text-[13px] font-bold text-[#11140F] uppercase tracking-wider">
+                <h4 className="text-[13px] font-bold text-[#11140F] dark:text-white uppercase tracking-wider">
                   Active Routing Matrix ({compiledRules.length} Rules)
                 </h4>
-                <p className="text-[11.5px] text-[#11140F]/55">
+                <p className="text-[11.5px] text-[#11140F]/55 dark:text-white/60">
                   Rules evaluate in priority order. The first rule whose condition matches is executed.
                 </p>
               </div>
             </div>
 
             {compiledRules.length === 0 ? (
-              <div className="p-8 text-center border border-dashed rounded-2xl border-[#11140F]/20 space-y-2">
-                <ShieldAlert className="w-8 h-8 text-[#11140F]/30 mx-auto" />
-                <p className="text-[13px] font-semibold text-[#11140F]/70">No conditional rules deployed yet</p>
-                <p className="text-[12px] text-[#11140F]/45 max-w-sm mx-auto">
+              <div className="p-8 text-center border border-dashed rounded-2xl border-[#11140F]/20 dark:border-white/15 space-y-2">
+                <ShieldAlert className="w-8 h-8 text-[#11140F]/30 dark:text-white/30 mx-auto" />
+                <p className="text-[13px] font-semibold text-[#11140F]/70 dark:text-white/70">No conditional rules deployed yet</p>
+                <p className="text-[12px] text-[#11140F]/45 dark:text-white/50 max-w-sm mx-auto">
                   All scanner traffic currently routes directly to your default destination URL.
                 </p>
                 <button
                   type="button"
                   onClick={() => setActiveTab('schedule')}
-                  className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#11140F] text-white text-[12px] font-medium"
+                  className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#11140F] dark:bg-emerald-600 text-white text-[12px] font-medium hover:bg-[#2A2E25] dark:hover:bg-emerald-500"
                 >
                   <Clock className="w-3 h-3 text-emerald-400" />
                   Configure Schedule Matrix
@@ -1255,25 +1264,25 @@ export default function AiRoutingComposer({
                 {compiledRules.map((rule, idx) => (
                   <div
                     key={idx}
-                    className="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 space-y-2.5 transition-all hover:border-slate-300"
+                    className="p-3.5 rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-white/[0.04] space-y-2.5 transition-all hover:border-slate-300 dark:hover:border-white/20"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0">
-                        <span className="w-5 h-5 rounded-full bg-[#11140F] text-white text-[10px] font-mono font-bold flex items-center justify-center shrink-0">
+                        <span className="w-5 h-5 rounded-full bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] text-[10px] font-mono font-bold flex items-center justify-center shrink-0">
                           {idx + 1}
                         </span>
-                        <span className="font-bold text-[13px] text-[#11140F] truncate">
+                        <span className="font-bold text-[13px] text-[#11140F] dark:text-white truncate">
                           {rule.label}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-white border text-slate-600">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-white dark:bg-white/10 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-white/70">
                           Priority {rule.priority}
                         </span>
                         <button
                           type="button"
                           onClick={() => handleDeleteRule(idx)}
-                          className="p-1 rounded-lg text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                          className="p-1 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors cursor-pointer"
                           title="Delete rule"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -1286,9 +1295,9 @@ export default function AiRoutingComposer({
                       {(rule.conditions as any[]).map((cond, cIdx) => (
                         <span
                           key={cIdx}
-                          className="px-2.5 py-1 rounded-xl text-[11px] font-semibold bg-emerald-100/90 text-emerald-900 border border-emerald-200/80 flex items-center gap-1"
+                          className="px-2.5 py-1 rounded-xl text-[11px] font-semibold bg-emerald-100/90 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-500/30 flex items-center gap-1"
                         >
-                          {cond.type === 'schedule' && <Clock className="w-3 h-3 text-emerald-700" />}
+                          {cond.type === 'schedule' && <Clock className="w-3 h-3 text-emerald-700 dark:text-emerald-400" />}
                           {cond.type === 'device' && <Smartphone className="w-3 h-3" />}
                           {cond.type === 'country' && <Globe className="w-3 h-3" />}
                           {cond.type === 'referrer' && <ExternalLink className="w-3 h-3" />}
@@ -1305,7 +1314,7 @@ export default function AiRoutingComposer({
 
                     {/* Target Destination */}
                     <div className="flex items-center gap-2">
-                      <CornerDownRight className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <CornerDownRight className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                       <input
                         type="url"
                         value={rule.destination}
@@ -1314,7 +1323,7 @@ export default function AiRoutingComposer({
                           updated[idx].destination = e.target.value;
                           setCompiledRules(updated);
                         }}
-                        className="flex-1 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-[12px] font-mono text-slate-900 outline-none focus:border-emerald-600"
+                        className="flex-1 rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-white/[0.06] px-2.5 py-1.5 text-[12px] font-mono text-slate-900 dark:text-white outline-none focus:border-emerald-600"
                       />
                     </div>
                   </div>
@@ -1328,23 +1337,23 @@ export default function AiRoutingComposer({
         {activeTab === 'simulator' && (
           <div className="space-y-4">
             <div>
-              <h4 className="text-[13px] font-bold text-[#11140F] uppercase tracking-wider flex items-center gap-1.5">
-                <Play className="w-3.5 h-3.5 text-emerald-600 fill-emerald-600" />
+              <h4 className="text-[13px] font-bold text-[#11140F] dark:text-white uppercase tracking-wider flex items-center gap-1.5">
+                <Play className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 fill-emerald-600 dark:fill-emerald-400" />
                 Live Traffic Sandbox Simulator
               </h4>
-              <p className="text-[11.5px] text-[#11140F]/55">
+              <p className="text-[11.5px] text-[#11140F]/55 dark:text-white/60">
                 Test how incoming mobile scans resolve by simulating different hours, days, devices, and countries.
               </p>
             </div>
 
-            <div className="space-y-3 p-4 rounded-2xl bg-slate-50 border border-slate-200">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">
+            <div className="space-y-3 p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-white/50 block">
                 Simulate Client Environment:
               </span>
 
               {/* Day of Week */}
               <div className="space-y-1">
-                <span className="text-[11px] font-semibold text-slate-600">Day of Week:</span>
+                <span className="text-[11px] font-semibold text-slate-600 dark:text-white/70">Day of Week:</span>
                 <div className="flex items-center gap-1.5 flex-wrap">
                   {DAYS_OF_WEEK.map((d) => (
                     <button
@@ -1353,8 +1362,8 @@ export default function AiRoutingComposer({
                       onClick={() => setSimTest({ ...simTest, dayOfWeek: d.day })}
                       className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
                         simTest.dayOfWeek === d.day
-                          ? 'bg-emerald-700 text-white shadow-xs'
-                          : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+                          ? 'bg-emerald-700 dark:bg-emerald-600 text-white shadow-xs'
+                          : 'bg-white dark:bg-white/[0.06] text-slate-700 dark:text-white/70 border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10'
                       }`}
                     >
                       {d.short}
@@ -1366,7 +1375,7 @@ export default function AiRoutingComposer({
               {/* Time of Day & Devices */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                 <div className="space-y-1">
-                  <span className="text-[11px] font-semibold text-slate-600">Time of Day (24h):</span>
+                  <span className="text-[11px] font-semibold text-slate-600 dark:text-white/70">Time of Day (24h):</span>
                   <div className="flex items-center gap-1.5">
                     {['12:00', '16:30', '20:30', '23:30'].map((time) => (
                       <button
@@ -1375,8 +1384,8 @@ export default function AiRoutingComposer({
                         onClick={() => setSimTest({ ...simTest, timeStr: time })}
                         className={`px-2 py-1 rounded-lg text-[11px] font-mono font-semibold transition-all cursor-pointer ${
                           simTest.timeStr === time
-                            ? 'bg-emerald-700 text-white'
-                            : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+                            ? 'bg-emerald-700 dark:bg-emerald-600 text-white'
+                            : 'bg-white dark:bg-white/[0.06] text-slate-700 dark:text-white/70 border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10'
                         }`}
                       >
                         {time}
@@ -1386,7 +1395,7 @@ export default function AiRoutingComposer({
                 </div>
 
                 <div className="space-y-1">
-                  <span className="text-[11px] font-semibold text-slate-600">Device Platform:</span>
+                  <span className="text-[11px] font-semibold text-slate-600 dark:text-white/70">Device Platform:</span>
                   <div className="flex items-center gap-1.5">
                     {(['ios', 'android', 'desktop'] as const).map((dev) => (
                       <button
@@ -1395,8 +1404,8 @@ export default function AiRoutingComposer({
                         onClick={() => setSimTest({ ...simTest, device: dev })}
                         className={`px-2 py-1 rounded-lg text-[11px] font-semibold uppercase transition-all cursor-pointer ${
                           simTest.device === dev
-                            ? 'bg-emerald-700 text-white'
-                            : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+                            ? 'bg-emerald-700 dark:bg-emerald-600 text-white'
+                            : 'bg-white dark:bg-white/[0.06] text-slate-700 dark:text-white/70 border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10'
                         }`}
                       >
                         {dev}
@@ -1408,11 +1417,42 @@ export default function AiRoutingComposer({
             </div>
 
             {/* Live Evaluation Box */}
-            <div className="p-4 rounded-2xl border border-emerald-300 bg-emerald-50/60 space-y-2.5">
+            <div className="p-4 rounded-2xl border border-emerald-300 dark:border-emerald-500/30 bg-emerald-50/60 dark:bg-emerald-950/20 space-y-2.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 animate-pulse" />
-                  <span className="text-[12.5px] font-bold text-emerald-950">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse" />
+                  <span className="text-[12.5px] font-bold text-emerald-950 dark:text-emerald-300">
                     {simResult.matched ? `Matched: ${simResult.rule?.label}` : 'Fallback Resolved'}
                   </span>
-                
+                </div>
+                <span className="px-2 py-0.5 rounded-full text-[10.5px] font-mono font-bold bg-emerald-200 dark:bg-emerald-900/50 text-emerald-900 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700/50">
+                  HTTP 307 (&lt; 2ms)
+                </span>
+              </div>
+
+              <div className="p-3 rounded-xl bg-white dark:bg-[#0C0F0A] border border-emerald-200/80 dark:border-emerald-500/30 space-y-1">
+                <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-white/40 block tracking-wider">
+                  Target Redirection Destination:
+                </span>
+                <p className="font-mono text-[13px] font-bold text-emerald-900 dark:text-emerald-300 break-all">
+                  {simResult.destination}
+                </p>
+              </div>
+
+              <p className="text-[11.5px] text-emerald-800/80 dark:text-emerald-300/80">
+                {simResult.reason}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Footer Status & Notification */}
+      {statusMessage && (
+        <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-[12px] font-medium text-emerald-900 text-center shrink-0">
+          {statusMessage}
+        </div>
+      )}
+    </div>
+  );
+}
