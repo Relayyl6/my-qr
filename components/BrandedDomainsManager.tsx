@@ -46,7 +46,7 @@ function SubmitDomainBtn() {
     <button
       type="submit"
       disabled={pending}
-      className="px-4 py-2.5 rounded-xl bg-[#11140F] text-white text-[13px] font-medium hover:bg-[#2A2E25] transition-colors disabled:opacity-50 flex items-center gap-1.5 shrink-0 cursor-pointer"
+      className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white text-[13px] font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-1.5 shrink-0 cursor-pointer shadow-xs"
     >
       <Plus className="w-4 h-4" />
       {pending ? 'Connecting…' : 'Add Domain'}
@@ -56,7 +56,8 @@ function SubmitDomainBtn() {
 
 export default function BrandedDomainsManager({ initialDomains, userTier, isAdmin }: Props) {
   const [domains, setDomains] = useState<Domain[]>(initialDomains);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(initialDomains.length === 0);
+  const [domainInput, setDomainInput] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [verifyingId, setVerifyingId] = useState<string | null>(null);
   const [actionMsg, setActionMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
@@ -74,6 +75,7 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
         if (prev.some((d) => d.id === state.domain.id)) return prev;
         return [state.domain, ...prev];
       });
+      setDomainInput('');
       setActionMsg({
         text: state.message || `Domain ${state.domain.domain} connected! Configure DNS records below.`,
         type: 'success',
@@ -154,30 +156,31 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
   };
 
   return (
-    <div className="rounded-2xl border border-[#11140F]/10 bg-white p-5 sm:p-7 shadow-xs space-y-6">
+    <div className="rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#11140F] p-5 sm:p-7 shadow-xs space-y-6 text-[#11140F] dark:text-white transition-colors">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#2F6B4F]/10 text-[#2F6B4F] flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
             <Globe className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-[16px] text-[#11140F]">Custom Branded Domains</h3>
-              <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-[#11140F]/5 text-[#11140F]/70 uppercase tracking-wider font-semibold">
+              <h3 className="font-semibold text-[16px] text-[#11140F] dark:text-white">Custom Branded Domains</h3>
+              <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-[#11140F]/5 dark:bg-white/10 text-[#11140F]/70 dark:text-white/70 uppercase tracking-wider font-semibold border border-[#11140F]/10 dark:border-white/15">
                 Plus & Ultra
               </span>
             </div>
-            <p className="text-[13px] text-[#11140F]/60">
-              Serve QR codes from your own branded domain (e.g.{' '}
-              <span className="font-mono text-[#2F6B4F] font-semibold">qr.yourcompany.com</span>).
+            <p className="text-[13px] text-[#11140F]/60 dark:text-white/60">
+              Serve QR codes and shortlinks from your own custom domain (e.g.{' '}
+              <span className="font-mono text-emerald-600 dark:text-emerald-400 font-semibold">qr.yourcompany.com</span>).
             </p>
           </div>
         </div>
 
         <button
+          type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="text-[13px] font-medium text-[#11140F] hover:text-[#2F6B4F] transition-colors flex items-center gap-1 self-start sm:self-auto cursor-pointer"
+          className="text-[13px] font-medium text-[#11140F] dark:text-white hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center gap-1.5 self-start sm:self-auto cursor-pointer px-3 py-1.5 rounded-xl border border-[#11140F]/10 dark:border-white/10 hover:bg-[#11140F]/5 dark:hover:bg-white/5"
         >
           {isOpen ? 'Collapse' : `Manage (${domains.length})`}
           <ChevronRight className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-90' : ''}`} />
@@ -185,21 +188,21 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
       </div>
 
       {isOpen && (
-        <div className="space-y-6 pt-2 border-t border-[#11140F]/10">
+        <div className="space-y-6 pt-2 border-t border-[#11140F]/10 dark:border-white/10">
           {!isEligible ? (
-            <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-4 flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
-              <div className="text-[13px] text-amber-900 space-y-1">
+            <div className="rounded-xl border border-amber-200 dark:border-amber-500/30 bg-amber-50/70 dark:bg-amber-950/20 p-4 flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-amber-700 dark:text-amber-400 shrink-0 mt-0.5" />
+              <div className="text-[13px] text-amber-900 dark:text-amber-200 space-y-1">
                 <p className="font-medium">Branded domains are locked to Plus and Ultra plans.</p>
-                <p className="text-amber-800/80">
+                <p className="text-amber-800/80 dark:text-amber-300/80">
                   Upgrade your subscription to connect custom CNAME domains and present your brand on all physical prints.
                 </p>
                 <div className="pt-2">
                   <a
                     href="/pricing"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#11140F] text-white text-[12px] font-medium hover:bg-[#2A2E25]"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] text-[12px] font-medium hover:bg-[#2A2E25]"
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-[#96A689]" />
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
                     Upgrade to Plus &rarr;
                   </a>
                 </div>
@@ -208,52 +211,52 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
           ) : (
             <>
               {/* How Custom Branded Domains Work in 3 Steps */}
-              <div className="rounded-2xl bg-[#F7F8F5] border border-[#11140F]/10 p-5 space-y-3.5 text-[12.5px] text-[#11140F]/85">
+              <div className="rounded-2xl bg-[#F7F8F5] dark:bg-[#151912] border border-[#11140F]/10 dark:border-white/10 p-5 space-y-4 text-[12.5px] text-[#11140F]/85 dark:text-white/85">
                 <div className="flex items-center justify-between">
-                  <div className="font-bold text-[14px] text-[#11140F] flex items-center gap-2">
-                    <Globe className="w-4 h-4 text-[#2F6B4F]" />
+                  <div className="font-bold text-[14px] text-[#11140F] dark:text-white flex items-center gap-2">
+                    <Globe className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                     How Custom Branded Domains Work in 3 Steps
                   </div>
-                  <span className="text-[11px] font-mono text-[#2F6B4F] bg-[#2F6B4F]/10 px-2.5 py-0.5 rounded-full font-bold">
+                  <span className="text-[11px] font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full font-bold">
                     Setup Guide
                   </span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 pt-1">
                   {/* Step 1 */}
-                  <div className="p-3.5 rounded-xl bg-white dark:bg-white/[0.04] border border-[#11140F]/8 dark:border-white/10 space-y-1.5 shadow-2xs">
-                    <div className="font-bold text-[#2F6B4F] flex items-center gap-1.5 text-[13px]">
-                      <span className="w-5 h-5 rounded-full bg-[#2F6B4F] text-white flex items-center justify-center text-[11px] font-bold">1</span>
+                  <div className="p-4 rounded-xl bg-white dark:bg-[#1C2218] border border-[#11140F]/10 dark:border-white/10 space-y-2 shadow-2xs">
+                    <div className="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-2 text-[13px]">
+                      <span className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[11px] font-bold shrink-0">1</span>
                       Enter Subdomain
                     </div>
                     <p className="text-[12px] text-[#11140F]/70 dark:text-white/70 leading-relaxed">
-                      In the input box below, type your desired subdomain (e.g. <code className="font-mono text-[#11140F] font-semibold">qr.yourcompany.com</code> or <code className="font-mono text-[#11140F] font-semibold">go.yourbrand.com</code>) and click <strong>"+ Add Domain"</strong>.
+                      Type your desired subdomain below (e.g. <code className="font-mono text-emerald-700 dark:text-emerald-300 font-semibold px-1 py-0.5 rounded bg-black/5 dark:bg-white/10">qr.yourcompany.com</code>) and click <strong>"Add Domain"</strong>.
                     </p>
                   </div>
 
                   {/* Step 2 */}
-                  <div className="p-3.5 rounded-xl bg-white border border-[#11140F]/8 space-y-2 shadow-2xs">
-                    <div className="font-bold text-[#2F6B4F] flex items-center gap-1.5 text-[13px]">
-                      <span className="w-5 h-5 rounded-full bg-[#2F6B4F] text-white flex items-center justify-center text-[11px] font-bold">2</span>
+                  <div className="p-4 rounded-xl bg-white dark:bg-[#1C2218] border border-[#11140F]/10 dark:border-white/10 space-y-2 shadow-2xs">
+                    <div className="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-2 text-[13px]">
+                      <span className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[11px] font-bold shrink-0">2</span>
                       Add 2 DNS Records
                     </div>
                     <div className="text-[11.5px] text-[#11140F]/75 dark:text-white/75 space-y-1.5 leading-snug">
-                      <p>In your registrar (Namecheap, GoDaddy, Cloudflare, etc.):</p>
-                      <div className="p-2 rounded-lg bg-[#F7F8F5] dark:bg-white/[0.03] border border-[#11140F]/8 dark:border-white/10 font-mono text-[11px] space-y-1 text-[#11140F] dark:text-white">
-                        <div><strong>• CNAME:</strong> Host <code className="text-[#2F6B4F]">qr</code> &rarr; <code className="text-[#11140F] dark:text-emerald-400">cname.vercel-dns.com</code></div>
-                        <div><strong>• TXT:</strong> Host <code className="text-[#2F6B4F]">_dynamicqr.qr</code> &rarr; copy TXT value</div>
+                      <p>In your registrar (Cloudflare, GoDaddy, Namecheap):</p>
+                      <div className="p-2 rounded-lg bg-[#F7F8F5] dark:bg-black/40 border border-[#11140F]/10 dark:border-white/10 font-mono text-[11px] space-y-1 text-[#11140F] dark:text-white">
+                        <div><strong>• CNAME:</strong> Host <code className="text-emerald-600 dark:text-emerald-400 font-bold">qr</code> &rarr; <code className="text-[#11140F] dark:text-white">cname.vercel-dns.com</code></div>
+                        <div><strong>• TXT:</strong> Host <code className="text-emerald-600 dark:text-emerald-400 font-bold">_dynamicqr.qr</code> &rarr; verification key</div>
                       </div>
                     </div>
                   </div>
 
                   {/* Step 3 */}
-                  <div className="p-3.5 rounded-xl bg-white border border-[#11140F]/8 space-y-1.5 shadow-2xs">
-                    <div className="font-bold text-[#2F6B4F] flex items-center gap-1.5 text-[13px]">
-                      <span className="w-5 h-5 rounded-full bg-[#2F6B4F] text-white flex items-center justify-center text-[11px] font-bold">3</span>
-                      Verify DNS & Print
+                  <div className="p-4 rounded-xl bg-white dark:bg-[#1C2218] border border-[#11140F]/10 dark:border-white/10 space-y-2 shadow-2xs">
+                    <div className="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-2 text-[13px]">
+                      <span className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[11px] font-bold shrink-0">3</span>
+                      Verify DNS & Deploy
                     </div>
-                    <p className="text-[12px] text-[#11140F]/70 leading-relaxed">
-                      Click <strong>"Verify DNS"</strong> (or <strong>"Instant Verify (Test Mode)"</strong>). The badge changes to <span className="text-emerald-700 font-bold">Active & Verified</span>, and all your QR links and print posters will serve directly from your custom domain!
+                    <p className="text-[12px] text-[#11140F]/70 dark:text-white/70 leading-relaxed">
+                      Click <strong>"Verify DNS"</strong> or <strong>"Instant Verify (Test Mode)"</strong>. Once <span className="text-emerald-700 dark:text-emerald-400 font-bold">Active & Verified</span>, select it when creating links to serve QR codes on your domain!
                     </p>
                   </div>
                 </div>
@@ -261,39 +264,64 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
 
               {/* Add Domain Form */}
               <form action={formAction} className="space-y-3">
-                <label className="block text-[12.5px] font-medium text-[#11140F]/70 dark:text-white/70">
-                  Connect a new branded subdomain:
-                </label>
-                <div className="flex flex-col sm:flex-row items-center gap-2.5">
-                  <div className="relative flex-1 w-full">
-                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[13px] text-[#11140F]/40 dark:text-white/40 font-mono select-none">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                  <label className="text-[13px] font-semibold text-[#11140F] dark:text-white flex items-center gap-1.5">
+                    <span>Connect your branded subdomain</span>
+                  </label>
+                  <span className="text-[11.5px] text-[#11140F]/60 dark:text-white/60">
+                    Use any domain or subdomain you own
+                  </span>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+                  <div className="relative flex-1 w-full flex items-center rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#151912] focus-within:border-emerald-500 dark:focus-within:border-emerald-400 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all shadow-2xs overflow-hidden">
+                    <span className="px-3.5 py-2.5 text-[13px] text-[#11140F]/50 dark:text-white/50 font-mono select-none bg-[#11140F]/[0.03] dark:bg-white/[0.05] border-r border-[#11140F]/10 dark:border-white/10 shrink-0 font-medium">
                       https://
                     </span>
                     <input
                       type="text"
                       name="domain"
+                      value={domainInput}
+                      onChange={(e) => setDomainInput(e.target.value)}
                       required
                       placeholder="qr.yourbrand.com"
-                      className="w-full pl-20 pr-4 py-2.5 rounded-xl border border-[#11140F]/15 dark:border-white/15 text-[13.5px] font-mono outline-none focus:border-[#11140F] dark:focus:border-white transition-colors bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white"
+                      className="w-full px-3.5 py-2.5 text-[13.5px] font-mono outline-none bg-transparent text-[#11140F] dark:text-white placeholder:text-[#11140F]/35 dark:placeholder:text-white/35"
                     />
                   </div>
                   <SubmitDomainBtn />
+                </div>
+
+                {/* Quick Example Suggestions */}
+                <div className="flex items-center gap-2 flex-wrap pt-0.5">
+                  <span className="text-[11px] text-[#11140F]/50 dark:text-white/50 font-medium">
+                    Try example:
+                  </span>
+                  {['qr.acme.com', 'go.brand.io', 'link.mycompany.org'].map((example) => (
+                    <button
+                      key={example}
+                      type="button"
+                      onClick={() => setDomainInput(example)}
+                      className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-[#11140F]/5 dark:bg-white/10 text-[#11140F]/70 dark:text-white/70 hover:bg-emerald-500/10 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors cursor-pointer"
+                    >
+                      {example}
+                    </button>
+                  ))}
                 </div>
               </form>
 
               {/* Feedback Alert Banner */}
               {actionMsg && (
                 <div
-                  className={`p-3 rounded-xl text-[12px] font-medium flex items-center gap-2 ${
+                  className={`p-3.5 rounded-xl text-[12.5px] font-medium flex items-center gap-2.5 ${
                     actionMsg.type === 'success'
-                      ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                      : 'bg-amber-50 text-amber-800 border border-amber-200'
+                      ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30'
+                      : 'bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30'
                   }`}
                 >
                   {actionMsg.type === 'success' ? (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   ) : (
-                    <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                    <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
                   )}
                   <span>{actionMsg.text}</span>
                 </div>
@@ -301,8 +329,8 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
 
               {/* Connected Domains List */}
               {domains.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-[#11140F]/15 dark:border-white/15 p-6 text-center text-[13px] text-[#11140F]/50 dark:text-white/50">
-                  No custom domains connected yet. Enter your subdomain above (e.g. <code>qr.yourbrand.com</code>) to get started.
+                <div className="rounded-xl border border-dashed border-[#11140F]/15 dark:border-white/15 p-6 text-center text-[13px] text-[#11140F]/60 dark:text-white/60 bg-[#11140F]/[0.01] dark:bg-white/[0.01]">
+                  No custom domains connected yet. Enter your subdomain above (e.g. <code className="font-mono text-emerald-600 dark:text-emerald-400 font-semibold">qr.yourbrand.com</code>) to get started.
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -323,13 +351,13 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
                               {d.domain}
                             </span>
                             {d.status === 'verified' ? (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-semibold">
-                                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30 text-[11px] font-semibold">
+                                <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                                 Active & Verified
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[11px] font-medium">
-                                <Clock className="w-3 h-3 text-amber-600" />
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30 text-[11px] font-medium">
+                                <Clock className="w-3 h-3 text-amber-600 dark:text-amber-400" />
                                 Pending DNS Setup
                               </span>
                             )}
@@ -342,7 +370,7 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
                                   type="button"
                                   onClick={() => handleVerify(d.id)}
                                   disabled={verifyingId === d.id}
-                                  className="px-3 py-1.5 rounded-lg border border-[#11140F]/15 bg-white text-[12px] font-medium text-[#11140F] hover:bg-white/80 transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer shadow-2xs"
+                                  className="px-3 py-1.5 rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#11140F] text-[12px] font-medium text-[#11140F] dark:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer shadow-2xs"
                                 >
                                   <RefreshCw className={`w-3 h-3 ${verifyingId === d.id ? 'animate-spin' : ''}`} />
                                   {verifyingId === d.id ? 'Checking DNS…' : 'Verify DNS'}
@@ -352,22 +380,23 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
                                   onClick={() => handleForceVerify(d.id)}
                                   disabled={verifyingId === d.id}
                                   title="Instantly mark as active for test campaigns"
-                                  className="px-2.5 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11.5px] font-medium hover:bg-emerald-100 transition-colors flex items-center gap-1 cursor-pointer"
+                                  className="px-2.5 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-[11.5px] font-medium hover:bg-emerald-100 dark:hover:bg-emerald-500/30 transition-colors flex items-center gap-1 cursor-pointer"
                                 >
-                                  <Zap className="w-3 h-3 text-emerald-600" />
+                                  <Zap className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                                   Instant Verify (Test Mode)
                                 </button>
                               </>
                             ) : (
-                              <span className="text-[11.5px] text-emerald-700 font-medium">
-                                ✓ Serving QR codes live
+                              <span className="text-[11.5px] text-emerald-700 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                Serving QR codes live
                               </span>
                             )}
 
                             <button
                               type="button"
                               onClick={() => handleDelete(d.id, d.domain)}
-                              className="p-1.5 rounded-lg text-[#11140F]/40 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                              className="p-1.5 rounded-lg text-[#11140F]/40 dark:text-white/40 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors cursor-pointer"
                               title="Delete domain"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -377,36 +406,37 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
 
                         {/* DNS Instructions Block */}
                         {d.status !== 'verified' && (
-                          <div className="rounded-xl bg-white border border-[#11140F]/10 p-4 space-y-3 text-[12px]">
-                            <div className="font-semibold text-[#11140F]/80 flex items-center justify-between">
+                          <div className="rounded-xl bg-white dark:bg-[#151912] border border-[#11140F]/10 dark:border-white/10 p-4 space-y-3 text-[12px]">
+                            <div className="font-semibold text-[#11140F]/80 dark:text-white/80 flex items-center justify-between">
                               <span>Add these 2 records in your Domain DNS Manager:</span>
-                              <span className="text-[11px] text-[#11140F]/50 font-normal">Click icon to copy</span>
+                              <span className="text-[11px] text-[#11140F]/50 dark:text-white/50 font-normal">Click icon to copy</span>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 font-mono text-[11.5px]">
                               {/* CNAME */}
-                              <div className="p-3 rounded-lg bg-[#EEF0EA]/70 border border-[#11140F]/10 flex items-center justify-between gap-2">
+                              <div className="p-3 rounded-lg bg-[#EEF0EA]/70 dark:bg-white/[0.04] border border-[#11140F]/10 dark:border-white/10 flex items-center justify-between gap-2">
                                 <div className="space-y-0.5 min-w-0">
-                                  <div className="text-[10px] text-[#11140F]/50 uppercase font-sans font-semibold">
+                                  <div className="text-[10px] text-[#11140F]/50 dark:text-white/50 uppercase font-sans font-semibold">
                                     Record 1 · Primary CNAME
                                   </div>
-                                  <div className="truncate">
-                                    <span className="font-bold text-[#2F6B4F]">Type:</span> CNAME
+                                  <div className="truncate text-[#11140F] dark:text-white">
+                                    <span className="font-bold text-emerald-600 dark:text-emerald-400">Type:</span> CNAME
                                   </div>
-                                  <div className="truncate">
-                                    <span className="font-bold text-[#2F6B4F]">Host:</span> {hostName}
+                                  <div className="truncate text-[#11140F] dark:text-white">
+                                    <span className="font-bold text-emerald-600 dark:text-emerald-400">Host:</span> {hostName}
                                   </div>
-                                  <div className="truncate">
-                                    <span className="font-bold text-[#2F6B4F]">Points to:</span> {d.cnameTarget}
+                                  <div className="truncate text-[#11140F] dark:text-white">
+                                    <span className="font-bold text-emerald-600 dark:text-emerald-400">Points to:</span> {d.cnameTarget}
                                   </div>
                                 </div>
                                 <button
+                                  type="button"
                                   onClick={() => handleCopy(d.cnameTarget, `cname-${d.id}`)}
-                                  className="p-2 hover:bg-white rounded-md text-[#11140F]/60 transition-colors shrink-0 cursor-pointer"
+                                  className="p-2 hover:bg-white dark:hover:bg-white/10 rounded-md text-[#11140F]/60 dark:text-white/70 transition-colors shrink-0 cursor-pointer"
                                   title="Copy CNAME target"
                                 >
                                   {copiedId === `cname-${d.id}` ? (
-                                    <Check className="w-4 h-4 text-emerald-600" />
+                                    <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                                   ) : (
                                     <Copy className="w-4 h-4" />
                                   )}
@@ -414,28 +444,29 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
                               </div>
 
                               {/* TXT */}
-                              <div className="p-3 rounded-lg bg-[#EEF0EA]/70 border border-[#11140F]/10 flex items-center justify-between gap-2">
+                              <div className="p-3 rounded-lg bg-[#EEF0EA]/70 dark:bg-white/[0.04] border border-[#11140F]/10 dark:border-white/10 flex items-center justify-between gap-2">
                                 <div className="space-y-0.5 min-w-0">
-                                  <div className="text-[10px] text-[#11140F]/50 uppercase font-sans font-semibold">
+                                  <div className="text-[10px] text-[#11140F]/50 dark:text-white/50 uppercase font-sans font-semibold">
                                     Record 2 · Verification TXT
                                   </div>
-                                  <div className="truncate">
-                                    <span className="font-bold text-[#2F6B4F]">Type:</span> TXT
+                                  <div className="truncate text-[#11140F] dark:text-white">
+                                    <span className="font-bold text-emerald-600 dark:text-emerald-400">Type:</span> TXT
                                   </div>
-                                  <div className="truncate">
-                                    <span className="font-bold text-[#2F6B4F]">Host:</span> _dynamicqr.{hostName}
+                                  <div className="truncate text-[#11140F] dark:text-white">
+                                    <span className="font-bold text-emerald-600 dark:text-emerald-400">Host:</span> _dynamicqr.{hostName}
                                   </div>
-                                  <div className="truncate">
-                                    <span className="font-bold text-[#2F6B4F]">Value:</span> {d.verificationTxt}
+                                  <div className="truncate text-[#11140F] dark:text-white">
+                                    <span className="font-bold text-emerald-600 dark:text-emerald-400">Value:</span> {d.verificationTxt}
                                   </div>
                                 </div>
                                 <button
+                                  type="button"
                                   onClick={() => handleCopy(d.verificationTxt, `txt-${d.id}`)}
-                                  className="p-2 hover:bg-white rounded-md text-[#11140F]/60 transition-colors shrink-0 cursor-pointer"
+                                  className="p-2 hover:bg-white dark:hover:bg-white/10 rounded-md text-[#11140F]/60 dark:text-white/70 transition-colors shrink-0 cursor-pointer"
                                   title="Copy verification TXT"
                                 >
                                   {copiedId === `txt-${d.id}` ? (
-                                    <Check className="w-4 h-4 text-emerald-600" />
+                                    <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                                   ) : (
                                     <Copy className="w-4 h-4" />
                                   )}
