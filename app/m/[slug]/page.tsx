@@ -19,10 +19,16 @@ export async function generateMetadata({
   }
 
   const spec = (item.spec as any) || {};
-  const pageTitle = `${item.title} — Contactless Digital Menu`;
-  const pageDesc = spec.description || `Explore the live contactless menu for ${item.title}. View delicious dishes, pricing, and ingredients directly on your phone.`;
+  const sectionCount = Array.isArray(spec.sections) ? spec.sections.length : 0;
+  const dishCount = Array.isArray(spec.sections)
+    ? spec.sections.reduce((acc: number, s: any) => acc + (s.items?.length || 0), 0)
+    : 0;
+
+  const pageTitle = `${item.title} — Digital Contactless Menu | DynamicQR`;
+  const pageDesc = spec.description ||
+    `Explore ${item.title}'s live contactless restaurant menu. Browse ${dishCount > 0 ? `${dishCount} dishes across ${sectionCount} categories` : 'chef specials and dishes'} with live pricing, photos, and dietary details.`;
   const canonicalUrl = `${APP_URL}/m/${slug}`;
-  const rawImage = spec.coverUrl || spec.logoUrl;
+  const rawImage = spec.bannerUrl || spec.coverUrl || spec.logoUrl;
   const ogImageUrl = rawImage ? getOptimizedStorageUrl(rawImage) : `${APP_URL}/icon.svg`;
 
   return {
@@ -37,13 +43,13 @@ export async function generateMetadata({
       description: pageDesc,
       url: canonicalUrl,
       siteName: 'DynamicQR',
-      type: 'website',
+      type: 'restaurant.menu',
       images: [
         {
           url: ogImageUrl,
           width: 1200,
           height: 630,
-          alt: `${item.title} Digital Menu`,
+          alt: `${item.title} Contactless Menu`,
         },
       ],
     },
@@ -52,6 +58,11 @@ export async function generateMetadata({
       title: pageTitle,
       description: pageDesc,
       images: [ogImageUrl],
+    },
+    other: {
+      'theme-color': spec.accentColor || '#10B981',
+      'restaurant:menu_sections': String(sectionCount),
+      'restaurant:currency': spec.currency || '$',
     },
   };
 }

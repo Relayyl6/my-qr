@@ -18,8 +18,11 @@ export async function generateMetadata({
   }
 
   const spec = (item.spec as any) || {};
-  const pageTitle = `Connect to ${item.title} — Instant Wi-Fi Access`;
-  const pageDesc = `Fast contactless Wi-Fi access for ${item.title} (SSID: ${spec.ssid || item.title}). Tap to join network or scan QR code.`;
+  const ssid = spec.ssid || item.title;
+  const security = spec.encryption || 'WPA2/WPA3';
+  const pageTitle = `Connect to ${item.title} — Instant Contactless Wi-Fi | DynamicQR`;
+  const pageDesc = spec.notes ||
+    `One-tap Wi-Fi connection for ${item.title}. SSID: "${ssid}" (${security} Secured). Scan QR code or tap to connect without typing long passwords.`;
   const canonicalUrl = `${APP_URL}/w/${slug}`;
 
   return {
@@ -40,7 +43,7 @@ export async function generateMetadata({
           url: `${APP_URL}/icon.svg`,
           width: 800,
           height: 800,
-          alt: `${item.title} Wi-Fi`,
+          alt: `${item.title} Wi-Fi Access Card`,
         },
       ],
     },
@@ -49,6 +52,11 @@ export async function generateMetadata({
       title: pageTitle,
       description: pageDesc,
       images: [`${APP_URL}/icon.svg`],
+    },
+    other: {
+      'theme-color': '#10B981',
+      'wifi:ssid': ssid,
+      'wifi:encryption': security,
     },
   };
 }

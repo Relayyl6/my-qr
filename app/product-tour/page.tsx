@@ -7,8 +7,40 @@ import HeaderNav from '@/components/HeaderNav';
 import AppleProductTour from '@/components/AppleProductTour';
 import MaintenanceScreen from '@/components/MaintenanceScreen';
 import { ChevronRight } from 'lucide-react';
+import { Metadata } from 'next';
+import { APP_URL } from '@/lib/config';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  metadataBase: new URL(APP_URL),
+  title: 'Interactive Product Tour — DynamicQR',
+  description: 'Explore DynamicQR features: Intelligent routing, digital business cards, interactive contactless menus, and real-time scan analytics.',
+  alternates: {
+    canonical: `${APP_URL}/product-tour`,
+  },
+  openGraph: {
+    title: 'DynamicQR Interactive Product Tour',
+    description: 'Experience intelligent QR routing, digital vCards, and real-time scan diagnostics.',
+    url: `${APP_URL}/product-tour`,
+    siteName: 'DynamicQR',
+    type: 'website',
+    images: [
+      {
+        url: `${APP_URL}/icon.svg`,
+        width: 800,
+        height: 800,
+        alt: 'DynamicQR Product Tour',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary',
+    title: 'DynamicQR Interactive Product Tour',
+    description: 'Experience intelligent QR routing, digital vCards, and real-time scan diagnostics.',
+    images: [`${APP_URL}/icon.svg`],
+  },
+};
 
 export default async function ProductTourPage() {
   const user = await getCurrentUser();

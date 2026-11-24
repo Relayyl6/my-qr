@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { getLandingPageByShortCode } from "@/lib/ai/features/landing-page-builder";
 import { RenderLandingPage } from "@/lib/landing/render";
 import { Metadata } from "next";
+import { APP_URL } from "@/lib/config";
+import { getOptimizedStorageUrl } from "@/lib/media";
 
 export const dynamic = "force-dynamic";
 
@@ -13,9 +15,44 @@ export async function generateMetadata({
   const result = await getLandingPageByShortCode(params.shortCode);
   if (!result) return { title: "Page Not Found — DynamicQR" };
 
+  const { spec } = result;
+  const pageTitle = `${spec.businessName || "Exclusive Landing Page"} | DynamicQR`;
+  const pageDesc = spec.bio || spec.headline || "Official mobile destination powered by DynamicQR.";
+  const canonicalUrl = `${APP_URL}/page/${params.shortCode}`;
+  const rawImage = spec.heroImageUrl || spec.logoUrl;
+  const ogImageUrl = rawImage ? getOptimizedStorageUrl(rawImage) : `${APP_URL}/icon.svg`;
+
   return {
-    title: `${result.spec.businessName} — DynamicQR`,
-    description: result.spec.bio || "Official mobile destination",
+    metadataBase: new URL(APP_URL),
+    title: pageTitle,
+    description: pageDesc,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title: pageTitle,
+      description: pageDesc,
+      url: canonicalUrl,
+      siteName: "DynamicQR",
+      type: "website",
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: `${spec.businessName} Mobile Page`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: pageTitle,
+      description: pageDesc,
+      images: [ogImageUrl],
+    },
+    other: {
+      "theme-color": spec.themeColor || "#10B981",
+    },
   };
 }
 

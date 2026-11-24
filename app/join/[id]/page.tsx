@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
+import { APP_URL } from '@/lib/config';
 import CustomerJoinView from '@/components/CustomerJoinView';
 
 export async function generateMetadata({
@@ -16,9 +17,42 @@ export async function generateMetadata({
     return { title: 'Mailing List Not Found | DynamicQR' };
   }
 
+  const pageTitle = `Join ${list.name} — Exclusive VIP Subscriber List | DynamicQR`;
+  const pageDesc = list.description ||
+    `Subscribe to ${list.name} for exclusive private updates, announcements, and VIP perks. One-tap signup powered by DynamicQR.`;
+  const canonicalUrl = `${APP_URL}/join/${id}`;
+
   return {
-    title: `Join ${list.name} | VIP Subscriber List`,
-    description: list.description || `Subscribe to ${list.name} for exclusive updates and promotions.`,
+    metadataBase: new URL(APP_URL),
+    title: pageTitle,
+    description: pageDesc,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title: pageTitle,
+      description: pageDesc,
+      url: canonicalUrl,
+      siteName: 'DynamicQR',
+      type: 'website',
+      images: [
+        {
+          url: `${APP_URL}/icon.svg`,
+          width: 800,
+          height: 800,
+          alt: `${list.name} VIP List`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary',
+      title: pageTitle,
+      description: pageDesc,
+      images: [`${APP_URL}/icon.svg`],
+    },
+    other: {
+      'theme-color': '#10B981',
+    },
   };
 }
 

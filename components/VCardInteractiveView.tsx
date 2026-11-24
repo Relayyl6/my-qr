@@ -726,10 +726,10 @@ export default function VCardInteractiveView({
     <div className={`min-h-screen ${activeTheme.bg} flex flex-col justify-between items-center p-4 sm:p-6 selection:bg-[#2F6B4F] selection:text-white transition-colors`}>
       <div className="w-full max-w-md my-auto space-y-5">
         
-        {/* Main Card */}
-        <div className={`${activeTheme.cardBg} rounded-2xl border ${activeTheme.border} p-6 sm:p-8 shadow-xl space-y-6 relative overflow-hidden backdrop-blur-md`}>
-          {/* Header Cover Banner - Background for top buttons with overlapping avatar */}
-          <div className="-mx-6 -mt-6 sm:-mx-8 sm:-mt-8 relative h-44 sm:h-48 overflow-hidden rounded-t-2xl bg-[#090A09]">
+        {/* Main Card - Clean, Calm, Uncluttered Container */}
+        <div className={`${activeTheme.cardBg} rounded-3xl border ${activeTheme.border} p-5 sm:p-7 shadow-2xl space-y-5 relative overflow-hidden backdrop-blur-md`}>
+          {/* Header Cover Banner */}
+          <div className="-mx-5 -mt-5 sm:-mx-7 sm:-mt-7 relative h-36 sm:h-40 overflow-hidden rounded-t-3xl bg-[#090A09]">
             {bannerUrl ? (
               <img
                 src={bannerSrc || bannerUrl}
@@ -747,20 +747,20 @@ export default function VCardInteractiveView({
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:16px_16px]" />
               </div>
             )}
-            {/* Subtle gradient vignette to blend into card */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/35 pointer-events-none" />
+            {/* Soft vignette to blend banner into card background */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/30 pointer-events-none" />
 
-            {/* Top Action Buttons: Floating directly over the banner */}
-            <div className="absolute top-4 inset-x-4 sm:inset-x-6 flex items-center justify-between z-20">
+            {/* Top Action Buttons: Sleek Frosted Glass Pills */}
+            <div className="absolute top-3.5 inset-x-3.5 sm:inset-x-5 flex items-center justify-between z-20">
               <button
                 type="button"
                 onClick={() => {
                   setShareViewMode('preview');
                   setShowShareModal(true);
                 }}
-                className="px-2.5 py-1.5 rounded-xl bg-black/60 hover:bg-black/80 text-white/95 hover:text-white border border-white/20 transition-all flex items-center gap-1.5 text-xs font-mono cursor-pointer backdrop-blur-md shadow-lg"
+                className="px-3 py-1.5 rounded-full bg-black/45 hover:bg-black/70 text-white/95 hover:text-white border border-white/15 transition-all flex items-center gap-1.5 text-xs font-medium cursor-pointer backdrop-blur-md shadow-sm"
               >
-                <QrCode className="w-4 h-4" />
+                <QrCode className="w-3.5 h-3.5" />
                 <span>Share</span>
               </button>
 
@@ -769,7 +769,7 @@ export default function VCardInteractiveView({
                   <button
                     type="button"
                     onClick={handleOpenSettings}
-                    className="px-2.5 py-1.5 rounded-xl bg-black/60 hover:bg-black/80 text-white font-medium text-xs border border-white/20 hover:border-emerald-400/50 transition-all flex items-center gap-1.5 cursor-pointer shadow-lg backdrop-blur-md"
+                    className="px-3 py-1.5 rounded-full bg-black/45 hover:bg-black/70 text-white font-medium text-xs border border-white/15 hover:border-emerald-400/50 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm backdrop-blur-md"
                     title="Customize Quick Actions & Mini Linktree"
                   >
                     <Settings className="w-3.5 h-3.5 text-emerald-400" />
@@ -780,7 +780,7 @@ export default function VCardInteractiveView({
                 <button
                   type="button"
                   onClick={() => setShowExchangeModal(true)}
-                  className="px-3 py-1.5 rounded-xl bg-black/60 hover:bg-black/80 text-white font-medium text-xs border border-white/20 transition-all flex items-center gap-1.5 cursor-pointer shadow-lg backdrop-blur-md"
+                  className="px-3.5 py-1.5 rounded-full bg-black/45 hover:bg-black/70 text-white font-medium text-xs border border-white/15 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm backdrop-blur-md"
                 >
                   <Sparkles className="w-3.5 h-3.5 text-[#34D399]" />
                   <span>Exchange Info</span>
@@ -789,18 +789,18 @@ export default function VCardInteractiveView({
             </div>
           </div>
 
-          {/* Profile Details: Avatar overlapping banner bottom edge */}
-          <div className="text-center space-y-3 !-mt-14 sm:!-mt-16 relative z-20">
+          {/* Profile Details: Balanced avatar and clean typography */}
+          <div className="text-center space-y-2.5 !-mt-12 sm:!-mt-14 relative z-20">
             <div
               style={{ borderColor: activeTheme.accent }}
-              className={`w-24 h-24 sm:w-28 sm:h-28 mx-auto rounded-full overflow-hidden shadow-2xl border-3 ${activeTheme.cardBg === 'bg-white' ? 'ring-white' : 'ring-black/80'} ring-4 shrink-0 relative bg-black flex items-center justify-center`}
+              className={`w-22 h-22 sm:w-24 sm:h-24 mx-auto rounded-full overflow-hidden shadow-2xl border-2 ${activeTheme.cardBg === 'bg-white' ? 'ring-white' : 'ring-black/70'} ring-4 shrink-0 relative bg-black flex items-center justify-center`}
             >
               {/* Fallback initials */}
-              <span className="text-2xl sm:text-3xl font-extrabold tracking-wider text-white select-none">
+              <span className="text-xl sm:text-2xl font-bold tracking-wider text-white select-none">
                 {initials}
               </span>
 
-              {/* Profile Image: crisp render over initials */}
+              {/* Profile Image */}
               {avatarUrl && !avatarError && (
                 <img
                   src={avatarSrc || avatarUrl}
@@ -814,16 +814,16 @@ export default function VCardInteractiveView({
             </div>
 
             <div>
-              <h1 className={`text-2xl font-black ${activeTheme.text} tracking-tight`}>
+              <h1 className={`text-xl sm:text-2xl font-black ${activeTheme.text} tracking-tight`}>
                 {fullName}
               </h1>
               {activeTitle && (
-                <p style={{ color: activeTheme.accent }} className="text-sm font-semibold mt-0.5">
+                <p style={{ color: activeTheme.accent }} className="text-xs sm:text-sm font-semibold mt-0.5 tracking-wide">
                   {activeTitle}
                 </p>
               )}
               {activeCompany && (
-                <div className="inline-flex items-center justify-center gap-2 mt-1.5 px-3 py-1 rounded-xl bg-white/5 border border-white/10 shadow-xs max-w-full">
+                <div className="inline-flex items-center justify-center gap-1.5 mt-1.5 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 shadow-xs max-w-full">
                   {logoUrl && (
                     <img
                       src={logoSrc}
@@ -833,10 +833,10 @@ export default function VCardInteractiveView({
                       onError={() => {
                         if (logoSrc !== logoUrl && logoUrl) setLogoSrc(logoUrl);
                       }}
-                      className="w-5 h-5 rounded object-contain shrink-0 bg-white/10 p-0.5"
+                      className="w-4 h-4 rounded-full object-contain shrink-0 bg-white/10 p-0.5"
                     />
                   )}
-                  <p className={`text-xs font-bold uppercase tracking-wider truncate ${activeTheme.subtext}`}>
+                  <p className={`text-[11px] font-bold uppercase tracking-wider truncate ${activeTheme.subtext}`}>
                     {activeCompany}
                   </p>
                 </div>
@@ -844,27 +844,27 @@ export default function VCardInteractiveView({
             </div>
 
             {activeBio && (
-              <p className={`text-xs sm:text-[13px] ${activeTheme.subtext} leading-relaxed max-w-xs mx-auto pt-1`}>
+              <p className={`text-xs ${activeTheme.subtext} leading-relaxed max-w-sm mx-auto pt-0.5`}>
                 {activeBio}
               </p>
             )}
           </div>
 
           {/* Primary Action Button: Save Contact */}
-          <div className="pt-1">
+          <div className="pt-0.5">
             <a
               href={`/api/vcard/${slug}/download`}
               style={{ backgroundColor: activeTheme.accent, color: theme === 'executive_white' ? '#fff' : '#000' }}
-              className="w-full py-3 px-6 rounded-md font-bold text-sm hover:opacity-90 transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-3 px-6 rounded-2xl font-bold text-xs sm:text-sm hover:opacity-90 active:scale-[0.99] transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
             >
               <UserPlus className="w-4 h-4" />
               <span>Save Contact to Phone</span>
             </a>
           </div>
 
-          {/* Centered Circular Brand Glyphs Row (Linktree Style) */}
+          {/* Centered Circular Brand Glyphs Row (Linktree Style Dock) */}
           {circularActions.length > 0 && (
-            <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
+            <div className="pt-1 flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
               {circularActions.map((action) => {
                 const Icon = action.icon;
                 const isDirect = action.id === 'call' || action.id === 'sms' || action.id === 'email';
@@ -876,7 +876,7 @@ export default function VCardInteractiveView({
                     rel={isDirect ? undefined : 'noopener noreferrer'}
                     title={action.title}
                     aria-label={action.title}
-                    className={`w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 flex items-center justify-center text-white/90 ${action.color} transition-all transform hover:scale-110 active:scale-95 shadow-md backdrop-blur-xs`}
+                    className={`w-11 h-11 rounded-full bg-white/[0.07] hover:bg-white/[0.14] border border-white/10 flex items-center justify-center text-white/90 ${action.color} transition-all transform hover:scale-110 active:scale-95 shadow-sm backdrop-blur-xs`}
                   >
                     <Icon className="w-5 h-5 shrink-0" />
                   </a>
@@ -904,10 +904,10 @@ export default function VCardInteractiveView({
                     href={link.url.startsWith('http') ? link.url : `https://${link.url}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#34D399]/40 transition-all text-left shadow-xs"
+                    className="group flex items-center justify-between p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] hover:border-white/20 transition-all text-left shadow-xs"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-[#34D399] group-hover:scale-105 transition-transform shrink-0">
+                      <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-[#34D399] group-hover:scale-105 transition-transform shrink-0">
                         <Link2 className="w-4 h-4" />
                       </div>
                       <div className="min-w-0">

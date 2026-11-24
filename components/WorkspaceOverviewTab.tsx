@@ -608,53 +608,60 @@ export default function WorkspaceOverviewTab({
     return base;
   }, [links, vcards, shorteners, menus, wifis, mailLists, totalSubscribers, topLink]);
 
-  const sendCopilotPrompt = (text: string) => {
+  const sendCopilotPrompt = async (text: string) => {
     const q = text.trim();
     if (!q || copilotLoading) return;
     setCopilotInput('');
-    setCopilotChat((prev) => [...prev, { role: 'user', text: q }]);
+    const newChat = [...copilotChat, { role: 'user' as const, text: q }];
+    setCopilotChat(newChat);
     setCopilotLoading(true);
 
-    setTimeout(() => {
-      const lower = q.toLowerCase();
-      let reply = '';
-      if (lower.includes('lead') || lower.includes('subscriber') || lower.includes('vip') || lower.includes('contact') || lower.includes('audience')) {
-        if (totalSubscribers > 0) {
-          const listName = mailLists[0]?.name || 'Mailing List';
-          const latestEmail = customerContacts[0]?.email ? ` Latest contact: ${customerContacts[0].email}.` : '';
-          reply = `You have ${totalSubscribers} captured leads in your "${listName}" list.${latestEmail}`;
-        } else {
-          reply = `You currently have 0 captured leads. Connect a VIP mailing list to capture subscribers from dynamic QR pages.`;
-        }
-      } else if (lower.includes('vcard') || lower.includes('card')) {
-        if (vcards.length > 0) {
-          const cardName = vcards[0]?.title || vcards[0]?.slug || 'vCard';
-          reply = `vCard "${cardName}" is active with ${vcards[0]?.scansCount || 0} scans at /c/${vcards[0]?.slug}. One-tap phone saving and custom links are live.`;
-        } else {
-          reply = `You have 0 digital vCards deployed.`;
-        }
-      } else if (lower.includes('top') || lower.includes('best') || lower.includes('route')) {
-        if (topLink && (topLink.scanCount || 0) > 0) {
-          reply = `Top route is "${topLink.label || topLink.shortCode}" with ${topLink.scanCount} scans, redirecting to ${topLink.destinationUrl}.`;
-        } else {
-          reply = `Your dynamic links have not recorded scans yet. Share a QR code to start tracking traffic!`;
-        }
-      } else if (lower.includes('scan') || lower.includes('traffic') || lower.includes('volume') || lower.includes('stat')) {
-        const peakMonth = [...monthlyBuckets].sort((a, b) => b.value - a.value)[0];
-        reply = `Total recorded scans across your network: ${totalScansVolume} scans across ${links.length} active links. Peak monthly volume was in ${peakMonth?.month || 'recent months'} (${peakMonth?.value || 0} scans).`;
-      } else if (lower.includes('shortener') || lower.includes('short')) {
-        if (shorteners.length > 0) {
-          const shortName = shorteners[0]?.title || shorteners[0]?.slug || 'Shortener';
-          reply = `Branded shortener "${shortName}" has generated ${shorteners[0]?.scansCount || 0} high-speed redirects.`;
-        } else {
-          reply = `You have 0 branded shorteners deployed.`;
-        }
-      } else {
-        reply = `Network status: ${links.length} active QR links, ${totalSubscribers} VIP leads, and ${totalScansVolume} total recorded redirects. System routing health is at ${healthScore}%.`;
-      }
+    try {
+      const peakMonth = [...monthlyBuckets].sort((a, b) => b.value - a.value)[0];
+      const recentContactEmails = customerContacts.map((c: any) => c.email).filter(Boolean);
+
+      const workspaceContext = {
+        linksCount: links.length,
+        totalScans: totalScansVolume,
+        healthScore,
+        subscribersCount: totalSubscribers,
+        vcardsCount: vcards.length,
+        shortenersCount: shorteners.length,
+        menusCount: menus.length,
+        wifisCount: wifis.length,
+        topLinkTitle: topLink?.label || topLink?.shortCode || 'None',
+        topLinkScans: topLink?.scanCount || 0,
+        topLinkDestination: topLink?.destinationUrl || '',
+        mailingListName: mailLists[0]?.name || 'VIP Mailing List',
+        recentLeads: recentContactEmails.slice(0, 5),
+        peakMonth: peakMonth?.month || 'recent months',
+        peakMonthScans: peakMonth?.value || 0,
+      };
+
+      const res = await fetch('/api/workspace/copilot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: q,
+          history: newChat.slice(-6),
+          workspaceContext,
+        }),
+      });
+
+      const data = await res.json();
+      const reply = data.text || 'Workspace routing is operational across all active destinations.';
       setCopilotChat((prev) => [...prev, { role: 'assistant', text: reply }]);
+    } catch (err) {
+      setCopilotChat((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          text: `Workspace status shows ${links.length} active QR links, ${totalSubscribers} captured leads, and ${totalScansVolume} total redirects. Routing health is at ${healthScore} percent.`,
+        },
+      ]);
+    } finally {
       setCopilotLoading(false);
-    }, 400);
+    }
   };
 
   const handleCopilotSubmit = (e: React.FormEvent) => {
@@ -1076,24 +1083,26 @@ export default function WorkspaceOverviewTab({
           </div>
 
           {/* Interactive Chat Stream & Quick Inquiries */}
-          <div className="flex-1 min-h-0 my-2 overflow-y-auto pr-1 space-y-2.5 no-scrollbar flex flex-col justify-end">
+          <div className={`flex-1 min-h-[140px] my-2 overflow-y-auto pr-1.5 space-y-2.5 ${
+            copilotChat.length === 0 ? 'flex flex-col justify-end' : ''
+          }`}>
             {copilotChat.length === 0 ? (
               <div className="space-y-2 py-1">
                 <p className="text-[11px] text-white/70 leading-relaxed font-normal">
                   {dynamicAiSynthesis}
                 </p>
 
-                {/* Instant Tap Prompt Pills */}
+                {/* Instant Tap Prompt Pills (Clean, no emojis) */}
                 <div className="pt-1">
                   <span className="text-[9.5px] uppercase tracking-wider font-mono text-white/35 block mb-1.5">
-                    Quick Insights
+                    Quick Inquiries
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {[
-                      { label: '📊 Total Scans', query: 'What is my total scan traffic?' },
-                      { label: '🔥 Top Route', query: 'What is my best performing link?' },
-                      { label: '👥 VIP Leads', query: 'How many captured leads do I have?' },
-                      { label: '📇 My vCard', query: 'Show me my active digital vCards' },
+                      { label: 'Total Scans', query: 'What is my total scan traffic and peak activity?' },
+                      { label: 'Top Route', query: 'What is my best performing link?' },
+                      { label: 'VIP Leads', query: 'How many captured leads do I have?' },
+                      { label: 'Active vCards', query: 'Show me my active digital vCards status' },
                     ].map((pill) => (
                       <button
                         key={pill.label}
@@ -1108,7 +1117,7 @@ export default function WorkspaceOverviewTab({
                 </div>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-2 py-0.5">
                 {copilotChat.map((msg, idx) => (
                   <div
                     key={idx}

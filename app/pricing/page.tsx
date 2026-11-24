@@ -7,8 +7,40 @@ import { ArrowLeft, ShieldCheck, Sparkles } from 'lucide-react';
 import PricingTable from '@/components/PricingTable';
 import ComprehensiveFeatureMatrix from '@/components/ComprehensiveFeatureMatrix';
 import MaintenanceScreen from '@/components/MaintenanceScreen';
+import { Metadata } from 'next';
+import { APP_URL } from '@/lib/config';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  metadataBase: new URL(APP_URL),
+  title: 'Pricing & Plans — DynamicQR',
+  description: 'Transparent pricing for intelligent dynamic QR routing, digital business cards, contactless menus, and real-time scan analytics.',
+  alternates: {
+    canonical: `${APP_URL}/pricing`,
+  },
+  openGraph: {
+    title: 'DynamicQR Pricing — Free, Pro, Plus & Ultra Plans',
+    description: 'Compare all 100+ enterprise features. Dynamic QR routing, digital vCards, AI smart router, and unlimited scans.',
+    url: `${APP_URL}/pricing`,
+    siteName: 'DynamicQR',
+    type: 'website',
+    images: [
+      {
+        url: `${APP_URL}/icon.svg`,
+        width: 800,
+        height: 800,
+        alt: 'DynamicQR Pricing',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary',
+    title: 'DynamicQR Pricing — Free, Pro, Plus & Ultra Plans',
+    description: 'Compare all 100+ enterprise features. Dynamic QR routing, digital vCards, AI smart router, and unlimited scans.',
+    images: [`${APP_URL}/icon.svg`],
+  },
+};
 
 function QrMark({ className = 'w-6 h-6', fill = '#11140F' }: { className?: string; fill?: string }) {
   return (
