@@ -753,147 +753,136 @@ export default function WorkspaceOverviewTab({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-3.5 flex-1 min-h-0">
         
         {/* CARD A: REAL SCAN VELOCITY & MONTHLY AGGREGATION (8 COLS) */}
-        <div className="lg:col-span-8 rounded-[24px] bg-[#0E1017] border border-white/[0.065] p-4 sm:p-5 flex flex-col justify-between shadow-[0_20px_45px_rgba(0,0,0,0.65)] min-h-[250px] lg:min-h-0 relative overflow-hidden">
+        <div className="lg:col-span-8 rounded-2xl bg-[#0E1017] border border-white/[0.07] p-4 sm:p-5 flex flex-col justify-between shadow-[0_16px_40px_rgba(0,0,0,0.5)] min-h-[250px] lg:min-h-0 relative">
           
           {/* Header Row */}
-          <div className="flex items-start justify-between gap-3 shrink-0">
-            <div>
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 shrink-0">
+            <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-white/80 tracking-tight block">
-                  Scan Velocity & Traffic
+                <span className="text-xs font-medium text-white/75 tracking-tight">
+                  Scan Velocity &amp; Traffic
                 </span>
-                <span className="text-[9.5px] font-mono px-1.5 py-0.2 rounded bg-blue-500/15 text-blue-400 font-bold border border-blue-500/25">
-                  REALTIME
+                <span className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  Live
                 </span>
               </div>
 
-              <div className="flex items-baseline gap-2 mt-0.5">
-                <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white font-mono">
+              <div className="flex items-baseline gap-2.5 flex-wrap">
+                <span className="text-2xl sm:text-3xl font-bold tracking-tight text-white tabular-nums">
                   {totalScansVolume.toLocaleString()}
                 </span>
-                <span className="text-xs font-semibold text-white/50">
-                  Total Scans
+                <span className="text-xs font-medium text-white/50 whitespace-nowrap">
+                  total scans
                 </span>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 text-[10px] font-bold">
-                  ▲ +18.4%
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-400 text-[11px] font-semibold whitespace-nowrap shrink-0">
+                  +18.4%
                 </span>
-                <span className="text-[11px] text-white/40 font-normal hidden sm:inline">
-                  across {links.length} dynamic links & {microSaasItems.length} active micro-services
+                <span className="text-[11px] text-white/40 hidden md:inline whitespace-nowrap">
+                  across {links.length} links &amp; {microSaasItems.length} active tools
                 </span>
               </div>
             </div>
 
-            {/* Time Filter Capsule Toggle (Operational) */}
-            <div className="flex items-center gap-1.5">
-              <div className="flex items-center p-0.5 rounded-full bg-[#161822] border border-white/[0.08] text-[11px]">
+            {/* Clean Time Filter Segmented Control */}
+            <div className="flex items-center gap-1.5 self-start">
+              <div className="flex items-center p-0.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[11px]">
                 {(['weekly', 'monthly', 'yearly', 'range'] as const).map((tab) => (
                   <button
                     key={tab}
                     type="button"
                     onClick={() => setTimeFilter(tab)}
-                    className={`px-2.5 py-0.5 rounded-full font-medium capitalize transition-all cursor-pointer ${
+                    className={`px-2.5 py-1 rounded-md font-medium capitalize transition-colors cursor-pointer ${
                       timeFilter === tab
-                        ? 'bg-white text-black font-bold shadow-xs'
-                        : 'text-white/40 hover:text-white'
+                        ? 'bg-white text-black font-semibold'
+                        : 'text-white/50 hover:text-white'
                     }`}
                   >
                     {tab}
                   </button>
                 ))}
               </div>
-              <button
-                type="button"
-                className="w-7 h-7 rounded-full bg-[#161822] border border-white/[0.08] flex items-center justify-center text-white/40 hover:text-white transition-colors cursor-pointer"
-                title="Telemetry Scale Settings"
-              >
-                <SlidersHorizontal className="w-3 h-3" />
-              </button>
             </div>
           </div>
 
-          {/* Capsule Bar Chart with Authentic Inactive Textured Sliders & Selected Active Blue Bar */}
-          <div className="flex items-stretch gap-2 pt-8 sm:pt-9 pb-1 flex-1 min-h-0">
-            {/* Dynamic Y-Axis based on user's real peak scan volume */}
-            <div className="flex flex-col justify-between text-[10px] font-mono text-white/35 py-1 select-none pr-1 shrink-0">
+          {/* Precision Column Chart */}
+          <div className="flex items-stretch gap-3 pt-8 pb-1 flex-1 min-h-[155px]">
+            {/* Y-Axis Labels */}
+            <div className="flex flex-col justify-between text-[10px] font-mono text-white/35 select-none pr-1 pb-5 shrink-0 text-right min-w-[26px]">
               {ySteps.map((step, idx) => (
-                <span key={idx}>{step}</span>
+                <span key={idx} className="leading-none">{step}</span>
               ))}
             </div>
 
-            {/* 12 Capsule Bars with Real Calculated Scan Values */}
-            <div className="flex-1 flex items-end justify-between gap-1.5 sm:gap-2 px-1 relative">
-              {/* Horizontal Faint Guide Lines */}
-              <div className="absolute inset-x-0 top-0 border-b border-white/[0.035] pointer-events-none" />
-              <div className="absolute inset-x-0 top-1/4 border-b border-white/[0.035] pointer-events-none" />
-              <div className="absolute inset-x-0 top-2/4 border-b border-white/[0.035] pointer-events-none" />
-              <div className="absolute inset-x-0 top-3/4 border-b border-white/[0.035] pointer-events-none" />
+            {/* Columns + Guide Lines */}
+            <div className="flex-1 flex flex-col justify-end relative">
+              {/* Guide Lines Grid */}
+              <div className="flex-1 relative flex items-end justify-between gap-2 sm:gap-3 px-1">
+                <div className="absolute inset-x-0 top-0 border-b border-dashed border-white/[0.06] pointer-events-none" />
+                <div className="absolute inset-x-0 top-1/4 border-b border-dashed border-white/[0.05] pointer-events-none" />
+                <div className="absolute inset-x-0 top-2/4 border-b border-dashed border-white/[0.05] pointer-events-none" />
+                <div className="absolute inset-x-0 top-3/4 border-b border-dashed border-white/[0.05] pointer-events-none" />
+                <div className="absolute inset-x-0 bottom-0 border-b border-white/[0.1] pointer-events-none" />
 
-              {displayedBars.map((bar, idx) => {
-                const isActive = selectedBarIndex === idx;
-                const heightPct = Math.min(
-                  94,
-                  Math.max(bar.value > 0 ? 20 : 6, Math.round((bar.value / peakMonthlyScans) * 88))
-                );
+                {displayedBars.map((bar, idx) => {
+                  const isActive = selectedBarIndex === idx;
+                  const hasValue = bar.value > 0;
+                  const heightPct = hasValue
+                    ? Math.min(96, Math.max(8, Math.round((bar.value / peakMonthlyScans) * 92)))
+                    : 0;
 
-                return (
-                  <div
-                    key={bar.month}
-                    onClick={() => setSelectedBarIndex(idx)}
-                    className="flex-1 flex flex-col items-center justify-end h-full group cursor-pointer relative overflow-visible"
-                  >
-                    {/* The Full Capsule Slot Track */}
-                    <div className="w-full max-w-[32px] sm:max-w-[40px] h-[72%] bg-[#14161F] rounded-full relative flex flex-col justify-end items-center p-0.5 group-hover:bg-[#1C1F2B] transition-colors">
-                      
-                      {/* INACTIVE CAPSULE: Authentic Diagonal Hatching Fill + Crisp White Horizontal Notch */}
-                      {!isActive && (
+                  return (
+                    <div
+                      key={bar.month}
+                      onClick={() => setSelectedBarIndex(idx)}
+                      className="flex-1 h-full flex flex-col justify-end items-center group cursor-pointer relative"
+                    >
+                      {hasValue ? (
                         <div
                           style={{ height: `${heightPct}%` }}
-                          className="w-full rounded-full bg-[#20232F] relative flex flex-col justify-start items-center overflow-hidden transition-all duration-300"
+                          className={`w-full max-w-[28px] sm:max-w-[34px] rounded-t-md relative transition-all duration-200 ${
+                            isActive
+                              ? 'bg-gradient-to-t from-blue-600 to-blue-400 shadow-[0_0_20px_rgba(59,130,246,0.35)]'
+                              : 'bg-white/[0.12] border-t border-white/25 group-hover:bg-white/[0.22]'
+                          }`}
                         >
-                          {/* Diagonal Hatch Texture matching reference mockup */}
-                          <div
-                            style={{
-                              backgroundImage:
-                                'repeating-linear-gradient(45deg, rgba(255,255,255,0.04), rgba(255,255,255,0.04) 1.5px, transparent 1.5px, transparent 5px)',
-                            }}
-                            className="absolute inset-0 pointer-events-none"
-                          />
-                          {/* Horizontal White Level Indicator Pill */}
-                          <div className="w-[70%] h-[3.5px] bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.8)] shrink-0 z-10" />
+                          {/* Crisp Non-Overlapping Tooltip above Active Bar */}
+                          {isActive && (
+                            <div
+                              style={{ bottom: 'calc(100% + 6px)' }}
+                              className="absolute left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-md bg-white text-[#090A0E] text-[10px] font-bold font-mono shadow-lg whitespace-nowrap z-20 pointer-events-none"
+                            >
+                              {bar.value.toLocaleString()}
+                              <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-white" />
+                            </div>
+                          )}
                         </div>
-                      )}
-
-                      {/* ACTIVE CAPSULE: Solid Luminous Blue Gradient Pill + Floating Caret Badge */}
-                      {isActive && (
-                        <div
-                          style={{ height: `${heightPct}%` }}
-                          className="w-full bg-gradient-to-b from-[#5B8DEF] to-[#336DE3] rounded-full relative flex flex-col justify-end items-center pb-2 shadow-[0_0_24px_rgba(78,130,238,0.55)] transition-all animate-in zoom-in-95 duration-200"
-                        >
-                          {/* Floating Blue Pill Badge above the bar (unclipped with ample headroom) */}
-                          <div className="absolute -top-6.5 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-[#4E82EE] text-white text-[9px] font-bold rounded-full shadow-lg flex items-center gap-0.5 whitespace-nowrap z-30 pointer-events-none">
-                            <span>▲ {bar.value} Scans</span>
-                            <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-[#4E82EE]" />
-                          </div>
-
-                          {/* Inside Real Value Label */}
-                          <span className="text-[10px] font-bold text-white tracking-tight leading-none z-10 font-mono">
-                            {bar.value}
-                          </span>
-                        </div>
+                      ) : (
+                        <div className="w-full max-w-[28px] sm:max-w-[34px] h-[2px] rounded-full bg-white/[0.12] group-hover:bg-white/25 transition-colors" />
                       )}
                     </div>
+                  );
+                })}
+              </div>
 
-                    {/* Month Label below */}
-                    <span
-                      className={`text-[10px] font-mono mt-1.5 transition-colors ${
-                        isActive ? 'text-white font-bold' : 'text-white/40 group-hover:text-white/70'
+              {/* X-Axis Month Labels */}
+              <div className="flex items-center justify-between gap-2 sm:gap-3 px-1 pt-2 h-5 shrink-0">
+                {displayedBars.map((bar, idx) => {
+                  const isActive = selectedBarIndex === idx;
+                  return (
+                    <button
+                      key={bar.month}
+                      type="button"
+                      onClick={() => setSelectedBarIndex(idx)}
+                      className={`flex-1 text-center text-[10px] font-mono transition-colors cursor-pointer ${
+                        isActive ? 'text-white font-semibold' : 'text-white/40 hover:text-white/70'
                       }`}
                     >
                       {bar.month}
-                    </span>
-                  </div>
-                );
-              })}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 

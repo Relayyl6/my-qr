@@ -301,35 +301,29 @@ export default function WorkspaceShell({
 
   const navSections = [
     {
-      group: 'MAIN WORKSPACE',
+      group: 'WORKSPACE',
       items: [
         {
           id: 'overview' as WorkspaceSection,
           label: 'Overview',
           icon: LayoutDashboard,
-          badge: 'Live',
-          badgeColor: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
         },
         {
           id: 'all' as WorkspaceSection,
-          label: 'Complete Workspace',
+          label: 'All Tools',
           icon: Layers,
-          badge: 'All Tools',
-          badgeColor: 'bg-blue-500/10 text-blue-700 dark:text-blue-400',
         },
         {
           id: 'links' as WorkspaceSection,
           label: 'Dynamic QR Links',
           icon: QrCode,
           badge: `${activeLinksCount}`,
-          badgeColor: 'bg-[#11140F]/10 dark:bg-white/10 text-[#11140F] dark:text-white',
+          badgeColor: 'bg-[#11140F]/8 dark:bg-white/10 text-[#11140F]/70 dark:text-white/70',
         },
         {
           id: 'analyst' as WorkspaceSection,
-          label: 'AI Campaign Analyst',
+          label: 'Campaign Analyst',
           icon: Sparkles,
-          badge: 'AI',
-          badgeColor: 'bg-purple-500/10 text-purple-700 dark:text-purple-400',
         },
         {
           id: 'domains' as WorkspaceSection,
@@ -339,14 +333,12 @@ export default function WorkspaceShell({
       ],
     },
     {
-      group: 'MICRO-SAAS ECOSYSTEM',
+      group: 'APPS & SERVICES',
       items: [
         {
           id: 'mailing' as WorkspaceSection,
           label: 'Mailing Lists & Print',
           icon: Mail,
-          badge: 'Print QR',
-          badgeColor: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
         },
         {
           id: 'vcard' as WorkspaceSection,
@@ -357,8 +349,6 @@ export default function WorkspaceShell({
           id: 'shortener' as WorkspaceSection,
           label: 'Smart Link Shortener',
           icon: Link2,
-          badge: 'OS Route',
-          badgeColor: 'bg-blue-500/10 text-blue-700 dark:text-blue-400',
         },
         {
           id: 'menu' as WorkspaceSection,
@@ -367,19 +357,72 @@ export default function WorkspaceShell({
         },
         {
           id: 'wifi' as WorkspaceSection,
-          label: 'Dynamic Guest Wi-Fi',
+          label: 'Guest Wi-Fi',
           icon: Wifi,
         },
         {
           id: 'namelaunch' as WorkspaceSection,
-          label: 'Domains & Email (₦)',
+          label: 'Domains & Email',
           icon: AtSign,
-          badge: 'Paystack',
-          badgeColor: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
         },
       ],
     },
   ];
+
+  const sectionHeaderMeta: Record<string, { breadcrumb: string; title: string; subtitle: string }> = {
+    all: {
+      breadcrumb: 'All Tools',
+      title: `Welcome, ${userName}`,
+      subtitle: 'Manage dynamic QR links, scan intelligence, custom domains, and workspace tools.',
+    },
+    links: {
+      breadcrumb: 'Dynamic QR Links',
+      title: 'Dynamic QR Links',
+      subtitle: 'Create, customize, and route trackable QR codes with instant destination control.',
+    },
+    analyst: {
+      breadcrumb: 'Campaign Analyst',
+      title: 'Campaign Analyst',
+      subtitle: 'Scan performance diagnostics, audience trends, and optimization recommendations.',
+    },
+    domains: {
+      breadcrumb: 'Branded Domains',
+      title: 'Branded Domains',
+      subtitle: 'Connect your own domain to serve shortlinks and print assets under your brand.',
+    },
+    mailing: {
+      breadcrumb: 'Mailing Lists & Print',
+      title: 'Mailing Lists & Print',
+      subtitle: 'Collect subscriber leads via QR opt-in and generate print-ready campaign layouts.',
+    },
+    vcard: {
+      breadcrumb: 'Digital vCards',
+      title: 'Digital vCards',
+      subtitle: 'Interactive mobile business cards with instant one-tap contact saving.',
+    },
+    shortener: {
+      breadcrumb: 'Smart Link Shortener',
+      title: 'Smart Link Shortener',
+      subtitle: 'Short URLs with intelligent device, schedule, and location-aware routing.',
+    },
+    menu: {
+      breadcrumb: 'Restaurant Menus',
+      title: 'Restaurant Menus',
+      subtitle: 'Contactless digital menus with instant item updates and table QR codes.',
+    },
+    wifi: {
+      breadcrumb: 'Guest Wi-Fi',
+      title: 'Guest Wi-Fi',
+      subtitle: 'Instant one-scan Wi-Fi access portals for offices, venues, and hospitality.',
+    },
+    namelaunch: {
+      breadcrumb: 'Domains & Email',
+      title: 'Domains & Business Email',
+      subtitle: 'Register custom domains with managed DNS and branded business email forwarding.',
+    },
+  };
+
+  const activeMeta = sectionHeaderMeta[activeSection] || sectionHeaderMeta.all;
 
   return (
     <div className={`w-full min-h-screen ${activeSection === 'overview' ? 'bg-[#090A0E] text-white' : 'bg-[#F4F5F1] dark:bg-[#080907] text-[#11140F] dark:text-[#EEF0EA]'} flex flex-col md:flex-row relative transition-colors duration-200`}>
@@ -589,7 +632,7 @@ export default function WorkspaceShell({
               ) : (
                 idx > 0 && <div className="w-7 h-px bg-[#11140F]/10 dark:bg-white/10 mx-auto my-2" />
               )}
-              {group.items.map((item) => {
+              {group.items.map((item: { id: WorkspaceSection; label: string; icon: any; badge?: string; badgeColor?: string }) => {
                 const Icon = item.icon;
                 const isActive = activeSection === item.id;
                 return (
@@ -597,30 +640,30 @@ export default function WorkspaceShell({
                     key={item.id}
                     type="button"
                     onClick={() => handleSelectSection(item.id)}
-                    className={`relative rounded-xl text-xs font-medium transition-all cursor-pointer ${
+                    className={`relative rounded-xl text-[12.5px] font-medium transition-all cursor-pointer ${
                       sidebarCollapsed
                         ? `w-10 h-10 flex items-center justify-center mx-auto ${
                             isActive
                               ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] shadow-xs'
-                              : 'text-[#11140F]/70 dark:text-white/70 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white'
+                              : 'text-[#11140F]/70 dark:text-white/65 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white'
                           }`
-                        : `w-full flex items-center gap-3 px-3 py-2.5 ${
+                        : `w-full flex items-center gap-2.5 px-3 py-2 ${
                             isActive
                               ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] font-semibold shadow-xs'
-                              : 'text-[#11140F]/70 dark:text-white/70 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white'
+                              : 'text-[#11140F]/70 dark:text-white/65 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white'
                           }`
                     }`}
                     title={item.label}
                   >
-                    <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-emerald-400 dark:text-[#2F6B4F]' : ''}`} />
+                    <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-emerald-400 dark:text-[#2F6B4F]' : 'opacity-75'}`} />
                     {!sidebarCollapsed && (
                       <span className="truncate flex-1 text-left">{item.label}</span>
                     )}
                     {!sidebarCollapsed && item.badge && (
                       <span
-                        className={`text-[9.5px] px-1.5 py-0.5 rounded-full font-mono uppercase font-bold shrink-0 ${
+                        className={`text-[10px] px-1.5 py-0.5 rounded-md font-mono font-medium shrink-0 ${
                           isActive
-                            ? 'bg-white/20 dark:bg-black/20 text-white dark:text-black'
+                            ? 'bg-white/15 dark:bg-black/15 text-white dark:text-[#11140F]'
                             : item.badgeColor
                         }`}
                       >
@@ -628,7 +671,7 @@ export default function WorkspaceShell({
                       </span>
                     )}
                     {sidebarCollapsed && item.badge && (
-                      <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-[#0D0F0C]" />
+                      <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500" />
                     )}
                   </button>
                 );
@@ -636,105 +679,105 @@ export default function WorkspaceShell({
             </div>
           ))}
 
-          {/* Alternate Platform Navigation & Utilities */}
-          <div className="pt-2 border-t border-[#11140F]/10 dark:border-white/10 space-y-1">
+          {/* Platform Navigation & Utilities */}
+          <div className="pt-2 border-t border-[#11140F]/10 dark:border-white/10 space-y-0.5">
             {!sidebarCollapsed && (
-              <div className="px-3 py-1 text-[10px] font-mono uppercase tracking-wider font-bold text-[#11140F]/40 dark:text-white/40">
-                PLATFORM & UTILITIES
+              <div className="px-3 py-1 text-[10px] font-mono uppercase tracking-wider font-semibold text-[#11140F]/40 dark:text-white/40">
+                PLATFORM
               </div>
             )}
 
             <Link
               href="/product-tour"
-              className={`rounded-xl text-xs font-medium transition-all ${
+              className={`rounded-xl text-[12.5px] font-medium transition-all ${
                 sidebarCollapsed
-                  ? 'w-10 h-10 flex items-center justify-center mx-auto text-[#11140F]/70 dark:text-white/70 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white'
-                  : 'w-full flex items-center gap-3 px-3 py-2.5 text-[#11140F]/70 dark:text-white/70 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white'
+                  ? 'w-10 h-10 flex items-center justify-center mx-auto text-[#11140F]/65 dark:text-white/65 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white'
+                  : 'w-full flex items-center gap-2.5 px-3 py-2 text-[#11140F]/65 dark:text-white/65 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white'
               }`}
               title="Product Tour"
             >
-              <Compass className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+              <Compass className="w-4 h-4 shrink-0 opacity-75" />
               {!sidebarCollapsed && <span className="truncate flex-1 text-left">Product Tour</span>}
             </Link>
 
             <Link
               href="/pricing"
-              className={`rounded-xl text-xs font-medium transition-all ${
+              className={`rounded-xl text-[12.5px] font-medium transition-all ${
                 sidebarCollapsed
-                  ? 'w-10 h-10 flex items-center justify-center mx-auto text-[#11140F]/70 dark:text-white/70 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white'
-                  : 'w-full flex items-center gap-3 px-3 py-2.5 text-[#11140F]/70 dark:text-white/70 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white'
+                  ? 'w-10 h-10 flex items-center justify-center mx-auto text-[#11140F]/65 dark:text-white/65 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white'
+                  : 'w-full flex items-center gap-2.5 px-3 py-2 text-[#11140F]/65 dark:text-white/65 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white'
               }`}
               title="Pricing Plans"
             >
-              <CreditCard className="w-4 h-4 shrink-0" />
+              <CreditCard className="w-4 h-4 shrink-0 opacity-75" />
               {!sidebarCollapsed && <span className="truncate flex-1 text-left">Pricing Plans</span>}
             </Link>
 
             <button
               type="button"
               onClick={() => setShowBulkModal(true)}
-              className={`rounded-xl text-xs font-medium transition-all cursor-pointer ${
+              className={`rounded-xl text-[12.5px] font-medium transition-all cursor-pointer ${
                 sidebarCollapsed
-                  ? 'w-10 h-10 flex items-center justify-center mx-auto text-[#11140F]/70 dark:text-white/70 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white'
-                  : 'w-full flex items-center gap-3 px-3 py-2.5 text-[#11140F]/70 dark:text-white/70 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white'
+                  ? 'w-10 h-10 flex items-center justify-center mx-auto text-[#11140F]/65 dark:text-white/65 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white'
+                  : 'w-full flex items-center gap-2.5 px-3 py-2 text-[#11140F]/65 dark:text-white/65 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white'
               }`}
-              title="Bulk Import (AI)"
+              title="Bulk Import"
             >
-              <Layers className="w-4 h-4 shrink-0 text-purple-600 dark:text-purple-400" />
-              {!sidebarCollapsed && <span className="truncate flex-1 text-left">Bulk Import (AI)</span>}
+              <Layers className="w-4 h-4 shrink-0 opacity-75" />
+              {!sidebarCollapsed && <span className="truncate flex-1 text-left">Bulk Import</span>}
             </button>
 
             {isAdmin && (
               <>
                 <Link
                   href="/admin"
-                  className={`rounded-xl text-xs font-medium transition-all ${
+                  className={`rounded-xl text-[12.5px] font-medium transition-all ${
                     sidebarCollapsed
                       ? 'w-10 h-10 flex items-center justify-center mx-auto text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10'
-                      : 'w-full flex items-center gap-3 px-3 py-2.5 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10'
+                      : 'w-full flex items-center gap-2.5 px-3 py-2 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10'
                   }`}
                   title="Admin Console"
                 >
-                  <Shield className="w-4 h-4 shrink-0" />
+                  <Shield className="w-4 h-4 shrink-0 opacity-85" />
                   {!sidebarCollapsed && <span className="truncate flex-1 text-left">Admin Console</span>}
                 </Link>
 
                 <Link
                   href="/admin/ai-usage"
-                  className={`rounded-xl text-xs font-medium transition-all ${
+                  className={`rounded-xl text-[12.5px] font-medium transition-all ${
                     sidebarCollapsed
-                      ? 'w-10 h-10 flex items-center justify-center mx-auto text-purple-700 dark:text-purple-400 hover:bg-purple-500/10'
-                      : 'w-full flex items-center gap-3 px-3 py-2.5 text-purple-700 dark:text-purple-400 hover:bg-purple-500/10'
+                      ? 'w-10 h-10 flex items-center justify-center mx-auto text-[#11140F]/65 dark:text-white/65 hover:bg-[#11140F]/5 dark:hover:bg-white/5'
+                      : 'w-full flex items-center gap-2.5 px-3 py-2 text-[#11140F]/65 dark:text-white/65 hover:bg-[#11140F]/5 dark:hover:bg-white/5'
                   }`}
                   title="AI Telemetry"
                 >
-                  <Activity className="w-4 h-4 shrink-0" />
+                  <Activity className="w-4 h-4 shrink-0 opacity-75" />
                   {!sidebarCollapsed && <span className="truncate flex-1 text-left">AI Telemetry</span>}
                 </Link>
 
                 <Link
                   href="/admin/analytics"
-                  className={`rounded-xl text-xs font-medium transition-all ${
+                  className={`rounded-xl text-[12.5px] font-medium transition-all ${
                     sidebarCollapsed
-                      ? 'w-10 h-10 flex items-center justify-center mx-auto text-blue-700 dark:text-blue-400 hover:bg-blue-500/10'
-                      : 'w-full flex items-center gap-3 px-3 py-2.5 text-blue-700 dark:text-blue-400 hover:bg-blue-500/10'
+                      ? 'w-10 h-10 flex items-center justify-center mx-auto text-[#11140F]/65 dark:text-white/65 hover:bg-[#11140F]/5 dark:hover:bg-white/5'
+                      : 'w-full flex items-center gap-2.5 px-3 py-2 text-[#11140F]/65 dark:text-white/65 hover:bg-[#11140F]/5 dark:hover:bg-white/5'
                   }`}
                   title="Analytics Hub"
                 >
-                  <TrendingUp className="w-4 h-4 shrink-0" />
+                  <TrendingUp className="w-4 h-4 shrink-0 opacity-75" />
                   {!sidebarCollapsed && <span className="truncate flex-1 text-left">Analytics Hub</span>}
                 </Link>
 
                 <Link
                   href="/admin/sessions"
-                  className={`rounded-xl text-xs font-medium transition-all ${
+                  className={`rounded-xl text-[12.5px] font-medium transition-all ${
                     sidebarCollapsed
-                      ? 'w-10 h-10 flex items-center justify-center mx-auto text-rose-700 dark:text-rose-400 hover:bg-rose-500/10'
-                      : 'w-full flex items-center gap-3 px-3 py-2.5 text-rose-700 dark:text-rose-400 hover:bg-rose-500/10'
+                      ? 'w-10 h-10 flex items-center justify-center mx-auto text-[#11140F]/65 dark:text-white/65 hover:bg-[#11140F]/5 dark:hover:bg-white/5'
+                      : 'w-full flex items-center gap-2.5 px-3 py-2 text-[#11140F]/65 dark:text-white/65 hover:bg-[#11140F]/5 dark:hover:bg-white/5'
                   }`}
                   title="Session Replay"
                 >
-                  <Video className="w-4 h-4 shrink-0" />
+                  <Video className="w-4 h-4 shrink-0 opacity-75" />
                   {!sidebarCollapsed && <span className="truncate flex-1 text-left">Session Replay</span>}
                 </Link>
               </>
@@ -744,17 +787,17 @@ export default function WorkspaceShell({
 
         {/* User Profile Card (Bottom of Sidebar) */}
         {user && (
-          <div className="p-2 lg:p-3 border-t border-[#11140F]/10 dark:border-white/10 shrink-0 bg-white/50 dark:bg-[#0D0F0C]/50">
+          <div className="p-2 lg:p-3 border-t border-[#11140F]/10 dark:border-white/10 shrink-0">
             {!sidebarCollapsed ? (
-              <div className="flex items-center justify-between gap-2 p-1.5 rounded-xl bg-[#11140F]/[0.03] dark:bg-white/[0.03]">
-                {/* Avatar & User Details */}
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <button
-                    type="button"
-                    onClick={() => setShowAccountModal(true)}
-                    className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-tr from-emerald-600 to-[#11140F] text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-xs hover:ring-2 hover:ring-emerald-500/50 transition-all cursor-pointer"
-                    title="Account Settings"
-                  >
+              <div className="flex items-center justify-between gap-2 p-1.5 rounded-xl hover:bg-[#11140F]/[0.04] dark:hover:bg-white/[0.04] transition-colors">
+                {/* Entire Identity Area Clickable for Settings */}
+                <button
+                  type="button"
+                  onClick={() => setShowAccountModal(true)}
+                  className="flex items-center gap-2.5 min-w-0 flex-1 text-left cursor-pointer group"
+                  title="Account Settings"
+                >
+                  <div className="w-8 h-8 rounded-full overflow-hidden bg-[#11140F] dark:bg-white/15 text-white flex items-center justify-center text-xs font-semibold shrink-0 ring-1 ring-black/10 dark:ring-white/15">
                     {userAvatar ? (
                       <img
                         src={getOptimizedStorageUrl(userAvatar)}
@@ -766,41 +809,31 @@ export default function WorkspaceShell({
                     ) : (
                       userInitial
                     )}
-                  </button>
-                  <div className="min-w-0">
+                  </div>
+                  <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-bold text-[#11140F] dark:text-white truncate">
+                      <span className="text-xs font-semibold text-[#11140F] dark:text-white truncate group-hover:underline">
                         {userName}
                       </span>
-                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 font-bold">
+                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[#11140F]/8 dark:bg-white/10 text-[#11140F]/70 dark:text-white/70 font-semibold uppercase">
                         {tierName}
                       </span>
                     </div>
-                    <span className="text-[11px] text-[#11140F]/50 dark:text-white/50 truncate block">
+                    <span className="text-[11px] text-[#11140F]/50 dark:text-white/45 truncate block">
                       {user.email}
                     </span>
                   </div>
-                </div>
+                </button>
 
-                {/* Settings & Logout Actions */}
-                <div className="flex items-center gap-1 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => setShowAccountModal(true)}
-                    className="p-1.5 rounded-lg text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white hover:bg-[#11140F]/10 dark:hover:bg-white/10 transition-colors cursor-pointer"
-                    title="Account & Privacy Settings"
-                  >
-                    <Settings className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => signOut()}
-                    className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
-                    title="Log Out"
-                  >
-                    <LogOut className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+                {/* Subtle Logout Action */}
+                <button
+                  type="button"
+                  onClick={() => signOut()}
+                  className="p-1.5 rounded-lg text-[#11140F]/45 dark:text-white/45 hover:text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer shrink-0"
+                  title="Log Out"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
               </div>
             ) : (
               <div className="flex flex-col items-center gap-2 py-1">
@@ -907,7 +940,7 @@ export default function WorkspaceShell({
                   <div className="text-[10px] font-mono uppercase tracking-wider font-bold text-[#11140F]/40 dark:text-white/40 px-2">
                     {group.group}
                   </div>
-                  {group.items.map((item) => {
+                  {group.items.map((item: { id: WorkspaceSection; label: string; icon: any; badge?: string }) => {
                     const Icon = item.icon;
                     const isActive = activeSection === item.id;
                     return (
@@ -917,14 +950,14 @@ export default function WorkspaceShell({
                         onClick={() => handleSelectSection(item.id)}
                         className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
                           isActive
-                            ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] font-bold'
+                            ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] font-semibold'
                             : 'text-[#11140F]/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5'
                         }`}
                       >
-                        <Icon className="w-4 h-4 shrink-0" />
+                        <Icon className="w-4 h-4 shrink-0 opacity-80" />
                         <span className="truncate flex-1 text-left">{item.label}</span>
                         {item.badge && (
-                          <span className="text-[9.5px] px-1.5 py-0.5 rounded-full font-mono uppercase font-bold">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-md font-mono font-medium opacity-75">
                             {item.badge}
                           </span>
                         )}
@@ -1075,63 +1108,58 @@ export default function WorkspaceShell({
             : 'p-4 sm:p-6 lg:p-8 space-y-6'
         }`}
       >
-        {/* Main Header Row (Suppressed on 'overview' to fit single desktop screen without scroll) */}
+        {/* Unified Contextual Page Header (Consistent across all sidebar menu pages) */}
         {activeSection !== 'overview' && (
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-[#11140F]/10 dark:border-white/10">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#11140F]/10 dark:border-white/10">
             <div>
-              <div className="flex items-center gap-2 text-xs font-mono text-[#11140F]/50 dark:text-white/50">
-                <span>DynamicQR</span>
+              <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#11140F]/45 dark:text-white/45">
+                <span>Workspace</span>
                 <span>/</span>
-                <span className="text-emerald-700 dark:text-emerald-400 font-semibold uppercase">
-                  {activeSection === 'all'
-                    ? 'All Services'
-                    : isMicroSaasSection
-                    ? `Micro-SaaS • ${activeSection}`
-                    : activeSection}
+                <span className="text-[#11140F]/80 dark:text-white/80">
+                  {activeMeta.breadcrumb}
                 </span>
               </div>
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#11140F] dark:text-white mt-0.5">
-                Welcome, {userName}!
+              <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-[#11140F] dark:text-white mt-1">
+                {activeMeta.title}
               </h1>
-              <p className="text-xs sm:text-[13px] text-[#11140F]/60 dark:text-white/60">
-                Manage dynamic routes, review scan intelligence, and dispatch physical print campaigns.
+              <p className="text-xs sm:text-[13px] text-[#11140F]/60 dark:text-white/55 mt-0.5">
+                {activeMeta.subtitle}
               </p>
             </div>
 
-            {/* Top Quick Actions & Stat Pills */}
-            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-              {/* Promo Modal Preview Trigger (Admin only) */}
+            {/* Clean Quick Actions */}
+            <div className="flex items-center gap-2 flex-wrap">
               {isAdmin && (
                 <button
                   type="button"
                   onClick={() => setShowPromoModalPreview(true)}
-                  className="px-3.5 py-1.5 rounded-xl border border-dashed border-[#11140F]/20 dark:border-white/20 bg-white/70 dark:bg-[#11140F] hover:bg-white text-xs font-semibold text-[#11140F] dark:text-white transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer"
+                  className="px-3 py-1.5 rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.04] hover:bg-black/[0.03] dark:hover:bg-white/[0.08] text-xs font-medium text-[#11140F]/80 dark:text-white/80 transition-colors flex items-center gap-1.5 cursor-pointer"
                   title="Test Promotional Entry Popup"
                 >
-                  <Eye className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Test Promo Modal</span>
+                  <Eye className="w-3.5 h-3.5 opacity-70" />
+                  <span>Preview Promo</span>
                 </button>
               )}
 
-              {/* Quick Create Button */}
-              <button
-                type="button"
-                onClick={handleCreateNewClick}
-                className="px-3.5 py-1.5 rounded-xl bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] text-xs font-bold hover:bg-[#2A2E25] transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5 text-emerald-400 dark:text-[#2F6B4F]" />
-                <span>New QR Link</span>
-              </button>
+              {activeSection !== 'links' && (
+                <button
+                  type="button"
+                  onClick={handleCreateNewClick}
+                  className="px-3.5 py-1.5 rounded-lg bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] text-xs font-semibold hover:opacity-90 transition-opacity flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>New QR Link</span>
+                </button>
+              )}
 
-              {/* View Mode Toggle */}
               {activeSection !== 'all' && (
                 <button
                   type="button"
                   onClick={() => handleSelectSection('all')}
-                  className="px-3 py-1.5 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#11140F] text-xs font-semibold text-[#11140F] dark:text-white hover:bg-[#11140F]/5 transition-all shadow-2xs cursor-pointer flex items-center gap-1.5"
+                  className="px-3 py-1.5 rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.04] text-xs font-medium text-[#11140F]/80 dark:text-white/80 hover:bg-black/[0.03] dark:hover:bg-white/[0.08] transition-colors cursor-pointer flex items-center gap-1.5"
                 >
-                  <LayoutDashboard className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Show All Tools</span>
+                  <LayoutDashboard className="w-3.5 h-3.5 opacity-70" />
+                  <span>All Tools</span>
                 </button>
               )}
             </div>
@@ -1207,6 +1235,7 @@ export default function WorkspaceShell({
             <MicroSaasHub
               userTier={user?.tier || 'free'}
               isAdmin={isAdmin}
+              hideHeader={true}
               externalActiveTab={microSaasTab}
               onTabChange={(t) => {
                 setMicroSaasTab(t);
@@ -1223,7 +1252,7 @@ export default function WorkspaceShell({
           </div>
         )}
 
-        {/* VIEW 11: NAMELAUNCH DOMAINS & BUSINESS EMAIL (PAYSTACK STOREFRONT) */}
+        {/* VIEW 11: DOMAINS & BUSINESS EMAIL */}
         {activeSection === 'namelaunch' && (
           <div className="space-y-6">
             <NameLaunchService user={user} isAdmin={isAdmin} />

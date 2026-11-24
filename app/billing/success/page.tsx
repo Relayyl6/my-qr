@@ -58,7 +58,7 @@ export default async function BillingSuccessPage({
             Welcome to DynamicQR {tierName.toUpperCase()}
           </h1>
           <p className="text-[14px] sm:text-[15px] text-[#11140F]/60 leading-relaxed">
-            Your Paystack payment was confirmed. Advanced AI dynamic routing, high-res 300 DPI exports, branded custom domains, and generous monthly AI budgets are now fully active on your account.
+            Your payment has been confirmed. Advanced dynamic routing, high-res 300 DPI exports, branded custom domains, and monthly AI budgets are now active on your account.
           </p>
           {searchParams.ref && (
             <p className="text-[11.5px] font-mono text-slate-500 bg-slate-50 border border-slate-200 rounded-lg py-1 px-2.5 inline-block">

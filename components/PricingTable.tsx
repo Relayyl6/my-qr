@@ -373,7 +373,6 @@ function PricingTableContent({ currentTier, isLoggedIn }: PricingTableProps) {
                 <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-[#2F6B4F]/10 dark:bg-[#34D399]/15 text-[#2F6B4F] dark:text-[#34D399] font-mono text-[11px] font-bold">
                   ₦{calcNgn(interval === 'year' ? proAnnualTotal.discounted : proMonthly.discounted).toLocaleString()} {interval === 'year' ? '/yr' : '/mo'}
                 </span>
-                <span className="text-[10px] text-[#11140F]/50 dark:text-white/50">via Paystack</span>
               </div>
               {interval === 'year' && (
                 <div className="mt-1 text-[11px] font-medium text-[#2F6B4F] dark:text-[#34D399]">
@@ -447,7 +446,7 @@ function PricingTableContent({ currentTier, isLoggedIn }: PricingTableProps) {
                 'Current Plan'
               ) : (
                 <>
-                  Upgrade with Paystack
+                  Upgrade to Pro
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -488,7 +487,6 @@ function PricingTableContent({ currentTier, isLoggedIn }: PricingTableProps) {
                 <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 font-mono text-[11px] font-bold">
                   ₦{calcNgn(interval === 'year' ? plusAnnualTotal.discounted : plusMonthly.discounted).toLocaleString()} {interval === 'year' ? '/yr' : '/mo'}
                 </span>
-                <span className="text-[10px] text-[#11140F]/50 dark:text-white/50">via Paystack</span>
               </div>
               {interval === 'year' && (
                 <div className="mt-1 text-[11px] font-medium text-[#2F6B4F] dark:text-[#34D399]">
@@ -562,7 +560,7 @@ function PricingTableContent({ currentTier, isLoggedIn }: PricingTableProps) {
                 'Current Plan'
               ) : (
                 <>
-                  Upgrade with Paystack
+                  Upgrade to Plus
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -603,7 +601,6 @@ function PricingTableContent({ currentTier, isLoggedIn }: PricingTableProps) {
                 <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-purple-50 dark:bg-purple-950/40 text-purple-900 dark:text-purple-300 font-mono text-[11px] font-bold">
                   ₦{calcNgn(interval === 'year' ? ultraAnnualTotal.discounted : ultraMonthly.discounted).toLocaleString()} {interval === 'year' ? '/yr' : '/mo'}
                 </span>
-                <span className="text-[10px] text-[#11140F]/50 dark:text-white/50">via Paystack</span>
               </div>
               {interval === 'year' && (
                 <div className="mt-1 text-[11px] font-medium text-[#2F6B4F] dark:text-[#34D399]">
@@ -677,7 +674,7 @@ function PricingTableContent({ currentTier, isLoggedIn }: PricingTableProps) {
                 'Current Plan'
               ) : (
                 <>
-                  Upgrade with Paystack
+                  Upgrade to Ultra
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -686,15 +683,14 @@ function PricingTableContent({ currentTier, isLoggedIn }: PricingTableProps) {
         </div>
       </div>
 
-      {/* Paystack Payment Trust & Currency Guarantee */}
-      <div className="max-w-2xl mx-auto text-center p-4 rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5] dark:bg-white/5 space-y-2">
+      {/* Payment Trust & Currency Guarantee */}
+      <div className="max-w-2xl mx-auto text-center p-4 rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5] dark:bg-white/5 space-y-1.5">
         <div className="flex items-center justify-center gap-2 text-xs font-semibold text-[#11140F] dark:text-white">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span>Secured by Paystack • Instant Automated Provisioning</span>
+          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+          <span>Instant Automated Activation</span>
         </div>
-        <p className="text-[12px] text-[#11140F]/70 dark:text-white/70 leading-relaxed">
-          Accepting Debit &amp; Credit Cards (Mastercard, Visa, Verve), Bank Transfers, USSD, and Apple Pay.
-          All subscription fees are converted to Naira using the platform’s live buffered exchange rate (~₦{fxRate.toLocaleString()}/$1) with zero hidden transaction markups.
+        <p className="text-[12px] text-[#11140F]/65 dark:text-white/65 leading-relaxed">
+          Accepting Debit &amp; Credit Cards (Mastercard, Visa, Verve), Bank Transfers, USSD, and Apple Pay with zero hidden fees.
         </p>
       </div>
     </div>

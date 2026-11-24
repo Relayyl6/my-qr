@@ -166,7 +166,7 @@ export default function DnsManagerModal({ orderId, domainName, onClose }: Props)
           <div className="p-3.5 rounded-xl bg-[#F7F8F5] dark:bg-white/[0.03] border border-[#11140F]/10 dark:border-white/10 flex items-center justify-between gap-3 text-xs">
             <div className="space-y-0.5">
               <span className="font-semibold text-emerald-700 dark:text-emerald-400 uppercase font-mono text-[10px]">
-                Active Cloudflare Nameservers:
+                Active Edge Nameservers:
               </span>
               <div className="font-mono text-[#11140F]/80 dark:text-white/80">
                 {nameservers.join('  •  ')}
@@ -320,7 +320,7 @@ export default function DnsManagerModal({ orderId, domainName, onClose }: Props)
                   }}
                   className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
                 />
-                <span className="font-medium">Cloudflare Proxy (CDN &amp; DDoS protection)</span>
+                <span className="font-medium">Edge Proxy (CDN &amp; DDoS protection)</span>
                 <span className="text-[11px] text-[#11140F]/40 dark:text-white/40">
                   (Keep OFF for Vercel/Netlify custom domains)
                 </span>

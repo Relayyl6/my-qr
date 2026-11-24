@@ -340,24 +340,24 @@ export default function HeaderNav({
                     />
                   </button>
 
-                  {/* Sleek Glassmorphic Dropdown Menu */}
+                  {/* Clean Dropdown Menu */}
                   {userMenuOpen && (
                     <div
-                      className={`absolute right-0 top-full mt-2 w-64 rounded-2xl border shadow-2xl backdrop-blur-xl p-2 z-50 animate-in fade-in zoom-in-95 duration-150 ${
+                      className={`absolute right-0 top-full mt-2 w-60 rounded-xl border shadow-xl p-1.5 z-50 ${
                         isDark
-                          ? 'bg-[#141912]/95 border-white/15 text-white shadow-black/70'
-                          : 'bg-white/98 dark:bg-[#141912]/95 border-[#11140F]/12 dark:border-white/15 text-[#11140F] dark:text-white shadow-xl'
+                          ? 'bg-[#141615] border-white/12 text-white shadow-black/60'
+                          : 'bg-white dark:bg-[#141615] border-[#11140F]/12 dark:border-white/12 text-[#11140F] dark:text-white'
                       }`}
                     >
-                      {/* Identity Header Card with Badges & Avatar */}
+                      {/* Identity Header */}
                       <div
-                        className={`p-3 mb-1.5 rounded-xl border flex items-center gap-2.5 ${
+                        className={`px-2.5 py-2 mb-1 border-b flex items-center gap-2.5 ${
                           isDark
-                            ? 'bg-white/[0.04] border-white/10'
-                            : 'bg-[#11140F]/[0.03] dark:bg-white/[0.04] border-[#11140F]/5 dark:border-white/10'
+                            ? 'border-white/10'
+                            : 'border-[#11140F]/8 dark:border-white/10'
                         }`}
                       >
-                        <div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-tr from-emerald-600 via-teal-500 to-emerald-400 text-white font-bold text-xs flex items-center justify-center shadow-xs ring-1 ring-white/20 shrink-0">
+                        <div className="w-8 h-8 rounded-full overflow-hidden bg-[#11140F] dark:bg-white/15 text-white font-semibold text-xs flex items-center justify-center shrink-0">
                           {avatarUrl && !avatarError ? (
                             <img
                               src={getOptimizedStorageUrl(avatarUrl)}
@@ -371,20 +371,17 @@ export default function HeaderNav({
                           )}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <div className="flex items-center justify-between gap-1 mb-0.5">
-                            <span className="text-[13px] font-bold truncate">{displayName}</span>
-                            <div className="flex items-center gap-1 shrink-0">
-                              {isAdmin && (
-                                <span className="px-1.5 py-0.2 rounded text-[9.5px] font-mono font-bold bg-amber-400/20 text-amber-300 border border-amber-400/40 uppercase">
-                                  Admin
-                                </span>
-                              )}
-                              <span className="px-1.5 py-0.2 rounded text-[9.5px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 uppercase">
-                                {userTier}
-                              </span>
-                            </div>
+                          <div className="flex items-center justify-between gap-1.5">
+                            <span className="text-[13px] font-semibold truncate">{displayName}</span>
+                            <span className={`px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold uppercase shrink-0 ${
+                              isDark ? 'bg-white/10 text-white/80' : 'bg-[#11140F]/8 dark:bg-white/10 text-[#11140F]/75 dark:text-white/80'
+                            }`}>
+                              {isAdmin ? 'Admin' : userTier}
+                            </span>
                           </div>
-                          <p className="text-[11px] text-white/50 dark:text-white/50 truncate font-mono">
+                          <p className={`text-[11px] truncate font-mono ${
+                            isDark ? 'text-white/50' : 'text-[#11140F]/55 dark:text-white/50'
+                          }`}>
                             {user.email}
                           </p>
                         </div>
@@ -392,72 +389,71 @@ export default function HeaderNav({
 
                       {/* Dropdown Options */}
                       <div className="space-y-0.5">
-                        {/* Admin Console (if sovereign administrator) */}
                         {isAdmin && (
                           <Link
                             href="/admin"
                             onClick={() => setUserMenuOpen(false)}
-                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[12.5px] font-medium text-amber-300 hover:bg-amber-400/10 transition-colors"
+                            className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12.5px] font-medium transition-colors ${
+                              isDark
+                                ? 'text-white/85 hover:text-white hover:bg-white/8'
+                                : 'text-[#11140F]/80 dark:text-white/85 hover:bg-black/5 dark:hover:bg-white/8'
+                            }`}
                           >
-                            <Shield className="w-4 h-4 text-amber-400 shrink-0" />
+                            <Shield className="w-3.5 h-3.5 opacity-75 shrink-0" />
                             <span>Admin Console</span>
                           </Link>
                         )}
 
-                        {/* Plan & Limits */}
                         <Link
                           href="/pricing"
                           onClick={() => setUserMenuOpen(false)}
-                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-[12.5px] font-medium transition-colors ${
+                          className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-[12.5px] font-medium transition-colors ${
                             isDark
-                              ? 'text-white/85 hover:text-white hover:bg-white/10'
-                              : 'text-[#11140F]/80 dark:text-white/85 hover:text-[#11140F] dark:hover:text-white hover:bg-[#11140F]/5 dark:hover:bg-white/10'
+                              ? 'text-white/85 hover:text-white hover:bg-white/8'
+                              : 'text-[#11140F]/80 dark:text-white/85 hover:bg-black/5 dark:hover:bg-white/8'
                           }`}
                         >
                           <span className="flex items-center gap-2.5">
-                            <CreditCard className="w-4 h-4 text-emerald-400 shrink-0" />
-                            <span>Plan & Limits</span>
+                            <CreditCard className="w-3.5 h-3.5 opacity-75 shrink-0" />
+                            <span>Plan &amp; Billing</span>
                           </span>
-                          <span className="text-[10.5px] font-mono text-purple-400 uppercase font-bold">
+                          <span className="text-[10px] font-mono uppercase opacity-60">
                             {userTier}
                           </span>
                         </Link>
 
-                        {/* Account & Settings Modal Trigger */}
                         <button
                           type="button"
                           onClick={() => {
                             setUserMenuOpen(false);
                             setAccountModalOpen(true);
                           }}
-                          className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[12.5px] font-medium transition-colors cursor-pointer text-left ${
+                          className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12.5px] font-medium transition-colors cursor-pointer text-left ${
                             isDark
-                              ? 'text-white/85 hover:text-white hover:bg-white/10'
-                              : 'text-[#11140F]/80 dark:text-white/85 hover:text-[#11140F] dark:hover:text-white hover:bg-[#11140F]/5 dark:hover:bg-white/10'
+                              ? 'text-white/85 hover:text-white hover:bg-white/8'
+                              : 'text-[#11140F]/80 dark:text-white/85 hover:bg-black/5 dark:hover:bg-white/8'
                           }`}
                         >
-                          <Settings className="w-4 h-4 text-teal-400 shrink-0" />
-                          <span>Account & Settings</span>
+                          <Settings className="w-3.5 h-3.5 opacity-75 shrink-0" />
+                          <span>Settings</span>
                         </button>
                       </div>
 
-                      {/* Subtle Divider */}
                       <div
-                        className={`h-px my-1.5 ${
-                          isDark ? 'bg-white/10' : 'bg-[#11140F]/10 dark:bg-white/10'
+                        className={`h-px my-1 ${
+                          isDark ? 'bg-white/10' : 'bg-[#11140F]/8 dark:bg-white/10'
                         }`}
                       />
 
-                      {/* Log out Action */}
                       <button
                         type="button"
                         onClick={() => {
                           setUserMenuOpen(false);
                           signOut();
                         }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[12.5px] font-medium text-red-500 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer text-left"
+                        className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12.5px] font-medium text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer text-left"
                       >
-                        <LogOut className="w-4 h-4 shrink-0" />
+                        <LogOut className="w-3.5 h-3.5 shrink-0" />
                         <span>Log out</span>
                       </button>
                     </div>

@@ -160,28 +160,23 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
     <div className="rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#11140F] p-5 sm:p-7 shadow-xs space-y-6 text-[#11140F] dark:text-white transition-colors">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-            <Globe className="w-5 h-5" />
+        <div>
+          <div className="flex items-center gap-2">
+            <h3 className="font-semibold text-[15px] text-[#11140F] dark:text-white">Custom Branded Domains</h3>
+            <span className="text-[10.5px] font-mono px-2 py-0.5 rounded-md bg-[#11140F]/5 dark:bg-white/10 text-[#11140F]/65 dark:text-white/65 font-medium">
+              Plus &amp; Ultra
+            </span>
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-[16px] text-[#11140F] dark:text-white">Custom Branded Domains</h3>
-              <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-[#11140F]/5 dark:bg-white/10 text-[#11140F]/70 dark:text-white/70 uppercase tracking-wider font-semibold border border-[#11140F]/10 dark:border-white/15">
-                Plus & Ultra
-              </span>
-            </div>
-            <p className="text-[13px] text-[#11140F]/60 dark:text-white/60">
-              Serve QR codes and shortlinks from your own custom domain (e.g.{' '}
-              <span className="font-mono text-emerald-600 dark:text-emerald-400 font-semibold">qr.yourcompany.com</span>).
-            </p>
-          </div>
+          <p className="text-[12.5px] text-[#11140F]/60 dark:text-white/60 mt-0.5">
+            Serve QR codes and shortlinks from your own custom domain (e.g.{' '}
+            <span className="font-mono text-emerald-700 dark:text-emerald-400">qr.yourcompany.com</span>).
+          </p>
         </div>
 
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="text-[13px] font-medium text-[#11140F] dark:text-white hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center gap-1.5 self-start sm:self-auto cursor-pointer px-3 py-1.5 rounded-xl border border-[#11140F]/10 dark:border-white/10 hover:bg-[#11140F]/5 dark:hover:bg-white/5"
+          className="text-[12.5px] font-medium text-[#11140F] dark:text-white hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center gap-1.5 self-start sm:self-auto cursor-pointer px-3 py-1.5 rounded-lg border border-[#11140F]/10 dark:border-white/10 hover:bg-[#11140F]/5 dark:hover:bg-white/5"
         >
           {isOpen ? 'Collapse' : `Manage (${domains.length})`}
           <ChevronRight className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-90' : ''}`} />
@@ -215,9 +210,9 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
               <div className="rounded-2xl bg-[#F7F8F5] dark:bg-[#151912] border border-[#11140F]/10 dark:border-white/10 p-5 sm:p-6 space-y-4 text-[12.5px] text-[#11140F]/85 dark:text-white/85">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1 border-b border-[#11140F]/10 dark:border-white/10">
                   <div>
-                    <div className="font-bold text-[14.5px] text-[#11140F] dark:text-white flex items-center gap-2">
+                    <div className="font-semibold text-[14px] text-[#11140F] dark:text-white flex items-center gap-2">
                       <Globe className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                      If you own a domain (e.g. from GoDaddy, Namecheap, Cloudflare, or Google) and want to use it:
+                      Connect a domain you already own:
                     </div>
                     <p className="text-[12px] text-[#11140F]/65 dark:text-white/65 mt-0.5">
                       <strong>Optional:</strong> By default, all QR codes work instantly with <code className="font-mono text-emerald-600 dark:text-emerald-400">my-qr-sandy.vercel.app</code>. Connect a custom domain only if you want your own company brand on the link.
@@ -262,7 +257,7 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
                         </div>
                       </div>
                       <p className="text-[11.5px] leading-relaxed font-normal text-slate-800 dark:text-slate-200">
-                        Log into your domain account (GoDaddy, Namecheap, Cloudflare, etc.), go to your <strong>DNS Settings</strong>, and paste those 2 lines.
+                        Log into your domain registrar, open your <strong>DNS Settings</strong>, and paste those 2 records.
                       </p>
 
                       {/* Buy Domain Directly on DynamicQR Option */}
@@ -272,7 +267,7 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
                           <span>Don't own a domain yet?</span>
                         </div>
                         <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-snug">
-                          Buy a branded domain directly on DynamicQR (from ₦7,500/yr with free custom business email &amp; 0-config automatic DNS) via NameLaunch.
+                          Register a branded domain directly on DynamicQR (from ₦7,500/yr with custom business email &amp; automatic DNS).
                         </p>
                         <a
                           href="#workspace?section=namelaunch"
@@ -284,7 +279,7 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
                           }}
                           className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 hover:underline"
                         >
-                          <span>Register cheap domain on DynamicQR (₦)</span>
+                          <span>Register domain on DynamicQR</span>
                           <ArrowRight className="w-3 h-3" />
                         </a>
                       </div>

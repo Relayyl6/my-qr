@@ -40,6 +40,7 @@ import { getOptimizedStorageUrl } from '@/lib/media';
 interface MicroSaasHubProps {
   userTier: string;
   isAdmin?: boolean;
+  hideHeader?: boolean;
   externalActiveTab?: 'mailing' | 'vcard' | 'shortener' | 'menu' | 'wifi';
   onTabChange?: (tab: 'mailing' | 'vcard' | 'shortener' | 'menu' | 'wifi') => void;
 }
@@ -58,6 +59,7 @@ interface MicroItem {
 export default function MicroSaasHub({
   userTier,
   isAdmin = false,
+  hideHeader = false,
   externalActiveTab,
   onTabChange,
 }: MicroSaasHubProps) {
@@ -688,32 +690,27 @@ export default function MicroSaasHub({
   };
 
   return (
-    <div className="w-full rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#11140F] p-4 sm:p-7 shadow-xs dark:shadow-[0_10px_30px_rgba(0,0,0,0.5)] space-y-6 text-[#11140F] dark:text-white transition-colors">
-      {/* Header & Tabs */}
+    <div className={hideHeader ? 'w-full space-y-6 text-[#11140F] dark:text-white transition-colors' : 'w-full rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#11140F] p-4 sm:p-7 shadow-xs space-y-6 text-[#11140F] dark:text-white transition-colors'}>
+      {/* Header & Tabs (Shown in All-Tools view; omitted in focused sidebar views where WorkspaceShell renders the page header) */}
+      {!hideHeader && (
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#11140F]/10 dark:border-white/10 pb-5">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="flex h-2 w-2 rounded-full bg-[#2F6B4F] dark:bg-emerald-400" />
-            <h2 className="text-lg sm:text-xl font-bold text-[#11140F] dark:text-white tracking-tight">
-              Micro-SaaS Ecosystem
-            </h2>
-            <span className="text-[11px] font-semibold uppercase px-2 py-0.5 rounded-full bg-[#2F6B4F]/10 dark:bg-emerald-500/20 text-[#2F6B4F] dark:text-emerald-400">
-              5 Standalone Apps
-            </span>
-          </div>
-          <p className="text-xs sm:text-[13px] text-[#11140F]/60 dark:text-white/60 mt-1">
-            Turnkey micro-tools powered by DynamicQR routing, QR code engine, and lead capture.
+          <h2 className="text-lg font-semibold text-[#11140F] dark:text-white tracking-tight">
+            Business Apps &amp; Services
+          </h2>
+          <p className="text-xs sm:text-[13px] text-[#11140F]/55 dark:text-white/55 mt-0.5">
+            Mailing lists, digital vCards, smart shortlinks, contactless menus, and guest Wi-Fi portals.
           </p>
         </div>
 
-        {/* Responsive Tab Switcher: Full Operability on Both Mobile & Desktop */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full no-scrollbar">
+        {/* Responsive Tab Switcher */}
+        <div className="flex items-center gap-1 overflow-x-auto pb-1 max-w-full no-scrollbar">
           {[
             { id: 'mailing', label: 'Mailing Lists', count: undefined, icon: Mail },
-            { id: 'vcard', label: 'Digital vCards', count: vcards.length, icon: Contact },
-            { id: 'shortener', label: 'Smart Shortener', count: shorteners.length, icon: Link2 },
-            { id: 'menu', label: 'Restaurant Menus', count: menus.length, icon: Utensils },
-            { id: 'wifi', label: 'Dynamic Wi-Fi', count: wifis.length, icon: Wifi },
+            { id: 'vcard', label: 'vCards', count: vcards.length, icon: Contact },
+            { id: 'shortener', label: 'Shortener', count: shorteners.length, icon: Link2 },
+            { id: 'menu', label: 'Menus', count: menus.length, icon: Utensils },
+            { id: 'wifi', label: 'Wi-Fi', count: wifis.length, icon: Wifi },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -722,20 +719,16 @@ export default function MicroSaasHub({
                 key={tab.id}
                 type="button"
                 onClick={() => handleTabChange(tab.id as any)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all cursor-pointer shrink-0 ${
                   isActive
-                    ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] shadow-xs'
-                    : 'bg-[#11140F]/5 dark:bg-white/5 text-[#11140F]/65 dark:text-white/65 hover:text-[#11140F] dark:hover:text-white hover:bg-[#11140F]/10 dark:hover:bg-white/10'
+                    ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F]'
+                    : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white hover:bg-[#11140F]/5 dark:hover:bg-white/5'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-emerald-400 dark:text-emerald-600' : 'text-current opacity-70'}`} />
+                <Icon className="w-3.5 h-3.5 opacity-80" />
                 <span>{tab.label}</span>
                 {tab.count !== undefined && (
-                  <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
-                    isActive
-                      ? 'bg-white/20 dark:bg-black/10 text-white dark:text-[#11140F]'
-                      : 'bg-[#11140F]/10 dark:bg-white/10 text-[#11140F]/70 dark:text-white/70'
-                  }`}>
+                  <span className="text-[10px] font-mono opacity-70">
                     {tab.count}
                   </span>
                 )}
@@ -744,6 +737,7 @@ export default function MicroSaasHub({
           })}
         </div>
       </div>
+      )}
 
       {/* Global Alerts */}
       {errorMsg && (

@@ -21,7 +21,7 @@ export const DEFAULT_PRICING_CONFIG: DomainPricingConfig = {
   platformMarkupNgn: 2500,
   tldOverrides: {},
   lastFetchedAt: new Date().toISOString(),
-  source: 'open_er_api',
+  source: 'currency_api_cdn',
 };
 
 const CACHE_KEY = 'domain_pricing_config';
@@ -37,28 +37,38 @@ export function scaleBufferedRate(rawRate: number, bufferPercent: number = 5.0):
 }
 
 /**
- * Fetch live USD to NGN rate from APILayer (if key configured) or Open Exchange Rates API
+ * Fetch live USD to NGN rate from free, unlimited-volume exchange rate APIs (no API key or monthly quota).
  */
 export async function fetchLiveUsdToNgnRate(): Promise<{ rate: number; source: string }> {
-  const apilayerKey = process.env.APILAYER_API_KEY || process.env.EXCHANGE_RATE_API_KEY;
-
-  // 1. Try APILayer if API Key provided
-  if (apilayerKey) {
-    try {
-      const res = await fetch('https://api.apilayer.com/exchangerates_data/latest?base=USD&symbols=NGN', {
-        headers: { apikey: apilayerKey },
-        next: { revalidate: 3600 }, // 1 hour Next.js cache
-      });
-      const data = await res.json();
-      if (data && data.success && data.rates?.NGN) {
-        return { rate: Number(data.rates.NGN), source: 'apilayer' };
-      }
-    } catch (err) {
-      console.warn('[FX Engine] APILayer call failed, trying backup API:', err);
+  // 1. Primary: FawazAhmed0 Currency API on jsDelivr CDN (unlimited req/mo, no key, global edge)
+  try {
+    const res = await fetch(
+      'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json',
+      { next: { revalidate: 3600 } }
+    );
+    const data = await res.json();
+    if (data && data.usd?.ngn) {
+      return { rate: Number(data.usd.ngn), source: 'currency_api_cdn' };
     }
+  } catch (err) {
+    console.warn('[FX Engine] Primary currency CDN call failed, trying mirror:', err);
   }
 
-  // 2. Fallback to Open Exchange Rates / Open-ER API (High availability, no API key required)
+  // 2. Mirror: FawazAhmed0 Currency API Pages mirror (unlimited req/mo, no key)
+  try {
+    const res = await fetch(
+      'https://latest.currency-api.pages.dev/v1/currencies/usd.json',
+      { next: { revalidate: 3600 } }
+    );
+    const data = await res.json();
+    if (data && data.usd?.ngn) {
+      return { rate: Number(data.usd.ngn), source: 'currency_api_mirror' };
+    }
+  } catch (err) {
+    console.warn('[FX Engine] Mirror currency API failed, trying Open-ER API:', err);
+  }
+
+  // 3. Secondary Fallback: Open Exchange Rates / Open-ER API (free, no key required)
   try {
     const res = await fetch('https://open.er-api.com/v6/latest/USD', {
       next: { revalidate: 3600 },
@@ -68,10 +78,10 @@ export async function fetchLiveUsdToNgnRate(): Promise<{ rate: number; source: s
       return { rate: Number(data.rates.NGN), source: 'open_er_api' };
     }
   } catch (err) {
-    console.warn('[FX Engine] Backup FX API failed:', err);
+    console.warn('[FX Engine] Backup Open-ER FX API failed:', err);
   }
 
-  // 3. Environment variable fallback or safe static base
+  // 4. Environment variable fallback or safe static base
   const envRate = Number(process.env.USD_TO_NGN_RATE || 1400);
   return { rate: envRate, source: 'fallback_env' };
 }

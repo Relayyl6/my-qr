@@ -167,48 +167,28 @@ export default function CampaignAnalyst({ userTier = 'free', isAdmin = false }: 
     <div className="rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#0E1017] p-5 sm:p-6 shadow-sm space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-[15px] font-semibold text-[#11140F] dark:text-white">AI Campaign Analyst</h3>
-              <span className="px-2 py-0.5 rounded-full text-[10.5px] font-medium bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300">
-                PRO Intelligence
+        <div>
+          <div className="flex items-center gap-2">
+            <h3 className="text-[15px] font-semibold text-[#11140F] dark:text-white">Campaign Intelligence</h3>
+            {data && (
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                Live
               </span>
-              {data && (
-                <span
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-mono ${
-                    data.cached
-                      ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30'
-                      : data.isFallback
-                      ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30'
-                      : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30'
-                  }`}
-                >
-                  <Sparkles className="w-3 h-3" />
-                  {data.cached
-                    ? 'Instant Cache (<1ms)'
-                    : data.isFallback
-                    ? 'Deterministic Safety Engine'
-                    : `Gemini 3.5 AI (${(data.latencyMs / 1000).toFixed(1)}s)`}
-                </span>
-              )}
-            </div>
-            <p className="text-[12px] text-[#11140F]/50 dark:text-white/50">
-              Automated scan behavior diagnosis & actionable recommendations
-            </p>
+            )}
           </div>
+          <p className="text-[12px] text-[#11140F]/55 dark:text-white/55 mt-0.5">
+            Scan performance diagnostics and automated optimization recommendations
+          </p>
         </div>
 
         <button
           onClick={() => fetchInsights(true)}
           disabled={loading}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#141720] text-[12px] font-medium text-[#11140F]/80 dark:text-white/80 hover:bg-[#11140F]/[0.03] dark:hover:bg-white/5 transition-colors disabled:opacity-50 cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#141720] text-[12px] font-medium text-[#11140F]/80 dark:text-white/80 hover:bg-[#11140F]/[0.03] dark:hover:bg-white/5 transition-colors disabled:opacity-50 cursor-pointer"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-          {loading ? 'Analyzing data…' : 'Refresh insights'}
+          {loading ? 'Analyzing…' : 'Refresh'}
         </button>
       </div>
 

@@ -516,7 +516,7 @@ export default function DomainFleetOperabilities({
       {activeTab === 'nameservers' && (
         <div className="space-y-4">
           <p className="text-[11.5px] text-[#11140F]/70 dark:text-white/70 leading-relaxed">
-            By default, your domain runs on <strong>Cloudflare Ultra-Fast Managed DNS</strong> with automated SSL and instant routing. If you host on AWS Route53, cPanel, or another external provider, you can delegate nameservers here.
+            By default, your domain runs on <strong>DynamicQR Managed Edge DNS</strong> with automated SSL and instant routing. If you host externally, you can delegate custom nameservers here.
           </p>
 
           <div className="space-y-2">
@@ -528,7 +528,7 @@ export default function DomainFleetOperabilities({
                 onChange={() => setNsMode('cloudflare')}
                 className="accent-emerald-600"
               />
-              <span>Cloudflare Managed DNS (Recommended · Automated SSL, Email Forwarding &amp; DDoS Protection)</span>
+              <span>DynamicQR Managed Edge DNS (Recommended · Automated SSL, Email Forwarding &amp; DDoS Protection)</span>
             </label>
 
             <label className="flex items-center gap-2 cursor-pointer font-medium">

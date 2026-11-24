@@ -104,7 +104,7 @@ export default function AdminDomainPricingManager({
             </h3>
           </div>
           <p className="text-[12.5px] text-[#11140F]/50 mt-0.5">
-            Real-time APILayer exchange rates, safety buffers, platform markups, and per-TLD retail pricing overrides.
+            Unlimited live exchange rate feeds, safety buffers, platform markups, and per-TLD retail pricing overrides.
           </p>
         </div>
 
