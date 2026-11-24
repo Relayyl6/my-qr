@@ -1150,8 +1150,6 @@ export default function AiRoutingComposer({
                 </div>
               </div>
             )}
-              </div>
-            )}
           </div>
         )}
 
