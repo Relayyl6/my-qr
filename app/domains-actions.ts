@@ -13,15 +13,16 @@ import {
   DomainPricingConfig,
 } from '@/lib/domains/fxEngine';
 
-export async function getUserDomainOrders() {
+export async function getUserDomainOrders(emailQuery?: string) {
   const user = await getCurrentUser();
-  if (!user) return [];
+  const email = (emailQuery || user?.email || '').toLowerCase().trim();
+  if (!user && !email) return [];
 
   const orders = await prisma.domainOrder.findMany({
     where: {
       OR: [
-        { userId: user.id },
-        { userEmail: user.email.toLowerCase() },
+        ...(user ? [{ userId: user.id }] : []),
+        ...(email ? [{ userEmail: email }] : []),
       ],
     },
     orderBy: { createdAt: 'desc' },
@@ -32,9 +33,6 @@ export async function getUserDomainOrders() {
 
 export async function confirmOrderPayment(paystackRef: string) {
   const user = await getCurrentUser();
-  if (!user) {
-    return { success: false, message: 'Please sign in to verify payment.' };
-  }
 
   const order = await prisma.domainOrder.findUnique({
     where: { paystackRef },
@@ -45,8 +43,9 @@ export async function confirmOrderPayment(paystackRef: string) {
   }
 
   const adminEmail = (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();
-  const isAdmin = user.email.toLowerCase() === adminEmail;
+  const isAdmin = user && user.email.toLowerCase() === adminEmail;
   if (
+    user &&
     !isAdmin &&
     order.userId &&
     order.userId !== user.id &&

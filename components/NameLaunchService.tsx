@@ -105,10 +105,12 @@ export default function NameLaunchService({ user }: Props) {
       .catch(() => {});
   }, []);
 
-  async function loadOrders() {
+  async function loadOrders(overrideEmail?: string) {
     setLoadingOrders(true);
     try {
-      const data = await getUserDomainOrders();
+      const storedEmail = typeof window !== 'undefined' ? localStorage.getItem('namelaunch_email') : null;
+      const emailToQuery = overrideEmail || storedEmail || user?.email || undefined;
+      const data = await getUserDomainOrders(emailToQuery);
       setOrders(data || []);
     } catch (err) {
       console.error('Failed to load domain orders:', err);
@@ -136,18 +138,21 @@ export default function NameLaunchService({ user }: Props) {
 
       try {
         const res = await confirmOrderPayment(ref);
+        if (res.order?.userEmail) {
+          localStorage.setItem('namelaunch_email', res.order.userEmail);
+        }
         if (res.success) {
           setActionAlert({
-            text: `${res.order?.domainName} is now active. Managed DNS and email routing are ready.`,
+            text: res.message || `${res.order?.domainName} is now active. Managed DNS and email routing are ready.`,
             type: 'success',
           });
-          loadOrders();
+          loadOrders(res.order?.userEmail);
         } else {
           setActionAlert({
             text: res.message || 'Payment not completed yet.',
             type: 'error',
           });
-          loadOrders();
+          loadOrders(res.order?.userEmail);
         }
       } catch (err: any) {
         setActionAlert({ text: err.message || 'Verification error', type: 'error' });
@@ -199,6 +204,9 @@ export default function NameLaunchService({ user }: Props) {
 
     setCheckingOut(true);
     setCheckoutError(null);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('namelaunch_email', cleanTargetEmail);
+    }
 
     try {
       const res = await fetch('/api/domains/checkout/initialize', {
