@@ -92,14 +92,49 @@ export async function searchDomains(rawQuery: string): Promise<DomainSearchResul
     ? Array.from(new Set([requestedTld, ...SUPPORTED_TLDS]))
     : [...SUPPORTED_TLDS];
 
-  // Check if live Domain Name API is configured
+  // Check if live Domain Name API is configured (either API Key or Username/Password)
+  const dnaApiKey = process.env.DNA_API_KEY;
+  const dnaResellerId = process.env.DNA_RESELLER_ID || 'e2087205-ac6f-d5c2-1edd-3a25248464f9';
   const dnaUsername = process.env.DNA_USERNAME;
   const dnaPassword = process.env.DNA_PASSWORD;
 
   // Load active dynamic pricing & scaled FX configuration
   const pricingConfig = await getDomainPricingConfig().catch(() => null);
 
-  if (dnaUsername && dnaPassword) {
+  if (dnaApiKey) {
+    try {
+      const searchPromises = tldsToCheck.map(async (tld) => {
+        const domain = `${label}.${tld}`;
+        try {
+          const res = await fetch('https://api.domainresellerapi.com/api/v1/domains/search', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-API-KEY': dnaApiKey,
+              '__reseller': dnaResellerId,
+            },
+            body: JSON.stringify({ domainName: domain }),
+          });
+          const data = await res.json();
+          const available = data.info?.status === 'AVAILABLE' || data.status === 'AVAILABLE' || data.isAvailable === true;
+          const wholesaleUsd = Number(data.info?.price || WHOLESALE_USD_PRICING[tld] || 10.0);
+          return {
+            domain,
+            tld,
+            available,
+            pricing: available ? calculateNgnPricing(wholesaleUsd, tld, pricingConfig || undefined) : null,
+          };
+        } catch {
+          return null;
+        }
+      });
+      const settled = await Promise.all(searchPromises);
+      const valid = settled.filter(Boolean) as DomainSearchResult[];
+      if (valid.length > 0) return valid;
+    } catch (err) {
+      console.warn('[DomainResellerAPI] Live search error, falling back:', err);
+    }
+  } else if (dnaUsername && dnaPassword) {
     try {
       const dnaRes = await fetch('https://api.domainnameapi.com/api/Domain/CheckAvailability', {
         method: 'POST',

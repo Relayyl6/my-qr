@@ -46,10 +46,49 @@ export async function provisionDomainAndEmail(order: {
   ];
 
   // STEP 2: Register Domain via Domain Name API if credentials exist
+  const dnaApiKey = process.env.DNA_API_KEY;
+  const dnaResellerId = process.env.DNA_RESELLER_ID || 'e2087205-ac6f-d5c2-1edd-3a25248464f9';
   const dnaUsername = process.env.DNA_USERNAME;
   const dnaPassword = process.env.DNA_PASSWORD;
 
-  if (dnaUsername && dnaPassword) {
+  if (dnaApiKey) {
+    // Modern DomainResellerAPI v1 (REST with X-API-KEY)
+    try {
+      const dnaRes = await fetch('https://api.domainresellerapi.com/api/v1/domains', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-KEY': dnaApiKey,
+          '__reseller': dnaResellerId,
+        },
+        body: JSON.stringify({
+          domain: order.domainName,
+          period: 1,
+          nameservers,
+          contacts: {
+            registrant: {
+              first_name: 'DynamicQR',
+              last_name: 'Customer',
+              email: order.userEmail,
+              phone: '+234.8000000000',
+              address: 'Victoria Island',
+              city: 'Lagos',
+              country: 'NG',
+              postal_code: '101241',
+            },
+          },
+        }),
+      });
+      const dnaData = await dnaRes.json();
+      if (!dnaRes.ok || dnaData.error) {
+        throw new Error(dnaData.message || dnaData.error || 'Failed to register domain via DomainResellerAPI');
+      }
+    } catch (apiErr: any) {
+      console.error('[DNA Reseller API] Registration error:', apiErr);
+      throw new Error(`Registrar error: ${apiErr.message}`);
+    }
+  } else if (dnaUsername && dnaPassword) {
+    // Classic DomainNameAPI JSON API
     const dnaRes = await fetch('https://api.domainnameapi.com/api/Domain/Register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
