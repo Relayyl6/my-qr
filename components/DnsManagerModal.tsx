@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { X, RefreshCw, Plus, Trash2, Shield, AlertTriangle, CheckCircle2, Globe } from 'lucide-react';
 import { DnsRecord, RecordType, ALLOWED_DNS_TYPES } from '@/lib/domains/dnsManager';
+import ConfirmModal from './ConfirmModal';
 
 interface Props {
   orderId: string;
@@ -40,6 +41,8 @@ export default function DnsManagerModal({ orderId, domainName, onClose }: Props)
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [recordToDelete, setRecordToDelete] = useState<DnsRecord | null>(null);
+  const [deletingRecord, setDeletingRecord] = useState(false);
 
   // Form state
   const [type, setType] = useState<RecordType>('A');
@@ -101,19 +104,14 @@ export default function DnsManagerModal({ orderId, domainName, onClose }: Props)
     }
   }
 
-  async function handleDeleteRecord(record: DnsRecord) {
-    const isSystemEmail =
-      record.content.includes('mx.cloudflare.net') ||
-      record.content.includes('_spf.mx.cloudflare.net');
+  function handleDeleteRecord(record: DnsRecord) {
+    setRecordToDelete(record);
+  }
 
-    if (isSystemEmail) {
-      const confirmed = window.confirm(
-        'Warning: This record powers your custom email forwarding. Deleting it will stop incoming emails. Are you sure you want to delete it?'
-      );
-      if (!confirmed) return;
-    } else {
-      if (!window.confirm(`Delete ${record.type} record for ${record.name}?`)) return;
-    }
+  async function confirmDeleteRecord() {
+    if (!recordToDelete) return;
+    const record = recordToDelete;
+    setDeletingRecord(true);
 
     try {
       const res = await fetch(
@@ -126,8 +124,11 @@ export default function DnsManagerModal({ orderId, domainName, onClose }: Props)
       setRecords((prev) => prev.filter((r) => r.id !== record.id));
       setSuccessMsg('Record deleted.');
       setTimeout(() => setSuccessMsg(null), 3000);
+      setRecordToDelete(null);
     } catch (err: any) {
       setError(err.message || 'Failed to delete record');
+    } finally {
+      setDeletingRecord(false);
     }
   }
 
@@ -420,6 +421,27 @@ export default function DnsManagerModal({ orderId, domainName, onClose }: Props)
           </div>
         </div>
       </div>
+
+      {/* Confirmation Modal for DNS Record Deletion */}
+      <ConfirmModal
+        isOpen={!!recordToDelete}
+        onClose={() => setRecordToDelete(null)}
+        onConfirm={confirmDeleteRecord}
+        title={
+          recordToDelete?.content.includes('mx.cloudflare.net')
+            ? 'Delete Email Forwarding Record?'
+            : `Delete ${recordToDelete?.type} Record?`
+        }
+        description={
+          recordToDelete?.content.includes('mx.cloudflare.net')
+            ? `Warning: This ${recordToDelete?.type} record powers your custom business email forwarding. Deleting it will immediately stop incoming emails from reaching your inbox.`
+            : `Are you sure you want to delete the ${recordToDelete?.type} record pointing "${recordToDelete?.name}" to "${recordToDelete?.content}"?`
+        }
+        confirmLabel="Yes, Delete Record"
+        cancelLabel="Keep Record"
+        isDestructive={true}
+        loading={deletingRecord}
+      />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import React, { useMemo, useState } from 'react';
 import { Globe, RefreshCw, CheckCircle2, Clock, Mail, Search, Trash2 } from 'lucide-react';
 import { adminRetryDomainProvision, adminDeleteDomainOrder } from '@/app/domains-actions';
 import PaginationControls from './PaginationControls';
+import ConfirmModal from './ConfirmModal';
 
 interface AdminDomainOrder {
   id: string;
@@ -25,6 +26,7 @@ export default function AdminDomainOrdersManager({ initialOrders }: { initialOrd
   const [orders, setOrders] = useState<AdminDomainOrder[]>(initialOrders);
   const [retryingId, setRetryingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [orderToDelete, setOrderToDelete] = useState<AdminDomainOrder | null>(null);
   const [feedback, setFeedback] = useState<{ id: string; msg: string; success: boolean } | null>(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -67,14 +69,16 @@ export default function AdminDomainOrdersManager({ initialOrders }: { initialOrd
     }
   };
 
-  const handleDelete = async (orderId: string, domainName: string) => {
-    if (!confirm(`Are you sure you want to permanently delete the domain order for "${domainName}"?`)) return;
+  const executeDeleteOrder = async () => {
+    if (!orderToDelete) return;
+    const orderId = orderToDelete.id;
     setDeletingId(orderId);
     setFeedback(null);
     try {
       const res = await adminDeleteDomainOrder(orderId);
       if (res.success) {
         setOrders((prev) => prev.filter((o) => o.id !== orderId));
+        setOrderToDelete(null);
       } else {
         setFeedback({ id: orderId, msg: res.message || 'Delete failed', success: false });
       }
@@ -234,7 +238,7 @@ export default function AdminDomainOrdersManager({ initialOrders }: { initialOrd
                       <button
                         type="button"
                         disabled={deletingId === o.id || retryingId === o.id}
-                        onClick={() => handleDelete(o.id, o.domainName)}
+                        onClick={() => setOrderToDelete(o)}
                         className="p-1 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer disabled:opacity-50"
                         title="Delete Domain Order"
                       >
@@ -269,6 +273,19 @@ export default function AdminDomainOrdersManager({ initialOrders }: { initialOrd
         </div>
       </>
       )}
+
+      {/* Confirmation Modal for Permanent Domain Order Deletion */}
+      <ConfirmModal
+        isOpen={!!orderToDelete}
+        onClose={() => setOrderToDelete(null)}
+        onConfirm={executeDeleteOrder}
+        title={`Delete domain order "${orderToDelete?.domainName}"?`}
+        description={`This will permanently remove the domain order record for ${orderToDelete?.domainName} and unlink any associated custom domain branding. This action cannot be undone.`}
+        confirmLabel="Yes, Delete Order"
+        cancelLabel="Keep Order"
+        isDestructive={true}
+        loading={!!deletingId}
+      />
     </div>
   );
 }
