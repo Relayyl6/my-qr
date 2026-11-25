@@ -208,6 +208,7 @@ export default function NameLaunchService({ user }: Props) {
           domainName: selectedDomain.domain,
           desiredAlias: cleanAlias,
           userEmail: cleanTargetEmail,
+          expectedPriceNgn: selectedDomain.pricing.totalNgn,
         }),
       });
 

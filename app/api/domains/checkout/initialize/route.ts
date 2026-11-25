@@ -40,18 +40,45 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Unauthorized.' }, { status: 403 });
       }
 
+      const tld = existing.domainName.split('.').pop() || 'com';
+      const wholesaleUsd = WHOLESALE_USD_PRICING[tld] || 10.5;
+      const pricingConfig = await getDomainPricingConfig().catch(() => null);
+      const pricing = calculateNgnPricing(wholesaleUsd, tld, pricingConfig || undefined);
+      const effectiveRate = pricingConfig
+        ? pricingConfig.mode === 'manual_override'
+          ? pricingConfig.manualOverrideRate
+          : pricingConfig.bufferedRate
+        : 1400;
+
+      const clientExpectedNgn = body.expectedPriceNgn ? Number(body.expectedPriceNgn) : null;
+      let finalChargeNgn = pricing.totalNgn;
+      let finalMarkupNgn = pricing.platformFeeNgn;
+
+      if (
+        clientExpectedNgn &&
+        clientExpectedNgn > 0 &&
+        Math.abs(pricing.totalNgn - clientExpectedNgn) <= 1000
+      ) {
+        finalChargeNgn = clientExpectedNgn;
+        finalMarkupNgn = Math.max(0, finalChargeNgn - pricing.wholesaleNgn);
+      }
+
       order = await prisma.domainOrder.update({
         where: { id: existing.id },
         data: {
           paystackRef: reference,
           userId: user?.id || existing.userId,
+          wholesaleUsd: pricing.wholesaleUsd,
+          exchangeRate: effectiveRate,
+          platformMarkupNgn: finalMarkupNgn,
+          totalPaidNgn: finalChargeNgn,
         },
       });
 
       domainName = order.domainName;
       desiredAlias = order.desiredAlias;
       userEmail = order.userEmail;
-      totalPaidNgn = order.totalPaidNgn;
+      totalPaidNgn = finalChargeNgn;
     } else {
       // Option B: Create or update pending order for domain + email
       domainName = String(body.domainName || '').trim().toLowerCase();
@@ -78,6 +105,21 @@ export async function POST(req: Request) {
           : pricingConfig.bufferedRate
         : 1400;
 
+      // Lock charge to exact storefront card price if within tolerance (<= 1000 NGN)
+      // guaranteeing Paystack checkout matches the exact button price seen by the user!
+      const clientExpectedNgn = body.expectedPriceNgn ? Number(body.expectedPriceNgn) : null;
+      let finalChargeNgn = pricing.totalNgn;
+      let finalMarkupNgn = pricing.platformFeeNgn;
+
+      if (
+        clientExpectedNgn &&
+        clientExpectedNgn > 0 &&
+        Math.abs(pricing.totalNgn - clientExpectedNgn) <= 1000
+      ) {
+        finalChargeNgn = clientExpectedNgn;
+        finalMarkupNgn = Math.max(0, finalChargeNgn - pricing.wholesaleNgn);
+      }
+
       // Reuse existing PENDING_PAYMENT order for the same domain & customer if present
       const existingPending = await prisma.domainOrder.findFirst({
         where: {
@@ -99,8 +141,8 @@ export async function POST(req: Request) {
             desiredAlias,
             wholesaleUsd: pricing.wholesaleUsd,
             exchangeRate: effectiveRate,
-            platformMarkupNgn: pricing.platformFeeNgn,
-            totalPaidNgn: pricing.totalNgn,
+            platformMarkupNgn: finalMarkupNgn,
+            totalPaidNgn: finalChargeNgn,
             paystackRef: reference,
           },
         });
@@ -113,15 +155,15 @@ export async function POST(req: Request) {
             desiredAlias,
             wholesaleUsd: pricing.wholesaleUsd,
             exchangeRate: effectiveRate,
-            platformMarkupNgn: pricing.platformFeeNgn,
-            totalPaidNgn: pricing.totalNgn,
+            platformMarkupNgn: finalMarkupNgn,
+            totalPaidNgn: finalChargeNgn,
             paystackRef: reference,
             status: 'PENDING_PAYMENT',
           },
         });
       }
 
-      totalPaidNgn = pricing.totalNgn;
+      totalPaidNgn = finalChargeNgn;
     }
 
     const appUrl =
