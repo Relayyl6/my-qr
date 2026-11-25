@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Globe, RefreshCw, CheckCircle2, Clock, AlertTriangle, ExternalLink, ShieldCheck, Mail } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { Globe, RefreshCw, CheckCircle2, Clock, Mail, Search } from 'lucide-react';
 import { adminRetryDomainProvision } from '@/app/domains-actions';
+import PaginationControls from './PaginationControls';
 
 interface AdminDomainOrder {
   id: string;
@@ -24,6 +25,28 @@ export default function AdminDomainOrdersManager({ initialOrders }: { initialOrd
   const [orders, setOrders] = useState<AdminDomainOrder[]>(initialOrders);
   const [retryingId, setRetryingId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ id: string; msg: string; success: boolean } | null>(null);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+
+  const filteredOrders = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return orders.filter((o) => {
+      if (statusFilter !== 'all' && o.status !== statusFilter) return false;
+      if (!q) return true;
+      return (
+        o.domainName.toLowerCase().includes(q) ||
+        o.userEmail.toLowerCase().includes(q) ||
+        o.paystackRef.toLowerCase().includes(q)
+      );
+    });
+  }, [orders, search, statusFilter]);
+
+  const paginatedOrders = useMemo(() => {
+    const start = (page - 1) * perPage;
+    return filteredOrders.slice(start, start + perPage);
+  }, [filteredOrders, page, perPage]);
 
   const handleRetry = async (orderId: string) => {
     setRetryingId(orderId);
@@ -86,30 +109,63 @@ export default function AdminDomainOrdersManager({ initialOrders }: { initialOrd
             </h3>
           </div>
           <p className="text-[12.5px] text-[#11140F]/50 mt-0.5">
-            Real-time Paystack domain sales, Cloudflare zones, and automated email forwarding provisioning.
+            Domain registrations, managed DNS zones, and automated email forwarding provisioning.
           </p>
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="relative w-full sm:w-52">
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#11140F]/40" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              placeholder="Search domain or email…"
+              className="w-full pl-8 pr-3 py-1.5 rounded-xl border border-[#11140F]/15 bg-[#F7F8F5] text-xs text-[#11140F] outline-none focus:border-[#2F6B4F]"
+            />
+          </div>
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setPage(1);
+            }}
+            className="px-2.5 py-1.5 rounded-xl border border-[#11140F]/15 bg-[#F7F8F5] text-xs text-[#11140F] outline-none cursor-pointer"
+          >
+            <option value="all">All Status</option>
+            <option value="ACTIVE">Active</option>
+            <option value="PENDING_PAYMENT">Pending Payment</option>
+            <option value="PAID_AWAITING_FUNDS">Paid Awaiting Funds</option>
+            <option value="PROVISIONING">Provisioning</option>
+          </select>
         </div>
       </div>
 
-      {orders.length === 0 ? (
+      {filteredOrders.length === 0 ? (
         <div className="p-8 text-center text-sm text-[#11140F]/60">
-          No domain orders processed yet. Customers can search and buy domains directly via NameLaunch.
+          {orders.length === 0
+            ? 'No domain orders processed yet. Customers can search and buy domains directly in Domains.'
+            : 'No domain orders match your filter.'}
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-[#11140F]/10 bg-[#F7F8F5]/80 text-[11.5px] uppercase font-semibold text-[#11140F]/50 tracking-wider">
-                <th className="py-3 px-4">Domain & Email</th>
-                <th className="py-3 px-4">Customer Email</th>
-                <th className="py-3 px-4">Paid (NGN)</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4">Cloudflare Zone</th>
-                <th className="py-3 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map((o) => (
+        <>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-[#11140F]/10 bg-[#F7F8F5]/80 text-[11.5px] uppercase font-semibold text-[#11140F]/50 tracking-wider">
+                  <th className="py-3 px-4">Domain & Email</th>
+                  <th className="py-3 px-4">Customer Email</th>
+                  <th className="py-3 px-4">Paid (NGN)</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4">DNS Zone</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedOrders.map((o) => (
                 <tr key={o.id} className="border-b border-[#11140F]/5 hover:bg-[#F7F8F5]/40 transition-colors">
                   <td className="py-3 px-4">
                     <div className="font-mono font-bold text-sm text-[#11140F]">{o.domainName}</div>
@@ -172,6 +228,18 @@ export default function AdminDomainOrdersManager({ initialOrders }: { initialOrd
             </tbody>
           </table>
         </div>
+        <div className="px-5 pb-4">
+          <PaginationControls
+            currentPage={page}
+            totalItems={filteredOrders.length}
+            itemsPerPage={perPage}
+            onPageChange={setPage}
+            onItemsPerPageChange={setPerPage}
+            pageSizeOptions={[10, 25, 50]}
+            itemLabel="orders"
+          />
+        </div>
+      </>
       )}
     </div>
   );

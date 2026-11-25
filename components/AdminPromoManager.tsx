@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import {
   Tag,
@@ -28,6 +28,7 @@ import {
   adminDeletePromoCode,
 } from '@/app/admin/actions';
 import ConfirmModal from './ConfirmModal';
+import PaginationControls from './PaginationControls';
 
 interface PromoCodeItem {
   id: string;
@@ -75,6 +76,14 @@ export default function AdminPromoManager({
     maxRedemptions: '',
     expiresAt: '',
   });
+
+  const [codePage, setCodePage] = useState(1);
+  const [codePerPage, setCodePerPage] = useState(10);
+
+  const paginatedPromoCodes = useMemo(() => {
+    const start = (codePage - 1) * codePerPage;
+    return promoCodes.slice(start, start + codePerPage);
+  }, [promoCodes, codePage, codePerPage]);
 
   const handleToggleBannerSwitch = async (checked: boolean) => {
     const updated = {
@@ -943,7 +952,7 @@ export default function AdminPromoManager({
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#11140F]/5">
-                {promoCodes.map((item) => (
+                {paginatedPromoCodes.map((item: PromoCodeItem) => (
                   <tr key={item.id} className="hover:bg-[#F7F8F5]/60 transition-colors">
                     <td className="py-3.5">
                       <div className="flex items-center gap-2">
@@ -1007,6 +1016,17 @@ export default function AdminPromoManager({
               </tbody>
             </table>
           </div>
+          {promoCodes.length > 0 && (
+            <PaginationControls
+              currentPage={codePage}
+              totalItems={promoCodes.length}
+              itemsPerPage={codePerPage}
+              onPageChange={setCodePage}
+              onItemsPerPageChange={setCodePerPage}
+              pageSizeOptions={[10, 25, 50]}
+              itemLabel="promo codes"
+            />
+          )}
         </div>
       )}
 

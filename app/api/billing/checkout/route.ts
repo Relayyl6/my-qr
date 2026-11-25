@@ -138,46 +138,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ url: paystackData.data.authorization_url });
     }
 
-    // 6. Seamless Sandbox / Dev Upgrade Mode (if Paystack key is pending setup in env)
-    console.info(
-      `[Billing] Paystack key pending. Executing instant development upgrade to ${planId} (USD: $${finalUsd}, NGN: ₦${finalPriceNgn.toLocaleString()} @ ₦${effectiveRate}/$1)`
+    // 6. Reject checkout when payment gateway key is not configured
+    return NextResponse.json(
+      {
+        error:
+          "Subscription checkout is temporarily unavailable because the payment gateway is not configured in this environment.",
+      },
+      { status: 503 }
     );
-
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { tier: planId },
-    });
-
-    const tierConfig = TIER_CONFIGS[planId] || TIER_CONFIGS.pro;
-    await prisma.aiCredit.upsert({
-      where: { userId: user.id },
-      create: {
-        userId: user.id,
-        monthlyLimitUsd: tierConfig.monthlyLimitUsd,
-        usedThisMonth: 0,
-      },
-      update: {
-        monthlyLimitUsd: tierConfig.monthlyLimitUsd,
-      },
-    });
-
-    if (appliedPromoRecord) {
-      await prisma.promoCode.update({
-        where: { id: appliedPromoRecord.id },
-        data: { redemptionsCount: { increment: 1 } },
-      }).catch(() => {});
-    }
-
-    const redirectParams = new URLSearchParams({
-      tier: planId,
-      mode: "dev",
-      amountNgn: String(finalPriceNgn),
-      ...(promoCodeStr ? { promo: promoCodeStr, discount: String(discountPercent) } : {}),
-    });
-
-    return NextResponse.json({
-      url: `${origin}/billing/success?${redirectParams.toString()}`,
-    });
   } catch (error: any) {
     console.error("[Paystack Checkout Error]:", error);
     return NextResponse.json(

@@ -1,5 +1,3 @@
-import dns from 'dns';
-import { promisify } from 'util';
 import { getDomainPricingConfig, calculateDomainPrice, DomainPricingConfig } from './fxEngine';
 import {
   SUPPORTED_TLDS,
@@ -10,9 +8,6 @@ import {
 } from './constants';
 
 export * from './constants';
-
-const resolveNs = promisify(dns.resolveNs);
-const resolveSoa = promisify(dns.resolveSoa);
 
 export function calculateNgnPricing(
   wholesaleUsd: number,
@@ -44,22 +39,39 @@ export function calculateNgnPricing(
 }
 
 /**
- * Check if a domain has active DNS nameservers or SOA record
+ * Check if a domain is registered using DNS-over-HTTPS (Cloudflare 1.1.1.1).
+ * Uses fetch so this file remains bundlable in both server and edge runtimes.
  */
 async function checkDnsRegistered(domain: string): Promise<boolean> {
   try {
-    await resolveNs(domain);
-    return true; // Nameservers resolved -> domain is taken
-  } catch (err: any) {
-    if (err.code === 'ENOTFOUND' || err.code === 'NODATA') {
-      try {
-        await resolveSoa(domain);
+    const url = `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(domain)}&type=NS`;
+    const res = await fetch(url, {
+      headers: { Accept: 'application/dns-json' },
+      next: { revalidate: 300 },
+    });
+    if (!res.ok) return false;
+    const data = await res.json();
+    // Status 0 = NOERROR with answers means NS records found (domain is taken)
+    if (data.Status === 0 && Array.isArray(data.Answer) && data.Answer.length > 0) {
+      return true;
+    }
+    // Status 3 = NXDOMAIN -> domain does not exist (available)
+    if (data.Status === 3) return false;
+    // Fallback: try SOA lookup
+    const soaUrl = `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(domain)}&type=SOA`;
+    const soaRes = await fetch(soaUrl, {
+      headers: { Accept: 'application/dns-json' },
+      next: { revalidate: 300 },
+    });
+    if (soaRes.ok) {
+      const soaData = await soaRes.json();
+      if (soaData.Status === 0 && Array.isArray(soaData.Answer) && soaData.Answer.length > 0) {
         return true;
-      } catch {
-        return false; // Neither NS nor SOA -> likely available
       }
     }
     return false;
+  } catch {
+    return false; // Fail open — treat as available if DoH unreachable
   }
 }
 

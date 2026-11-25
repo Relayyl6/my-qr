@@ -183,14 +183,14 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/65 backdrop-blur-sm flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-black/65 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget && !loading) onClose();
       }}
     >
-      <div className="bg-white dark:bg-[#101211] rounded-3xl border border-[#11140F]/12 dark:border-white/[0.08] shadow-2xl max-w-md w-full overflow-hidden text-[#11140F] dark:text-white">
-        {/* Ambient Mesh Banner Header (matching signature card aesthetic) */}
-        <div className="relative h-28 overflow-hidden bg-[#0A0E0C]">
+      <div className="bg-white dark:bg-[#101211] rounded-3xl border border-[#11140F]/12 dark:border-white/[0.08] shadow-2xl max-w-md w-full max-h-[85vh] flex flex-col overflow-hidden text-[#11140F] dark:text-white">
+        {/* Compact Ambient Mesh Banner Header */}
+        <div className="relative h-20 shrink-0 overflow-hidden bg-[#0A0E0C]">
           <div className="w-full h-full bg-gradient-to-br from-emerald-950/75 via-[#101914] to-[#0A0E0C] relative">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-500/25 via-transparent to-transparent" />
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:16px_16px]" />
@@ -198,8 +198,8 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-black/30 pointer-events-none" />
 
           {/* Top Frosted Controls */}
-          <div className="absolute top-3.5 inset-x-4 flex items-center justify-between z-20">
-            <div className="px-3 py-1 rounded-full bg-black/45 border border-white/15 backdrop-blur-md text-white text-[11px] font-medium flex items-center gap-1.5">
+          <div className="absolute top-3 inset-x-3.5 flex items-center justify-between z-20">
+            <div className="px-2.5 py-1 rounded-full bg-black/45 border border-white/15 backdrop-blur-md text-white text-[11px] font-medium flex items-center gap-1.5">
               <Sparkles className="w-3 h-3 text-[#34D399]" />
               <span>Account</span>
             </div>
@@ -214,50 +214,49 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
                 type="button"
                 onClick={onClose}
                 disabled={loading}
-                className="w-8 h-8 rounded-full bg-black/45 hover:bg-black/70 text-white/90 hover:text-white border border-white/15 backdrop-blur-md flex items-center justify-center transition-colors cursor-pointer"
+                className="w-7 h-7 rounded-full bg-black/45 hover:bg-black/70 text-white/90 hover:text-white border border-white/15 backdrop-blur-md flex items-center justify-center transition-colors cursor-pointer"
                 aria-label="Close settings"
               >
-                <X className="w-4 h-4" />
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
         </div>
 
-        {/* Overlapping Circular Avatar + Centered Identity */}
-        <div className="px-6 text-center -mt-10 relative z-20 space-y-1.5">
-          <div className="w-20 h-20 mx-auto rounded-full overflow-hidden border-2 border-[#34D399] ring-4 ring-white dark:ring-[#101211] bg-[#121614] flex items-center justify-center shadow-xl">
+        {/* Compact Overlapping Avatar + Identity Strip */}
+        <div className="px-5 shrink-0 text-center -mt-8 relative z-20 space-y-2 pb-3 border-b border-[#11140F]/8 dark:border-white/[0.08]">
+          <div className="w-16 h-16 mx-auto rounded-full overflow-hidden border-2 border-[#34D399] ring-4 ring-white dark:ring-[#101211] bg-[#121614] flex items-center justify-center shadow-lg">
             {avatarUrl ? (
               <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
             ) : (
-              <span className="text-xl font-bold text-white">{initials}</span>
+              <span className="text-lg font-bold text-white">{initials}</span>
             )}
           </div>
           <div>
-            <h3 className="text-lg font-extrabold tracking-tight text-[#11140F] dark:text-white">
-              {displayName}
-            </h3>
-            <p className="text-xs font-semibold text-[#2F6B4F] dark:text-[#34D399] uppercase tracking-wider">
-              {(user.tier || 'free').toUpperCase()} Plan
-            </p>
-            <p className="text-[11.5px] text-[#11140F]/55 dark:text-white/50 font-mono">
+            <div className="flex items-center justify-center gap-2">
+              <h3 className="text-base font-extrabold tracking-tight text-[#11140F] dark:text-white">
+                {displayName}
+              </h3>
+              <span className="px-2 py-0.5 rounded-full bg-[#34D399]/15 text-[#2F6B4F] dark:text-[#34D399] text-[10px] font-bold uppercase tracking-wider">
+                {(user.tier || 'free').toUpperCase()}
+              </span>
+            </div>
+            <p className="text-[11px] text-[#11140F]/55 dark:text-white/50 font-mono truncate">
               {user.email}
             </p>
           </div>
 
-          {/* Primary Action Pill inside Profile Header */}
-          <div className="pt-2">
+          <div className="flex items-center gap-2">
             <a
               href="/pricing"
-              className="w-full py-2.5 px-5 rounded-2xl bg-[#34D399] hover:bg-[#34D399]/90 text-[#09110D] font-bold text-xs transition-all shadow-md inline-flex items-center justify-center gap-1.5"
+              className="flex-1 py-2 px-4 rounded-xl bg-[#34D399] hover:bg-[#34D399]/90 text-[#09110D] font-bold text-xs transition-all shadow-sm inline-flex items-center justify-center gap-1.5"
             >
               <span>Manage Plan &amp; Upgrades</span>
               <ArrowUpRight className="w-3.5 h-3.5" />
             </a>
           </div>
-        </div>
 
-        {/* Navigation Pill Strip */}
-        <div className="px-6 pt-4">
+          {/* Compact Navigation Pill Strip */}
           <div className="grid grid-cols-3 gap-1 p-1 rounded-2xl bg-[#F4F5F1] dark:bg-white/[0.04] border border-[#11140F]/8 dark:border-white/[0.08]">
             {[
               { id: 'preferences', label: 'Preferences', icon: Sliders },
@@ -271,7 +270,7 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`py-2 px-2.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                  className={`py-1.5 px-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                     isActive
                       ? tab.id === 'privacy'
                         ? 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/25'
@@ -287,8 +286,8 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
           </div>
         </div>
 
-        {/* Scrollable Content Body */}
-        <div className="p-6 pt-4 max-h-[54vh] overflow-y-auto space-y-4">
+        {/* Scrollable Content Body — flex-1 min-h-0 guarantees top content is never clipped */}
+        <div className="px-5 py-4 flex-1 min-h-0 overflow-y-auto space-y-3">
           {/* TAB 1: PREFERENCES */}
           {activeTab === 'preferences' && (
             <div className="space-y-3 text-[13px]">

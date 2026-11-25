@@ -12,15 +12,17 @@ export async function POST(req: Request) {
     const signature = req.headers.get('x-paystack-signature');
     const paystackSecret = process.env.PAYSTACK_SECRET_KEY;
 
-    if (paystackSecret && signature) {
-      const hash = crypto
-        .createHmac('sha512', paystackSecret)
-        .update(rawBody)
-        .digest('hex');
+    if (!paystackSecret || !signature) {
+      return NextResponse.json({ error: 'Webhook signature verification unavailable' }, { status: 401 });
+    }
 
-      if (hash !== signature) {
-        return NextResponse.json({ error: 'Invalid Paystack signature' }, { status: 401 });
-      }
+    const hash = crypto
+      .createHmac('sha512', paystackSecret)
+      .update(rawBody)
+      .digest('hex');
+
+    if (hash !== signature) {
+      return NextResponse.json({ error: 'Invalid Paystack signature' }, { status: 401 });
     }
 
     const event = JSON.parse(rawBody || '{}');

@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Flag, CheckCircle2, XCircle, ExternalLink, ShieldAlert, Clock, AlertTriangle, Eye } from 'lucide-react';
+import { Flag, CheckCircle2, XCircle, ExternalLink, AlertTriangle } from 'lucide-react';
 import { PlatformAbuseReport, adminUpdateReportStatus } from '@/app/admin/actions';
+import PaginationControls from './PaginationControls';
 
 interface AdminReportsManagerProps {
   initialReports: PlatformAbuseReport[];
@@ -13,14 +14,25 @@ export default function AdminReportsManager({ initialReports = [] }: AdminReport
   const [reports, setReports] = useState<PlatformAbuseReport[]>(initialReports);
   const [filter, setFilter] = useState<'all' | 'pending' | 'resolved'>('all');
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
 
   const pendingCount = reports.filter((r) => r.status === 'pending').length;
 
-  const filteredReports = reports.filter((r) => {
-    if (filter === 'pending') return r.status === 'pending';
-    if (filter === 'resolved') return r.status === 'reviewed' || r.status === 'dismissed';
-    return true;
-  });
+  const filteredReports = useMemo(
+    () =>
+      reports.filter((r) => {
+        if (filter === 'pending') return r.status === 'pending';
+        if (filter === 'resolved') return r.status === 'reviewed' || r.status === 'dismissed';
+        return true;
+      }),
+    [reports, filter]
+  );
+
+  const paginatedReports = useMemo(() => {
+    const start = (page - 1) * perPage;
+    return filteredReports.slice(start, start + perPage);
+  }, [filteredReports, page, perPage]);
 
   const handleStatusChange = async (reportId: string, newStatus: 'pending' | 'reviewed' | 'dismissed') => {
     setLoadingId(reportId);
@@ -82,7 +94,10 @@ export default function AdminReportsManager({ initialReports = [] }: AdminReport
         <div className="flex items-center gap-1 p-1 bg-[#11140F]/5 rounded-xl text-xs">
           <button
             type="button"
-            onClick={() => setFilter('all')}
+            onClick={() => {
+              setFilter('all');
+              setPage(1);
+            }}
             className={`px-3 py-1 rounded-lg font-medium transition-all ${
               filter === 'all'
                 ? 'bg-white text-[#11140F] shadow-xs font-semibold'
@@ -93,7 +108,10 @@ export default function AdminReportsManager({ initialReports = [] }: AdminReport
           </button>
           <button
             type="button"
-            onClick={() => setFilter('pending')}
+            onClick={() => {
+              setFilter('pending');
+              setPage(1);
+            }}
             className={`px-3 py-1 rounded-lg font-medium transition-all ${
               filter === 'pending'
                 ? 'bg-white text-[#11140F] shadow-xs font-semibold'
@@ -104,7 +122,10 @@ export default function AdminReportsManager({ initialReports = [] }: AdminReport
           </button>
           <button
             type="button"
-            onClick={() => setFilter('resolved')}
+            onClick={() => {
+              setFilter('resolved');
+              setPage(1);
+            }}
             className={`px-3 py-1 rounded-lg font-medium transition-all ${
               filter === 'resolved'
                 ? 'bg-white text-[#11140F] shadow-xs font-semibold'
@@ -141,7 +162,7 @@ export default function AdminReportsManager({ initialReports = [] }: AdminReport
               </tr>
             </thead>
             <tbody className="divide-y divide-[#11140F]/5 text-xs">
-              {filteredReports.map((report) => {
+              {paginatedReports.map((report) => {
                 const badge = getReasonBadge(report.reason);
                 const isLoading = loadingId === report.id;
 
@@ -239,6 +260,17 @@ export default function AdminReportsManager({ initialReports = [] }: AdminReport
               })}
             </tbody>
           </table>
+          <div className="px-4 pb-4">
+            <PaginationControls
+              currentPage={page}
+              totalItems={filteredReports.length}
+              itemsPerPage={perPage}
+              onPageChange={setPage}
+              onItemsPerPageChange={setPerPage}
+              pageSizeOptions={[10, 25, 50]}
+              itemLabel="reports"
+            />
+          </div>
         </div>
       )}
     </div>

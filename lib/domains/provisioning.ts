@@ -19,12 +19,9 @@ export async function provisionDomainAndEmail(order: {
 }): Promise<{ zoneId: string; nameservers: string[] }> {
   const cfHeaders = getCfHeaders();
 
-  // If Cloudflare token is not configured, run in development/staging simulation mode
+  // Cloudflare API Token is required to create live DNS zones and configure email routing
   if (!cfHeaders) {
-    console.log(`[NameLaunch Simulation] Cloudflare API token not set. Simulating instant zone & email routing for ${order.domainName}`);
-    const simulatedZoneId = `sim_zone_${Math.random().toString(36).substring(2, 10)}`;
-    const simulatedNs = ['ada.ns.cloudflare.com', 'bob.ns.cloudflare.com'];
-    return { zoneId: simulatedZoneId, nameservers: simulatedNs };
+    throw new Error('CLOUDFLARE_API_TOKEN is not configured in .env. Cannot provision DNS zone and email routing.');
   }
 
   // STEP 1: Create Cloudflare DNS Zone to receive nameservers

@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   adminSaveSystemConfig,
   SystemSovereigntyConfig,
 } from '@/app/admin/actions';
+import PaginationControls from './PaginationControls';
 import {
   ShieldAlert,
   Cpu,
@@ -28,6 +29,13 @@ export default function AdminSovereigntyControls({
 }: AdminSovereigntyControlsProps) {
   const [config, setConfig] = useState<SystemSovereigntyConfig>(initialConfig);
   const [bannerInput, setBannerInput] = useState(initialConfig.announcementBanner || '');
+  const [auditPage, setAuditPage] = useState(1);
+  const [auditPerPage, setAuditPerPage] = useState(5);
+
+  const paginatedLogs = useMemo(() => {
+    const start = (auditPage - 1) * auditPerPage;
+    return auditLogs.slice(start, start + auditPerPage);
+  }, [auditLogs, auditPage, auditPerPage]);
   const [saving, setSaving] = useState(false);
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
 
@@ -263,8 +271,8 @@ export default function AdminSovereigntyControls({
             </span>
           </div>
 
-          <div className="space-y-2 max-h-56 overflow-y-auto">
-            {auditLogs.map((log, idx) => (
+          <div className="space-y-2">
+            {paginatedLogs.map((log, idx) => (
               <div
                 key={idx}
                 className="p-2.5 rounded-lg border border-[#11140F]/5 bg-[#F7F8F5]/60 flex items-center justify-between text-[12px]"
@@ -284,6 +292,16 @@ export default function AdminSovereigntyControls({
               </div>
             ))}
           </div>
+
+          <PaginationControls
+            currentPage={auditPage}
+            totalItems={auditLogs.length}
+            itemsPerPage={auditPerPage}
+            onPageChange={setAuditPage}
+            onItemsPerPageChange={setAuditPerPage}
+            pageSizeOptions={[5, 10, 25]}
+            itemLabel="logs"
+          />
         </div>
       )}
     </div>

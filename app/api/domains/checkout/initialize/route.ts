@@ -176,14 +176,14 @@ export async function POST(req: Request) {
       });
     }
 
-    // 3. Fallback Sandbox Mode (when gateway key is pending setup in environment)
-    const testCallbackUrl = `${appUrl}/?section=namelaunch&ref=${reference}&test_paid=true`;
-    return NextResponse.json({
-      authorizationUrl: testCallbackUrl,
-      reference,
-      amountNgn: totalPaidNgn,
-      isSimulation: true,
-    });
+    // 3. Reject checkout when payment gateway key is not configured
+    return NextResponse.json(
+      {
+        error:
+          'Payment checkout is temporarily unavailable because the payment gateway is not configured in this environment.',
+      },
+      { status: 503 }
+    );
   } catch (error: any) {
     console.error('Checkout initialization error:', error);
     return NextResponse.json(

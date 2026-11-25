@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { TelemetryMetrics } from '@/lib/analytics/adminTelemetry';
+import { formatUsdMetric } from '@/lib/domains/profit';
 import { adminGetTelemetryAction } from '@/app/admin/actions';
 import {
   Activity,
@@ -222,10 +223,15 @@ export default function AdminAnalyticsDashboard({ initialData }: Props) {
             <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
           </div>
           <p className="text-2xl sm:text-3xl font-bold text-[#11140F] tracking-tight">
-            ${data.mrr.toLocaleString()}
+            ${formatUsdMetric(data.mrr)}
           </p>
           <p className="text-[11px] text-[#11140F]/50">
-            ARR: <strong className="text-[#11140F]">${data.arr.toLocaleString()}</strong>
+            ARR: <strong className="text-[#11140F]">${formatUsdMetric(data.arr)}</strong>
+            {(data.domainProfit30dUsd ?? 0) > 0 && (
+              <span className="block text-[10px] font-mono text-emerald-700">
+                +${formatUsdMetric(data.domainProfit30dUsd || 0)} domains
+              </span>
+            )}
           </p>
         </div>
 

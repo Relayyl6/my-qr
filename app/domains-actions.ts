@@ -32,6 +32,10 @@ export async function getUserDomainOrders() {
 
 export async function confirmOrderPayment(paystackRef: string) {
   const user = await getCurrentUser();
+  if (!user) {
+    return { success: false, message: 'Please sign in to verify payment.' };
+  }
+
   const order = await prisma.domainOrder.findUnique({
     where: { paystackRef },
   });
@@ -40,13 +44,33 @@ export async function confirmOrderPayment(paystackRef: string) {
     return { success: false, message: 'Order reference not found' };
   }
 
+  const adminEmail = (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();
+  const isAdmin = user.email.toLowerCase() === adminEmail;
+  if (
+    !isAdmin &&
+    order.userId &&
+    order.userId !== user.id &&
+    order.userEmail.toLowerCase() !== user.email.toLowerCase()
+  ) {
+    return { success: false, message: 'Unauthorized to verify this domain order.' };
+  }
+
   if (order.status === 'ACTIVE') {
     return { success: true, order, message: 'Domain is already active' };
   }
 
-  // Verify transaction status if payment gateway secret key is configured
+  // Strictly verify transaction against Paystack for any PENDING_PAYMENT order.
+  // Never bypass or auto-activate when gateway keys are absent.
   const paystackSecret = process.env.PAYSTACK_SECRET_KEY;
-  if (paystackSecret && !paystackSecret.includes('placeholder') && order.status === 'PENDING_PAYMENT') {
+  if (order.status === 'PENDING_PAYMENT') {
+    if (!paystackSecret || paystackSecret.includes('placeholder')) {
+      return {
+        success: false,
+        order,
+        message: 'Payment gateway is not configured in this environment. Payment cannot be verified yet.',
+      };
+    }
+
     try {
       const verifyRes = await fetch(
         `https://api.paystack.co/transaction/verify/${encodeURIComponent(paystackRef)}`,
@@ -56,7 +80,15 @@ export async function confirmOrderPayment(paystackRef: string) {
         }
       );
       const verifyData = await verifyRes.json();
-      if (!verifyData.status || verifyData.data?.status !== 'success') {
+      const paidKobo = Number(verifyData.data?.amount || 0);
+      const expectedKobo = Math.round(order.totalPaidNgn * 100);
+
+      if (
+        !verifyData.status ||
+        verifyData.data?.status !== 'success' ||
+        verifyData.data?.reference !== paystackRef ||
+        paidKobo < expectedKobo
+      ) {
         return {
           success: false,
           order,
@@ -71,6 +103,12 @@ export async function confirmOrderPayment(paystackRef: string) {
         message: 'Unable to verify payment status right now. Please try again.',
       };
     }
+  } else if (order.status !== 'PAID_AWAITING_FUNDS' && order.status !== 'PROVISIONING') {
+    return {
+      success: false,
+      order,
+      message: `Order status (${order.status}) is not eligible for provisioning.`,
+    };
   }
 
   try {

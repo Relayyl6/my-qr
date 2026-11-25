@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useRef, useTransition } from 'react';
+import React, { useState, useRef, useTransition, useMemo } from 'react';
+import PaginationControls from './PaginationControls';
 import {
   Mail,
   Search,
@@ -120,25 +121,41 @@ export default function AdminPlatformMailingList({
   // Broadcast Inspection & Deletion
   const [inspectingBroadcast, setInspectingBroadcast] = useState<PlatformBroadcastItem | null>(null);
   const [campaignToDelete, setCampaignToDelete] = useState<PlatformBroadcastItem | null>(null);
+  const [subPage, setSubPage] = useState(1);
+  const [subPerPage, setSubPerPage] = useState(10);
+  const [campPage, setCampPage] = useState(1);
+  const [campPerPage, setCampPerPage] = useState(10);
 
   const activeSubscribersCount = subscribers.filter((s) => s.status === 'active').length;
 
   // Filtered subscribers
-  const filteredSubscribers = subscribers.filter((sub) => {
-    const matchesStatus = statusFilter === 'all' || sub.status === statusFilter;
+  const filteredSubscribers = useMemo(() => {
     const query = search.trim().toLowerCase();
-    const matchesSearch =
-      !query ||
-      sub.email.toLowerCase().includes(query) ||
-      (sub.firstName && sub.firstName.toLowerCase().includes(query));
-    return matchesStatus && matchesSearch;
-  });
+    return subscribers.filter((sub) => {
+      const matchesStatus = statusFilter === 'all' || sub.status === statusFilter;
+      const matchesSearch =
+        !query ||
+        sub.email.toLowerCase().includes(query) ||
+        (sub.firstName && sub.firstName.toLowerCase().includes(query));
+      return matchesStatus && matchesSearch;
+    });
+  }, [subscribers, statusFilter, search]);
+
+  const paginatedSubscribers = useMemo(() => {
+    const start = (subPage - 1) * subPerPage;
+    return filteredSubscribers.slice(start, start + subPerPage);
+  }, [filteredSubscribers, subPage, subPerPage]);
 
   // Filtered broadcasts
-  const filteredBroadcasts = broadcasts.filter((b) => {
+  const filteredBroadcasts = useMemo(() => {
     const query = search.trim().toLowerCase();
-    return !query || b.subject.toLowerCase().includes(query);
-  });
+    return broadcasts.filter((b) => !query || b.subject.toLowerCase().includes(query));
+  }, [broadcasts, search]);
+
+  const paginatedBroadcasts = useMemo(() => {
+    const start = (campPage - 1) * campPerPage;
+    return filteredBroadcasts.slice(start, start + campPerPage);
+  }, [filteredBroadcasts, campPage, campPerPage]);
 
   // Insert Rich Tag helper for composer
   const insertFormat = (before: string, after: string = '', defaultText: string = '') => {
@@ -561,7 +578,7 @@ export default function AdminPlatformMailingList({
                     </td>
                   </tr>
                 ) : (
-                  filteredSubscribers.map((sub) => (
+                  paginatedSubscribers.map((sub) => (
                     <tr key={sub.id} className="hover:bg-[#F7F8F5]/60 transition-colors">
                       <td className="py-3 px-4 font-medium text-[#11140F]">{sub.email}</td>
                       <td className="py-3 px-4 text-[#11140F]/70">{sub.firstName || '—'}</td>
@@ -617,11 +634,25 @@ export default function AdminPlatformMailingList({
               </tbody>
             </table>
           </div>
+          {filteredSubscribers.length > 0 && (
+            <div className="px-4 pb-4">
+              <PaginationControls
+                currentPage={subPage}
+                totalItems={filteredSubscribers.length}
+                itemsPerPage={subPerPage}
+                onPageChange={setSubPage}
+                onItemsPerPageChange={setSubPerPage}
+                pageSizeOptions={[10, 25, 50]}
+                itemLabel="subscribers"
+              />
+            </div>
+          )}
         </>
       )}
 
       {/* TAB 2: BROADCAST CAMPAIGNS HISTORY */}
       {activeTab === 'broadcasts' && (
+        <>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -646,7 +677,7 @@ export default function AdminPlatformMailingList({
                   </td>
                 </tr>
               ) : (
-                filteredBroadcasts.map((b) => (
+                paginatedBroadcasts.map((b) => (
                   <tr key={b.id} className="hover:bg-[#F7F8F5]/60 transition-colors">
                     <td className="py-3 px-4 font-semibold text-[#11140F] max-w-xs truncate">
                       {b.subject}
@@ -705,6 +736,20 @@ export default function AdminPlatformMailingList({
             </tbody>
           </table>
         </div>
+        {filteredBroadcasts.length > 0 && (
+          <div className="px-4 pb-4">
+            <PaginationControls
+              currentPage={campPage}
+              totalItems={filteredBroadcasts.length}
+              itemsPerPage={campPerPage}
+              onPageChange={setCampPage}
+              onItemsPerPageChange={setCampPerPage}
+              pageSizeOptions={[10, 25, 50]}
+              itemLabel="broadcasts"
+            />
+          </div>
+        )}
+        </>
       )}
 
       {/* ================================================================= */}

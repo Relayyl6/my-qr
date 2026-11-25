@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import PaginationControls from './PaginationControls';
 import {
   Mail,
   Users,
@@ -186,6 +187,10 @@ export default function CustomerMailingListManager({
   const [campaigns, setCampaigns] = useState<CampaignItem[]>([]);
   const [loadingCampaigns, setLoadingCampaigns] = useState(false);
   const [inspectingCampaign, setInspectingCampaign] = useState<CampaignItem | null>(null);
+  const [contactsPage, setContactsPage] = useState(1);
+  const [contactsPerPage, setContactsPerPage] = useState(10);
+  const [campaignsPage, setCampaignsPage] = useState(1);
+  const [campaignsPerPage, setCampaignsPerPage] = useState(10);
 
   // Modals
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -1135,7 +1140,9 @@ export default function CustomerMailingListManager({
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-[#11140F]/5 dark:divide-white/5">
-                          {filteredContacts.map((c) => {
+                          {filteredContacts
+                            .slice((contactsPage - 1) * contactsPerPage, contactsPage * contactsPerPage)
+                            .map((c) => {
                             const isSelected = selectedContactIds.includes(c.id);
                             return (
                               <tr key={c.id} className="hover:bg-[#F7F8F5]/60 dark:hover:bg-white/[0.03] transition-colors">
@@ -1208,6 +1215,19 @@ export default function CustomerMailingListManager({
                       </table>
                     </div>
                   )}
+                  {filteredContacts.length > 0 && (
+                    <div className="px-3 pb-3">
+                      <PaginationControls
+                        currentPage={contactsPage}
+                        totalItems={filteredContacts.length}
+                        itemsPerPage={contactsPerPage}
+                        onPageChange={setContactsPage}
+                        onItemsPerPageChange={setContactsPerPage}
+                        pageSizeOptions={[10, 25, 50]}
+                        itemLabel="subscribers"
+                      />
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -1249,7 +1269,9 @@ export default function CustomerMailingListManager({
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-[#11140F]/5 dark:divide-white/5">
-                          {campaigns.map((camp) => (
+                          {campaigns
+                            .slice((campaignsPage - 1) * campaignsPerPage, campaignsPage * campaignsPerPage)
+                            .map((camp) => (
                             <tr key={camp.id} className="hover:bg-[#F7F8F5]/60 dark:hover:bg-white/[0.03] transition-colors">
                               <td className="py-3 px-4 font-medium text-[#11140F] dark:text-white max-w-xs truncate">
                                 {camp.subject}
@@ -1279,6 +1301,19 @@ export default function CustomerMailingListManager({
                           ))}
                         </tbody>
                       </table>
+                    </div>
+                  )}
+                  {campaigns.length > 0 && (
+                    <div className="px-3 pb-3">
+                      <PaginationControls
+                        currentPage={campaignsPage}
+                        totalItems={campaigns.length}
+                        itemsPerPage={campaignsPerPage}
+                        onPageChange={setCampaignsPage}
+                        onItemsPerPageChange={setCampaignsPerPage}
+                        pageSizeOptions={[10, 25, 50]}
+                        itemLabel="broadcasts"
+                      />
                     </div>
                   )}
                 </div>

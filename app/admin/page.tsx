@@ -20,8 +20,8 @@ import {
   ExternalLink,
   Video,
 } from 'lucide-react';
-import AdminUserRow from '@/components/AdminUserRow';
-import AdminDomainRow from '@/components/AdminDomainRow';
+import AdminCustomerFleetTable from '@/components/AdminCustomerFleetTable';
+import AdminCustomDomainsTable from '@/components/AdminCustomDomainsTable';
 import AdminSovereigntyControls from '@/components/AdminSovereigntyControls';
 import AdminPromoManager from '@/components/AdminPromoManager';
 import AdminPlatformMailingList from '@/components/AdminPlatformMailingList';
@@ -29,6 +29,7 @@ import AdminReportsManager from '@/components/AdminReportsManager';
 import AdminDomainOrdersManager from '@/components/AdminDomainOrdersManager';
 import AdminDomainPricingManager from '@/components/AdminDomainPricingManager';
 import { getDomainPricingConfig } from '@/lib/domains/fxEngine';
+import { calculateDomainSalesProfit, formatUsdMetric } from '@/lib/domains/profit';
 import { adminGetSystemConfig, adminGetAuditLogs, adminGetPromoConfig, adminGetPromoCodes, adminGetReports } from '@/app/admin/actions';
 
 export const dynamic = 'force-dynamic';
@@ -75,7 +76,7 @@ export default async function AdminDashboardPage() {
     prisma.customDomain.count(),
     prisma.user.findMany({
       orderBy: { createdAt: 'desc' },
-      take: 50,
+      take: 200,
       select: {
         id: true,
         email: true,
@@ -105,7 +106,7 @@ export default async function AdminDashboardPage() {
     }),
     prisma.customDomain.findMany({
       orderBy: { createdAt: 'desc' },
-      take: 15,
+      take: 100,
       select: {
         id: true,
         domain: true,
@@ -154,14 +155,20 @@ export default async function AdminDashboardPage() {
     adminGetReports(),
     prisma.domainOrder.findMany({
       orderBy: { createdAt: 'desc' },
-      take: 50,
+      take: 250,
     }),
     getDomainPricingConfig(),
   ]);
 
-  // Calculate MRR & ARR Run Rate
-  const mrr = proUsersCount * 5 + plusUsersCount * 12 + ultraUsersCount * 20;
-  const arr = mrr * 12;
+  // Calculate Subscription MRR + Dynamic Domain Sale Profit (30d in MRR, 365d in ARR)
+  const effectiveFxRate =
+    domainPricingConfig.mode === 'manual_override'
+      ? domainPricingConfig.manualOverrideRate
+      : domainPricingConfig.bufferedRate;
+  const domainProfit = calculateDomainSalesProfit(domainOrders, effectiveFxRate || 1440);
+  const subscriptionMrr = proUsersCount * 5 + plusUsersCount * 12 + ultraUsersCount * 20;
+  const mrr = Math.round((subscriptionMrr + domainProfit.last30dProfitUsd) * 100) / 100;
+  const arr = Math.round((subscriptionMrr * 12 + domainProfit.last365dProfitUsd) * 100) / 100;
 
   return (
     <div className="min-h-screen bg-[#F7F8F5] text-[#11140F] p-4 sm:p-8">
@@ -225,11 +232,16 @@ export default async function AdminDashboardPage() {
               <DollarSign className="w-4 h-4 text-emerald-600" />
             </div>
             <p className="text-2xl sm:text-3xl font-bold text-[#11140F]">
-              ${mrr.toLocaleString()}
+              ${formatUsdMetric(mrr)}
             </p>
             <p className="text-[11.5px] text-[#11140F]/50">
-              ARR Run Rate: <strong className="text-[#11140F]">${arr.toLocaleString()}</strong>
+              ARR Run Rate: <strong className="text-[#11140F]">${formatUsdMetric(arr)}</strong>
             </p>
+            {domainProfit.paidOrdersCount > 0 && (
+              <p className="text-[10.5px] font-mono text-emerald-700 pt-0.5">
+                Subs ${subscriptionMrr} + Domains +${formatUsdMetric(domainProfit.last30dProfitUsd)} (₦{domainProfit.totalProfitNgn.toLocaleString()} net)
+              </p>
+            )}
           </div>
 
           <div className="rounded-2xl border border-[#11140F]/10 bg-white p-5 shadow-xs space-y-1">
@@ -355,81 +367,11 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Custom Domain Registry (Instant Sovereign Force-Verify) */}
-        <div className="rounded-2xl border border-[#11140F]/10 bg-white overflow-hidden shadow-xs space-y-0">
-          <div className="p-5 border-b border-[#11140F]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                <Globe className="w-4 h-4 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-[16px] text-[#11140F]">
-                  Branded Custom Domains ({customDomains.length})
-                </h3>
-                <p className="text-[12.5px] text-[#11140F]/50">
-                  Instant force-verification bypass for customer domains without waiting for DNS propagation
-                </p>
-              </div>
-            </div>
-          </div>
+        {/* Custom Domain Registry (Paginated) */}
+        <AdminCustomDomainsTable domains={customDomains as any} />
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-[#11140F]/10 bg-[#F7F8F5]/80 text-[11.5px] uppercase font-semibold text-[#11140F]/50 tracking-wider">
-                  <th className="py-3 px-4">Custom Domain</th>
-                  <th className="py-3 px-4">Owner Email</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4">CNAME Target</th>
-                  <th className="py-3 px-4 text-right">Sovereign Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {customDomains.map((d) => (
-                  <AdminDomainRow key={d.id} domain={d} />
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Customer Directory Management */}
-        <div className="rounded-2xl border border-[#11140F]/10 bg-white overflow-hidden shadow-xs space-y-0">
-          <div className="p-5 border-b border-[#11140F]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <h3 className="font-semibold text-[16px] text-[#11140F]">
-                Customer Fleet Directory ({recentUsers.length})
-              </h3>
-              <p className="text-[12.5px] text-[#11140F]/50">
-                Manage user subscription tiers, inspect links, and adjust AI compute budgets directly.
-              </p>
-            </div>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-[#11140F]/10 bg-[#F7F8F5]/80 text-[11.5px] uppercase font-semibold text-[#11140F]/50 tracking-wider">
-                  <th className="py-3 px-4">Customer Email</th>
-                  <th className="py-3 px-4">Joined</th>
-                  <th className="py-3 px-4">Current Plan</th>
-                  <th className="py-3 px-4">Link Fleet</th>
-                  <th className="py-3 px-4">Stripe Billing</th>
-                  <th className="py-3 px-4 text-right">Sovereign Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentUsers.map((u) => (
-                  <AdminUserRow
-                    key={u.id}
-                    user={u}
-                    isSelf={u.email.toLowerCase() === adminEmail}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        {/* Customer Directory Management (Paginated) */}
+        <AdminCustomerFleetTable users={recentUsers as any} adminEmail={adminEmail} />
 
         {/* FX Exchange Rate Engine & Scaled Markup Sovereignty */}
         <AdminDomainPricingManager initialConfig={domainPricingConfig} />

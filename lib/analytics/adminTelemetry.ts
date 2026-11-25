@@ -1,4 +1,6 @@
 import { prisma } from '@/lib/prisma';
+import { getDomainPricingConfig } from '@/lib/domains/fxEngine';
+import { calculateDomainSalesProfit } from '@/lib/domains/profit';
 
 export interface EntryPageMetric {
   path: string;
@@ -43,6 +45,9 @@ export interface TelemetryMetrics {
   // Financial Unit Economics
   mrr: number;
   arr: number;
+  subscriptionMrr?: number;
+  domainProfit30dUsd?: number;
+  domainProfitTotalNgn?: number;
   arpu: number;
   conversionRateVisitorsToSignups: number;
   conversionRateFreeToPaid: number;
@@ -117,6 +122,8 @@ export async function getAdminTelemetry(
     topLinksRaw,
     signupsInPeriod,
     sessions,
+    domainOrders,
+    domainPricingConfig,
   ] = await Promise.all([
     prisma.siteVisit.count({
       where: { createdAt: { gte: since } },
@@ -206,6 +213,17 @@ export async function getAdminTelemetry(
       orderBy: { createdAt: 'desc' },
       take: 5000,
     }),
+    prisma.domainOrder.findMany({
+      where: { status: { in: ['ACTIVE', 'PROVISIONING', 'PAID_AWAITING_FUNDS'] } },
+      select: {
+        status: true,
+        totalPaidNgn: true,
+        wholesaleUsd: true,
+        exchangeRate: true,
+        createdAt: true,
+      },
+    }),
+    getDomainPricingConfig(),
   ]);
 
   // Aggregate Unique Visitors (deduped by ipHash)
@@ -596,11 +614,17 @@ export async function getAdminTelemetry(
     }));
   }
 
-  // Unit Economics
+  // Unit Economics (Subscriptions + Dynamic Domain Sales Profit)
   const paidUsersCount = proUsersCount + plusUsersCount + ultraUsersCount;
-  const mrr = proUsersCount * 5 + plusUsersCount * 12 + ultraUsersCount * 20;
-  const arr = mrr * 12;
-  const arpu = paidUsersCount > 0 ? Math.round((mrr / paidUsersCount) * 100) / 100 : 0;
+  const effectiveFxRate =
+    domainPricingConfig.mode === 'manual_override'
+      ? domainPricingConfig.manualOverrideRate
+      : domainPricingConfig.bufferedRate;
+  const domainProfit = calculateDomainSalesProfit(domainOrders, effectiveFxRate || 1440);
+  const subscriptionMrr = proUsersCount * 5 + plusUsersCount * 12 + ultraUsersCount * 20;
+  const mrr = Math.round((subscriptionMrr + domainProfit.last30dProfitUsd) * 100) / 100;
+  const arr = Math.round((subscriptionMrr * 12 + domainProfit.last365dProfitUsd) * 100) / 100;
+  const arpu = paidUsersCount > 0 ? Math.round((subscriptionMrr / paidUsersCount) * 100) / 100 : 0;
   
   const conversionRateVisitorsToSignups =
     uniqueVisitors > 0 ? Math.round((signupsInPeriod / uniqueVisitors) * 1000) / 10 : 0;
@@ -623,6 +647,9 @@ export async function getAdminTelemetry(
     sessionsWithReplaysCount,
     mrr,
     arr,
+    subscriptionMrr,
+    domainProfit30dUsd: domainProfit.last30dProfitUsd,
+    domainProfitTotalNgn: domainProfit.totalProfitNgn,
     arpu,
     conversionRateVisitorsToSignups,
     conversionRateFreeToPaid,
