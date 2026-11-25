@@ -16,6 +16,7 @@ export async function provisionDomainAndEmail(order: {
   domainName: string;
   desiredAlias: string;
   userEmail: string;
+  emailAliases?: any;
 }): Promise<{ zoneId: string; nameservers: string[] }> {
   const cfHeaders = getCfHeaders();
 
@@ -144,31 +145,48 @@ export async function provisionDomainAndEmail(order: {
     console.warn('Failed to enable email routing:', err);
   }
 
-  // STEP 4: Add Email Forwarding Rule (e.g. hello@domain.com -> user@gmail.com)
-  try {
-    await fetch(`${CF_BASE}/zones/${zoneId}/email/routing/rules`, {
-      method: 'POST',
-      headers: cfHeaders,
-      body: JSON.stringify({
-        name: `Forward ${order.desiredAlias}`,
-        enabled: true,
-        matchers: [
-          {
-            type: 'literal',
-            field: 'to',
-            value: `${order.desiredAlias}@${order.domainName}`,
-          },
-        ],
-        actions: [
-          {
-            type: 'forward',
-            value: [order.userEmail],
-          },
-        ],
-      }),
+  // STEP 4: Add Email Forwarding Rules (Primary + any additional purchased aliases)
+  const aliasesToProvision: Array<{ alias: string; forwardTo: string }> = [];
+  if (Array.isArray(order.emailAliases) && order.emailAliases.length > 0) {
+    for (const a of order.emailAliases as any[]) {
+      if (a && a.alias && a.forwardTo) {
+        aliasesToProvision.push({ alias: a.alias, forwardTo: a.forwardTo });
+      }
+    }
+  }
+  if (aliasesToProvision.length === 0) {
+    aliasesToProvision.push({
+      alias: order.desiredAlias || 'hello',
+      forwardTo: order.userEmail,
     });
-  } catch (err) {
-    console.warn('Failed to create email routing rule:', err);
+  }
+
+  for (const { alias, forwardTo } of aliasesToProvision) {
+    try {
+      await fetch(`${CF_BASE}/zones/${zoneId}/email/routing/rules`, {
+        method: 'POST',
+        headers: cfHeaders,
+        body: JSON.stringify({
+          name: `Forward ${alias}`,
+          enabled: true,
+          matchers: [
+            {
+              type: 'literal',
+              field: 'to',
+              value: `${alias}@${order.domainName}`,
+            },
+          ],
+          actions: [
+            {
+              type: 'forward',
+              value: [forwardTo],
+            },
+          ],
+        }),
+      });
+    } catch (err) {
+      console.warn(`Failed to create email routing rule for ${alias}:`, err);
+    }
   }
 
   return { zoneId, nameservers };

@@ -38,6 +38,7 @@ export default function AdminDomainPricingManager({
     standardMarkupNgn: initialConfig.standardMarkupNgn ?? 5500,
     premiumMarkupNgn: initialConfig.premiumMarkupNgn ?? 8000,
     roundingStep: initialConfig.roundingStep ?? 1000,
+    extraEmailPriceNgn: initialConfig.extraEmailPriceNgn ?? 1500,
     tldMargins:
       initialConfig.tldMargins && Object.keys(initialConfig.tldMargins).length > 0
         ? initialConfig.tldMargins
@@ -156,6 +157,7 @@ export default function AdminDomainPricingManager({
         standardMarkupNgn: Number(config.standardMarkupNgn || 5500),
         premiumMarkupNgn: Number(config.premiumMarkupNgn || 8000),
         roundingStep: config.roundingStep || 1000,
+        extraEmailPriceNgn: Number(config.extraEmailPriceNgn || 1500),
         tldMargins: cleanMargins,
         tldOverrides: cleanOverrides,
       });
@@ -231,7 +233,7 @@ export default function AdminDomainPricingManager({
       )}
 
       {/* Row 1: Core FX & Converter Engine */}
-      <div className="p-5 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Live Market Rate vs Scaled Buffered Rate */}
         <div className="p-4 rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5]/60 dark:bg-white/[0.02] space-y-3">
           <div className="flex items-center justify-between">
@@ -351,6 +353,34 @@ export default function AdminDomainPricingManager({
           <div className="pt-1 flex items-center justify-between text-xs border-t border-[#11140F]/10 dark:border-white/10 text-[#11140F]/70 dark:text-white/70">
             <span>Effective Billing FX:</span>
             <strong className="font-mono text-sm text-emerald-700 dark:text-[#34D399]">₦{effectiveRate} / $1</strong>
+          </div>
+        </div>
+
+        {/* Card 4: Additional Email Routing Upsell */}
+        <div className="p-4 rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-white/[0.02] space-y-3">
+          <label className="text-[11.5px] font-bold text-[#11140F] dark:text-white block">
+            Extra Email Routing Upsell (₦/yr)
+          </label>
+          <div className="space-y-1">
+            <div className="relative">
+              <span className="absolute left-3 top-2 text-xs font-bold text-[#11140F]/40 dark:text-white/40">₦</span>
+              <input
+                type="number"
+                step="200"
+                min="0"
+                value={config.extraEmailPriceNgn ?? 1500}
+                onChange={(e) => setConfig({ ...config, extraEmailPriceNgn: Number(e.target.value) })}
+                className="w-full pl-7 pr-3 py-1.5 rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.04] text-[#11140F] dark:text-white font-mono text-xs font-bold outline-none focus:border-emerald-500"
+              />
+            </div>
+            <p className="text-[11px] text-[#11140F]/50 dark:text-white/50 mt-1">
+              Fee charged per additional provisioned email address beyond the 1st free one.
+            </p>
+          </div>
+
+          <div className="pt-1 flex items-center justify-between text-xs border-t border-[#11140F]/10 dark:border-white/10 text-[#11140F]/70 dark:text-white/70">
+            <span>1st Email Alias:</span>
+            <strong className="font-mono text-xs text-emerald-700 dark:text-[#34D399]">Included (Free)</strong>
           </div>
         </div>
       </div>

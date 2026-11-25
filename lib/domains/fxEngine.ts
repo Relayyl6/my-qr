@@ -24,6 +24,9 @@ export interface DomainPricingConfig {
   
   // Clean pricing progression / rounding step (nearest 100, 500, 800, 1000, or 900 charm)
   roundingStep?: RoundingStep;
+
+  // Additional provisioned email forwarding addresses (NGN/yr per extra email beyond 1st free)
+  extraEmailPriceNgn?: number;
   
   lastFetchedAt: string;
   source: string;              // 'apilayer' | 'open_er_api' | 'fallback_env'
@@ -54,6 +57,7 @@ export const DEFAULT_PRICING_CONFIG: DomainPricingConfig = {
   tldMargins: { ...DEFAULT_TLD_MARGIN_PROGRESSION },
   tldOverrides: {},
   roundingStep: 1000,
+  extraEmailPriceNgn: 1500,
   lastFetchedAt: new Date().toISOString(),
   source: 'currency_api_cdn',
 };
@@ -137,6 +141,9 @@ export async function getDomainPricingConfig(): Promise<DomainPricingConfig> {
       }
       if (!merged.budgetMarkupNgn || merged.budgetMarkupNgn < 3000) {
         merged.budgetMarkupNgn = 3000;
+      }
+      if (typeof merged.extraEmailPriceNgn !== 'number' || merged.extraEmailPriceNgn <= 0) {
+        merged.extraEmailPriceNgn = 1500;
       }
       return merged;
     }

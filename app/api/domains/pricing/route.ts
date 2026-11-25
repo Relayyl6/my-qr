@@ -27,8 +27,11 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json({ tlds });
+    return NextResponse.json({
+      tlds,
+      extraEmailPriceNgn: config?.extraEmailPriceNgn ?? 1500,
+    });
   } catch (err: any) {
-    return NextResponse.json({ tlds: [] });
+    return NextResponse.json({ tlds: [], extraEmailPriceNgn: 1500 });
   }
 }

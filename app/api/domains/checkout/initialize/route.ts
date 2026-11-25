@@ -105,20 +105,45 @@ export async function POST(req: Request) {
           : pricingConfig.bufferedRate
         : 1400;
 
+      // Parse and validate additional email forwarding aliases (+money per email)
+      const rawAdditional = Array.isArray(body.additionalAliases) ? body.additionalAliases : [];
+      const validAdditional: Array<{ alias: string; forwardTo: string }> = [];
+      const seenAliases = new Set<string>([desiredAlias]);
+
+      for (const item of rawAdditional) {
+        if (!item || typeof item !== 'object') continue;
+        const a = String(item.alias || '').trim().toLowerCase().replace(/[^a-z0-9._-]/g, '');
+        const f = String(item.forwardTo || userEmail).trim().toLowerCase();
+        if (a && a !== desiredAlias && !seenAliases.has(a) && f.includes('@')) {
+          seenAliases.add(a);
+          validAdditional.push({ alias: a, forwardTo: f });
+        }
+      }
+
+      const extraEmailPriceNgn = pricingConfig?.extraEmailPriceNgn ?? 1500;
+      const additionalCostNgn = validAdditional.length * extraEmailPriceNgn;
+      const totalExpectedNgn = pricing.totalNgn + additionalCostNgn;
+
       // Lock charge to exact storefront card price if within tolerance (<= 1000 NGN)
       // guaranteeing Paystack checkout matches the exact button price seen by the user!
       const clientExpectedNgn = body.expectedPriceNgn ? Number(body.expectedPriceNgn) : null;
-      let finalChargeNgn = pricing.totalNgn;
-      let finalMarkupNgn = pricing.platformFeeNgn;
+      let finalChargeNgn = totalExpectedNgn;
+      let finalMarkupNgn = pricing.platformFeeNgn + additionalCostNgn;
 
       if (
         clientExpectedNgn &&
         clientExpectedNgn > 0 &&
-        Math.abs(pricing.totalNgn - clientExpectedNgn) <= 1000
+        Math.abs(totalExpectedNgn - clientExpectedNgn) <= 1000
       ) {
         finalChargeNgn = clientExpectedNgn;
         finalMarkupNgn = Math.max(0, finalChargeNgn - pricing.wholesaleNgn);
       }
+
+      // Compile complete emailAliases list (primary + additional)
+      const compiledEmailAliases = [
+        { alias: desiredAlias, forwardTo: userEmail, enabled: true },
+        ...validAdditional.map((a) => ({ alias: a.alias, forwardTo: a.forwardTo, enabled: true })),
+      ];
 
       // Reuse existing PENDING_PAYMENT order for the same domain & customer if present
       const existingPending = await prisma.domainOrder.findFirst({
@@ -139,6 +164,7 @@ export async function POST(req: Request) {
             userId: user?.id || existingPending.userId,
             userEmail,
             desiredAlias,
+            emailAliases: compiledEmailAliases as any,
             wholesaleUsd: pricing.wholesaleUsd,
             exchangeRate: effectiveRate,
             platformMarkupNgn: finalMarkupNgn,
@@ -153,6 +179,7 @@ export async function POST(req: Request) {
             userEmail,
             domainName,
             desiredAlias,
+            emailAliases: compiledEmailAliases as any,
             wholesaleUsd: pricing.wholesaleUsd,
             exchangeRate: effectiveRate,
             platformMarkupNgn: finalMarkupNgn,

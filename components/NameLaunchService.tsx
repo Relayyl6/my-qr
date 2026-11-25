@@ -16,6 +16,7 @@ import {
   Lock,
   CreditCard,
   Trash2,
+  Plus,
   ArrowRight,
   Zap,
   EyeOff,
@@ -80,6 +81,10 @@ export default function NameLaunchService({ user }: Props) {
   const [selectedDomain, setSelectedDomain] = useState<DomainSearchResult | null>(null);
   const [emailAlias, setEmailAlias] = useState('hello');
   const [forwardingEmail, setForwardingEmail] = useState(user?.email || '');
+  const [extraEmailPriceNgn, setExtraEmailPriceNgn] = useState(1500);
+  const [additionalAliases, setAdditionalAliases] = useState<
+    Array<{ id: string; alias: string; forwardTo: string }>
+  >([]);
   const [checkingOut, setCheckingOut] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
@@ -101,6 +106,9 @@ export default function NameLaunchService({ user }: Props) {
       .then((d) => {
         if (Array.isArray(d?.tlds) && d.tlds.length > 0) {
           setFeaturedTlds(d.tlds);
+        }
+        if (typeof d?.extraEmailPriceNgn === 'number' && d.extraEmailPriceNgn > 0) {
+          setExtraEmailPriceNgn(d.extraEmailPriceNgn);
         }
       })
       .catch(() => {});
@@ -195,13 +203,31 @@ export default function NameLaunchService({ user }: Props) {
     const cleanTargetEmail = forwardingEmail.trim().toLowerCase();
 
     if (!cleanAlias) {
-      setCheckoutError('Please enter a valid email prefix (e.g. hello).');
+      setCheckoutError('Please enter a valid email prefix (e.g. hello, founder, billing).');
       return;
     }
     if (!cleanTargetEmail.includes('@')) {
       setCheckoutError('Please enter a valid forwarding email address.');
       return;
     }
+
+    const cleanedAdditional = additionalAliases
+      .filter((a) => a.alias.trim())
+      .map((a) => ({
+        alias: a.alias.trim().toLowerCase().replace(/[^a-z0-9._-]/g, ''),
+        forwardTo: a.forwardTo.trim().toLowerCase() || cleanTargetEmail,
+      }));
+
+    // Check for duplicate aliases
+    const allAliases = [cleanAlias, ...cleanedAdditional.map((a) => a.alias)];
+    const uniqueAliases = new Set(allAliases);
+    if (uniqueAliases.size !== allAliases.length) {
+      setCheckoutError('Each business email address must have a unique prefix (no duplicates).');
+      return;
+    }
+
+    const additionalCostNgn = cleanedAdditional.length * extraEmailPriceNgn;
+    const finalExpectedTotal = selectedDomain.pricing.totalNgn + additionalCostNgn;
 
     setCheckingOut(true);
     setCheckoutError(null);
@@ -217,7 +243,8 @@ export default function NameLaunchService({ user }: Props) {
           domainName: selectedDomain.domain,
           desiredAlias: cleanAlias,
           userEmail: cleanTargetEmail,
-          expectedPriceNgn: selectedDomain.pricing.totalNgn,
+          additionalAliases: cleanedAdditional,
+          expectedPriceNgn: finalExpectedTotal,
         }),
       });
 
@@ -654,11 +681,22 @@ export default function NameLaunchService({ user }: Props) {
               </div>
 
               <form onSubmit={handleCheckout} className="space-y-5">
+                {/* 1. Primary Business Email Address */}
                 <div className="space-y-2">
-                  <label className="block text-xs font-semibold text-[#11140F]/80 dark:text-white/80">
-                    Business Email Address
-                  </label>
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-semibold text-[#11140F]/80 dark:text-white/80">
+                      Primary Business Email Address
+                    </label>
+                    <span className="text-[11px] font-semibold text-emerald-700 dark:text-[#34D399]">
+                      Included (Free)
+                    </span>
+                  </div>
+
+                  <p className="text-[11.5px] text-[#11140F]/55 dark:text-white/55">
+                    Select a popular preset or type any custom address you prefer (e.g. billing, ceo, sales, leonard):
+                  </p>
+
+                  <div className="flex flex-wrap items-center gap-1.5">
                     {PRESET_ALIASES.map((preset) => (
                       <button
                         key={preset}
@@ -673,16 +711,21 @@ export default function NameLaunchService({ user }: Props) {
                         {preset}@
                       </button>
                     ))}
+                    {!PRESET_ALIASES.includes(emailAlias) && emailAlias.trim() !== '' && (
+                      <span className="px-2.5 py-1 rounded-md text-xs font-mono bg-emerald-500/10 text-emerald-800 dark:text-[#34D399] border border-emerald-500/20 font-semibold">
+                        Custom: {emailAlias}@
+                      </span>
+                    )}
                   </div>
 
                   <div className="flex items-center rounded-xl border border-[#11140F]/15 dark:border-white/15 overflow-hidden bg-[#F7F8F5] dark:bg-white/[0.03] focus-within:ring-2 focus-within:ring-emerald-500/25 focus-within:border-emerald-500">
                     <input
                       type="text"
                       value={emailAlias}
-                      onChange={(e) => setEmailAlias(e.target.value)}
-                      placeholder="hello"
+                      onChange={(e) => setEmailAlias(e.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, ''))}
+                      placeholder="e.g. founder, billing, sales"
                       required
-                      className="w-36 sm:w-44 px-3.5 py-2.5 text-xs font-mono bg-transparent outline-none text-[#11140F] dark:text-white"
+                      className="w-40 sm:w-52 px-3.5 py-2.5 text-xs font-mono bg-transparent outline-none text-[#11140F] dark:text-white"
                     />
                     <span className="bg-black/[0.03] dark:bg-white/[0.04] px-3.5 py-2.5 text-xs font-mono text-[#11140F]/60 dark:text-white/60 border-l border-[#11140F]/10 dark:border-white/10 flex-1 truncate">
                       @{selectedDomain.domain}
@@ -690,9 +733,10 @@ export default function NameLaunchService({ user }: Props) {
                   </div>
                 </div>
 
+                {/* Primary Forwarding Inbox */}
                 <div className="space-y-1.5">
                   <label className="block text-xs font-semibold text-[#11140F]/80 dark:text-white/80">
-                    Forward Incoming Mail To
+                    Forward Primary Mail To
                   </label>
                   <input
                     type="email"
@@ -707,45 +751,153 @@ export default function NameLaunchService({ user }: Props) {
                   </p>
                 </div>
 
-                <div className="rounded-xl p-4 bg-[#F7F8F5] dark:bg-white/[0.03] border border-[#11140F]/8 dark:border-white/10 space-y-2 text-xs">
-                  <div className="flex justify-between text-[#11140F]/70 dark:text-white/70">
-                    <span>1-Year Domain Registration ({selectedDomain.domain})</span>
-                    <span className="font-mono text-emerald-700 dark:text-emerald-400">Included</span>
+                {/* 2. Multi-Email Provisioning (Additional Inboxes) */}
+                <div className="pt-2 border-t border-[#11140F]/8 dark:border-white/8 space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                    <div>
+                      <h4 className="text-xs font-bold text-[#11140F] dark:text-white flex items-center gap-1.5">
+                        <Mail className="w-3.5 h-3.5 text-emerald-600 dark:text-[#34D399]" />
+                        <span>Additional Business Email Addresses (Optional)</span>
+                      </h4>
+                      <p className="text-[11px] text-[#11140F]/55 dark:text-white/55">
+                        Add extra inboxes (e.g. sales@, support@, billing@) for just +{formatNaira(extraEmailPriceNgn)}/yr each.
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setAdditionalAliases((prev) => [
+                          ...prev,
+                          { id: Math.random().toString(), alias: '', forwardTo: forwardingEmail },
+                        ])
+                      }
+                      className="px-3 py-1.5 rounded-xl border border-dashed border-emerald-600/30 dark:border-[#34D399]/30 bg-emerald-500/5 hover:bg-emerald-500/10 text-emerald-800 dark:text-[#34D399] text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer self-start sm:self-auto shrink-0"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add Extra Email (+{formatNaira(extraEmailPriceNgn)}/yr)</span>
+                    </button>
                   </div>
-                  <div className="flex justify-between text-[#11140F]/70 dark:text-white/70">
-                    <span>Custom Email Routing ({emailAlias || 'hello'}@{selectedDomain.domain})</span>
-                    <span className="font-mono text-emerald-700 dark:text-emerald-400">Included</span>
-                  </div>
-                  <div className="flex justify-between text-[#11140F]/70 dark:text-white/70">
-                    <span>Managed DNS, Edge SSL &amp; WHOIS Privacy</span>
-                    <span className="font-mono text-emerald-700 dark:text-emerald-400">Included</span>
-                  </div>
-                  <div className="border-t border-[#11140F]/10 dark:border-white/10 pt-2.5 flex justify-between font-bold text-sm">
-                    <span>Total Due Today</span>
-                    <span className="font-mono">
-                      {formatNaira(selectedDomain.pricing.totalNgn)}
-                    </span>
-                  </div>
+
+                  {additionalAliases.length > 0 && (
+                    <div className="space-y-2.5 pt-1">
+                      {additionalAliases.map((item, idx) => (
+                        <div
+                          key={item.id}
+                          className="p-3 rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5] dark:bg-white/[0.02] space-y-2"
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] font-bold text-[#11140F]/70 dark:text-white/70 font-mono">
+                              Extra Email #{idx + 2} (+{formatNaira(extraEmailPriceNgn)}/yr)
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setAdditionalAliases((prev) => prev.filter((a) => a.id !== item.id))
+                              }
+                              className="p-1 rounded-lg text-red-600 hover:bg-red-500/10 transition-colors cursor-pointer"
+                              title="Remove email"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                            <div className="flex items-center rounded-lg border border-[#11140F]/15 dark:border-white/15 overflow-hidden bg-white dark:bg-[#1A1F16]">
+                              <input
+                                type="text"
+                                value={item.alias}
+                                onChange={(e) => {
+                                  const val = e.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, '');
+                                  setAdditionalAliases((prev) =>
+                                    prev.map((a) => (a.id === item.id ? { ...a, alias: val } : a))
+                                  );
+                                }}
+                                placeholder="e.g. sales, billing"
+                                className="w-28 sm:w-32 px-2.5 py-1.5 text-xs font-mono bg-transparent outline-none text-[#11140F] dark:text-white"
+                              />
+                              <span className="px-2 py-1.5 text-[11px] font-mono text-[#11140F]/60 dark:text-white/60 border-l border-[#11140F]/10 dark:border-white/10 flex-1 truncate bg-black/[0.02] dark:bg-white/[0.03]">
+                                @{selectedDomain.domain}
+                              </span>
+                            </div>
+
+                            <input
+                              type="email"
+                              value={item.forwardTo}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setAdditionalAliases((prev) =>
+                                  prev.map((a) => (a.id === item.id ? { ...a, forwardTo: val } : a))
+                                );
+                              }}
+                              placeholder="Forward to inbox (e.g. team@gmail.com)"
+                              className="px-2.5 py-1.5 rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#1A1F16] text-[#11140F] dark:text-white font-mono text-xs outline-none focus:border-emerald-500"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
-                {checkoutError && (
-                  <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-500/30 text-xs text-red-700 dark:text-red-300">
-                    {checkoutError}
-                  </div>
-                )}
+                {/* 3. Order Summary & Price Breakdown */}
+                {(() => {
+                  const validCount = additionalAliases.filter((a) => a.alias.trim()).length;
+                  const extraCost = validCount * extraEmailPriceNgn;
+                  const totalDue = selectedDomain.pricing.totalNgn + extraCost;
 
-                <button
-                  type="submit"
-                  disabled={checkingOut}
-                  className="w-full py-3.5 rounded-2xl bg-[#34D399] hover:bg-[#34D399]/90 active:scale-[0.99] text-[#09110D] font-bold text-sm transition-all shadow-md disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
-                >
-                  <Lock className="w-4 h-4" />
-                  <span>
-                    {checkingOut
-                      ? 'Preparing Secure Checkout…'
-                      : `Complete Purchase · ${formatNaira(selectedDomain.pricing.totalNgn)}`}
-                  </span>
-                </button>
+                  return (
+                    <>
+                      <div className="rounded-xl p-4 bg-[#F7F8F5] dark:bg-white/[0.03] border border-[#11140F]/8 dark:border-white/10 space-y-2 text-xs">
+                        <div className="flex justify-between text-[#11140F]/70 dark:text-white/70">
+                          <span>1-Year Domain Registration ({selectedDomain.domain})</span>
+                          <span className="font-mono text-emerald-700 dark:text-emerald-400">Included</span>
+                        </div>
+                        <div className="flex justify-between text-[#11140F]/70 dark:text-white/70">
+                          <span>Primary Email Routing ({emailAlias || 'hello'}@{selectedDomain.domain})</span>
+                          <span className="font-mono text-emerald-700 dark:text-emerald-400">Included (Free)</span>
+                        </div>
+                        {validCount > 0 && (
+                          <div className="flex justify-between text-[#11140F]/85 dark:text-white/85 font-medium">
+                            <span>
+                              {validCount} Extra Email {validCount === 1 ? 'Address' : 'Addresses'} (+{formatNaira(extraEmailPriceNgn)}/ea)
+                            </span>
+                            <span className="font-mono font-bold text-emerald-700 dark:text-[#34D399]">
+                              +{formatNaira(extraCost)}
+                            </span>
+                          </div>
+                        )}
+                        <div className="flex justify-between text-[#11140F]/70 dark:text-white/70">
+                          <span>Managed DNS, Edge SSL &amp; WHOIS Privacy</span>
+                          <span className="font-mono text-emerald-700 dark:text-emerald-400">Included</span>
+                        </div>
+                        <div className="border-t border-[#11140F]/10 dark:border-white/10 pt-2.5 flex justify-between font-bold text-sm">
+                          <span>Total Due Today</span>
+                          <span className="font-mono">{formatNaira(totalDue)}</span>
+                        </div>
+                      </div>
+
+                      {checkoutError && (
+                        <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-500/30 text-xs text-red-700 dark:text-red-300">
+                          {checkoutError}
+                        </div>
+                      )}
+
+                      <button
+                        type="submit"
+                        disabled={checkingOut}
+                        className="w-full py-3.5 rounded-2xl bg-[#34D399] hover:bg-[#34D399]/90 active:scale-[0.99] text-[#09110D] font-bold text-sm transition-all shadow-md disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+                      >
+                        <Lock className="w-4 h-4" />
+                        <span>
+                          {checkingOut
+                            ? 'Preparing Secure Checkout…'
+                            : `Complete Purchase · ${formatNaira(totalDue)}`}
+                        </span>
+                      </button>
+                    </>
+                  );
+                })()}
               </form>
             </div>
           )}
