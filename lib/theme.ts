@@ -51,25 +51,34 @@ export function applyTheme(theme: ThemeMode) {
   } catch (e) {}
 }
 
-export function playAudioClick() {
+let sharedAudioCtx: AudioContext | null = null;
+
+export function playAudioClick(force = false) {
   if (typeof window === 'undefined') return;
   try {
     const prefs = getStoredPreferences();
-    if (!prefs.soundEffects) return;
+    if (!force && !prefs.soundEffects) return;
     const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
     if (!AudioContextClass) return;
-    const ctx = new AudioContextClass();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
+
+    if (!sharedAudioCtx || sharedAudioCtx.state === 'closed') {
+      sharedAudioCtx = new AudioContextClass();
+    }
+    if (sharedAudioCtx.state === 'suspended') {
+      sharedAudioCtx.resume();
+    }
+
+    const osc = sharedAudioCtx.createOscillator();
+    const gain = sharedAudioCtx.createGain();
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(800, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.04);
-    gain.gain.setValueAtTime(0.06, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
+    osc.frequency.setValueAtTime(880, sharedAudioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(440, sharedAudioCtx.currentTime + 0.05);
+    gain.gain.setValueAtTime(0.08, sharedAudioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, sharedAudioCtx.currentTime + 0.05);
     osc.connect(gain);
-    gain.connect(ctx.destination);
+    gain.connect(sharedAudioCtx.destination);
     osc.start();
-    osc.stop(ctx.currentTime + 0.04);
+    osc.stop(sharedAudioCtx.currentTime + 0.05);
   } catch (e) {}
 }
 

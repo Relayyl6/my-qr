@@ -114,11 +114,11 @@ export default function AdminAnalyticsDashboard({ initialData }: Props) {
   return (
     <div className="space-y-8">
       {/* Control Bar: Timeframe Filters & Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white border border-[#11140F]/10 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white dark:bg-[#0E1017] border border-[#11140F]/10 dark:border-white/10 shadow-xs">
         <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-[#11140F]/50 shrink-0" />
-          <span className="text-[13px] font-semibold text-[#11140F]">Reporting Window:</span>
-          <div className="inline-flex rounded-xl bg-[#F0F2EB] p-1 border border-[#11140F]/10">
+          <Filter className="w-4 h-4 text-[#11140F]/50 dark:text-white/50 shrink-0" />
+          <span className="text-[13px] font-semibold text-[#11140F] dark:text-white">Reporting Window:</span>
+          <div className="inline-flex rounded-xl bg-[#F0F2EB] dark:bg-white/[0.06] p-1 border border-[#11140F]/10 dark:border-white/10">
             {(['24h', '7d', '30d', 'all'] as const).map((tf) => (
               <button
                 key={tf}
@@ -126,8 +126,8 @@ export default function AdminAnalyticsDashboard({ initialData }: Props) {
                 disabled={isPending}
                 className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all ${
                   timeframe === tf
-                    ? 'bg-[#11140F] text-white shadow-xs font-semibold'
-                    : 'text-[#11140F]/65 hover:text-[#11140F]'
+                    ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#09110D] shadow-xs font-semibold'
+                    : 'text-[#11140F]/65 dark:text-white/65 hover:text-[#11140F] dark:hover:text-white'
                 }`}
               >
                 {tf === '24h'
@@ -161,9 +161,9 @@ export default function AdminAnalyticsDashboard({ initialData }: Props) {
 
           <button
             onClick={handleExportCsv}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-[#11140F]/15 text-[#11140F] text-[12.5px] font-medium hover:bg-[#EEF0EA] transition-colors shadow-xs"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-[#161B13] border border-[#11140F]/15 dark:border-white/15 text-[#11140F] dark:text-white text-[12.5px] font-medium hover:bg-[#EEF0EA] dark:hover:bg-white/10 transition-colors shadow-xs"
           >
-            <Download className="w-4 h-4 text-[#11140F]/70" />
+            <Download className="w-4 h-4 text-[#11140F]/70 dark:text-white/70" />
             <span>Export Raw CSV</span>
           </button>
         </div>
@@ -171,88 +171,88 @@ export default function AdminAnalyticsDashboard({ initialData }: Props) {
 
       {/* KPI Headline Metrics Grid */}
       <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-        <div className="rounded-2xl border border-[#11140F]/10 bg-white p-4 shadow-xs space-y-1">
-          <div className="flex items-center justify-between text-[11px] font-bold text-[#11140F]/50 uppercase tracking-wider">
+        <div className="rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#0E1017] p-4 shadow-xs space-y-1">
+          <div className="flex items-center justify-between text-[11px] font-bold text-[#11140F]/50 dark:text-white/50 uppercase tracking-wider">
             <span>Total Views</span>
             <Eye className="w-3.5 h-3.5 text-blue-600" />
           </div>
-          <p className="text-2xl sm:text-3xl font-bold text-[#11140F] tracking-tight">
+          <p className="text-2xl sm:text-3xl font-bold text-[#11140F] dark:text-white tracking-tight">
             {totalPageViews.toLocaleString()}
           </p>
-          <p className="text-[11px] text-[#11140F]/50">All page impressions</p>
+          <p className="text-[11px] text-[#11140F]/50 dark:text-white/50">All page impressions</p>
         </div>
 
-        <div className="rounded-2xl border border-[#11140F]/10 bg-white p-4 shadow-xs space-y-1">
-          <div className="flex items-center justify-between text-[11px] font-bold text-[#11140F]/50 uppercase tracking-wider">
+        <div className="rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#0E1017] p-4 shadow-xs space-y-1">
+          <div className="flex items-center justify-between text-[11px] font-bold text-[#11140F]/50 dark:text-white/50 uppercase tracking-wider">
             <span>Unique Visitors</span>
             <Users className="w-3.5 h-3.5 text-indigo-600" />
           </div>
-          <p className="text-2xl sm:text-3xl font-bold text-[#11140F] tracking-tight">
+          <p className="text-2xl sm:text-3xl font-bold text-[#11140F] dark:text-white tracking-tight">
             {data.uniqueVisitors.toLocaleString()}
           </p>
-          <p className="text-[11px] text-[#11140F]/50">Deduped unique reach</p>
+          <p className="text-[11px] text-[#11140F]/50 dark:text-white/50">Deduped unique reach</p>
         </div>
 
-        <div className="rounded-2xl border border-[#11140F]/10 bg-white p-4 shadow-xs space-y-1">
-          <div className="flex items-center justify-between text-[11px] font-bold text-[#11140F]/50 uppercase tracking-wider">
+        <div className="rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#0E1017] p-4 shadow-xs space-y-1">
+          <div className="flex items-center justify-between text-[11px] font-bold text-[#11140F]/50 dark:text-white/50 uppercase tracking-wider">
             <span>Total Sessions</span>
             <Compass className="w-3.5 h-3.5 text-emerald-600" />
           </div>
-          <p className="text-2xl sm:text-3xl font-bold text-[#11140F] tracking-tight">
+          <p className="text-2xl sm:text-3xl font-bold text-[#11140F] dark:text-white tracking-tight">
             {(data.totalSessions ?? 0).toLocaleString()}
           </p>
-          <p className="text-[11px] text-[#11140F]/50">
+          <p className="text-[11px] text-[#11140F]/50 dark:text-white/50">
             {data.sessionsWithReplaysCount ?? 0} with full audit replay
           </p>
         </div>
 
-        <div className="rounded-2xl border border-[#11140F]/10 bg-white p-4 shadow-xs space-y-1">
-          <div className="flex items-center justify-between text-[11px] font-bold text-[#11140F]/50 uppercase tracking-wider">
+        <div className="rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#0E1017] p-4 shadow-xs space-y-1">
+          <div className="flex items-center justify-between text-[11px] font-bold text-[#11140F]/50 dark:text-white/50 uppercase tracking-wider">
             <span>QR Scans</span>
             <QrCode className="w-3.5 h-3.5 text-purple-600" />
           </div>
-          <p className="text-2xl sm:text-3xl font-bold text-[#11140F] tracking-tight">
+          <p className="text-2xl sm:text-3xl font-bold text-[#11140F] dark:text-white tracking-tight">
             {data.totalScans.toLocaleString()}
           </p>
-          <p className="text-[11px] text-[#11140F]/50">Edge redirects</p>
+          <p className="text-[11px] text-[#11140F]/50 dark:text-white/50">Edge redirects</p>
         </div>
 
-        <div className="rounded-2xl border border-[#11140F]/10 bg-white p-4 shadow-xs space-y-1">
-          <div className="flex items-center justify-between text-[11px] font-bold text-[#11140F]/50 uppercase tracking-wider">
+        <div className="rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#0E1017] p-4 shadow-xs space-y-1">
+          <div className="flex items-center justify-between text-[11px] font-bold text-[#11140F]/50 dark:text-white/50 uppercase tracking-wider">
             <span>Estimated MRR</span>
             <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
           </div>
-          <p className="text-2xl sm:text-3xl font-bold text-[#11140F] tracking-tight">
+          <p className="text-2xl sm:text-3xl font-bold text-[#11140F] dark:text-white tracking-tight">
             ${formatUsdMetric(data.mrr)}
           </p>
-          <p className="text-[11px] text-[#11140F]/50">
-            ARR: <strong className="text-[#11140F]">${formatUsdMetric(data.arr)}</strong>
+          <p className="text-[11px] text-[#11140F]/50 dark:text-white/50">
+            ARR: <strong className="text-[#11140F] dark:text-white">${formatUsdMetric(data.arr)}</strong>
             {(data.domainProfit30dUsd ?? 0) > 0 && (
-              <span className="block text-[10px] font-mono text-emerald-700">
+              <span className="block text-[10px] font-mono text-emerald-700 dark:text-emerald-400">
                 +${formatUsdMetric(data.domainProfit30dUsd || 0)} domains
               </span>
             )}
           </p>
         </div>
 
-        <div className="rounded-2xl border border-[#11140F]/10 bg-white p-4 shadow-xs space-y-1">
-          <div className="flex items-center justify-between text-[11px] font-bold text-[#11140F]/50 uppercase tracking-wider">
+        <div className="rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#0E1017] p-4 shadow-xs space-y-1">
+          <div className="flex items-center justify-between text-[11px] font-bold text-[#11140F]/50 dark:text-white/50 uppercase tracking-wider">
             <span>Conversion</span>
             <TrendingUp className="w-3.5 h-3.5 text-amber-600" />
           </div>
-          <p className="text-2xl sm:text-3xl font-bold text-[#11140F] tracking-tight">
+          <p className="text-2xl sm:text-3xl font-bold text-[#11140F] dark:text-white tracking-tight">
             {data.conversionRateVisitorsToSignups}%
           </p>
-          <p className="text-[11px] text-[#11140F]/50">Visitor &rarr; Signup rate</p>
+          <p className="text-[11px] text-[#11140F]/50 dark:text-white/50">Visitor &rarr; Signup rate</p>
         </div>
       </div>
 
       {/* Traffic & Scan Volume Timeline (Daily & Hourly Trends) */}
-      <div className="rounded-2xl border border-[#11140F]/10 bg-white p-6 shadow-xs space-y-4 overflow-hidden">
+      <div className="rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#0E1017] p-6 shadow-xs space-y-4 overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h3 className="font-semibold text-[15px] text-[#11140F] flex items-center gap-2">
-              <Activity className="w-4 h-4 text-emerald-600" />
+            <h3 className="font-semibold text-[15px] text-[#11140F] dark:text-white flex items-center gap-2">
+              <Activity className="w-4 h-4 text-emerald-600 dark:text-[#34D399]" />
               Traffic & Scan Velocity Timeline
             </h3>
             <p className="text-[12px] text-[#11140F]/55">

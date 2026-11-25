@@ -58,12 +58,15 @@ export default function HomeTabs({
         setActiveTab('overview');
       } else {
         // No hash in URL: Apply user's defaultLanding preference
-        if (prefs.defaultLanding === 'overview') {
+        if (!user) {
+          // Unauthenticated visitors always see the Product Tour
+          setActiveTab('overview');
+        } else if (prefs.defaultLanding === 'overview') {
           setActiveTab('overview');
         } else if (prefs.defaultLanding === 'workspace') {
           setActiveTab('workspace');
         } else {
-          setActiveTab(user ? 'workspace' : 'overview');
+          setActiveTab('workspace'); // logged-in default
         }
       }
     };

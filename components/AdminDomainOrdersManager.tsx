@@ -122,23 +122,23 @@ export default function AdminDomainOrdersManager({ initialOrders }: { initialOrd
   };
 
   return (
-    <div className="rounded-2xl border border-[#11140F]/10 bg-white overflow-hidden shadow-xs space-y-0">
-      <div className="p-5 border-b border-[#11140F]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div className="rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#0E1017] overflow-hidden shadow-xs space-y-0">
+      <div className="p-5 border-b border-[#11140F]/10 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <Globe className="w-5 h-5 text-emerald-600" />
-            <h3 className="font-semibold text-[16px] text-[#11140F]">
-              NameLaunch Registrar & Custom Email Fleet ({orders.length})
+            <Globe className="w-5 h-5 text-emerald-600 dark:text-[#34D399]" />
+            <h3 className="font-semibold text-[16px] text-[#11140F] dark:text-white">
+              NameLaunch Registrar &amp; Custom Email Fleet ({orders.length})
             </h3>
           </div>
-          <p className="text-[12.5px] text-[#11140F]/50 mt-0.5">
+          <p className="text-[12.5px] text-[#11140F]/50 dark:text-white/50 mt-0.5">
             Domain registrations, managed DNS zones, and automated email forwarding provisioning.
           </p>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
           <div className="relative w-full sm:w-52">
-            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#11140F]/40" />
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#11140F]/40 dark:text-white/40" />
             <input
               type="text"
               value={search}
@@ -147,7 +147,7 @@ export default function AdminDomainOrdersManager({ initialOrders }: { initialOrd
                 setPage(1);
               }}
               placeholder="Search domain or email…"
-              className="w-full pl-8 pr-3 py-1.5 rounded-xl border border-[#11140F]/15 bg-[#F7F8F5] text-xs text-[#11140F] outline-none focus:border-[#2F6B4F]"
+              className="w-full pl-8 pr-3 py-1.5 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-white/[0.04] text-xs text-[#11140F] dark:text-white placeholder:text-[#11140F]/40 dark:placeholder:text-white/40 outline-none focus:border-[#2F6B4F] dark:focus:border-[#34D399]"
             />
           </div>
           <select
@@ -156,7 +156,7 @@ export default function AdminDomainOrdersManager({ initialOrders }: { initialOrd
               setStatusFilter(e.target.value);
               setPage(1);
             }}
-            className="px-2.5 py-1.5 rounded-xl border border-[#11140F]/15 bg-[#F7F8F5] text-xs text-[#11140F] outline-none cursor-pointer"
+            className="px-2.5 py-1.5 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-[#161B13] text-xs text-[#11140F] dark:text-white outline-none cursor-pointer"
           >
             <option value="all">All Status</option>
             <option value="ACTIVE">Active</option>
@@ -168,7 +168,7 @@ export default function AdminDomainOrdersManager({ initialOrders }: { initialOrd
       </div>
 
       {filteredOrders.length === 0 ? (
-        <div className="p-8 text-center text-sm text-[#11140F]/60">
+        <div className="p-8 text-center text-sm text-[#11140F]/60 dark:text-white/60">
           {orders.length === 0
             ? 'No domain orders processed yet. Customers can search and buy domains directly in Domains.'
             : 'No domain orders match your filter.'}
@@ -178,8 +178,8 @@ export default function AdminDomainOrdersManager({ initialOrders }: { initialOrd
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-[#11140F]/10 bg-[#F7F8F5]/80 text-[11.5px] uppercase font-semibold text-[#11140F]/50 tracking-wider">
-                  <th className="py-3 px-4">Domain & Email</th>
+                <tr className="border-b border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5]/80 dark:bg-white/[0.03] text-[11.5px] uppercase font-semibold text-[#11140F]/50 dark:text-white/50 tracking-wider">
+                  <th className="py-3 px-4">Domain &amp; Email</th>
                   <th className="py-3 px-4">Customer Email</th>
                   <th className="py-3 px-4">Paid (NGN)</th>
                   <th className="py-3 px-4">Status</th>
@@ -189,37 +189,37 @@ export default function AdminDomainOrdersManager({ initialOrders }: { initialOrd
               </thead>
               <tbody>
                 {paginatedOrders.map((o) => (
-                <tr key={o.id} className="border-b border-[#11140F]/5 hover:bg-[#F7F8F5]/40 transition-colors">
+                <tr key={o.id} className="border-b border-[#11140F]/5 dark:border-white/5 hover:bg-[#F7F8F5]/40 dark:hover:bg-white/[0.02] transition-colors">
                   <td className="py-3 px-4">
-                    <div className="font-mono font-bold text-sm text-[#11140F]">{o.domainName}</div>
-                    <div className="text-xs text-emerald-600 font-medium flex items-center gap-1 mt-0.5">
+                    <div className="font-mono font-bold text-sm text-[#11140F] dark:text-white">{o.domainName}</div>
+                    <div className="text-xs text-emerald-600 dark:text-[#34D399] font-medium flex items-center gap-1 mt-0.5">
                       <Mail className="w-3 h-3" />
                       <span>{o.desiredAlias}@{o.domainName}</span>
                     </div>
                   </td>
-                  <td className="py-3 px-4 text-xs font-medium text-[#11140F]/80">
+                  <td className="py-3 px-4 text-xs font-medium text-[#11140F]/80 dark:text-white/80">
                     {o.userEmail}
-                    <div className="text-[10px] text-[#11140F]/40 font-mono mt-0.5">Ref: {o.paystackRef}</div>
+                    <div className="text-[10px] text-[#11140F]/40 dark:text-white/40 font-mono mt-0.5">Ref: {o.paystackRef}</div>
                   </td>
-                  <td className="py-3 px-4 text-xs font-semibold text-[#11140F]">
+                  <td className="py-3 px-4 text-xs font-semibold text-[#11140F] dark:text-white">
                     ₦{o.totalPaidNgn?.toLocaleString()}
-                    <div className="text-[10px] text-emerald-700 font-normal">Markup: +₦{o.platformMarkupNgn}</div>
+                    <div className="text-[10px] text-emerald-700 dark:text-emerald-400 font-normal">Markup: +₦{o.platformMarkupNgn}</div>
                   </td>
                   <td className="py-3 px-4">
                     {getStatusBadge(o.status)}
                     {o.errorMessage && (
-                      <div className="text-[10.5px] text-red-600 max-w-xs truncate mt-1" title={o.errorMessage}>
+                      <div className="text-[10.5px] text-red-600 dark:text-red-400 max-w-xs truncate mt-1" title={o.errorMessage}>
                         {o.errorMessage}
                       </div>
                     )}
                   </td>
-                  <td className="py-3 px-4 text-xs font-mono text-[#11140F]/70">
+                  <td className="py-3 px-4 text-xs font-mono text-[#11140F]/70 dark:text-white/70">
                     {o.cloudflareZoneId ? (
                       <span className="truncate max-w-[140px] block" title={o.cloudflareZoneId}>
                         {o.cloudflareZoneId}
                       </span>
                     ) : (
-                      <span className="text-[#11140F]/40 italic">None yet</span>
+                      <span className="text-[#11140F]/40 dark:text-white/40 italic">None yet</span>
                     )}
                   </td>
                   <td className="py-3 px-4 text-right">

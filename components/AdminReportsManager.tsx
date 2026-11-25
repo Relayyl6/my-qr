@@ -66,16 +66,16 @@ export default function AdminReportsManager({ initialReports = [] }: AdminReport
   };
 
   return (
-    <div className="rounded-2xl border border-[#11140F]/10 bg-white shadow-xs overflow-hidden">
+    <div className="rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#0E1017] shadow-xs overflow-hidden">
       {/* Header */}
-      <div className="p-5 border-b border-[#11140F]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="p-5 border-b border-[#11140F]/10 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center">
             <Flag className="w-4 h-4 text-red-600" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-[16px] text-[#11140F]">
+              <h3 className="font-semibold text-[16px] text-[#11140F] dark:text-white">
                 Trust & Safety Reports
               </h3>
               {pendingCount > 0 && (
@@ -84,24 +84,24 @@ export default function AdminReportsManager({ initialReports = [] }: AdminReport
                 </span>
               )}
             </div>
-            <p className="text-[12.5px] text-[#11140F]/50">
+            <p className="text-[12.5px] text-[#11140F]/50 dark:text-white/50">
               Community flags submitted from public vCards, landing pages, and dynamic QR routes
             </p>
           </div>
         </div>
 
         {/* Filter Pills */}
-        <div className="flex items-center gap-1 p-1 bg-[#11140F]/5 rounded-xl text-xs">
+        <div className="flex items-center gap-1 p-1 bg-[#11140F]/5 dark:bg-white/[0.06] rounded-xl text-xs">
           <button
             type="button"
             onClick={() => {
               setFilter('all');
               setPage(1);
             }}
-            className={`px-3 py-1 rounded-lg font-medium transition-all ${
+            className={`px-3 py-1 rounded-lg font-medium transition-all cursor-pointer ${
               filter === 'all'
-                ? 'bg-white text-[#11140F] shadow-xs font-semibold'
-                : 'text-[#11140F]/60 hover:text-[#11140F]'
+                ? 'bg-white dark:bg-[#1E2330] text-[#11140F] dark:text-white shadow-xs font-semibold'
+                : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white'
             }`}
           >
             All ({reports.length})
@@ -112,10 +112,10 @@ export default function AdminReportsManager({ initialReports = [] }: AdminReport
               setFilter('pending');
               setPage(1);
             }}
-            className={`px-3 py-1 rounded-lg font-medium transition-all ${
+            className={`px-3 py-1 rounded-lg font-medium transition-all cursor-pointer ${
               filter === 'pending'
-                ? 'bg-white text-[#11140F] shadow-xs font-semibold'
-                : 'text-[#11140F]/60 hover:text-[#11140F]'
+                ? 'bg-white dark:bg-[#1E2330] text-[#11140F] dark:text-white shadow-xs font-semibold'
+                : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white'
             }`}
           >
             Pending ({pendingCount})
@@ -126,10 +126,10 @@ export default function AdminReportsManager({ initialReports = [] }: AdminReport
               setFilter('resolved');
               setPage(1);
             }}
-            className={`px-3 py-1 rounded-lg font-medium transition-all ${
+            className={`px-3 py-1 rounded-lg font-medium transition-all cursor-pointer ${
               filter === 'resolved'
-                ? 'bg-white text-[#11140F] shadow-xs font-semibold'
-                : 'text-[#11140F]/60 hover:text-[#11140F]'
+                ? 'bg-white dark:bg-[#1E2330] text-[#11140F] dark:text-white shadow-xs font-semibold'
+                : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white'
             }`}
           >
             Resolved ({reports.length - pendingCount})
@@ -143,8 +143,8 @@ export default function AdminReportsManager({ initialReports = [] }: AdminReport
           <div className="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center mx-auto">
             <CheckCircle2 className="w-5 h-5" />
           </div>
-          <p className="text-sm font-semibold text-[#11140F]">No abuse reports in this view</p>
-          <p className="text-xs text-[#11140F]/50 max-w-sm mx-auto">
+          <p className="text-sm font-semibold text-[#11140F] dark:text-white">No abuse reports in this view</p>
+          <p className="text-xs text-[#11140F]/50 dark:text-white/50 max-w-sm mx-auto">
             All public digital vCards and dynamic routing links are currently clean with zero outstanding safety flags.
           </p>
         </div>
@@ -152,7 +152,7 @@ export default function AdminReportsManager({ initialReports = [] }: AdminReport
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-[#11140F]/10 bg-[#F7F8F5]/80 text-[11px] uppercase font-semibold text-[#11140F]/50 tracking-wider">
+              <tr className="border-b border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5]/80 dark:bg-white/[0.03] text-[11px] uppercase font-semibold text-[#11140F]/50 dark:text-white/50 tracking-wider">
                 <th className="py-3 px-4">Flagged Target</th>
                 <th className="py-3 px-4">Category</th>
                 <th className="py-3 px-4">Details & Reporter</th>
@@ -161,17 +161,17 @@ export default function AdminReportsManager({ initialReports = [] }: AdminReport
                 <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#11140F]/5 text-xs">
+            <tbody className="divide-y divide-[#11140F]/5 dark:divide-white/5 text-xs">
               {paginatedReports.map((report) => {
                 const badge = getReasonBadge(report.reason);
                 const isLoading = loadingId === report.id;
 
                 return (
-                  <tr key={report.id} className="hover:bg-[#11140F]/[0.02] transition-colors">
+                  <tr key={report.id} className="hover:bg-[#11140F]/[0.02] dark:hover:bg-white/[0.03] transition-colors">
                     {/* Target */}
                     <td className="py-3 px-4">
                       <div className="space-y-0.5">
-                        <p className="font-semibold text-[#11140F]">{report.targetTitle}</p>
+                        <p className="font-semibold text-[#11140F] dark:text-white">{report.targetTitle}</p>
                         <Link
                           href={report.targetUrl}
                           target="_blank"
@@ -192,16 +192,16 @@ export default function AdminReportsManager({ initialReports = [] }: AdminReport
 
                     {/* Details */}
                     <td className="py-3 px-4 max-w-xs">
-                      <p className="text-[11.5px] text-[#11140F]/70 truncate" title={report.details || 'No details provided'}>
+                      <p className="text-[11.5px] text-[#11140F]/70 dark:text-white/70 truncate" title={report.details || 'No details provided'}>
                         {report.details || 'Community flag'}
                       </p>
-                      <p className="text-[10px] text-[#11140F]/40 font-mono mt-0.5">
+                      <p className="text-[10px] text-[#11140F]/40 dark:text-white/40 font-mono mt-0.5">
                         IP: {report.reporterIp || 'anonymous'}
                       </p>
                     </td>
 
                     {/* Date */}
-                    <td className="py-3 px-4 whitespace-nowrap text-[#11140F]/60 font-mono text-[11px]">
+                    <td className="py-3 px-4 whitespace-nowrap text-[#11140F]/60 dark:text-white/60 font-mono text-[11px]">
                       {new Date(report.timestamp).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
@@ -238,7 +238,7 @@ export default function AdminReportsManager({ initialReports = [] }: AdminReport
                             type="button"
                             disabled={isLoading}
                             onClick={() => handleStatusChange(report.id, 'reviewed')}
-                            className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-semibold text-[11px] border border-emerald-200 transition-colors cursor-pointer disabled:opacity-50"
+                            className="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 font-semibold text-[11px] border border-emerald-200 dark:border-emerald-500/30 transition-colors cursor-pointer disabled:opacity-50"
                           >
                             Mark Reviewed
                           </button>
@@ -248,7 +248,7 @@ export default function AdminReportsManager({ initialReports = [] }: AdminReport
                             type="button"
                             disabled={isLoading}
                             onClick={() => handleStatusChange(report.id, 'dismissed')}
-                            className="px-2 py-1 rounded-lg bg-gray-50 text-gray-600 hover:bg-gray-100 font-medium text-[11px] border border-gray-200 transition-colors cursor-pointer disabled:opacity-50"
+                            className="px-2 py-1 rounded-lg bg-gray-50 dark:bg-white/10 text-gray-600 dark:text-white/70 hover:bg-gray-100 dark:hover:bg-white/20 font-medium text-[11px] border border-gray-200 dark:border-white/15 transition-colors cursor-pointer disabled:opacity-50"
                           >
                             Dismiss
                           </button>

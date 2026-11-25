@@ -47,14 +47,14 @@ export default function AdminCustomerFleetTable({
   }, [filteredUsers, page, perPage]);
 
   return (
-    <div className="rounded-2xl border border-[#11140F]/10 bg-white overflow-hidden shadow-xs space-y-0">
-      <div className="p-5 border-b border-[#11140F]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div className="rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#0E1017] overflow-hidden shadow-xs space-y-0">
+      <div className="p-5 border-b border-[#11140F]/10 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h3 className="font-semibold text-[16px] text-[#11140F] flex items-center gap-2">
+          <h3 className="font-semibold text-[16px] text-[#11140F] dark:text-white flex items-center gap-2">
             <Users className="w-4 h-4 text-blue-600" />
             <span>Customer Fleet Directory ({users.length})</span>
           </h3>
-          <p className="text-[12.5px] text-[#11140F]/50">
+          <p className="text-[12.5px] text-[#11140F]/50 dark:text-white/50">
             Manage user subscription tiers, inspect links, and adjust AI compute budgets directly.
           </p>
         </div>
@@ -70,7 +70,7 @@ export default function AdminCustomerFleetTable({
                 setPage(1);
               }}
               placeholder="Search email or name…"
-              className="w-full pl-8 pr-3 py-1.5 rounded-xl border border-[#11140F]/15 bg-[#F7F8F5] text-xs text-[#11140F] outline-none focus:border-[#2F6B4F]"
+              className="w-full pl-8 pr-3 py-1.5 rounded-xl border border-[#11140F]/15 dark:border-white/10 bg-[#F7F8F5] dark:bg-white/[0.04] text-xs text-[#11140F] dark:text-white outline-none focus:border-[#2F6B4F]"
             />
           </div>
 
@@ -80,7 +80,7 @@ export default function AdminCustomerFleetTable({
               setTierFilter(e.target.value as any);
               setPage(1);
             }}
-            className="px-2.5 py-1.5 rounded-xl border border-[#11140F]/15 bg-[#F7F8F5] text-xs text-[#11140F] outline-none cursor-pointer"
+            className="px-2.5 py-1.5 rounded-xl border border-[#11140F]/15 dark:border-white/10 bg-[#F7F8F5] dark:bg-white/[0.04] text-xs text-[#11140F] dark:text-white outline-none cursor-pointer"
           >
             <option value="all">All Plans</option>
             <option value="free">Free</option>
@@ -94,7 +94,7 @@ export default function AdminCustomerFleetTable({
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="border-b border-[#11140F]/10 bg-[#F7F8F5]/80 text-[11.5px] uppercase font-semibold text-[#11140F]/50 tracking-wider">
+            <tr className="border-b border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5]/80 dark:bg-white/[0.03] text-[11.5px] uppercase font-semibold text-[#11140F]/50 dark:text-white/50 tracking-wider">
               <th className="py-3 px-4">Customer Email</th>
               <th className="py-3 px-4">Joined</th>
               <th className="py-3 px-4">Current Plan</th>

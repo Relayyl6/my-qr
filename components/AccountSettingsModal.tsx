@@ -7,7 +7,11 @@ import {
   deleteSelfAccount,
   updateUserProfileAvatar,
   getUserProfileAvatar,
+  saveUserNotificationPrefs,
+  getUserNotificationPrefs,
+  sendTestWeeklyDigestAction,
 } from '@/app/auth-actions';
+import { playAudioClick } from '@/lib/theme';
 import ImageUploadField from './ImageUploadField';
 import {
   User,
@@ -61,6 +65,8 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
   const [preferences, setPreferences] = useState<UserExperienceSettings>(() => getStoredPreferences());
   const [avatarUrl, setAvatarUrl] = useState<string>('');
   const [avatarMsg, setAvatarMsg] = useState<string | null>(null);
+  const [sendingDigest, setSendingDigest] = useState(false);
+  const [digestStatus, setDigestStatus] = useState<string | null>(null);
 
   useEffect(() => {
     setPreferences(getStoredPreferences());
@@ -71,6 +77,12 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
       if (url) {
         setAvatarUrl(url);
         if (typeof window !== 'undefined') localStorage.setItem('dynamicqr_user_avatar', url);
+      }
+    });
+
+    getUserNotificationPrefs().then((dbPrefs) => {
+      if (dbPrefs && typeof dbPrefs.weeklyDigest === 'boolean') {
+        setPreferences((prev) => ({ ...prev, emailDigests: dbPrefs.weeklyDigest }));
       }
     });
   }, []);
@@ -431,46 +443,106 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
 
               {/* Audio & Digest Card */}
               <div className="p-3 rounded-2xl bg-[#F7F8F5] dark:bg-white/[0.03] border border-[#11140F]/8 dark:border-white/[0.08] space-y-3">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded-xl bg-black/[0.05] dark:bg-white/10 flex items-center justify-center text-[#2F6B4F] dark:text-[#34D399] shrink-0">
-                      <Volume2 className="w-4 h-4" />
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-xl bg-black/[0.05] dark:bg-white/10 flex items-center justify-center text-[#2F6B4F] dark:text-[#34D399] shrink-0">
+                        <Volume2 className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold text-[#11140F] dark:text-white truncate">Sound Effects</div>
+                        <div className="text-[11px] text-[#11140F]/50 dark:text-white/50 truncate">Copy &amp; generate clicks</div>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <div className="text-xs font-bold text-[#11140F] dark:text-white truncate">Sound Effects</div>
-                      <div className="text-[11px] text-[#11140F]/50 dark:text-white/50 truncate">Copy &amp; generate clicks</div>
-                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                      <input
+                        type="checkbox"
+                        checked={preferences.soundEffects}
+                        onChange={(e) => {
+                          handleUpdatePref({ soundEffects: e.target.checked });
+                          if (e.target.checked) playAudioClick(true);
+                        }}
+                        className="sr-only peer"
+                      />
+                      <div className="w-9 h-5 bg-black/15 dark:bg-white/15 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#34D399]" />
+                    </label>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer shrink-0">
-                    <input
-                      type="checkbox"
-                      checked={preferences.soundEffects}
-                      onChange={(e) => handleUpdatePref({ soundEffects: e.target.checked })}
-                      className="sr-only peer"
-                    />
-                    <div className="w-9 h-5 bg-black/15 dark:bg-white/15 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#34D399]" />
-                  </label>
+                  {preferences.soundEffects && (
+                    <div className="pl-11 flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => playAudioClick(true)}
+                        className="text-[11px] font-semibold text-[#2F6B4F] dark:text-[#34D399] hover:underline flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>🔊 Test audio chime</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
 
-                <div className="flex items-center justify-between gap-3 pt-2.5 border-t border-[#11140F]/6 dark:border-white/[0.06]">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded-xl bg-black/[0.05] dark:bg-white/10 flex items-center justify-center text-[#2F6B4F] dark:text-[#34D399] shrink-0">
-                      <Bell className="w-4 h-4" />
+                <div className="space-y-2 pt-2.5 border-t border-[#11140F]/6 dark:border-white/[0.06]">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-xl bg-black/[0.05] dark:bg-white/10 flex items-center justify-center text-[#2F6B4F] dark:text-[#34D399] shrink-0">
+                        <Bell className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold text-[#11140F] dark:text-white truncate">Weekly Digest</div>
+                        <div className="text-[11px] text-[#11140F]/50 dark:text-white/50 truncate">Scan performance report</div>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <div className="text-xs font-bold text-[#11140F] dark:text-white truncate">Weekly Digest</div>
-                      <div className="text-[11px] text-[#11140F]/50 dark:text-white/50 truncate">Scan performance report</div>
-                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                      <input
+                        type="checkbox"
+                        checked={preferences.emailDigests}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          handleUpdatePref({ emailDigests: checked });
+                          saveUserNotificationPrefs({ weeklyDigest: checked });
+                        }}
+                        className="sr-only peer"
+                      />
+                      <div className="w-9 h-5 bg-black/15 dark:bg-white/15 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#34D399]" />
+                    </label>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer shrink-0">
-                    <input
-                      type="checkbox"
-                      checked={preferences.emailDigests}
-                      onChange={(e) => handleUpdatePref({ emailDigests: e.target.checked })}
-                      className="sr-only peer"
-                    />
-                    <div className="w-9 h-5 bg-black/15 dark:bg-white/15 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#34D399]" />
-                  </label>
+
+                  {preferences.emailDigests && (
+                    <div className="pl-11 space-y-1.5">
+                      <button
+                        type="button"
+                        disabled={sendingDigest}
+                        onClick={async () => {
+                          setSendingDigest(true);
+                          setDigestStatus(null);
+                          const res = await sendTestWeeklyDigestAction();
+                          setSendingDigest(false);
+                          if (res.success) {
+                            setDigestStatus(res.message || 'Test weekly digest sent!');
+                          } else {
+                            setDigestStatus(res.error || 'Failed to dispatch test digest.');
+                          }
+                          setTimeout(() => setDigestStatus(null), 4500);
+                        }}
+                        className="text-[11px] font-semibold text-[#2F6B4F] dark:text-[#34D399] hover:underline flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                      >
+                        {sendingDigest ? (
+                          <>
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                            <span>Generating &amp; emailing digest…</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>📨 Send test digest to {user.email}</span>
+                          </>
+                        )}
+                      </button>
+                      {digestStatus && (
+                        <p className="text-[10.5px] font-medium text-emerald-700 dark:text-[#34D399] animate-in fade-in">
+                          {digestStatus}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

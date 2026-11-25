@@ -267,3 +267,86 @@ export async function getUserProfileAvatar(): Promise<string | null> {
     return null;
   }
 }
+
+export async function saveUserNotificationPrefs(prefs: { weeklyDigest: boolean }): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { getCurrentUser } = await import('@/lib/auth');
+    const user = await getCurrentUser();
+    if (!user) return { success: false, error: 'Not authenticated' };
+
+    await prisma.aiCache.upsert({
+      where: { key: `user_notif_${user.id}` },
+      create: {
+        key: `user_notif_${user.id}`,
+        value: { weeklyDigest: prefs.weeklyDigest },
+        expiresAt: new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000),
+      },
+      update: {
+        value: { weeklyDigest: prefs.weeklyDigest },
+      },
+    });
+
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message || 'Failed to save notification preferences' };
+  }
+}
+
+export async function getUserNotificationPrefs(): Promise<{ weeklyDigest: boolean }> {
+  try {
+    const { getCurrentUser } = await import('@/lib/auth');
+    const user = await getCurrentUser();
+    if (!user) return { weeklyDigest: true };
+
+    const record = await prisma.aiCache.findUnique({
+      where: { key: `user_notif_${user.id}` },
+    });
+    if (!record || !record.value) return { weeklyDigest: true };
+    return { weeklyDigest: (record.value as any)?.weeklyDigest !== false };
+  } catch {
+    return { weeklyDigest: true };
+  }
+}
+
+export async function sendTestWeeklyDigestAction(): Promise<{ success: boolean; message?: string; error?: string }> {
+  try {
+    const { getCurrentUser } = await import('@/lib/auth');
+    const user = await getCurrentUser();
+    if (!user) return { success: false, error: 'Not authenticated' };
+
+    const { aggregateUserScans } = await import('@/lib/analytics/aggregate');
+    const { sendEmail, buildWeeklyDigestEmailHtml } = await import('@/lib/email/send');
+
+    const stats = await aggregateUserScans(user.id, 7);
+    const summary = stats.totalScans > 0
+      ? `Your dynamic QR campaigns recorded ${stats.totalScans} verified scans across ${stats.totalLinks} links over the past 7 days.`
+      : 'Your dynamic QR campaigns are live and ready. Share your QR codes on social media, posters, or packaging to start capturing verified scans.';
+
+    const recommendations = [
+      'Ensure high visual contrast on printed materials for fastest camera acquisition.',
+      'Connect a custom branded domain in your workspace for 100% white-label vanity links.',
+      'Review daily device analytics to optimize destination URLs for mobile vs desktop visitors.',
+    ];
+
+    const emailHtml = buildWeeklyDigestEmailHtml({
+      email: user.email,
+      totalScans: stats.totalScans,
+      summary,
+      recommendations,
+    });
+
+    const emailRes = await sendEmail({
+      to: user.email,
+      subject: `📈 [Test Digest] Your DynamicQR Weekly Report: ${stats.totalScans} scans this week`,
+      html: emailHtml,
+    });
+
+    if (emailRes.success) {
+      return { success: true, message: `Test weekly digest sent to ${user.email}!` };
+    } else {
+      return { success: false, error: 'Email service could not dispatch email. Please check SMTP configuration.' };
+    }
+  } catch (err: any) {
+    return { success: false, error: err.message || 'Failed to dispatch test digest' };
+  }
+}

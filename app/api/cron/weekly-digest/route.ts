@@ -31,6 +31,15 @@ export async function GET(request: Request) {
     const summaries = [];
 
     for (const user of usersWithLinks) {
+      // Check user's notification preference (default: opted in)
+      const notifRecord = await prisma.aiCache.findUnique({
+        where: { key: `user_notif_${user.id}` },
+      });
+      const weeklyDigestEnabled = notifRecord
+        ? (notifRecord.value as any)?.weeklyDigest !== false
+        : true;
+      if (!weeklyDigestEnabled) continue;
+
       const stats = await aggregateUserScans(user.id, 7);
       if (stats.totalScans > 0) {
         const result = await runAI<CampaignAnalystOutput>({

@@ -1,16 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { Sparkles, ArrowRight, ShieldCheck, Lock, QrCode } from 'lucide-react';
+import { Sparkles, ArrowRight, ShieldCheck, Lock, QrCode, Compass } from 'lucide-react';
 import AuthModal from './AuthModal';
 import { APP_URL } from '@/lib/config';
 
 export default function WorkspaceLocked() {
   const [authOpen, setAuthOpen] = useState(false);
   const [authTab, setAuthTab] = useState<'login' | 'signup'>('signup');
-  const [demoUrl, setDemoUrl] = useState(`${APP_URL}/demo`);
+  const [demoUrl, setDemoUrl] = useState('https://dynamicqr.dev/demo');
   const [qrColor, setQrColor] = useState('#11140F');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.origin) {
+      setDemoUrl(`${window.location.origin}/demo`);
+    }
+  }, []);
 
   const openAuth = (tab: 'login' | 'signup') => {
     setAuthTab(tab);
@@ -19,7 +25,25 @@ export default function WorkspaceLocked() {
 
   return (
     <>
-      <div className="w-full rounded-lg border border-[#11140F]/15 dark:border-white/10 bg-white dark:bg-[#11140F] shadow-xs overflow-hidden transition-colors duration-200">
+      <div className="w-full rounded-2xl border border-[#11140F]/15 dark:border-white/10 bg-white dark:bg-[#11140F] shadow-sm overflow-hidden transition-colors duration-200">
+        {/* Product Tour Discovery Banner */}
+        <div className="bg-[#F7F8F5] dark:bg-white/[0.02] border-b border-[#11140F]/10 dark:border-white/10 px-6 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+          <div className="flex items-center gap-2 text-[#11140F]/70 dark:text-white/70">
+            <Compass className="w-3.5 h-3.5 text-[#34D399]" />
+            <span>First time exploring DynamicQR? Discover how dynamic link routing works.</span>
+          </div>
+          <a
+            href="#overview"
+            onClick={(e) => {
+              e.preventDefault();
+              window.location.hash = '#overview';
+            }}
+            className="font-semibold text-[#2F6B4F] dark:text-[#34D399] hover:underline flex items-center gap-1 cursor-pointer shrink-0"
+          >
+            <span>Explore Interactive Product Tour →</span>
+          </a>
+        </div>
+
         {/* Top Header */}
         <div className="bg-[#11140F] dark:bg-[#161B13] text-white p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b dark:border-white/10">
           <div className="space-y-1">
@@ -134,6 +158,9 @@ export default function WorkspaceLocked() {
                 Sign In to Existing Account
               </button>
             </div>
+            <p className="text-[11.5px] text-[#2F6B4F] dark:text-[#34D399]/70 text-center sm:text-left">
+              No credit card required. Free forever plan available.
+            </p>
           </div>
 
           {/* Live Interactive QR Code Canvas */}
