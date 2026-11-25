@@ -1,4 +1,7 @@
 import { prisma } from '@/lib/prisma';
+import { getTldTier } from './constants';
+
+export type RoundingStep = 100 | 500 | 1000 | 900;
 
 export interface DomainPricingConfig {
   mode: 'auto_buffered' | 'manual_override';
@@ -6,8 +9,22 @@ export interface DomainPricingConfig {
   bufferPercent: number;       // e.g., 5.0% buffer spread against payment processor rate cuts
   bufferedRate: number;         // e.g., 1400 (scaled-up buffered rate)
   manualOverrideRate: number;  // e.g., 1450 (if admin opts to freeze an explicit FX rate)
-  platformMarkupNgn: number;   // e.g., 2500 platform fee added to wholesale cost
+  platformMarkupNgn: number;   // e.g., 2500 fallback global platform fee added to wholesale cost
+  
+  // Tiered Profit Margins (NGN)
+  budgetMarkupNgn?: number;    // e.g., 2000 for budget TLDs (.xyz, .site, .store, .online)
+  standardMarkupNgn?: number;  // e.g., 5000 for standard TLDs (.com, .net, .org)
+  premiumMarkupNgn?: number;   // e.g., 8000 for premium TLDs (.co, .io)
+  
+  // Per-TLD custom profit margins (NGN)
+  tldMargins?: Record<string, number>; // e.g. { io: 8000, co: 6000, net: 5000 }
+  
+  // Per-TLD fixed retail price overrides (NGN)
   tldOverrides: Record<string, number>; // Specific fixed retail prices in NGN (e.g., { com: 19500 })
+  
+  // Clean pricing progression / rounding step (nearest 100, 500, 1000, or 900 charm)
+  roundingStep?: RoundingStep;
+  
   lastFetchedAt: string;
   source: string;              // 'apilayer' | 'open_er_api' | 'fallback_env'
 }
@@ -19,7 +36,12 @@ export const DEFAULT_PRICING_CONFIG: DomainPricingConfig = {
   bufferedRate: 1400,
   manualOverrideRate: 1500,
   platformMarkupNgn: 2500,
+  budgetMarkupNgn: 2000,
+  standardMarkupNgn: 5000,
+  premiumMarkupNgn: 8000,
+  tldMargins: {},
   tldOverrides: {},
+  roundingStep: 500,
   lastFetchedAt: new Date().toISOString(),
   source: 'currency_api_cdn',
 };
@@ -165,6 +187,19 @@ export async function saveDomainPricingConfig(updates: Partial<DomainPricingConf
   return next;
 }
 
+/**
+ * Clean retail price rounding / progression step (e.g. 500, 1000, 900 charm, or 100)
+ */
+export function applyRoundingStep(rawAmount: number, step: RoundingStep = 500): number {
+  if (step === 900) {
+    const upper = Math.ceil(rawAmount / 1000) * 1000;
+    const charm = upper - 100;
+    return charm >= rawAmount ? charm : upper + 900;
+  }
+  const s = step || 500;
+  return Math.ceil(rawAmount / s) * s;
+}
+
 export interface CalculatedDomainPrice {
   wholesaleUsd: number;
   wholesaleNgn: number;
@@ -183,12 +218,16 @@ export function calculateDomainPrice(
   config: DomainPricingConfig
 ): CalculatedDomainPrice {
   const cleanTld = tld.toLowerCase().replace(/^\./, '');
+  const effectiveRate = config.mode === 'manual_override' ? config.manualOverrideRate : config.bufferedRate;
+  const wholesaleNgn = Math.ceil(wholesaleUsd * effectiveRate);
   
-  // 1. Check if admin set an explicit NGN price override for this specific TLD
-  if (config.tldOverrides && typeof config.tldOverrides[cleanTld] === 'number') {
+  // 1. Check if admin set an explicit fixed retail price override for this specific TLD
+  if (
+    config.tldOverrides &&
+    typeof config.tldOverrides[cleanTld] === 'number' &&
+    config.tldOverrides[cleanTld] > 0
+  ) {
     const overridePrice = config.tldOverrides[cleanTld];
-    const effectiveRate = config.mode === 'manual_override' ? config.manualOverrideRate : config.bufferedRate;
-    const wholesaleNgn = Math.ceil(wholesaleUsd * effectiveRate);
     return {
       wholesaleUsd,
       wholesaleNgn,
@@ -199,17 +238,31 @@ export function calculateDomainPrice(
     };
   }
 
-  // 2. Standard calculation using scaled-up buffered FX rate or manual override
-  const effectiveRate = config.mode === 'manual_override' ? config.manualOverrideRate : config.bufferedRate;
-  const wholesaleNgn = Math.ceil(wholesaleUsd * effectiveRate);
-  const rawTotal = wholesaleNgn + config.platformMarkupNgn;
-  const finalPriceNgn = Math.ceil(rawTotal / 100) * 100;
+  // 2. Determine target profit margin:
+  // a) Check per-TLD margin override first
+  let targetMargin = config.tldMargins?.[cleanTld];
+  if (typeof targetMargin !== 'number' || targetMargin <= 0) {
+    // b) Check tiered margin
+    const tier = getTldTier(cleanTld);
+    if (tier === 'premium') {
+      targetMargin = typeof config.premiumMarkupNgn === 'number' ? config.premiumMarkupNgn : 8000;
+    } else if (tier === 'standard') {
+      targetMargin = typeof config.standardMarkupNgn === 'number' ? config.standardMarkupNgn : 5000;
+    } else {
+      targetMargin = typeof config.budgetMarkupNgn === 'number' ? config.budgetMarkupNgn : (config.platformMarkupNgn || 2000);
+    }
+  }
+
+  // 3. Raw retail = wholesaleNgn + targetMargin
+  const rawTotal = wholesaleNgn + targetMargin;
+  const roundingStep = config.roundingStep || 500;
+  const finalPriceNgn = applyRoundingStep(rawTotal, roundingStep);
 
   return {
     wholesaleUsd,
     wholesaleNgn,
     effectiveFxRate: effectiveRate,
-    platformMarkupNgn: config.platformMarkupNgn,
+    platformMarkupNgn: Math.max(0, finalPriceNgn - wholesaleNgn),
     finalPriceNgn,
     isOverride: false,
   };
