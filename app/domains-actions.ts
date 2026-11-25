@@ -39,7 +39,7 @@ export async function confirmOrderPayment(paystackRef: string) {
   });
 
   if (!order) {
-    return { success: false, message: 'Order reference not found' };
+    return { success: false, isNotFound: true, message: 'Checkout session ended or replaced by a new session.' };
   }
 
   const adminEmail = (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();

@@ -136,9 +136,18 @@ export default function NameLaunchService({ user }: Props) {
   async function checkUrlReference() {
     if (typeof window === 'undefined') return;
     const params = new URLSearchParams(window.location.search);
-    const ref = params.get('ref');
+    const ref = params.get('ref') || params.get('reference') || params.get('trxref');
 
     if (ref && ref.startsWith('DOM_')) {
+      // Clean query params from the browser address bar immediately so refreshing or navigating doesn't re-trigger
+      params.delete('ref');
+      params.delete('reference');
+      params.delete('trxref');
+      const cleanQuery = params.toString();
+      const cleanUrl =
+        window.location.pathname + (cleanQuery ? `?${cleanQuery}` : '') + window.location.hash;
+      window.history.replaceState({}, '', cleanUrl);
+
       setActiveTab('domains');
       setActionAlert({
         text: 'Verifying payment and activating your domain…',
@@ -157,14 +166,19 @@ export default function NameLaunchService({ user }: Props) {
           });
           loadOrders(res.order?.userEmail);
         } else {
-          setActionAlert({
-            text: res.message || 'Payment not completed yet.',
-            type: 'error',
-          });
+          // If reference was superseded or not found because the user simply didn't pay, do not show a scary error banner
+          if ((res as any).isNotFound || res.message?.includes('not found') || res.message?.includes('ended')) {
+            setActionAlert(null);
+          } else {
+            setActionAlert({
+              text: res.message || 'Payment not completed yet.',
+              type: 'error',
+            });
+          }
           loadOrders(res.order?.userEmail);
         }
       } catch (err: any) {
-        setActionAlert({ text: err.message || 'Verification error', type: 'error' });
+        setActionAlert(null);
       }
     }
   }
