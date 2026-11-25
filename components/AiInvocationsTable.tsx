@@ -320,99 +320,99 @@ export default function AiInvocationsTable({ invocations }: AiInvocationsTablePr
       {/* Invocation Details Modal */}
       {selectedInvocation && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-150"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
           onClick={() => setSelectedInvocation(null)}
         >
           <div
-            className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl border border-slate-200 space-y-4"
+            className="w-full max-w-lg rounded-2xl bg-white dark:bg-[#101211] p-6 shadow-2xl border border-slate-200 dark:border-white/12 space-y-4 text-slate-900 dark:text-white"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b pb-3">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
               <div>
-                <h3 className="text-[15px] font-bold text-slate-900 flex items-center gap-2">
+                <h3 className="text-[15px] font-bold text-slate-900 dark:text-white flex items-center gap-2">
                   <span>Invocation Telemetry</span>
                   {getStatusType(selectedInvocation) === 'OK' && (
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10.5px] font-semibold">
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-[#34D399]/20 text-emerald-800 dark:text-[#34D399] text-[10.5px] font-semibold">
                       LIVE INFERENCE SUCCESS
                     </span>
                   )}
                   {getStatusType(selectedInvocation) === 'FALLBACK' && (
-                    <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 text-[10.5px] font-semibold flex items-center gap-1">
-                      <Sparkles className="w-3 h-3 text-amber-600" />
+                    <span className="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30 text-[10.5px] font-semibold flex items-center gap-1">
+                      <Sparkles className="w-3 h-3 text-amber-600 dark:text-amber-300" />
                       FALLBACK RESCUED
                     </span>
                   )}
                   {getStatusType(selectedInvocation) === 'FAIL' && (
-                    <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-800 text-[10.5px] font-semibold">
+                    <span className="px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-500/20 text-red-800 dark:text-red-300 text-[10.5px] font-semibold">
                       FAILED
                     </span>
                   )}
                 </h3>
-                <p className="text-[11.5px] font-mono text-slate-500 mt-0.5">
+                <p className="text-[11.5px] font-mono text-slate-500 dark:text-white/50 mt-0.5">
                   ID: {selectedInvocation.id}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedInvocation(null)}
-                className="text-slate-400 hover:text-slate-700 p-1 rounded-lg"
+                className="text-slate-400 dark:text-white/50 hover:text-slate-700 dark:hover:text-white p-1 rounded-lg"
               >
                 ✕
               </button>
             </div>
 
             {getStatusType(selectedInvocation) === 'FALLBACK' && (
-              <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200 text-amber-900 text-[12px] space-y-1">
-                <span className="font-semibold block flex items-center gap-1.5 text-amber-950">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-700" />
+              <div className="p-3 rounded-xl bg-amber-50/80 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/25 text-amber-900 dark:text-amber-200 text-[12px] space-y-1">
+                <span className="font-semibold block flex items-center gap-1.5 text-amber-950 dark:text-amber-100">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-700 dark:text-amber-300" />
                   Deterministic Engine Protection Active
                 </span>
-                <p className="text-amber-800/80 text-[11.5px] leading-relaxed">
+                <p className="text-amber-800/80 dark:text-amber-200/80 text-[11.5px] leading-relaxed">
                   Live upstream model timed out or was temporarily queued. The smart deterministic fallback engine stepped in instantly, fulfilling the request so user experience had zero downtime.
                 </p>
               </div>
             )}
 
             <div className="grid grid-cols-2 gap-3 text-[12.5px]">
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                <span className="text-[11px] font-medium text-slate-500 block uppercase">Feature</span>
-                <span className="font-semibold text-slate-900 font-mono">
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/10">
+                <span className="text-[11px] font-medium text-slate-500 dark:text-white/50 block uppercase">Feature</span>
+                <span className="font-semibold text-slate-900 dark:text-white font-mono">
                   {selectedInvocation.feature}
                 </span>
               </div>
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                <span className="text-[11px] font-medium text-slate-500 block uppercase">Model</span>
-                <span className="font-semibold text-slate-900 font-mono">
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/10">
+                <span className="text-[11px] font-medium text-slate-500 dark:text-white/50 block uppercase">Model</span>
+                <span className="font-semibold text-slate-900 dark:text-white font-mono">
                   {selectedInvocation.model}
                 </span>
               </div>
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                <span className="text-[11px] font-medium text-slate-500 block uppercase">Tokens (In / Out)</span>
-                <span className="font-semibold text-slate-900 font-mono">
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/10">
+                <span className="text-[11px] font-medium text-slate-500 dark:text-white/50 block uppercase">Tokens (In / Out)</span>
+                <span className="font-semibold text-slate-900 dark:text-white font-mono">
                   {selectedInvocation.inputTokens} / {selectedInvocation.outputTokens}
                 </span>
               </div>
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                <span className="text-[11px] font-medium text-slate-500 block uppercase">Latency / Cost</span>
-                <span className="font-semibold text-slate-900 font-mono">
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/10">
+                <span className="text-[11px] font-medium text-slate-500 dark:text-white/50 block uppercase">Latency / Cost</span>
+                <span className="font-semibold text-slate-900 dark:text-white font-mono">
                   {selectedInvocation.latencyMs}ms / ${Number(selectedInvocation.costUsd).toFixed(5)}
                 </span>
               </div>
             </div>
 
             <div className="space-y-1">
-              <span className="text-[11px] font-medium text-slate-500 block uppercase">Prompt Key</span>
-              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 font-mono text-[12px] text-slate-800">
+              <span className="text-[11px] font-medium text-slate-500 dark:text-white/50 block uppercase">Prompt Key</span>
+              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-black/40 border border-slate-100 dark:border-white/10 font-mono text-[12px] text-slate-800 dark:text-white/85">
                 {selectedInvocation.promptKey}
               </div>
             </div>
 
             {selectedInvocation.error && (
               <div className="space-y-1">
-                <span className="text-[11px] font-medium text-red-600 block uppercase font-semibold">
+                <span className="text-[11px] font-medium text-red-600 dark:text-red-400 block uppercase font-semibold">
                   Error Details
                 </span>
-                <div className="p-3 rounded-xl bg-red-50/70 border border-red-200 text-red-800 font-mono text-[11.5px] max-h-32 overflow-y-auto whitespace-pre-wrap">
+                <div className="p-3 rounded-xl bg-red-50/70 dark:bg-red-500/15 border border-red-200 dark:border-red-500/25 text-red-800 dark:text-red-300 font-mono text-[11.5px] max-h-32 overflow-y-auto whitespace-pre-wrap">
                   {selectedInvocation.error}
                 </div>
               </div>
@@ -422,7 +422,7 @@ export default function AiInvocationsTable({ invocations }: AiInvocationsTablePr
               <button
                 type="button"
                 onClick={() => setSelectedInvocation(null)}
-                className="px-4 py-2 rounded-xl bg-slate-900 text-white text-[12px] font-semibold hover:bg-slate-800 transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-slate-900 dark:bg-[#34D399] text-white dark:text-[#09110D] text-[12px] font-semibold hover:bg-slate-800 dark:hover:bg-[#2EC28A] transition-colors cursor-pointer"
               >
                 Close
               </button>

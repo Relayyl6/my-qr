@@ -89,36 +89,36 @@ export default function BulkImportWizard({
 
   if (!isEligible) {
     return (
-      <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-[#11140F]/10 space-y-6 animate-in fade-in zoom-in-95 duration-150">
-        <div className="flex items-center justify-between pb-4 border-b border-[#11140F]/10">
+      <div className="bg-white dark:bg-[#101211] text-[#11140F] dark:text-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-[#11140F]/10 dark:border-white/12 space-y-6 animate-in fade-in zoom-in-95 duration-150">
+        <div className="flex items-center justify-between pb-4 border-b border-[#11140F]/10 dark:border-white/10">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/15 text-[#2F6B4F] dark:text-[#34D399] flex items-center justify-center">
               <Layers className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-semibold text-[16px] text-[#11140F]">Bulk Link Ingestion (AI)</h3>
-              <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full bg-[#11140F]/5 text-[#11140F]/70 uppercase tracking-wider">
-                Pro & Higher
+              <h3 className="font-semibold text-[16px] text-[#11140F] dark:text-white">Bulk Link Ingestion</h3>
+              <span className="text-[10.5px] font-mono font-semibold px-2 py-0.5 rounded-full bg-[#11140F]/5 dark:bg-white/10 text-[#11140F]/70 dark:text-[#34D399] uppercase tracking-wider">
+                Pro &amp; Higher
               </span>
             </div>
           </div>
           {onClose && (
-            <button onClick={onClose} className="p-1 rounded-lg text-[#11140F]/50 hover:bg-[#11140F]/5 cursor-pointer">
+            <button onClick={onClose} className="p-1.5 rounded-lg text-[#11140F]/50 dark:text-white/50 hover:bg-black/5 dark:hover:bg-white/10 cursor-pointer">
               <X className="w-5 h-5" />
             </button>
           )}
         </div>
 
         <div className="space-y-4">
-          <p className="text-[14px] text-[#11140F]/70 leading-relaxed">
-            AI Bulk Link Ingestion automatically clusters CSV/text batches into organized campaigns, generates semantic shortcodes, and deploys high-speed routing rules in bulk.
+          <p className="text-[13.5px] text-[#11140F]/70 dark:text-white/65 leading-relaxed">
+            Automatically cluster CSV or text link batches into organized campaigns with semantic shortcodes and instant deployment.
           </p>
-          <div className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-4 space-y-2 text-[12.5px] text-emerald-900">
-            <p className="font-semibold">Included on Pro, Plus & Ultra Plans:</p>
-            <ul className="space-y-1 list-disc pl-4 text-emerald-800/80">
+          <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.06] p-4 space-y-2 text-[12.5px]">
+            <p className="font-semibold text-[#11140F] dark:text-white">Included on Pro, Plus &amp; Ultra Plans:</p>
+            <ul className="space-y-1 list-disc pl-4 text-[#11140F]/75 dark:text-white/75">
               <li>Up to 50 active links on Pro, 500 on Plus, unlimited on Ultra</li>
               <li>Batch CSV and plain text paste ingestion</li>
-              <li>AI campaign semantic naming & tag classification</li>
+              <li>Automated campaign naming &amp; tag classification</li>
               <li>Instant 1-click batch generation</li>
             </ul>
           </div>
@@ -128,16 +128,16 @@ export default function BulkImportWizard({
           {onClose && (
             <button
               onClick={onClose}
-              className="px-4 py-2.5 rounded-xl border border-[#11140F]/15 text-[#11140F] text-[13px] font-medium hover:bg-[#EEF0EA] cursor-pointer"
+              className="px-4 py-2.5 rounded-xl border border-[#11140F]/15 dark:border-white/15 text-[#11140F] dark:text-white text-[13px] font-medium hover:bg-black/5 dark:hover:bg-white/10 cursor-pointer"
             >
               Close
             </button>
           )}
           <Link
             href="/pricing"
-            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#11140F] text-white text-[13px] font-semibold hover:bg-[#2A2E25] transition-colors shadow-xs cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#34D399] text-[#09110D] text-[13px] font-bold hover:opacity-90 transition-opacity shadow-xs cursor-pointer"
           >
-            <Lock className="w-3.5 h-3.5 text-emerald-400" />
+            <Lock className="w-3.5 h-3.5" />
             <span>Upgrade to Pro</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
@@ -202,25 +202,25 @@ export default function BulkImportWizard({
   };
 
   return (
-    <div className="rounded-2xl border border-[#11140F]/15 bg-white p-5 sm:p-6 shadow-2xl space-y-4 max-w-2xl w-full max-h-[90vh] flex flex-col">
-      <div className="flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-            <Layers className="w-4 h-4 text-emerald-600" />
+    <div className="rounded-3xl border border-[#11140F]/15 dark:border-white/12 bg-white dark:bg-[#101211] text-[#11140F] dark:text-white p-5 sm:p-6 shadow-2xl space-y-4 max-w-2xl w-full max-h-[90vh] flex flex-col">
+      <div className="flex items-center justify-between shrink-0 pb-3 border-b border-[#11140F]/10 dark:border-white/10">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-emerald-500/15 flex items-center justify-center">
+            <Layers className="w-4 h-4 text-[#2F6B4F] dark:text-[#34D399]" />
           </div>
           <div>
-            <h3 className="text-[15px] font-semibold text-[#11140F]">
-              AI Bulk Import & Campaign Orchestrator
+            <h3 className="text-[15px] font-bold text-[#11140F] dark:text-white">
+              Bulk Import &amp; Campaign Builder
             </h3>
-            <p className="text-[12px] text-[#11140F]/50">
-              Paste URLs or CSV lines to cluster, slugify, and bulk-deploy
+            <p className="text-[12px] text-[#11140F]/55 dark:text-white/55">
+              Paste URLs or CSV lines to organize, slugify, and bulk-deploy
             </p>
           </div>
         </div>
         {onClose && (
           <button
             onClick={onClose}
-            className="text-[#11140F]/40 hover:text-[#11140F] p-1.5 rounded-lg hover:bg-[#11140F]/5"
+            className="text-[#11140F]/45 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -230,21 +230,21 @@ export default function BulkImportWizard({
       <div className="overflow-y-auto flex-1 space-y-4">
         {loading ? (
           <AiProgressTracker
-            title="Orchestrating Campaign Clusters"
-            subtitle="Grouping destinations, generating scannable shortcodes & assigning campaign tags"
+            title="Organizing Campaign Clusters"
+            subtitle="Grouping destinations, generating shortcodes & assigning campaign tags"
             onForceComplete={handleForceComplete}
           />
         ) : !orchestrated ? (
           <div className="space-y-3">
             {/* Presets */}
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[11.5px] font-medium text-[#11140F]/60">Quick Examples:</span>
+              <span className="text-[11.5px] font-medium text-[#11140F]/60 dark:text-white/55">Quick Examples:</span>
               {PRESET_BATCHES.map((batch, idx) => (
                 <button
                   key={idx}
                   type="button"
                   onClick={() => setRawText(batch.text)}
-                  className="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-[#11140F]/5 hover:bg-[#11140F]/10 text-[#11140F]/80 transition-colors cursor-pointer"
+                  className="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-black/5 dark:bg-white/[0.06] hover:bg-black/10 dark:hover:bg-white/10 text-[#11140F]/80 dark:text-white/80 transition-colors cursor-pointer"
                 >
                   {batch.name}
                 </button>
@@ -252,15 +252,15 @@ export default function BulkImportWizard({
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-[12.5px] font-medium text-[#11140F]/70">
-                Paste Destination URLs (one per line, format: <code>url, label</code>)
+              <label className="block text-[12.5px] font-medium text-[#11140F]/75 dark:text-white/80">
+                Paste Destination URLs (one per line, format: <code className="font-mono text-[#34D399]">url, label</code>)
               </label>
               <textarea
                 rows={6}
                 value={rawText}
                 onChange={(e) => setRawText(e.target.value)}
                 placeholder="https://example.com/link-1, Flyer 1&#10;https://example.com/link-2, Flyer 2"
-                className="w-full rounded-xl border border-[#11140F]/15 bg-[#11140F]/[0.02] p-3 text-[13px] font-mono text-[#11140F] placeholder:text-[#11140F]/30 outline-none focus:border-[#11140F] transition-colors resize-none"
+                className="w-full rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 p-3 text-[13px] font-mono text-[#11140F] dark:text-white placeholder:text-[#11140F]/35 dark:placeholder:text-white/35 outline-none focus:border-[#34D399] transition-colors resize-none"
               />
             </div>
 
@@ -269,48 +269,40 @@ export default function BulkImportWizard({
                 type="button"
                 onClick={handleOrchestrate}
                 disabled={loading || !rawText.trim()}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#11140F] text-white text-[12.5px] font-medium hover:bg-[#2A2E25] transition-colors disabled:opacity-50 cursor-pointer shadow-sm"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#34D399] hover:bg-[#34D399]/90 text-[#09110D] text-[12.5px] font-bold transition-colors disabled:opacity-50 cursor-pointer shadow-sm"
               >
-                <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-                ⚡ Orchestrate Campaigns with AI
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Organize Campaigns</span>
               </button>
             </div>
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200/80 text-[12.5px] text-emerald-950 space-y-1">
+            <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-[12.5px] text-[#11140F] dark:text-white space-y-1">
               <div className="flex items-center justify-between">
                 <span className="font-semibold block">Campaign Plan</span>
                 {orchestratedMeta && (
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-[10.5px] font-mono font-semibold ${
-                      !orchestratedMeta.isFallback
-                        ? 'bg-emerald-200 text-emerald-900'
-                        : 'bg-amber-100 text-amber-900'
-                    }`}
-                  >
-                    {!orchestratedMeta.isFallback
-                      ? `✨ Live AI (${((orchestratedMeta.latencyMs || 0) / 1000).toFixed(1)}s)`
-                      : '⚡ High-Speed Engine'}
+                  <span className="px-2 py-0.5 rounded-full text-[10.5px] font-mono font-semibold bg-emerald-500/20 text-[#2F6B4F] dark:text-[#34D399]">
+                    Ready to Deploy
                   </span>
                 )}
               </div>
-              <p>{orchestrated.summary}</p>
+              <p className="text-[#11140F]/75 dark:text-white/75">{orchestrated.summary}</p>
             </div>
 
             {orchestrated.campaigns.map((camp, cIdx) => (
               <div
                 key={cIdx}
-                className="rounded-xl border border-[#11140F]/10 bg-[#11140F]/[0.02] p-4 space-y-3"
+                className="rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5] dark:bg-white/[0.03] p-4 space-y-3"
               >
                 <div className="flex items-center justify-between">
-                  <h4 className="font-semibold text-[14px] text-[#11140F]">{camp.campaignName}</h4>
-                  <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-100 text-emerald-800">
+                  <h4 className="font-semibold text-[14px] text-[#11140F] dark:text-white">{camp.campaignName}</h4>
+                  <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/15 text-[#2F6B4F] dark:text-[#34D399]">
                     {camp.category}
                   </span>
                 </div>
 
-                <p className="text-[12px] text-[#11140F]/60 italic">
+                <p className="text-[12px] text-[#11140F]/60 dark:text-white/55 italic">
                   Strategy: {camp.suggestedStrategy}
                 </p>
 
@@ -318,11 +310,11 @@ export default function BulkImportWizard({
                   {camp.items.map((it, iIdx) => (
                     <div
                       key={iIdx}
-                      className="p-2.5 rounded-lg bg-white border border-[#11140F]/10 flex items-center justify-between text-[12px]"
+                      className="p-2.5 rounded-xl bg-white dark:bg-black/30 border border-[#11140F]/10 dark:border-white/10 flex items-center justify-between text-[12px]"
                     >
                       <div className="min-w-0 pr-2">
-                        <span className="font-semibold text-[#11140F] block truncate">{it.label}</span>
-                        <span className="font-mono text-[#11140F]/50 text-[11px] truncate block">
+                        <span className="font-semibold text-[#11140F] dark:text-white block truncate">{it.label}</span>
+                        <span className="font-mono text-[#11140F]/55 dark:text-white/50 text-[11px] truncate block">
                           /id/{it.shortCode} → {it.destinationUrl}
                         </span>
                       </div>
@@ -330,7 +322,7 @@ export default function BulkImportWizard({
                         {it.tags.map((t, tIdx) => (
                           <span
                             key={tIdx}
-                            className="px-1.5 py-0.5 rounded bg-[#11140F]/5 text-[#11140F]/70 text-[10px]"
+                            className="px-1.5 py-0.5 rounded bg-black/5 dark:bg-white/10 text-[#11140F]/70 dark:text-white/75 text-[10px]"
                           >
                             #{t}
                           </span>
@@ -346,16 +338,16 @@ export default function BulkImportWizard({
               <button
                 type="button"
                 onClick={() => setOrchestrated(null)}
-                className="text-[12px] text-[#11140F]/60 hover:text-[#11140F] underline"
+                className="text-[12px] text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white underline cursor-pointer"
               >
-                ← Back to text editor
+                ← Back to editor
               </button>
 
               <button
                 type="button"
                 onClick={handleApply}
                 disabled={applying}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 text-white text-[12.5px] font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50 cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#34D399] hover:bg-[#34D399]/90 text-[#09110D] text-[12.5px] font-bold transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {applying ? (
                   <>
@@ -365,7 +357,7 @@ export default function BulkImportWizard({
                 ) : (
                   <>
                     <CheckCircle className="w-3.5 h-3.5" />
-                    Apply & Deploy All QR Codes
+                    Apply &amp; Deploy All QR Codes
                   </>
                 )}
               </button>
@@ -375,7 +367,7 @@ export default function BulkImportWizard({
       </div>
 
       {statusMsg && (
-        <p className="text-[12px] font-medium text-emerald-700 text-center shrink-0">
+        <p className="text-[12px] font-medium text-[#2F6B4F] dark:text-[#34D399] text-center shrink-0">
           {statusMsg}
         </p>
       )}

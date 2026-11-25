@@ -1290,19 +1290,19 @@ export default function CustomerMailingListManager({
 
       {/* MODAL: Campaign Inspection Detail */}
       {inspectingCampaign && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-          <div className="w-full max-w-2xl bg-white rounded-lg p-6 shadow-xl border border-[#11140F]/15 max-h-[85vh] overflow-y-auto space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#11140F]/10">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs">
+          <div className="w-full max-w-2xl bg-white dark:bg-[#101211] text-[#11140F] dark:text-white rounded-2xl p-6 shadow-2xl border border-[#11140F]/15 dark:border-white/12 max-h-[85vh] overflow-y-auto space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#11140F]/10 dark:border-white/10">
               <div>
                 <h4 className="font-bold text-sm text-[#11140F] dark:text-white">{inspectingCampaign.subject}</h4>
-                <p className="text-xs text-[#11140F]/60 mt-0.5">
+                <p className="text-xs text-[#11140F]/60 dark:text-white/55 mt-0.5">
                   Dispatched on {inspectingCampaign.sentAt ? new Date(inspectingCampaign.sentAt).toLocaleString() : '—'} • {inspectingCampaign.sentCount} delivered
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setInspectingCampaign(null)}
-                className="text-[#11140F]/40 hover:text-[#11140F] p-1"
+                className="text-[#11140F]/45 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1310,29 +1310,29 @@ export default function CustomerMailingListManager({
 
             {/* Recipients Delivery Log Table */}
             <div>
-              <h5 className="text-xs font-semibold text-[#11140F] mb-2">Recipient Delivery Status:</h5>
+              <h5 className="text-xs font-semibold text-[#11140F] dark:text-white/90 mb-2">Recipient Delivery Status:</h5>
               {inspectingCampaign.recipients && inspectingCampaign.recipients.length > 0 ? (
-                <div className="rounded-md border border-[#11140F]/10 max-h-48 overflow-y-auto">
+                <div className="rounded-xl border border-[#11140F]/10 dark:border-white/10 max-h-48 overflow-y-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="bg-gray-50 border-b border-[#11140F]/8 text-[10.5px] uppercase text-[#11140F]/50">
+                      <tr className="bg-gray-50 dark:bg-white/[0.04] border-b border-[#11140F]/8 dark:border-white/10 text-[10.5px] uppercase text-[#11140F]/50 dark:text-white/50">
                         <th className="py-2 px-3">Email</th>
                         <th className="py-2 px-3">Status</th>
                         <th className="py-2 px-3">Timestamp</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#11140F]/5">
+                    <tbody className="divide-y divide-[#11140F]/5 dark:divide-white/[0.06]">
                       {inspectingCampaign.recipients.map((rec, i) => (
-                        <tr key={i} className="hover:bg-gray-50">
+                        <tr key={i} className="hover:bg-gray-50 dark:hover:bg-white/[0.03]">
                           <td className="py-2 px-3 font-mono text-[11px]">{rec.email}</td>
                           <td className="py-2 px-3">
                             {rec.status === 'sent' ? (
-                              <span className="text-emerald-700 font-semibold text-[10.5px]">Delivered</span>
+                              <span className="text-emerald-700 dark:text-[#34D399] font-semibold text-[10.5px]">Delivered</span>
                             ) : (
-                              <span className="text-red-600 font-semibold text-[10.5px]">{rec.error || 'Failed'}</span>
+                              <span className="text-rose-600 dark:text-rose-400 font-semibold text-[10.5px]">{rec.error || 'Failed'}</span>
                             )}
                           </td>
-                          <td className="py-2 px-3 text-[10.5px] text-[#11140F]/40 font-mono">
+                          <td className="py-2 px-3 text-[10.5px] text-[#11140F]/40 dark:text-white/45 font-mono">
                             {rec.sentAt ? new Date(rec.sentAt).toLocaleTimeString() : '—'}
                           </td>
                         </tr>
@@ -1341,15 +1341,15 @@ export default function CustomerMailingListManager({
                   </table>
                 </div>
               ) : (
-                <p className="text-xs text-[#11140F]/50 italic">Delivered to active subscriber list.</p>
+                <p className="text-xs text-[#11140F]/50 dark:text-white/50 italic">Delivered to active subscriber list.</p>
               )}
             </div>
 
             {/* Email Body Preview */}
             <div className="pt-2">
-              <h5 className="text-xs font-semibold text-[#11140F] mb-2">Dispatched Message Content:</h5>
+              <h5 className="text-xs font-semibold text-[#11140F] dark:text-white/90 mb-2">Dispatched Message Content:</h5>
               <div
-                className="p-4 rounded-md border border-[#11140F]/10 bg-gray-50 text-xs leading-relaxed max-h-56 overflow-y-auto"
+                className="p-4 rounded-xl border border-[#11140F]/10 bg-gray-50 text-[#11140F] text-xs leading-relaxed max-h-56 overflow-y-auto"
                 dangerouslySetInnerHTML={{ __html: inspectingCampaign.bodyHtml }}
               />
             </div>
@@ -1358,7 +1358,7 @@ export default function CustomerMailingListManager({
               <button
                 type="button"
                 onClick={() => setInspectingCampaign(null)}
-                className="px-4 py-1.5 rounded-md bg-[#11140F] text-white text-xs font-semibold hover:bg-[#2A2E25]"
+                className="px-4 py-1.5 rounded-xl bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] text-xs font-semibold hover:opacity-90 cursor-pointer"
               >
                 Close
               </button>
@@ -1369,14 +1369,14 @@ export default function CustomerMailingListManager({
 
       {/* Modal 1: Create List */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-          <div className="w-full max-w-lg bg-white rounded-lg p-5 shadow-xl border border-[#11140F]/15 space-y-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-2 border-b border-[#11140F]/10">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs">
+          <div className="w-full max-w-lg bg-white dark:bg-[#101211] text-[#11140F] dark:text-white rounded-2xl p-5 sm:p-6 shadow-2xl border border-[#11140F]/15 dark:border-white/12 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-[#11140F]/10 dark:border-white/10">
               <h4 className="text-sm font-bold text-[#11140F] dark:text-white">Create Mailing List</h4>
               <button
                 type="button"
                 onClick={() => setShowCreateModal(false)}
-                className="text-[#11140F]/40 hover:text-[#11140F] p-1"
+                className="text-[#11140F]/45 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1391,7 +1391,7 @@ export default function CustomerMailingListManager({
                   onChange={(e) => setNewListName(e.target.value)}
                   placeholder="e.g. VIP Customers, Weekend Brunch Club"
                   required
-                  className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-xs text-[#11140F] dark:text-white placeholder:text-[#11140F]/40 dark:placeholder:text-white/35 focus:outline-none focus:border-[#34D399]"
                 />
               </div>
 
@@ -1406,7 +1406,7 @@ export default function CustomerMailingListManager({
                     value={newListBadge}
                     onChange={(e) => setNewListBadge(e.target.value)}
                     placeholder="e.g. VIP Subscriber Form, Scan to Join"
-                    className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                    className="w-full px-3 py-2 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-xs text-[#11140F] dark:text-white placeholder:text-[#11140F]/40 dark:placeholder:text-white/35 focus:outline-none focus:border-[#34D399]"
                   />
                 </div>
 
@@ -1420,7 +1420,7 @@ export default function CustomerMailingListManager({
                     value={newListCta}
                     onChange={(e) => setNewListCta(e.target.value)}
                     placeholder="e.g. Subscribe to Updates, Claim Perk"
-                    className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                    className="w-full px-3 py-2 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-xs text-[#11140F] dark:text-white placeholder:text-[#11140F]/40 dark:placeholder:text-white/35 focus:outline-none focus:border-[#34D399]"
                   />
                 </div>
               </div>
@@ -1435,7 +1435,7 @@ export default function CustomerMailingListManager({
                   value={newListHeadline}
                   onChange={(e) => setNewListHeadline(e.target.value)}
                   placeholder="e.g. Join The VIP Tasting Club & Get 15% Off"
-                  className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-xs text-[#11140F] dark:text-white placeholder:text-[#11140F]/40 dark:placeholder:text-white/35 focus:outline-none focus:border-[#34D399]"
                 />
               </div>
 
@@ -1446,7 +1446,7 @@ export default function CustomerMailingListManager({
                   value={newListDesc}
                   onChange={(e) => setNewListDesc(e.target.value)}
                   placeholder="e.g. Scan to receive secret menus, weekly promotions, and member-only event invitations."
-                  className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-xs text-[#11140F] dark:text-white placeholder:text-[#11140F]/40 dark:placeholder:text-white/35 focus:outline-none focus:border-[#34D399]"
                 />
               </div>
 
@@ -1460,7 +1460,7 @@ export default function CustomerMailingListManager({
                   value={newListSuccessMsg}
                   onChange={(e) => setNewListSuccessMsg(e.target.value)}
                   placeholder="e.g. You're on the list! Show this screen to your server for 10% off today."
-                  className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-xs text-[#11140F] dark:text-white placeholder:text-[#11140F]/40 dark:placeholder:text-white/35 focus:outline-none focus:border-[#34D399]"
                 />
               </div>
 
@@ -1480,18 +1480,18 @@ export default function CustomerMailingListManager({
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#11140F]/10">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#11140F]/10 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="px-3 py-1.5 text-xs font-medium text-[#11140F]/60 hover:text-[#11140F]"
+                  className="px-3.5 py-2 rounded-xl text-xs font-medium text-[#11140F]/65 dark:text-white/65 hover:text-[#11140F] dark:hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={creatingList}
-                  className="px-4 py-1.5 rounded-md bg-[#11140F] text-white text-xs font-semibold hover:bg-[#2A2E25] transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer shadow-xs"
+                  className="px-4 py-2 rounded-xl bg-[#34D399] hover:bg-[#34D399]/90 text-[#09110D] text-xs font-bold transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer shadow-xs"
                 >
                   {creatingList && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   <span>Create List</span>
@@ -1504,14 +1504,14 @@ export default function CustomerMailingListManager({
 
       {/* Modal: Edit List */}
       {showEditListModal && selectedList && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-          <div className="w-full max-w-lg bg-white rounded-lg p-5 shadow-xl border border-[#11140F]/15 space-y-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-2 border-b border-[#11140F]/10">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs">
+          <div className="w-full max-w-lg bg-white dark:bg-[#101211] text-[#11140F] dark:text-white rounded-2xl p-5 sm:p-6 shadow-2xl border border-[#11140F]/15 dark:border-white/12 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-[#11140F]/10 dark:border-white/10">
               <h4 className="text-sm font-bold text-[#11140F] dark:text-white">Edit Mailing List Settings</h4>
               <button
                 type="button"
                 onClick={() => setShowEditListModal(false)}
-                className="text-[#11140F]/40 hover:text-[#11140F] p-1"
+                className="text-[#11140F]/45 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1525,7 +1525,7 @@ export default function CustomerMailingListManager({
                   value={editListName}
                   onChange={(e) => setEditListName(e.target.value)}
                   required
-                  className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-xs text-[#11140F] dark:text-white focus:outline-none focus:border-[#34D399]"
                 />
               </div>
 
@@ -1540,7 +1540,7 @@ export default function CustomerMailingListManager({
                     value={editListBadge}
                     onChange={(e) => setEditListBadge(e.target.value)}
                     placeholder="e.g. VIP Subscriber Form, Scan to Join"
-                    className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                    className="w-full px-3 py-2 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-xs text-[#11140F] dark:text-white placeholder:text-[#11140F]/40 dark:placeholder:text-white/35 focus:outline-none focus:border-[#34D399]"
                   />
                 </div>
 
@@ -1554,7 +1554,7 @@ export default function CustomerMailingListManager({
                     value={editListCta}
                     onChange={(e) => setEditListCta(e.target.value)}
                     placeholder="e.g. Subscribe to Updates, Claim Perk"
-                    className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                    className="w-full px-3 py-2 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-xs text-[#11140F] dark:text-white placeholder:text-[#11140F]/40 dark:placeholder:text-white/35 focus:outline-none focus:border-[#34D399]"
                   />
                 </div>
               </div>
@@ -1569,7 +1569,7 @@ export default function CustomerMailingListManager({
                   value={editListHeadline}
                   onChange={(e) => setEditListHeadline(e.target.value)}
                   placeholder="e.g. Join Our VIP Tasting Club"
-                  className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-xs text-[#11140F] dark:text-white placeholder:text-[#11140F]/40 dark:placeholder:text-white/35 focus:outline-none focus:border-[#34D399]"
                 />
               </div>
 
@@ -1579,7 +1579,7 @@ export default function CustomerMailingListManager({
                   rows={2}
                   value={editListDesc}
                   onChange={(e) => setEditListDesc(e.target.value)}
-                  className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-xs text-[#11140F] dark:text-white focus:outline-none focus:border-[#34D399]"
                 />
               </div>
 
@@ -1593,7 +1593,7 @@ export default function CustomerMailingListManager({
                   value={editListSuccessMsg}
                   onChange={(e) => setEditListSuccessMsg(e.target.value)}
                   placeholder="e.g. You're on the list! Show this screen to your server for 10% off today."
-                  className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-xs text-[#11140F] dark:text-white placeholder:text-[#11140F]/40 dark:placeholder:text-white/35 focus:outline-none focus:border-[#34D399]"
                 />
               </div>
 
@@ -1613,18 +1613,18 @@ export default function CustomerMailingListManager({
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#11140F]/10">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#11140F]/10 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setShowEditListModal(false)}
-                  className="px-3 py-1.5 text-xs font-medium text-[#11140F]/60 hover:text-[#11140F]"
+                  className="px-3.5 py-2 rounded-xl text-xs font-medium text-[#11140F]/65 dark:text-white/65 hover:text-[#11140F] dark:hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={updatingList}
-                  className="px-4 py-1.5 rounded-md bg-[#11140F] text-white text-xs font-semibold hover:bg-[#2A2E25] transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer shadow-xs"
+                  className="px-4 py-2 rounded-xl bg-[#34D399] hover:bg-[#34D399]/90 text-[#09110D] text-xs font-bold transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer shadow-xs"
                 >
                   {updatingList && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   <span>Save Changes</span>
@@ -1637,8 +1637,8 @@ export default function CustomerMailingListManager({
 
       {/* Modal: Add Subscriber */}
       {showAddContactModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white rounded-lg p-5 shadow-xl border border-[#11140F]/15 space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs">
+          <div className="w-full max-w-md bg-white dark:bg-[#101211] text-[#11140F] dark:text-white rounded-2xl p-5 sm:p-6 shadow-2xl border border-[#11140F]/15 dark:border-white/12 space-y-4">
             <h4 className="text-sm font-bold text-[#11140F] dark:text-white">Add Subscriber to {selectedList?.name}</h4>
             <form onSubmit={handleAddContact} className="space-y-3">
               <div>
@@ -1649,7 +1649,7 @@ export default function CustomerMailingListManager({
                   onChange={(e) => setNewContactEmail(e.target.value)}
                   placeholder="subscriber@example.com"
                   required
-                  className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-xs text-[#11140F] dark:text-white placeholder:text-[#11140F]/40 dark:placeholder:text-white/35 focus:outline-none focus:border-[#34D399]"
                 />
               </div>
 
@@ -1660,22 +1660,22 @@ export default function CustomerMailingListManager({
                   value={newContactName}
                   onChange={(e) => setNewContactName(e.target.value)}
                   placeholder="e.g. Alex"
-                  className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-xs text-[#11140F] dark:text-white placeholder:text-[#11140F]/40 dark:placeholder:text-white/35 focus:outline-none focus:border-[#34D399]"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#11140F]/10">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#11140F]/10 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setShowAddContactModal(false)}
-                  className="px-3 py-1.5 text-xs font-medium text-[#11140F]/60 hover:text-[#11140F]"
+                  className="px-3.5 py-2 text-xs font-medium text-[#11140F]/65 dark:text-white/65 hover:text-[#11140F] dark:hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={addingContact}
-                  className="px-4 py-1.5 rounded-md bg-[#11140F] text-white text-xs font-medium hover:bg-[#2A2E25] transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-4 py-2 rounded-xl bg-[#34D399] hover:bg-[#34D399]/90 text-[#09110D] text-xs font-bold transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
                 >
                   {addingContact && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   <span>Add Subscriber</span>
@@ -1688,8 +1688,8 @@ export default function CustomerMailingListManager({
 
       {/* Modal: Edit Subscriber */}
       {showEditContactModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white rounded-lg p-5 shadow-xl border border-[#11140F]/15 space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs">
+          <div className="w-full max-w-md bg-white dark:bg-[#101211] text-[#11140F] dark:text-white rounded-2xl p-5 sm:p-6 shadow-2xl border border-[#11140F]/15 dark:border-white/12 space-y-4">
             <h4 className="text-sm font-bold text-[#11140F] dark:text-white">Edit Subscriber</h4>
             <form onSubmit={handleUpdateContact} className="space-y-3">
               <div>
@@ -1699,7 +1699,7 @@ export default function CustomerMailingListManager({
                   value={editContactEmail}
                   onChange={(e) => setEditContactEmail(e.target.value)}
                   required
-                  className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-xs text-[#11140F] dark:text-white focus:outline-none focus:border-[#34D399]"
                 />
               </div>
 
@@ -1709,7 +1709,7 @@ export default function CustomerMailingListManager({
                   type="text"
                   value={editContactName}
                   onChange={(e) => setEditContactName(e.target.value)}
-                  className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-xs text-[#11140F] dark:text-white focus:outline-none focus:border-[#34D399]"
                 />
               </div>
 
@@ -1718,7 +1718,7 @@ export default function CustomerMailingListManager({
                 <select
                   value={editContactStatus}
                   onChange={(e) => setEditContactStatus(e.target.value)}
-                  className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] bg-white focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2 rounded-xl border border-[#11140F]/15 dark:border-white/15 text-xs text-[#11140F] dark:text-white bg-[#F7F8F5] dark:bg-[#171A18] focus:outline-none focus:border-[#34D399]"
                 >
                   <option value="active">Active (Receives broadcasts)</option>
                   <option value="unsubscribed">Unsubscribed (Suppressed)</option>
@@ -1726,18 +1726,18 @@ export default function CustomerMailingListManager({
                 </select>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#11140F]/10">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#11140F]/10 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setShowEditContactModal(false)}
-                  className="px-3 py-1.5 text-xs font-medium text-[#11140F]/60 hover:text-[#11140F]"
+                  className="px-3.5 py-2 text-xs font-medium text-[#11140F]/65 dark:text-white/65 hover:text-[#11140F] dark:hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={updatingContact}
-                  className="px-4 py-1.5 rounded-md bg-[#11140F] text-white text-xs font-medium hover:bg-[#2A2E25] transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-4 py-2 rounded-xl bg-[#34D399] hover:bg-[#34D399]/90 text-[#09110D] text-xs font-bold transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
                 >
                   {updatingContact && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   <span>Update</span>
@@ -1750,24 +1750,24 @@ export default function CustomerMailingListManager({
 
       {/* Modal: CSV Bulk Import */}
       {showCsvModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-          <div className="w-full max-w-lg bg-white rounded-lg p-5 shadow-xl border border-[#11140F]/15 space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-[#11140F]/10">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs">
+          <div className="w-full max-w-lg bg-white dark:bg-[#101211] text-[#11140F] dark:text-white rounded-2xl p-5 sm:p-6 shadow-2xl border border-[#11140F]/15 dark:border-white/12 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#11140F]/10 dark:border-white/10">
               <h4 className="text-sm font-bold text-[#11140F] dark:text-white flex items-center gap-1.5">
-                <FileSpreadsheet className="w-4 h-4 text-[#2F6B4F]" />
+                <FileSpreadsheet className="w-4 h-4 text-[#34D399]" />
                 CSV Bulk Import
               </h4>
               <button
                 type="button"
                 onClick={() => setShowCsvModal(false)}
-                className="text-[#11140F]/40 hover:text-[#11140F]"
+                className="text-[#11140F]/45 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <p className="text-xs text-[#11140F]/60 dark:text-white/60">
-              Upload a .csv file or paste lines below in format: <code>email, first_name</code>.
+              Upload a .csv file or paste lines below in format: <code className="font-mono text-[#34D399]">email, first_name</code>.
             </p>
 
             <form onSubmit={handleCsvImport} className="space-y-3">
@@ -1777,7 +1777,7 @@ export default function CustomerMailingListManager({
                   type="file"
                   accept=".csv,.txt"
                   onChange={handleCsvFileUpload}
-                  className="w-full text-xs text-[#11140F]/70 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#11140F]/10 file:text-[#11140F] hover:file:bg-[#11140F]/20 cursor-pointer"
+                  className="w-full text-xs text-[#11140F]/70 dark:text-white/70 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-black/10 dark:file:bg-white/10 file:text-[#11140F] dark:file:text-white hover:file:bg-black/20 dark:hover:file:bg-white/20 cursor-pointer"
                 />
               </div>
 
@@ -1791,22 +1791,22 @@ export default function CustomerMailingListManager({
                   onChange={(e) => setCsvText(e.target.value)}
                   placeholder="alice@example.com, Alice&#10;bob@example.com, Bob&#10;charlie@example.com, Charlie"
                   required
-                  className="w-full px-3 py-2 rounded-md border border-[#11140F]/15 text-xs font-mono text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-xs font-mono text-[#11140F] dark:text-white placeholder:text-[#11140F]/40 dark:placeholder:text-white/35 focus:outline-none focus:border-[#34D399]"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#11140F]/10">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#11140F]/10 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setShowCsvModal(false)}
-                  className="px-3 py-1.5 text-xs font-medium text-[#11140F]/60 hover:text-[#11140F]"
+                  className="px-3.5 py-2 text-xs font-medium text-[#11140F]/65 dark:text-white/65 hover:text-[#11140F] dark:hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={importingCsv}
-                  className="px-4 py-1.5 rounded-md bg-[#11140F] text-white text-xs font-medium hover:bg-[#2A2E25] transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-4 py-2 rounded-xl bg-[#34D399] hover:bg-[#34D399]/90 text-[#09110D] text-xs font-bold transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
                 >
                   {importingCsv && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   <span>Import Subscribers</span>
@@ -1819,14 +1819,14 @@ export default function CustomerMailingListManager({
 
       {/* Modal: Broadcast Composer with Rich Text Toolbar & Live Preview */}
       {showBroadcastModal && selectedList && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-          <div className="w-full max-w-4xl bg-white rounded-lg p-5 shadow-xl border border-[#11140F]/15 max-h-[90vh] overflow-y-auto space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#11140F]/10">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs">
+          <div className="w-full max-w-4xl bg-white dark:bg-[#101211] text-[#11140F] dark:text-white rounded-2xl p-5 sm:p-6 shadow-2xl border border-[#11140F]/15 dark:border-white/12 max-h-[90vh] overflow-y-auto space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#11140F]/10 dark:border-white/10">
               <div>
                 <h4 className="text-sm font-bold text-[#11140F] dark:text-white">
                   Broadcast to {selectedList.name}
                 </h4>
-                <p className="text-xs text-[#11140F]/60 dark:text-white/60">
+                <p className="text-xs text-[#11140F]/60 dark:text-white/55 mt-0.5">
                   Delivering to {contacts.filter((c) => c.status === 'active').length} active recipients via personal Gmail.
                 </p>
               </div>
@@ -1834,15 +1834,15 @@ export default function CustomerMailingListManager({
                 <button
                   type="button"
                   onClick={() => setShowPreview(!showPreview)}
-                  className="px-2.5 py-1 rounded-md border border-[#11140F]/15 text-xs font-medium text-[#11140F] hover:bg-gray-50 transition-colors flex items-center gap-1"
+                  className="px-3 py-1.5 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.04] text-xs font-medium text-[#11140F] dark:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
-                  <Eye className="w-3.5 h-3.5" />
+                  <Eye className="w-3.5 h-3.5 text-[#34D399]" />
                   <span>{showPreview ? 'Hide Preview' : 'Show Preview'}</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowBroadcastModal(false)}
-                  className="text-[#11140F]/40 hover:text-[#11140F] p-1"
+                  className="text-[#11140F]/45 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -1851,7 +1851,7 @@ export default function CustomerMailingListManager({
 
             {/* Quick Template Picker */}
             <div className="space-y-1.5">
-              <span className="text-[11px] font-semibold text-[#11140F]/60 uppercase tracking-wider block">
+              <span className="text-[11px] font-semibold text-[#11140F]/60 dark:text-white/55 uppercase tracking-wider block">
                 Load Ready Template:
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -1863,10 +1863,10 @@ export default function CustomerMailingListManager({
                       setBroadcastSubject(tmpl.subject.replace('{{list_name}}', selectedList.name));
                       setBroadcastBody(tmpl.body.replace(/{{list_name}}/g, selectedList.name));
                     }}
-                    className="p-2 rounded-md border border-[#11140F]/10 bg-[#F7F8F5] hover:border-[#2F6B4F] text-left text-xs font-medium text-[#11140F] transition-all cursor-pointer"
+                    className="p-2.5 rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5] dark:bg-white/[0.03] hover:border-[#34D399] text-left text-xs font-medium text-[#11140F] dark:text-white transition-all cursor-pointer"
                   >
                     <span className="block font-semibold">{tmpl.name}</span>
-                    <span className="text-[10px] text-[#11140F]/50">Click to apply</span>
+                    <span className="text-[10px] text-[#11140F]/50 dark:text-white/45">Click to apply</span>
                   </button>
                 ))}
               </div>
@@ -1881,7 +1881,7 @@ export default function CustomerMailingListManager({
                   onChange={(e) => setBroadcastSubject(e.target.value)}
                   placeholder="e.g. Exclusive Friday Announcement"
                   required
-                  className="w-full px-3 py-1.5 rounded-md border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-xs text-[#11140F] dark:text-white placeholder:text-[#11140F]/40 dark:placeholder:text-white/35 focus:outline-none focus:border-[#34D399]"
                 />
               </div>
 
@@ -1889,19 +1889,19 @@ export default function CustomerMailingListManager({
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-xs font-medium text-[#11140F] dark:text-white/90">Email Body (HTML &amp; Rich Text) *</label>
-                  <div className="flex items-center gap-1 text-[11px] text-[#11140F]/50">
+                  <div className="flex items-center gap-1 text-[11px] text-[#11140F]/55 dark:text-white/50">
                     <span>Tags:</span>
                     <button
                       type="button"
                       onClick={() => insertSnippet('{{first_name}}')}
-                      className="px-1.5 py-0.5 rounded bg-gray-100 hover:bg-gray-200 text-[#11140F] font-mono text-[10px]"
+                      className="px-1.5 py-0.5 rounded bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[#11140F] dark:text-white font-mono text-[10px] cursor-pointer"
                     >
                       +First Name
                     </button>
                     <button
                       type="button"
                       onClick={() => insertSnippet('{{list_name}}')}
-                      className="px-1.5 py-0.5 rounded bg-gray-100 hover:bg-gray-200 text-[#11140F] font-mono text-[10px]"
+                      className="px-1.5 py-0.5 rounded bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[#11140F] dark:text-white font-mono text-[10px] cursor-pointer"
                     >
                       +List Name
                     </button>
@@ -1909,11 +1909,11 @@ export default function CustomerMailingListManager({
                 </div>
 
                 {/* Toolbar Controls */}
-                <div className="flex flex-wrap items-center gap-1 p-1.5 bg-[#F7F8F5] border border-b-0 border-[#11140F]/15 rounded-t-md text-xs">
+                <div className="flex flex-wrap items-center gap-1 p-1.5 bg-[#F7F8F5] dark:bg-white/[0.04] border border-b-0 border-[#11140F]/15 dark:border-white/15 rounded-t-xl text-xs">
                   <button
                     type="button"
                     onClick={() => insertSnippet('<strong>', '</strong>', 'bold text')}
-                    className="p-1 rounded hover:bg-white text-[#11140F] transition-colors"
+                    className="p-1.5 rounded hover:bg-white dark:hover:bg-white/10 text-[#11140F] dark:text-white transition-colors cursor-pointer"
                     title="Bold"
                   >
                     <Bold className="w-3.5 h-3.5" />
@@ -1921,7 +1921,7 @@ export default function CustomerMailingListManager({
                   <button
                     type="button"
                     onClick={() => insertSnippet('<em>', '</em>', 'italic text')}
-                    className="p-1 rounded hover:bg-white text-[#11140F] transition-colors"
+                    className="p-1.5 rounded hover:bg-white dark:hover:bg-white/10 text-[#11140F] dark:text-white transition-colors cursor-pointer"
                     title="Italic"
                   >
                     <Italic className="w-3.5 h-3.5" />
@@ -1929,13 +1929,13 @@ export default function CustomerMailingListManager({
                   <button
                     type="button"
                     onClick={() => insertSnippet('<u>', '</u>', 'underlined text')}
-                    className="p-1 rounded hover:bg-white text-[#11140F] transition-colors"
+                    className="p-1.5 rounded hover:bg-white dark:hover:bg-white/10 text-[#11140F] dark:text-white transition-colors cursor-pointer"
                     title="Underline"
                   >
                     <UnderlineIcon className="w-3.5 h-3.5" />
                   </button>
 
-                  <span className="w-px h-4 bg-[#11140F]/10 mx-0.5" />
+                  <span className="w-px h-4 bg-[#11140F]/10 dark:bg-white/15 mx-0.5" />
 
                   <button
                     type="button"
@@ -1946,7 +1946,7 @@ export default function CustomerMailingListManager({
                         'Section Heading'
                       )
                     }
-                    className="p-1 rounded hover:bg-white text-[#11140F] transition-colors font-bold text-[11px]"
+                    className="p-1.5 rounded hover:bg-white dark:hover:bg-white/10 text-[#11140F] dark:text-white transition-colors font-bold text-[11px] cursor-pointer"
                     title="Heading 2"
                   >
                     <Heading2 className="w-3.5 h-3.5" />
@@ -1960,13 +1960,13 @@ export default function CustomerMailingListManager({
                         'Subheading'
                       )
                     }
-                    className="p-1 rounded hover:bg-white text-[#11140F] transition-colors font-bold text-[11px]"
+                    className="p-1.5 rounded hover:bg-white dark:hover:bg-white/10 text-[#11140F] dark:text-white transition-colors font-bold text-[11px] cursor-pointer"
                     title="Heading 3"
                   >
                     <Heading3 className="w-3.5 h-3.5" />
                   </button>
 
-                  <span className="w-px h-4 bg-[#11140F]/10 mx-0.5" />
+                  <span className="w-px h-4 bg-[#11140F]/10 dark:bg-white/15 mx-0.5" />
 
                   <button
                     type="button"
@@ -1979,7 +1979,7 @@ export default function CustomerMailingListManager({
                         );
                       }
                     }}
-                    className="p-1 rounded hover:bg-white text-[#11140F] transition-colors"
+                    className="p-1.5 rounded hover:bg-white dark:hover:bg-white/10 text-[#11140F] dark:text-white transition-colors cursor-pointer"
                     title="Insert Link"
                   >
                     <LinkIcon className="w-3.5 h-3.5" />
@@ -1996,7 +1996,7 @@ export default function CustomerMailingListManager({
                         );
                       }
                     }}
-                    className="p-1 rounded hover:bg-white text-[#11140F] transition-colors"
+                    className="p-1.5 rounded hover:bg-white dark:hover:bg-white/10 text-[#11140F] dark:text-white transition-colors cursor-pointer"
                     title="Insert Image"
                   >
                     <ImageIcon className="w-3.5 h-3.5" />
@@ -2011,7 +2011,7 @@ export default function CustomerMailingListManager({
                         `<div style="text-align:center;margin:20px 0;"><a href="${url}" style="background:#11140F;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:6px;font-size:13px;font-weight:600;display:inline-block;">${text}</a></div>`
                       );
                     }}
-                    className="p-1 rounded hover:bg-white text-[#11140F] transition-colors flex items-center gap-1 text-[11px]"
+                    className="p-1.5 rounded hover:bg-white dark:hover:bg-white/10 text-[#11140F] dark:text-white transition-colors flex items-center gap-1 text-[11px] cursor-pointer"
                     title="Insert CTA Button"
                   >
                     <MousePointerClick className="w-3.5 h-3.5" />
@@ -2025,7 +2025,7 @@ export default function CustomerMailingListManager({
                         '<ul style="margin:12px 0;padding-left:20px;color:#374151;">\n  <li>First point</li>\n  <li>Second point</li>\n</ul>\n'
                       )
                     }
-                    className="p-1 rounded hover:bg-white text-[#11140F] transition-colors"
+                    className="p-1.5 rounded hover:bg-white dark:hover:bg-white/10 text-[#11140F] dark:text-white transition-colors cursor-pointer"
                     title="Bullet List"
                   >
                     <ListIcon className="w-3.5 h-3.5" />
@@ -2036,7 +2036,7 @@ export default function CustomerMailingListManager({
                     onClick={() =>
                       insertSnippet('\n<hr style="border:none;border-top:1px solid #e5e7eb;margin:18px 0;" />\n')
                     }
-                    className="p-1 rounded hover:bg-white text-[#11140F] transition-colors"
+                    className="p-1.5 rounded hover:bg-white dark:hover:bg-white/10 text-[#11140F] dark:text-white transition-colors cursor-pointer"
                     title="Divider"
                   >
                     <Minus className="w-3.5 h-3.5" />
@@ -2050,27 +2050,27 @@ export default function CustomerMailingListManager({
                   onChange={(e) => setBroadcastBody(e.target.value)}
                   placeholder="Hello {{first_name}},\n\nWrite your announcement or promo here..."
                   required
-                  className="w-full px-3 py-2 rounded-b-md border border-[#11140F]/15 text-xs font-mono text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2.5 rounded-b-xl border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-xs font-mono text-[#11140F] dark:text-white placeholder:text-[#11140F]/40 dark:placeholder:text-white/35 focus:outline-none focus:border-[#34D399]"
                 />
               </div>
 
               {/* Branding notification */}
-              <div className="p-2.5 rounded-md bg-gray-50 border border-gray-200 text-[11px] text-gray-600">
-                Email footer includes <strong>Powered by Dynamic QR</strong> (clickable to main site) and your business unsubscribe link.
+              <div className="p-3 rounded-xl bg-[#F7F8F5] dark:bg-white/[0.03] border border-[#11140F]/10 dark:border-white/[0.08] text-[11px] text-[#11140F]/65 dark:text-white/60">
+                Email footer includes <strong className="text-[#11140F] dark:text-white">Powered by Dynamic QR</strong> and your unsubscribe link.
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-1 border-t border-[#11140F]/10">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#11140F]/10 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setShowBroadcastModal(false)}
-                  className="px-3 py-1.5 text-xs font-medium text-[#11140F]/60 hover:text-[#11140F]"
+                  className="px-3.5 py-2 text-xs font-medium text-[#11140F]/65 dark:text-white/65 hover:text-[#11140F] dark:hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={broadcasting}
-                  className="px-4 py-1.5 rounded-md bg-[#2F6B4F] text-white text-xs font-medium hover:bg-[#25553E] transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-[#34D399] hover:bg-[#34D399]/90 text-[#09110D] text-xs font-bold transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer shadow-xs"
                 >
                   {broadcasting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                   <span>{broadcasting ? 'Sending...' : 'Send Broadcast via Gmail'}</span>
@@ -2078,30 +2078,30 @@ export default function CustomerMailingListManager({
               </div>
             </form>
 
-            {/* Live Preview Panel */}
+            {/* Live Preview Panel (Keep actual email canvas white for realistic inbox rendering) */}
             {showPreview && (
-              <div className="rounded-lg border border-[#11140F]/15 bg-gray-100 p-4 space-y-3">
-                <div className="flex items-center justify-between text-xs text-[#11140F]/60">
-                  <span className="font-semibold text-[#11140F]">Live Email Preview:</span>
-                  <div className="flex items-center gap-1 bg-white p-0.5 rounded-md border border-[#11140F]/10">
+              <div className="rounded-2xl border border-[#11140F]/15 dark:border-white/12 bg-gray-100 dark:bg-white/[0.04] p-4 space-y-3">
+                <div className="flex items-center justify-between text-xs text-[#11140F]/60 dark:text-white/60">
+                  <span className="font-semibold text-[#11140F] dark:text-white">Live Email Preview:</span>
+                  <div className="flex items-center gap-1 bg-white dark:bg-black/40 p-0.5 rounded-lg border border-[#11140F]/10 dark:border-white/10">
                     <button
                       type="button"
                       onClick={() => setPreviewDevice('desktop')}
-                      className={`p-1 rounded ${previewDevice === 'desktop' ? 'bg-[#11140F] text-white' : 'text-[#11140F]/60'}`}
+                      className={`p-1 rounded cursor-pointer ${previewDevice === 'desktop' ? 'bg-[#34D399] text-[#09110D]' : 'text-[#11140F]/60 dark:text-white/60'}`}
                     >
                       <Monitor className="w-3.5 h-3.5" />
                     </button>
                     <button
                       type="button"
                       onClick={() => setPreviewDevice('mobile')}
-                      className={`p-1 rounded ${previewDevice === 'mobile' ? 'bg-[#11140F] text-white' : 'text-[#11140F]/60'}`}
+                      className={`p-1 rounded cursor-pointer ${previewDevice === 'mobile' ? 'bg-[#34D399] text-[#09110D]' : 'text-[#11140F]/60 dark:text-white/60'}`}
                     >
                       <Smartphone className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
 
-                <div className={`mx-auto bg-white rounded-md border border-gray-200 shadow-xs p-4 overflow-hidden text-xs leading-relaxed ${previewDevice === 'mobile' ? 'max-w-xs' : 'w-full'}`}>
+                <div className={`mx-auto bg-white rounded-xl border border-gray-200 shadow-xs p-4 overflow-hidden text-xs leading-relaxed ${previewDevice === 'mobile' ? 'max-w-xs' : 'w-full'}`}>
                   <div className="font-bold text-sm text-[#11140F] pb-2 border-b border-gray-100">
                     {broadcastSubject ? broadcastSubject.replace('{{first_name}}', 'Alex').replace('{{list_name}}', selectedList.name) : 'Subject line preview...'}
                   </div>
@@ -2136,17 +2136,17 @@ export default function CustomerMailingListManager({
 
       {/* Modal: Interactive Embed Widget Studio */}
       {showEmbedModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-          <div className="w-full max-w-2xl bg-white rounded-lg p-5 shadow-xl border border-[#11140F]/15 space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-[#11140F]/10">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs">
+          <div className="w-full max-w-2xl bg-white dark:bg-[#101211] text-[#11140F] dark:text-white rounded-2xl p-5 sm:p-6 shadow-2xl border border-[#11140F]/15 dark:border-white/12 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#11140F]/10 dark:border-white/10">
               <h4 className="text-sm font-bold text-[#11140F] dark:text-white flex items-center gap-1.5">
-                <Code className="w-4 h-4 text-[#2F6B4F]" />
+                <Code className="w-4 h-4 text-[#34D399]" />
                 Embeddable Subscriber Form
               </h4>
               <button
                 type="button"
                 onClick={() => setShowEmbedModal(false)}
-                className="text-[#11140F]/40 hover:text-[#11140F]"
+                className="text-[#11140F]/45 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -2161,40 +2161,40 @@ export default function CustomerMailingListManager({
               <button
                 type="button"
                 onClick={() => setEmbedStyle('inline')}
-                className={`p-2.5 rounded-md border text-left transition-all cursor-pointer ${
+                className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                   embedStyle === 'inline'
-                    ? 'border-[#2F6B4F] bg-[#2F6B4F]/5'
-                    : 'border-[#11140F]/10 hover:bg-[#F7F8F5]'
+                    ? 'border-[#34D399] bg-emerald-500/10'
+                    : 'border-[#11140F]/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/[0.04]'
                 }`}
               >
-                <span className="block text-xs font-bold text-[#11140F]">1. Inline Box</span>
-                <span className="text-[10px] text-[#11140F]/50">Blog footers &amp; sidebars</span>
+                <span className="block text-xs font-bold text-[#11140F] dark:text-white">1. Inline Box</span>
+                <span className="text-[10px] text-[#11140F]/50 dark:text-white/50">Blog footers &amp; sidebars</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setEmbedStyle('floating_pill')}
-                className={`p-2.5 rounded-md border text-left transition-all cursor-pointer ${
+                className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                   embedStyle === 'floating_pill'
-                    ? 'border-[#2F6B4F] bg-[#2F6B4F]/5'
-                    : 'border-[#11140F]/10 hover:bg-[#F7F8F5]'
+                    ? 'border-[#34D399] bg-emerald-500/10'
+                    : 'border-[#11140F]/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/[0.04]'
                 }`}
               >
-                <span className="block text-xs font-bold text-[#11140F]">2. Floating Pill</span>
-                <span className="text-[10px] text-[#11140F]/50">Fixed corner popup</span>
+                <span className="block text-xs font-bold text-[#11140F] dark:text-white">2. Floating Pill</span>
+                <span className="text-[10px] text-[#11140F]/50 dark:text-white/50">Fixed corner popup</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setEmbedStyle('minimal')}
-                className={`p-2.5 rounded-md border text-left transition-all cursor-pointer ${
+                className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                   embedStyle === 'minimal'
-                    ? 'border-[#2F6B4F] bg-[#2F6B4F]/5'
-                    : 'border-[#11140F]/10 hover:bg-[#F7F8F5]'
+                    ? 'border-[#34D399] bg-emerald-500/10'
+                    : 'border-[#11140F]/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/[0.04]'
                 }`}
               >
-                <span className="block text-xs font-bold text-[#11140F]">3. Minimal Button</span>
-                <span className="text-[10px] text-[#11140F]/50">Direct link to hosted form</span>
+                <span className="block text-xs font-bold text-[#11140F] dark:text-white">3. Minimal Button</span>
+                <span className="text-[10px] text-[#11140F]/50 dark:text-white/50">Direct link to hosted form</span>
               </button>
             </div>
 
@@ -2204,7 +2204,7 @@ export default function CustomerMailingListManager({
                 readOnly
                 rows={6}
                 value={embedCodeSnippet}
-                className="w-full px-3 py-2 rounded-md bg-[#11140F] text-emerald-400 font-mono text-xs focus:outline-none"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-[#0A0E0C] border border-white/10 text-[#34D399] font-mono text-xs focus:outline-none"
               />
               <button
                 type="button"
@@ -2213,18 +2213,18 @@ export default function CustomerMailingListManager({
                   setCopiedEmbed(true);
                   setTimeout(() => setCopiedEmbed(false), 2000);
                 }}
-                className="absolute top-2.5 right-2.5 px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-white text-[11px] font-semibold transition-colors flex items-center gap-1"
+                className="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[11px] font-semibold transition-colors flex items-center gap-1 cursor-pointer"
               >
                 <Copy className="w-3 h-3" />
                 <span>{copiedEmbed ? 'Copied!' : 'Copy Snippet'}</span>
               </button>
             </div>
 
-            <div className="flex justify-end pt-2 border-t border-[#11140F]/10">
+            <div className="flex justify-end pt-3 border-t border-[#11140F]/10 dark:border-white/10">
               <button
                 type="button"
                 onClick={() => setShowEmbedModal(false)}
-                className="px-4 py-1.5 rounded-md bg-[#11140F] text-white text-xs font-medium hover:bg-[#2A2E25]"
+                className="px-4 py-2 rounded-xl bg-[#34D399] text-[#09110D] text-xs font-bold hover:opacity-90 cursor-pointer"
               >
                 Done
               </button>

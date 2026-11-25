@@ -76,14 +76,14 @@ export default function DeleteConfirmModal({
               onConfirmDelete();
               onClose();
             }}
-            className="w-full rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-[13px] font-medium text-red-600 hover:bg-red-100 transition-colors"
+            className="w-full rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2.5 text-[13px] font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 transition-colors cursor-pointer"
           >
             Permanently delete
           </button>
 
           <button
             onClick={onClose}
-            className="w-full rounded-xl border border-[#11140F]/15 bg-white px-4 py-2 text-[13px] font-medium text-[#11140F]/70 hover:bg-white/80 transition-colors"
+            className="w-full rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/5 px-4 py-2 text-[13px] font-medium text-[#11140F]/75 dark:text-white/80 hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
           >
             Cancel
           </button>

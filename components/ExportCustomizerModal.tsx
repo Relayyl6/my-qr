@@ -470,13 +470,13 @@ export default function ExportCustomizerModal({
             </div>
 
             {/* 2. Detail Toggles */}
-            <div className="space-y-2.5 p-4 rounded-2xl bg-[#11140F]/[0.02] border border-[#11140F]/10">
-              <span className="text-[11.5px] uppercase font-bold tracking-wider text-[#11140F]/60 block">
+            <div className="space-y-2.5 p-4 rounded-2xl bg-[#11140F]/[0.02] dark:bg-white/[0.03] border border-[#11140F]/10 dark:border-white/10">
+              <span className="text-[11.5px] uppercase font-bold tracking-wider text-[#11140F]/60 dark:text-white/60 block">
                 2. Edit Out Unneeded Details:
               </span>
 
               <div className="space-y-2">
-                <label className="flex items-center justify-between text-[12.5px] font-medium text-[#11140F] cursor-pointer">
+                <label className="flex items-center justify-between text-[12.5px] font-medium text-[#11140F] dark:text-white cursor-pointer">
                   <span>Display Title / Label</span>
                   <input
                     type="checkbox"
@@ -493,11 +493,11 @@ export default function ExportCustomizerModal({
                     value={customTitle}
                     onChange={(e) => setCustomTitle(e.target.value)}
                     placeholder="Enter custom title"
-                    className="w-full text-[12px] p-2 rounded-lg border border-[#11140F]/15 outline-none focus:border-emerald-600 font-medium"
+                    className="w-full text-[12px] p-2 rounded-lg border border-[#11140F]/15 dark:border-white/12 bg-white dark:bg-black/40 text-[#11140F] dark:text-white placeholder:text-[#11140F]/40 dark:placeholder:text-white/30 outline-none focus:border-emerald-600 dark:focus:border-[#34D399] font-medium"
                   />
                 )}
 
-                <label className="flex items-center justify-between text-[12.5px] font-medium text-[#11140F] cursor-pointer">
+                <label className="flex items-center justify-between text-[12.5px] font-medium text-[#11140F] dark:text-white cursor-pointer">
                   <span>Display Short Code (<code>/{shortCode}</code>)</span>
                   <input
                     type="checkbox"
@@ -508,7 +508,7 @@ export default function ExportCustomizerModal({
                   />
                 </label>
 
-                <label className="flex items-center justify-between text-[12.5px] font-medium text-[#11140F] cursor-pointer">
+                <label className="flex items-center justify-between text-[12.5px] font-medium text-[#11140F] dark:text-white cursor-pointer">
                   <span>Display Destination URL Pill</span>
                   <input
                     type="checkbox"
@@ -519,7 +519,7 @@ export default function ExportCustomizerModal({
                   />
                 </label>
 
-                <label className="flex items-center justify-between text-[12.5px] font-medium text-[#11140F] cursor-pointer">
+                <label className="flex items-center justify-between text-[12.5px] font-medium text-[#11140F] dark:text-white cursor-pointer">
                   <span>Display "SCAN WITH CAMERA" Helper</span>
                   <input
                     type="checkbox"
@@ -530,11 +530,11 @@ export default function ExportCustomizerModal({
                   />
                 </label>
 
-                <label className="flex items-center justify-between text-[12.5px] font-medium text-[#11140F] cursor-pointer">
+                <label className="flex items-center justify-between text-[12.5px] font-medium text-[#11140F] dark:text-white cursor-pointer">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <span>Display "DynamicQR" Watermark Branding</span>
                     {!canWhiteLabel && (
-                      <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-purple-100 text-purple-800 font-bold">
+                      <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-purple-100 dark:bg-purple-500/20 text-purple-800 dark:text-purple-300 font-bold">
                         Plus for 100% White-Label
                       </span>
                     )}
@@ -554,7 +554,7 @@ export default function ExportCustomizerModal({
                   />
                 </label>
 
-                <label className="flex items-center justify-between text-[12.5px] font-medium text-[#11140F] cursor-pointer">
+                <label className="flex items-center justify-between text-[12.5px] font-medium text-[#11140F] dark:text-white cursor-pointer">
                   <span>Display Outer Frame / Card Border</span>
                   <input
                     type="checkbox"
@@ -568,12 +568,12 @@ export default function ExportCustomizerModal({
             </div>
 
             {/* 3. Background Transparency */}
-            <div className="p-3.5 rounded-2xl bg-[#11140F]/[0.02] border border-[#11140F]/10 flex items-center justify-between">
+            <div className="p-3.5 rounded-2xl bg-[#11140F]/[0.02] dark:bg-white/[0.03] border border-[#11140F]/10 dark:border-white/10 flex items-center justify-between">
               <div>
-                <span className="text-[12.5px] font-bold text-[#11140F] block">
+                <span className="text-[12.5px] font-bold text-[#11140F] dark:text-white block">
                   Transparent Background (PNG)
                 </span>
-                <span className="text-[11px] text-[#11140F]/55">
+                <span className="text-[11px] text-[#11140F]/55 dark:text-white/55">
                   Ideal for Canva, Photoshop, packaging & flyer overlays
                 </span>
               </div>
@@ -587,13 +587,13 @@ export default function ExportCustomizerModal({
           </div>
 
           {/* Right Column: Live Real-Time Canvas Preview */}
-          <div className="md:col-span-6 flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-100 border border-slate-200">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">
+          <div className="md:col-span-6 flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-100 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-white/50 mb-2">
               Live Export Preview ({layoutMode}):
             </span>
 
             <div
-              className={`max-w-full rounded-2xl shadow-lg overflow-hidden border border-slate-300 p-2 ${
+              className={`max-w-full rounded-2xl shadow-lg overflow-hidden border border-slate-300 dark:border-white/15 p-2 ${
                 isTransparent ? 'bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:12px_12px] bg-slate-50' : 'bg-white'
               }`}
             >
@@ -603,15 +603,15 @@ export default function ExportCustomizerModal({
               />
             </div>
 
-            <div className="mt-3 text-center text-[11px] text-slate-500 font-mono">
+            <div className="mt-3 text-center text-[11px] text-slate-500 dark:text-white/50 font-mono">
               300 DPI &middot; Level H (30% error correction active)
             </div>
           </div>
         </div>
 
         {/* Footer Actions */}
-        <div className="pt-3 border-t border-[#11140F]/10 flex flex-wrap items-center justify-between gap-3 shrink-0">
-          <div className="flex items-center gap-1.5 text-[12px] text-[#11140F]/60">
+        <div className="pt-3 border-t border-[#11140F]/10 dark:border-white/10 flex flex-wrap items-center justify-between gap-3 shrink-0">
+          <div className="flex items-center gap-1.5 text-[12px] text-[#11140F]/60 dark:text-white/55">
             <span>Tight die-cut asset ready for download.</span>
           </div>
 
@@ -619,12 +619,12 @@ export default function ExportCustomizerModal({
             <button
               type="button"
               onClick={handlePrintTightPdf}
-              className="px-3.5 py-2 rounded-xl border border-[#11140F]/15 bg-white text-[#11140F] text-[12.5px] font-semibold hover:bg-[#EEF0EA] transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              className="px-3.5 py-2 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.05] text-[#11140F] dark:text-white text-[12.5px] font-semibold hover:bg-[#EEF0EA] dark:hover:bg-white/10 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
             >
-              <Printer className="w-3.5 h-3.5 text-[#2F6B4F]" />
+              <Printer className="w-3.5 h-3.5 text-[#34D399]" />
               <span>Save Tight PDF</span>
               {!canPrintPdf && (
-                <span className="text-[9.5px] font-mono px-1.5 py-0.2 rounded bg-purple-100 text-purple-800 font-bold uppercase">
+                <span className="text-[9.5px] font-mono px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 font-bold uppercase">
                   Plus
                 </span>
               )}
@@ -633,12 +633,12 @@ export default function ExportCustomizerModal({
             <button
               type="button"
               onClick={handleDownloadSvg}
-              className="px-3.5 py-2 rounded-xl border border-[#11140F]/15 bg-white text-[#11140F] text-[12.5px] font-semibold hover:bg-[#EEF0EA] transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              className="px-3.5 py-2 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.05] text-[#11140F] dark:text-white text-[12.5px] font-semibold hover:bg-[#EEF0EA] dark:hover:bg-white/10 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
             >
-              <FileCode className="w-3.5 h-3.5 text-[#2F6B4F]" />
+              <FileCode className="w-3.5 h-3.5 text-[#34D399]" />
               <span>Vector SVG</span>
               {!canExportSvg && (
-                <span className="text-[9.5px] font-mono px-1.5 py-0.2 rounded bg-purple-100 text-purple-800 font-bold uppercase">
+                <span className="text-[9.5px] font-mono px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 font-bold uppercase">
                   Plus
                 </span>
               )}
@@ -647,9 +647,9 @@ export default function ExportCustomizerModal({
             <button
               type="button"
               onClick={handleDownloadPng}
-              className="px-4 py-2 rounded-xl bg-[#11140F] text-white text-[12.5px] font-semibold hover:bg-[#2A2E25] transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
+              className="px-4 py-2 rounded-xl bg-[#34D399] hover:bg-[#34D399]/90 text-[#09110D] text-[12.5px] font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
             >
-              <Download className="w-3.5 h-3.5 text-emerald-400" />
+              <Download className="w-3.5 h-3.5" />
               <span>Download {tier === 'free' ? 'Standard PNG' : '300 DPI PNG'}</span>
             </button>
           </div>

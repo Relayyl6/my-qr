@@ -16,7 +16,7 @@ function SubmitBtn({ isLogin }: { isLogin: boolean }) {
     <button
       type="submit"
       disabled={pending}
-      className="w-full rounded-xl bg-[#11140F] px-4 py-3 text-[14px] font-medium text-white transition-colors hover:bg-[#2A2E25] disabled:opacity-50"
+      className="w-full rounded-xl bg-[#11140F] dark:bg-[#34D399] px-4 py-3 text-[14px] font-semibold text-white dark:text-[#09110D] transition-colors hover:bg-[#2A2E25] dark:hover:bg-[#2EC28A] disabled:opacity-50"
     >
       {pending ? (isLogin ? 'Signing in…' : 'Creating account…') : isLogin ? 'Sign in' : 'Create account'}
     </button>
@@ -58,20 +58,20 @@ export default function AuthModal({ isOpen, onClose, defaultTab = 'login' }: Pro
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm transition-opacity animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-sm rounded-2xl border border-[#11140F]/15 bg-[#EEF0EA] p-6 sm:p-7 shadow-2xl space-y-5 animate-in zoom-in-95 duration-200"
+        className="relative w-full max-w-sm rounded-3xl border border-[#11140F]/15 dark:border-white/12 bg-white dark:bg-[#101211] p-6 sm:p-7 shadow-2xl space-y-5 animate-in zoom-in-95 duration-200 text-[#11140F] dark:text-white"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Tab switcher */}
-        <div className="flex rounded-xl bg-[#11140F]/5 p-1">
+        <div className="flex rounded-2xl bg-[#11140F]/5 dark:bg-white/[0.05] p-1 border border-transparent dark:border-white/[0.06]">
           <button
             type="button"
             onClick={() => setTab('login')}
-            className={`flex-1 rounded-lg py-2 text-xs font-medium transition-colors ${
-              tab === 'login' ? 'bg-white text-[#11140F] shadow-sm' : 'text-[#11140F]/60 hover:text-[#11140F]'
+            className={`flex-1 rounded-xl py-2 text-xs font-semibold transition-colors cursor-pointer ${
+              tab === 'login' ? 'bg-white dark:bg-[#1A1E1C] text-[#11140F] dark:text-white shadow-sm' : 'text-[#11140F]/60 dark:text-white/55 hover:text-[#11140F] dark:hover:text-white'
             }`}
           >
             Log in
@@ -79,8 +79,8 @@ export default function AuthModal({ isOpen, onClose, defaultTab = 'login' }: Pro
           <button
             type="button"
             onClick={() => setTab('signup')}
-            className={`flex-1 rounded-lg py-2 text-xs font-medium transition-colors ${
-              tab === 'signup' ? 'bg-white text-[#11140F] shadow-sm' : 'text-[#11140F]/60 hover:text-[#11140F]'
+            className={`flex-1 rounded-xl py-2 text-xs font-semibold transition-colors cursor-pointer ${
+              tab === 'signup' ? 'bg-white dark:bg-[#1A1E1C] text-[#11140F] dark:text-white shadow-sm' : 'text-[#11140F]/60 dark:text-white/55 hover:text-[#11140F] dark:hover:text-white'
             }`}
           >
             Create account
@@ -88,10 +88,10 @@ export default function AuthModal({ isOpen, onClose, defaultTab = 'login' }: Pro
         </div>
 
         <div>
-          <h3 className="text-xl font-medium tracking-tight text-[#11140F]">
+          <h3 className="text-xl font-bold tracking-tight text-[#11140F] dark:text-white">
             {tab === 'login' ? 'Welcome back' : 'Start your DynamicQR workspace'}
           </h3>
-          <p className="text-xs text-[#11140F]/55 mt-1">
+          <p className="text-xs text-[#11140F]/55 dark:text-white/55 mt-1">
             {tab === 'login'
               ? 'Sign in to access your personal QR codes.'
               : 'Create a private account to manage your dynamic links.'}
@@ -99,7 +99,7 @@ export default function AuthModal({ isOpen, onClose, defaultTab = 'login' }: Pro
         </div>
 
         {activeState.message && (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-600 font-medium">
+          <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-600 dark:text-rose-400 font-medium">
             {activeState.message}
           </div>
         )}
@@ -107,41 +107,41 @@ export default function AuthModal({ isOpen, onClose, defaultTab = 'login' }: Pro
         <form action={tab === 'login' ? loginAction : signupAction} className="space-y-3.5">
           {tab === 'signup' && (
             <div>
-              <label className="block text-xs font-medium text-[#11140F]/70 mb-1">Name</label>
+              <label className="block text-xs font-medium text-[#11140F]/70 dark:text-white/75 mb-1">Name</label>
               <input
                 type="text"
                 name="name"
                 placeholder="Alex Morgan"
-                className="w-full rounded-xl border border-[#11140F]/15 bg-white px-3.5 py-2.5 text-sm text-[#11140F] placeholder:text-[#11140F]/30 outline-none focus:border-[#11140F]"
+                className="w-full rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 px-3.5 py-2.5 text-sm text-[#11140F] dark:text-white placeholder:text-[#11140F]/30 dark:placeholder:text-white/35 outline-none focus:border-[#34D399]"
               />
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-medium text-[#11140F]/70 mb-1">Email address</label>
+            <label className="block text-xs font-medium text-[#11140F]/70 dark:text-white/75 mb-1">Email address</label>
             <input
               type="email"
               name="email"
               required
               placeholder="alex@example.com"
-              className="w-full rounded-xl border border-[#11140F]/15 bg-white px-3.5 py-2.5 text-sm text-[#11140F] placeholder:text-[#11140F]/30 outline-none focus:border-[#11140F]"
+              className="w-full rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 px-3.5 py-2.5 text-sm text-[#11140F] dark:text-white placeholder:text-[#11140F]/30 dark:placeholder:text-white/35 outline-none focus:border-[#34D399]"
             />
             {signupState.errors?.email && (
-              <p className="mt-1 text-xs text-red-600">{signupState.errors.email[0]}</p>
+              <p className="mt-1 text-xs text-rose-500">{signupState.errors.email[0]}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-[#11140F]/70 mb-1">Password</label>
+            <label className="block text-xs font-medium text-[#11140F]/70 dark:text-white/75 mb-1">Password</label>
             <input
               type="password"
               name="password"
               required
               placeholder="••••••••"
-              className="w-full rounded-xl border border-[#11140F]/15 bg-white px-3.5 py-2.5 text-sm text-[#11140F] placeholder:text-[#11140F]/30 outline-none focus:border-[#11140F]"
+              className="w-full rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 px-3.5 py-2.5 text-sm text-[#11140F] dark:text-white placeholder:text-[#11140F]/30 dark:placeholder:text-white/35 outline-none focus:border-[#34D399]"
             />
             {signupState.errors?.password && (
-              <p className="mt-1 text-xs text-red-600">{signupState.errors.password[0]}</p>
+              <p className="mt-1 text-xs text-rose-500">{signupState.errors.password[0]}</p>
             )}
           </div>
 
@@ -152,7 +152,7 @@ export default function AuthModal({ isOpen, onClose, defaultTab = 'login' }: Pro
 
         <button
           onClick={onClose}
-          className="w-full text-center text-xs text-[#11140F]/45 hover:text-[#11140F] transition-colors"
+          className="w-full text-center text-xs text-[#11140F]/50 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white transition-colors cursor-pointer"
         >
           Cancel
         </button>

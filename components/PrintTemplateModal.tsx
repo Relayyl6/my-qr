@@ -467,16 +467,16 @@ export default function PrintTemplateModal({
             {/* Header */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-[#2F6B4F]/10 text-[#2F6B4F] flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-[#2F6B4F]/10 dark:bg-[#34D399]/15 text-[#2F6B4F] dark:text-[#34D399] flex items-center justify-center shrink-0">
                   <Printer className="w-4 h-4" />
                 </div>
                 <div>
                   <h3 className="font-bold text-[16px] sm:text-[17px] text-[#11140F] dark:text-white">Physical Print Studio</h3>
-                  <div className="flex items-center gap-1.5 text-[11px] text-emerald-700 font-medium">
+                  <div className="flex items-center gap-1.5 text-[11px] text-emerald-700 dark:text-[#34D399] font-medium">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     <span>Guaranteed 1-Page Output</span>
                     {canWhiteLabel && (
-                      <span className="ml-1 px-1.5 py-0.2 rounded bg-purple-100 text-purple-800 text-[10px] font-mono font-bold">
+                      <span className="ml-1 px-1.5 py-0.2 rounded bg-purple-100 dark:bg-purple-500/20 text-purple-800 dark:text-purple-300 text-[10px] font-mono font-bold">
                         100% White-Label
                       </span>
                     )}
@@ -485,7 +485,7 @@ export default function PrintTemplateModal({
               </div>
               <button
                 onClick={onClose}
-                className="text-[#11140F]/40 hover:text-[#11140F] p-1 rounded-lg transition-colors md:hidden"
+                className="text-[#11140F]/40 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white p-1 rounded-lg transition-colors md:hidden"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -493,8 +493,8 @@ export default function PrintTemplateModal({
 
             {/* Feature Guidance Banner */}
             {featureBannerText && (
-              <div className="p-3 rounded-2xl bg-[#2F6B4F]/10 border border-[#2F6B4F]/20 text-[11.5px] text-[#2F6B4F] leading-relaxed flex items-start gap-2.5">
-                <Sparkles className="w-4 h-4 shrink-0 text-[#2F6B4F] mt-0.5" />
+              <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-[11.5px] text-[#2F6B4F] dark:text-[#34D399] leading-relaxed flex items-start gap-2.5">
+                <Sparkles className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>{featureBannerText}</span>
               </div>
             )}
@@ -504,21 +504,21 @@ export default function PrintTemplateModal({
               <button
                 type="button"
                 onClick={() => setActiveTab('content')}
-                className={`flex-1 py-1.5 px-2 rounded-lg transition-all ${
+                className={`flex-1 py-1.5 px-2 rounded-lg transition-all cursor-pointer ${
                   activeTab === 'content'
                     ? 'bg-white dark:bg-white/15 text-[#11140F] dark:text-white shadow-xs font-semibold'
                     : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white'
                 }`}
               >
-                Layout & Text
+                Layout &amp; Text
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab('toggles')}
-                className={`flex-1 py-1.5 px-2 rounded-lg transition-all flex items-center justify-center gap-1 ${
+                className={`flex-1 py-1.5 px-2 rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer ${
                   activeTab === 'toggles'
-                    ? 'bg-white text-[#11140F] shadow-xs font-semibold'
-                    : 'text-[#11140F]/60 hover:text-[#11140F]'
+                    ? 'bg-white dark:bg-white/15 text-[#11140F] dark:text-white shadow-xs font-semibold'
+                    : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white'
                 }`}
               >
                 <SlidersHorizontal className="w-3 h-3" />
@@ -527,14 +527,14 @@ export default function PrintTemplateModal({
               <button
                 type="button"
                 onClick={() => setActiveTab('design')}
-                className={`flex-1 py-1.5 px-2 rounded-lg transition-all flex items-center justify-center gap-1 ${
+                className={`flex-1 py-1.5 px-2 rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer ${
                   activeTab === 'design'
-                    ? 'bg-white text-[#11140F] shadow-xs font-semibold'
-                    : 'text-[#11140F]/60 hover:text-[#11140F]'
+                    ? 'bg-white dark:bg-white/15 text-[#11140F] dark:text-white shadow-xs font-semibold'
+                    : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white'
                 }`}
               >
                 <Palette className="w-3 h-3" />
-                Colors & Logo
+                Colors &amp; Logo
               </button>
             </div>
 
@@ -543,7 +543,7 @@ export default function PrintTemplateModal({
               <div className="space-y-4">
                 {/* Format Selector */}
                 <div className="space-y-1.5">
-                  <label className="text-[11.5px] font-semibold text-[#11140F]/70 uppercase tracking-wider block">
+                  <label className="text-[11.5px] font-semibold text-[#11140F]/70 dark:text-white/70 uppercase tracking-wider block">
                     Choose Format
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -553,15 +553,15 @@ export default function PrintTemplateModal({
                         setTemplate('table-tent');
                         setHeaderTag('TABLE MENU & SPECIALS');
                       }}
-                      className={`p-2.5 rounded-xl border text-left flex flex-col gap-1 transition-all ${
+                      className={`p-2.5 rounded-xl border text-left flex flex-col gap-1 transition-all cursor-pointer ${
                         template === 'table-tent'
-                          ? 'border-[#11140F] bg-[#11140F] text-white shadow-xs'
-                          : 'border-[#11140F]/15 bg-white text-[#11140F] hover:bg-[#EEF0EA]'
+                          ? 'border-[#34D399] bg-[#34D399] text-[#09110D] shadow-xs'
+                          : 'border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.04] text-[#11140F] dark:text-white hover:bg-[#EEF0EA] dark:hover:bg-white/10'
                       }`}
                     >
                       <LayoutTemplate className="w-3.5 h-3.5 shrink-0" />
                       <div className="text-[11.5px] font-semibold">Table Tent</div>
-                      <div className={`text-[9.5px] ${template === 'table-tent' ? 'text-white/70' : 'text-[#11140F]/50'}`}>4" × 6"</div>
+                      <div className={`text-[9.5px] ${template === 'table-tent' ? 'text-[#09110D]/70' : 'text-[#11140F]/50 dark:text-white/50'}`}>4" × 6"</div>
                     </button>
 
                     <button
@@ -570,15 +570,15 @@ export default function PrintTemplateModal({
                         setTemplate('window-sign');
                         setHeaderTag('OFFICIAL SCAN POINT');
                       }}
-                      className={`p-2.5 rounded-xl border text-left flex flex-col gap-1 transition-all ${
+                      className={`p-2.5 rounded-xl border text-left flex flex-col gap-1 transition-all cursor-pointer ${
                         template === 'window-sign'
-                          ? 'border-[#11140F] bg-[#11140F] text-white shadow-xs'
-                          : 'border-[#11140F]/15 bg-white text-[#11140F] hover:bg-[#EEF0EA]'
+                          ? 'border-[#34D399] bg-[#34D399] text-[#09110D] shadow-xs'
+                          : 'border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.04] text-[#11140F] dark:text-white hover:bg-[#EEF0EA] dark:hover:bg-white/10'
                       }`}
                     >
                       <Store className="w-3.5 h-3.5 shrink-0" />
                       <div className="text-[11.5px] font-semibold">Window Sign</div>
-                      <div className={`text-[9.5px] ${template === 'window-sign' ? 'text-white/70' : 'text-[#11140F]/50'}`}>8" × 8"</div>
+                      <div className={`text-[9.5px] ${template === 'window-sign' ? 'text-[#09110D]/70' : 'text-[#11140F]/50 dark:text-white/50'}`}>8" × 8"</div>
                     </button>
 
                     <button
@@ -587,15 +587,15 @@ export default function PrintTemplateModal({
                         setTemplate('card-badge');
                         setHeaderTag('EVENT PASS');
                       }}
-                      className={`p-2.5 rounded-xl border text-left flex flex-col gap-1 transition-all ${
+                      className={`p-2.5 rounded-xl border text-left flex flex-col gap-1 transition-all cursor-pointer ${
                         template === 'card-badge'
-                          ? 'border-[#11140F] bg-[#11140F] text-white shadow-xs'
-                          : 'border-[#11140F]/15 bg-white text-[#11140F] hover:bg-[#EEF0EA]'
+                          ? 'border-[#34D399] bg-[#34D399] text-[#09110D] shadow-xs'
+                          : 'border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.04] text-[#11140F] dark:text-white hover:bg-[#EEF0EA] dark:hover:bg-white/10'
                       }`}
                     >
                       <CreditCard className="w-3.5 h-3.5 shrink-0" />
                       <div className="text-[11.5px] font-semibold">Badge Card</div>
-                      <div className={`text-[9.5px] ${template === 'card-badge' ? 'text-white/70' : 'text-[#11140F]/50'}`}>3.5" × 2"</div>
+                      <div className={`text-[9.5px] ${template === 'card-badge' ? 'text-[#09110D]/70' : 'text-[#11140F]/50 dark:text-white/50'}`}>3.5" × 2"</div>
                     </button>
 
                     <button
@@ -608,10 +608,10 @@ export default function PrintTemplateModal({
                         setTemplate('full-poster');
                         setHeaderTag('SCAN TO CONNECT');
                       }}
-                      className={`p-2.5 rounded-xl border text-left flex flex-col gap-1 transition-all relative ${
+                      className={`p-2.5 rounded-xl border text-left flex flex-col gap-1 transition-all relative cursor-pointer ${
                         template === 'full-poster'
-                          ? 'border-[#11140F] bg-[#11140F] text-white shadow-xs'
-                          : 'border-[#11140F]/15 bg-white text-[#11140F] hover:bg-[#EEF0EA]'
+                          ? 'border-[#34D399] bg-[#34D399] text-[#09110D] shadow-xs'
+                          : 'border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.04] text-[#11140F] dark:text-white hover:bg-[#EEF0EA] dark:hover:bg-white/10'
                       }`}
                     >
                       {!canWhiteLabel && (
@@ -631,9 +631,9 @@ export default function PrintTemplateModal({
                   {showHeaderTag && (
                     <div>
                       <div className="flex items-center justify-between mb-1">
-                        <label className="text-[11.5px] font-medium text-[#11140F]/70">Header Badge Tag</label>
+                        <label className="text-[11.5px] font-medium text-[#11140F]/70 dark:text-white/75">Header Badge Tag</label>
                         {!canWhiteLabel && (
-                          <span className="text-[10px] text-purple-700 flex items-center gap-0.5">
+                          <span className="text-[10px] text-purple-600 dark:text-purple-400 flex items-center gap-0.5">
                             <Lock className="w-2.5 h-2.5" /> Plus to customize
                           </span>
                         )}
@@ -643,31 +643,31 @@ export default function PrintTemplateModal({
                         disabled={!canWhiteLabel}
                         value={headerTag}
                         onChange={(e) => setHeaderTag(e.target.value.toUpperCase())}
-                        className="w-full px-3 py-2 text-[12.5px] border border-[#11140F]/15 rounded-xl outline-none focus:border-[#11140F] disabled:bg-[#EEF0EA]/50 disabled:opacity-75 font-mono"
+                        className="w-full px-3 py-2 text-[12.5px] border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-[#11140F] dark:text-white rounded-xl outline-none focus:border-[#34D399] disabled:opacity-60 font-mono"
                         placeholder="OFFICIAL SCAN POINT"
                       />
                     </div>
                   )}
 
                   <div>
-                    <label className="text-[11.5px] font-medium text-[#11140F]/70 block mb-1">Headline Text</label>
+                    <label className="text-[11.5px] font-medium text-[#11140F]/70 dark:text-white/75 block mb-1">Headline Text</label>
                     <input
                       type="text"
                       value={headline}
                       onChange={(e) => setHeadline(e.target.value)}
-                      className="w-full px-3 py-2 text-[12.5px] border border-[#11140F]/15 rounded-xl outline-none focus:border-[#11140F]"
+                      className="w-full px-3 py-2 text-[12.5px] border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-[#11140F] dark:text-white rounded-xl outline-none focus:border-[#34D399]"
                       placeholder="Scan for Menu"
                     />
                   </div>
 
                   {showSubline && (
                     <div>
-                      <label className="text-[11.5px] font-medium text-[#11140F]/70 block mb-1">Instruction Subline</label>
+                      <label className="text-[11.5px] font-medium text-[#11140F]/70 dark:text-white/75 block mb-1">Instruction Subline</label>
                       <input
                         type="text"
                         value={subline}
                         onChange={(e) => setSubline(e.target.value)}
-                        className="w-full px-3 py-2 text-[12.5px] border border-[#11140F]/15 rounded-xl outline-none focus:border-[#11140F]"
+                        className="w-full px-3 py-2 text-[12.5px] border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-[#11140F] dark:text-white rounded-xl outline-none focus:border-[#34D399]"
                         placeholder="Point your phone camera"
                       />
                     </div>
@@ -675,12 +675,12 @@ export default function PrintTemplateModal({
 
                   {showFooterNote && (
                     <div>
-                      <label className="text-[11.5px] font-medium text-[#11140F]/70 block mb-1">Footer Note</label>
+                      <label className="text-[11.5px] font-medium text-[#11140F]/70 dark:text-white/75 block mb-1">Footer Note</label>
                       <input
                         type="text"
                         value={footerNote}
                         onChange={(e) => setFooterNote(e.target.value)}
-                        className="w-full px-3 py-2 text-[12.5px] border border-[#11140F]/15 rounded-xl outline-none focus:border-[#11140F]"
+                        className="w-full px-3 py-2 text-[12.5px] border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-[#11140F] dark:text-white rounded-xl outline-none focus:border-[#34D399]"
                         placeholder="Powered by Dynamic QR"
                       />
                     </div>
@@ -692,27 +692,27 @@ export default function PrintTemplateModal({
             {/* TAB 2: Element Toggles (Removes Extra Stuff) */}
             {activeTab === 'toggles' && (
               <div className="space-y-3.5">
-                <div className="p-3 rounded-xl bg-[#F7F8F5] border border-[#11140F]/10 text-[12px] space-y-1">
-                  <div className="font-semibold text-[#11140F] flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                    Clean & Minimalist Print Customizer
+                <div className="p-3 rounded-xl bg-[#F7F8F5] dark:bg-white/[0.04] border border-[#11140F]/10 dark:border-white/10 text-[12px] space-y-1">
+                  <div className="font-semibold text-[#11140F] dark:text-white flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-[#34D399]" />
+                    Clean &amp; Minimalist Print Customizer
                   </div>
-                  <p className="text-[#11140F]/65 text-[11.5px]">
+                  <p className="text-[#11140F]/65 dark:text-white/60 text-[11.5px]">
                     Turn off extra labels to produce an ultra-minimal card containing only your QR code and title.
                   </p>
                 </div>
 
                 <div className="space-y-2">
-                  {/* Toggle 1: Header Tag ("OFFICIAL SCAN POINT") - White-label */}
-                  <div className="p-3 rounded-xl border border-[#11140F]/10 flex items-center justify-between gap-3 bg-white">
+                  {/* Toggle 1: Header Tag */}
+                  <div className="p-3 rounded-xl border border-[#11140F]/10 dark:border-white/10 flex items-center justify-between gap-3 bg-white dark:bg-white/[0.03]">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-[12.5px] font-semibold text-[#11140F]">Top Header Badge</span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-purple-100 text-purple-800 font-bold">
+                        <span className="text-[12.5px] font-semibold text-[#11140F] dark:text-white">Top Header Badge</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-purple-500/15 text-purple-600 dark:text-purple-300 font-bold">
                           Plus / White-Label
                         </span>
                       </div>
-                      <p className="text-[11px] text-[#11140F]/55">
+                      <p className="text-[11px] text-[#11140F]/55 dark:text-white/55">
                         Display or completely remove "OFFICIAL SCAN POINT"
                       </p>
                     </div>
@@ -721,12 +721,12 @@ export default function PrintTemplateModal({
                         type="checkbox"
                         checked={showHeaderTag}
                         onChange={(e) => setShowHeaderTag(e.target.checked)}
-                        className="w-4 h-4 accent-[#11140F] cursor-pointer"
+                        className="w-4 h-4 accent-[#34D399] cursor-pointer"
                       />
                     ) : (
                       <Link
                         href="/pricing"
-                        className="text-[11px] font-semibold text-purple-700 hover:underline flex items-center gap-1 shrink-0"
+                        className="text-[11px] font-semibold text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1 shrink-0"
                       >
                         <Lock className="w-3 h-3" />
                         Unlock
@@ -735,15 +735,15 @@ export default function PrintTemplateModal({
                   </div>
 
                   {/* Toggle 2: Instruction Subline */}
-                  <div className="p-3 rounded-xl border border-[#11140F]/10 flex items-center justify-between gap-3 bg-white">
+                  <div className="p-3 rounded-xl border border-[#11140F]/10 dark:border-white/10 flex items-center justify-between gap-3 bg-white dark:bg-white/[0.03]">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-[12.5px] font-semibold text-[#11140F]">Instruction Subline</span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 font-bold">
+                        <span className="text-[12.5px] font-semibold text-[#11140F] dark:text-white">Instruction Subline</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/15 text-[#2F6B4F] dark:text-[#34D399] font-bold">
                           Pro Feature
                         </span>
                       </div>
-                      <p className="text-[11px] text-[#11140F]/55">
+                      <p className="text-[11px] text-[#11140F]/55 dark:text-white/55">
                         "Point your camera at this code"
                       </p>
                     </div>
@@ -752,12 +752,12 @@ export default function PrintTemplateModal({
                         type="checkbox"
                         checked={showSubline}
                         onChange={(e) => setShowSubline(e.target.checked)}
-                        className="w-4 h-4 accent-[#11140F] cursor-pointer"
+                        className="w-4 h-4 accent-[#34D399] cursor-pointer"
                       />
                     ) : (
                       <Link
                         href="/pricing"
-                        className="text-[11px] font-semibold text-emerald-700 hover:underline flex items-center gap-1 shrink-0"
+                        className="text-[11px] font-semibold text-[#2F6B4F] dark:text-[#34D399] hover:underline flex items-center gap-1 shrink-0"
                       >
                         <Lock className="w-3 h-3" />
                         Pro Plan
@@ -766,15 +766,15 @@ export default function PrintTemplateModal({
                   </div>
 
                   {/* Toggle 3: Shortcode Slug Pill */}
-                  <div className="p-3 rounded-xl border border-[#11140F]/10 flex items-center justify-between gap-3 bg-white">
+                  <div className="p-3 rounded-xl border border-[#11140F]/10 dark:border-white/10 flex items-center justify-between gap-3 bg-white dark:bg-white/[0.03]">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-[12.5px] font-semibold text-[#11140F]">Short URL Badge</span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 font-bold">
+                        <span className="text-[12.5px] font-semibold text-[#11140F] dark:text-white">Short URL Badge</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/15 text-[#2F6B4F] dark:text-[#34D399] font-bold">
                           Pro Feature
                         </span>
                       </div>
-                      <p className="text-[11px] text-[#11140F]/55">
+                      <p className="text-[11px] text-[#11140F]/55 dark:text-white/55">
                         Bottom pill showing <code>/{shortCode}</code>
                       </p>
                     </div>
@@ -783,12 +783,12 @@ export default function PrintTemplateModal({
                         type="checkbox"
                         checked={showShortCode}
                         onChange={(e) => setShowShortCode(e.target.checked)}
-                        className="w-4 h-4 accent-[#11140F] cursor-pointer"
+                        className="w-4 h-4 accent-[#34D399] cursor-pointer"
                       />
                     ) : (
                       <Link
                         href="/pricing"
-                        className="text-[11px] font-semibold text-emerald-700 hover:underline flex items-center gap-1 shrink-0"
+                        className="text-[11px] font-semibold text-[#2F6B4F] dark:text-[#34D399] hover:underline flex items-center gap-1 shrink-0"
                       >
                         <Lock className="w-3 h-3" />
                         Pro Plan
@@ -797,15 +797,15 @@ export default function PrintTemplateModal({
                   </div>
 
                   {/* Toggle 4: Footer Note */}
-                  <div className="p-3 rounded-xl border border-[#11140F]/10 flex items-center justify-between gap-3 bg-white">
+                  <div className="p-3 rounded-xl border border-[#11140F]/10 dark:border-white/10 flex items-center justify-between gap-3 bg-white dark:bg-white/[0.03]">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-[12.5px] font-semibold text-[#11140F]">Footer Note</span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 font-bold">
+                        <span className="text-[12.5px] font-semibold text-[#11140F] dark:text-white">Footer Note</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/15 text-[#2F6B4F] dark:text-[#34D399] font-bold">
                           Pro Feature
                         </span>
                       </div>
-                      <p className="text-[11px] text-[#11140F]/55">
+                      <p className="text-[11px] text-[#11140F]/55 dark:text-white/55">
                         "Powered by Dynamic QR"
                       </p>
                     </div>
@@ -814,12 +814,12 @@ export default function PrintTemplateModal({
                         type="checkbox"
                         checked={showFooterNote}
                         onChange={(e) => setShowFooterNote(e.target.checked)}
-                        className="w-4 h-4 accent-[#11140F] cursor-pointer"
+                        className="w-4 h-4 accent-[#34D399] cursor-pointer"
                       />
                     ) : (
                       <Link
                         href="/pricing"
-                        className="text-[11px] font-semibold text-emerald-700 hover:underline flex items-center gap-1 shrink-0"
+                        className="text-[11px] font-semibold text-[#2F6B4F] dark:text-[#34D399] hover:underline flex items-center gap-1 shrink-0"
                       >
                         <Lock className="w-3 h-3" />
                         Pro Plan
@@ -828,15 +828,15 @@ export default function PrintTemplateModal({
                   </div>
 
                   {/* Toggle 5: Outer Border */}
-                  <div className="p-3 rounded-xl border border-[#11140F]/10 flex items-center justify-between gap-3 bg-white">
+                  <div className="p-3 rounded-xl border border-[#11140F]/10 dark:border-white/10 flex items-center justify-between gap-3 bg-white dark:bg-white/[0.03]">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-[12.5px] font-semibold text-[#11140F]">Card Outer Border</span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 font-bold">
+                        <span className="text-[12.5px] font-semibold text-[#11140F] dark:text-white">Card Outer Border</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/15 text-[#2F6B4F] dark:text-[#34D399] font-bold">
                           Pro Feature
                         </span>
                       </div>
-                      <p className="text-[11px] text-[#11140F]/55">
+                      <p className="text-[11px] text-[#11140F]/55 dark:text-white/55">
                         Draw outline around card or leave frameless
                       </p>
                     </div>
@@ -845,12 +845,12 @@ export default function PrintTemplateModal({
                         type="checkbox"
                         checked={showBorder}
                         onChange={(e) => setShowBorder(e.target.checked)}
-                        className="w-4 h-4 accent-[#11140F] cursor-pointer"
+                        className="w-4 h-4 accent-[#34D399] cursor-pointer"
                       />
                     ) : (
                       <Link
                         href="/pricing"
-                        className="text-[11px] font-semibold text-emerald-700 hover:underline flex items-center gap-1 shrink-0"
+                        className="text-[11px] font-semibold text-[#2F6B4F] dark:text-[#34D399] hover:underline flex items-center gap-1 shrink-0"
                       >
                         <Lock className="w-3 h-3" />
                         Pro Plan
@@ -867,11 +867,11 @@ export default function PrintTemplateModal({
                 {/* Brand Colors */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-[11.5px] font-semibold text-[#11140F]/70 uppercase tracking-wider block">
+                    <label className="text-[11.5px] font-semibold text-[#11140F]/70 dark:text-white/75 uppercase tracking-wider block">
                       Brand Accent Color
                     </label>
                     {!canCustomizeElements && (
-                      <span className="text-[10px] text-emerald-700 flex items-center gap-0.5">
+                      <span className="text-[10px] text-[#2F6B4F] dark:text-[#34D399] flex items-center gap-0.5">
                         <Lock className="w-2.5 h-2.5" /> Pro Feature
                       </span>
                     )}
@@ -888,10 +888,10 @@ export default function PrintTemplateModal({
                           }
                           setAccentColor(color.hex);
                         }}
-                        className={`p-2 rounded-xl border flex items-center gap-2 text-left transition-all ${
+                        className={`p-2 rounded-xl border flex items-center gap-2 text-left transition-all cursor-pointer ${
                           accentColor === color.hex
-                            ? 'border-[#11140F] ring-2 ring-[#11140F]/15 font-semibold bg-white'
-                            : 'border-[#11140F]/15 bg-white text-[#11140F]/80 hover:bg-[#EEF0EA]'
+                            ? 'border-[#34D399] ring-2 ring-[#34D399]/20 font-semibold bg-white dark:bg-white/10 text-[#11140F] dark:text-white'
+                            : 'border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.04] text-[#11140F]/80 dark:text-white/80 hover:bg-[#EEF0EA] dark:hover:bg-white/10'
                         }`}
                       >
                         <span
@@ -905,13 +905,13 @@ export default function PrintTemplateModal({
                 </div>
 
                 {/* Center QR Logo Overlay (Plus & Ultra) */}
-                <div className="space-y-2 pt-2 border-t border-[#11140F]/10">
+                <div className="space-y-2 pt-2 border-t border-[#11140F]/10 dark:border-white/10">
                   <div className="flex items-center justify-between">
-                    <label className="text-[11.5px] font-semibold text-[#11140F]/70 uppercase tracking-wider block">
+                    <label className="text-[11.5px] font-semibold text-[#11140F]/70 dark:text-white/75 uppercase tracking-wider block">
                       Center QR Badge
                     </label>
-                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-purple-100 text-purple-800 font-bold">
-                      Plus & Ultra
+                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-purple-500/15 text-purple-600 dark:text-purple-300 font-bold">
+                      Plus &amp; Ultra
                     </span>
                   </div>
                   <div className="grid grid-cols-3 gap-2">
@@ -935,10 +935,10 @@ export default function PrintTemplateModal({
                             }
                             setCenterLogo(item.id as CenterLogoType);
                           }}
-                          className={`p-2.5 rounded-xl border flex items-center gap-2 text-left transition-all ${
+                          className={`p-2.5 rounded-xl border flex items-center gap-2 text-left transition-all cursor-pointer ${
                             centerLogo === item.id
-                              ? 'border-[#11140F] bg-[#11140F] text-white shadow-xs'
-                              : 'border-[#11140F]/15 bg-white text-[#11140F] hover:bg-[#EEF0EA]'
+                              ? 'border-[#34D399] bg-[#34D399] text-[#09110D] font-bold shadow-xs'
+                              : 'border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.04] text-[#11140F] dark:text-white hover:bg-[#EEF0EA] dark:hover:bg-white/10'
                           }`}
                         >
                           <Icon className="w-3.5 h-3.5 shrink-0" />
@@ -966,7 +966,7 @@ export default function PrintTemplateModal({
               <button
                 onClick={handleDownloadPoster}
                 disabled={isExporting}
-                className="py-3 px-4 rounded-xl border border-[#11140F]/20 bg-white text-[#11140F] text-[13.5px] font-medium hover:bg-[#EEF0EA] transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                className="py-3 px-4 rounded-xl border border-[#11140F]/20 dark:border-white/15 bg-white dark:bg-white/[0.05] text-[#11140F] dark:text-white text-[13.5px] font-medium hover:bg-[#EEF0EA] dark:hover:bg-white/10 transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 title="Download high-resolution PNG poster"
               >
                 <Download className="w-4 h-4" />
@@ -975,7 +975,7 @@ export default function PrintTemplateModal({
             </div>
             <button
               onClick={onClose}
-              className="w-full py-2 px-4 rounded-xl text-[#11140F]/60 text-[12.5px] font-medium hover:text-[#11140F] transition-colors"
+              className="w-full py-2 px-4 rounded-xl text-[#11140F]/60 dark:text-white/55 text-[12.5px] font-medium hover:text-[#11140F] dark:hover:text-white transition-colors cursor-pointer"
             >
               Close
             </button>

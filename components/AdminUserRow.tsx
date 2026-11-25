@@ -318,25 +318,25 @@ export default function AdminUserRow({ user, isSelf }: { user: UserRecord; isSel
       {inspectModalOpen && (
         <tr>
           <td colSpan={6} className="p-0">
-            <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-              <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] shadow-2xl border border-[#11140F]/15 flex flex-col p-5 space-y-4">
+            <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+              <div className="bg-white dark:bg-[#101211] rounded-2xl max-w-2xl w-full max-h-[85vh] shadow-2xl border border-[#11140F]/15 dark:border-white/12 flex flex-col p-5 space-y-4">
                 <div className="flex items-center justify-between shrink-0">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                      <QrCode className="w-4 h-4 text-emerald-600" />
+                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 dark:bg-[#34D399]/15 flex items-center justify-center">
+                      <QrCode className="w-4 h-4 text-emerald-600 dark:text-[#34D399]" />
                     </div>
                     <div>
-                      <h3 className="text-[15px] font-semibold text-[#11140F]">
-                        Sovereign Link Inspector: <span className="font-mono text-emerald-700">{user.email}</span>
+                      <h3 className="text-[15px] font-semibold text-[#11140F] dark:text-white">
+                        Sovereign Link Inspector: <span className="font-mono text-emerald-700 dark:text-[#34D399]">{user.email}</span>
                       </h3>
-                      <p className="text-[12px] text-[#11140F]/50">
+                      <p className="text-[12px] text-[#11140F]/50 dark:text-white/55">
                         {user._count.links} QR destinations deployed in this account
                       </p>
                     </div>
                   </div>
                   <button
                     onClick={() => setInspectModalOpen(false)}
-                    className="p-1 rounded-lg text-[#11140F]/40 hover:text-[#11140F] hover:bg-[#11140F]/5"
+                    className="p-1 rounded-lg text-[#11140F]/40 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white hover:bg-[#11140F]/5 dark:hover:bg-white/10"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -344,14 +344,14 @@ export default function AdminUserRow({ user, isSelf }: { user: UserRecord; isSel
 
                 <div className="overflow-y-auto flex-1 space-y-2">
                   {loadingInspect && (
-                    <div className="py-12 flex flex-col items-center justify-center space-y-2 text-[#11140F]/50">
-                      <RefreshCw className="w-5 h-5 animate-spin text-emerald-600" />
+                    <div className="py-12 flex flex-col items-center justify-center space-y-2 text-[#11140F]/50 dark:text-white/55">
+                      <RefreshCw className="w-5 h-5 animate-spin text-emerald-600 dark:text-[#34D399]" />
                       <p className="text-[13px]">Querying customer links from database…</p>
                     </div>
                   )}
 
                   {!loadingInspect && inspectingLinks && inspectingLinks.length === 0 && (
-                    <div className="py-10 text-center text-[#11140F]/40 text-[13px]">
+                    <div className="py-10 text-center text-[#11140F]/40 dark:text-white/45 text-[13px]">
                       This customer has not created any dynamic QR links yet.
                     </div>
                   )}
@@ -361,34 +361,34 @@ export default function AdminUserRow({ user, isSelf }: { user: UserRecord; isSel
                     inspectingLinks.map((link) => (
                       <div
                         key={link.id}
-                        className="rounded-xl border border-[#11140F]/10 bg-[#11140F]/[0.02] p-3 flex items-center justify-between gap-3 text-[12.5px]"
+                        className="rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-[#11140F]/[0.02] dark:bg-white/[0.03] p-3 flex items-center justify-between gap-3 text-[12.5px]"
                       >
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-mono font-semibold text-emerald-800">
+                            <span className="font-mono font-semibold text-emerald-800 dark:text-[#34D399]">
                               /id/{link.shortCode}
                             </span>
                             {link.label && (
-                              <span className="text-[#11140F]/70 truncate">
+                              <span className="text-[#11140F]/70 dark:text-white/70 truncate">
                                 ({link.label})
                               </span>
                             )}
                             {link.isArchived && (
-                              <span className="px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 text-[10px]">
+                              <span className="px-1.5 py-0.2 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 text-[10px]">
                                 Archived
                               </span>
                             )}
                           </div>
-                          <span className="font-mono text-[11px] text-[#11140F]/50 truncate block mt-0.5">
+                          <span className="font-mono text-[11px] text-[#11140F]/50 dark:text-white/45 truncate block mt-0.5">
                             → {link.destinationUrl}
                           </span>
                         </div>
 
                         <div className="text-right shrink-0">
-                          <span className="font-semibold text-[#11140F] block">
+                          <span className="font-semibold text-[#11140F] dark:text-white block">
                             {link.scanCount} scans
                           </span>
-                          <span className="text-[10.5px] text-[#11140F]/40 font-mono">
+                          <span className="text-[10.5px] text-[#11140F]/40 dark:text-white/40 font-mono">
                             {link.lastScannedAt
                               ? `Last: ${new Date(link.lastScannedAt).toLocaleDateString()}`
                               : 'No scans yet'}
@@ -398,10 +398,10 @@ export default function AdminUserRow({ user, isSelf }: { user: UserRecord; isSel
                     ))}
                 </div>
 
-                <div className="shrink-0 flex justify-end pt-2 border-t border-[#11140F]/10">
+                <div className="shrink-0 flex justify-end pt-2 border-t border-[#11140F]/10 dark:border-white/10">
                   <button
                     onClick={() => setInspectModalOpen(false)}
-                    className="px-4 py-2 rounded-xl bg-[#11140F] text-white text-[12px] font-medium hover:bg-[#2A2E25]"
+                    className="px-4 py-2 rounded-xl bg-[#11140F] dark:bg-[#34D399] text-white dark:text-[#09110D] text-[12px] font-semibold hover:bg-[#2A2E25] dark:hover:bg-[#2EC28A]"
                   >
                     Close Inspector
                   </button>

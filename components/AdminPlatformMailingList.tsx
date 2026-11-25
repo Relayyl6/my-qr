@@ -712,16 +712,16 @@ export default function AdminPlatformMailingList({
       {/* ================================================================= */}
       {showBroadcastModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="w-full max-w-2xl bg-white rounded-2xl p-6 border border-[#11140F]/15 shadow-2xl max-h-[90vh] overflow-y-auto space-y-4">
+          <div className="w-full max-w-2xl bg-white dark:bg-[#101211] rounded-2xl p-6 border border-[#11140F]/15 dark:border-white/12 shadow-2xl max-h-[90vh] overflow-y-auto space-y-4 text-[#11140F] dark:text-white">
             {/* Modal Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-[#11140F]/10">
+            <div className="flex items-center justify-between pb-3 border-b border-[#11140F]/10 dark:border-white/10">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-[#2F6B4F]/10 text-[#2F6B4F] flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xl bg-[#2F6B4F]/10 dark:bg-[#34D399]/15 text-[#2F6B4F] dark:text-[#34D399] flex items-center justify-center">
                   <Send className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-base text-[#11140F]">Platform-Wide Email Broadcast</h4>
-                  <p className="text-[12px] text-[#11140F]/60">
+                  <h4 className="font-bold text-base text-[#11140F] dark:text-white">Platform-Wide Email Broadcast</h4>
+                  <p className="text-[12px] text-[#11140F]/60 dark:text-white/55">
                     Dispatch sovereign platform updates to all active platform subscribers.
                   </p>
                 </div>
@@ -729,22 +729,22 @@ export default function AdminPlatformMailingList({
               <button
                 type="button"
                 onClick={() => setShowBroadcastModal(false)}
-                className="text-[#11140F]/40 hover:text-[#11140F] p-1 rounded-md"
+                className="text-[#11140F]/40 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white p-1 rounded-md"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Audience Banner */}
-            <div className="p-3 rounded-xl bg-[#F7F8F5] border border-[#11140F]/10 flex flex-wrap items-center justify-between gap-2">
+            <div className="p-3 rounded-xl bg-[#F7F8F5] dark:bg-white/[0.03] border border-[#11140F]/10 dark:border-white/10 flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-[#2F6B4F]" />
-                <span className="text-xs text-[#11140F]">
+                <Users className="w-4 h-4 text-[#2F6B4F] dark:text-[#34D399]" />
+                <span className="text-xs text-[#11140F] dark:text-white">
                   Audience: <strong>{activeSubscribersCount} active platform subscriber(s)</strong>
                 </span>
               </div>
               {activeSubscribersCount === 0 && (
-                <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                <span className="text-[11px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/15 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-500/25">
                   ⚠️ No active subscribers found
                 </span>
               )}
@@ -752,7 +752,7 @@ export default function AdminPlatformMailingList({
 
             {/* Error Message */}
             {errorMsg && (
-              <div className="p-3 rounded-xl bg-red-50 text-red-700 text-xs border border-red-200 flex items-center gap-2">
+              <div className="p-3 rounded-xl bg-red-50 dark:bg-red-500/15 text-red-700 dark:text-red-300 text-xs border border-red-200 dark:border-red-500/25 flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{errorMsg}</span>
               </div>
@@ -760,7 +760,7 @@ export default function AdminPlatformMailingList({
 
             {/* Preset Templates */}
             <div className="space-y-1.5">
-              <div className="text-[11px] font-semibold text-[#11140F]/50 uppercase tracking-wider">
+              <div className="text-[11px] font-semibold text-[#11140F]/50 dark:text-white/50 uppercase tracking-wider">
                 Quick Template Presets
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -772,10 +772,10 @@ export default function AdminPlatformMailingList({
                       setBroadcastSubject(tmpl.subject);
                       setBroadcastBody(tmpl.body);
                     }}
-                    className="p-2 rounded-xl border border-[#11140F]/10 bg-[#F7F8F5] hover:border-[#2F6B4F] text-left text-xs font-medium text-[#11140F] transition-all cursor-pointer"
+                    className="p-2 rounded-xl border border-[#11140F]/10 dark:border-white/12 bg-[#F7F8F5] dark:bg-white/[0.04] hover:border-[#2F6B4F] dark:hover:border-[#34D399] text-left text-xs font-medium text-[#11140F] dark:text-white transition-all cursor-pointer"
                   >
                     <span className="block font-semibold">{tmpl.name}</span>
-                    <span className="text-[10.5px] text-[#11140F]/50">Click to apply</span>
+                    <span className="text-[10.5px] text-[#11140F]/50 dark:text-white/45">Click to apply</span>
                   </button>
                 ))}
               </div>
@@ -784,7 +784,7 @@ export default function AdminPlatformMailingList({
             {/* Composer Form */}
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-semibold text-[#11140F] mb-1">
+                <label className="block text-xs font-semibold text-[#11140F] dark:text-white/90 mb-1">
                   Subject Line *
                 </label>
                 <input
@@ -793,29 +793,29 @@ export default function AdminPlatformMailingList({
                   onChange={(e) => setBroadcastSubject(e.target.value)}
                   placeholder="e.g. Major Platform Update: Sovereign QR Routing 2.0"
                   required
-                  className="w-full px-3 py-2 rounded-xl border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2 rounded-xl border border-[#11140F]/15 dark:border-white/12 bg-white dark:bg-black/40 text-xs text-[#11140F] dark:text-white placeholder:text-[#11140F]/35 dark:placeholder:text-white/30 focus:outline-none focus:border-[#2F6B4F] dark:focus:border-[#34D399]"
                 />
               </div>
 
               {/* Formatting Toolbar */}
               <div>
                 <div className="flex items-center justify-between pb-1 text-xs">
-                  <label className="font-semibold text-[#11140F]">Email Content *</label>
+                  <label className="font-semibold text-[#11140F] dark:text-white/90">Email Content *</label>
                   <button
                     type="button"
                     onClick={() => setShowPreview(!showPreview)}
-                    className="text-[11px] font-semibold text-[#2F6B4F] hover:underline flex items-center gap-1 cursor-pointer"
+                    className="text-[11px] font-semibold text-[#2F6B4F] dark:text-[#34D399] hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     <Eye className="w-3.5 h-3.5" />
                     <span>{showPreview ? 'Hide Preview' : 'Show Live Preview'}</span>
                   </button>
                 </div>
 
-                <div className="rounded-t-xl bg-[#F7F8F5] border border-b-0 border-[#11140F]/15 p-1.5 flex flex-wrap items-center gap-1">
+                <div className="rounded-t-xl bg-[#F7F8F5] dark:bg-white/[0.04] border border-b-0 border-[#11140F]/15 dark:border-white/12 p-1.5 flex flex-wrap items-center gap-1">
                   <button
                     type="button"
                     onClick={() => insertFormat('<b>', '</b>', 'bold text')}
-                    className="p-1.5 rounded hover:bg-white text-[#11140F]/70 hover:text-[#11140F] text-xs font-bold"
+                    className="p-1.5 rounded hover:bg-white dark:hover:bg-white/10 text-[#11140F]/70 dark:text-white/75 hover:text-[#11140F] dark:hover:text-white text-xs font-bold"
                     title="Bold"
                   >
                     <Bold className="w-3.5 h-3.5" />
@@ -823,7 +823,7 @@ export default function AdminPlatformMailingList({
                   <button
                     type="button"
                     onClick={() => insertFormat('<i>', '</i>', 'italic text')}
-                    className="p-1.5 rounded hover:bg-white text-[#11140F]/70 hover:text-[#11140F] text-xs italic"
+                    className="p-1.5 rounded hover:bg-white dark:hover:bg-white/10 text-[#11140F]/70 dark:text-white/75 hover:text-[#11140F] dark:hover:text-white text-xs italic"
                     title="Italic"
                   >
                     <Italic className="w-3.5 h-3.5" />
@@ -837,7 +837,7 @@ export default function AdminPlatformMailingList({
                         'link text'
                       )
                     }
-                    className="p-1.5 rounded hover:bg-white text-[#11140F]/70 hover:text-[#11140F] text-xs"
+                    className="p-1.5 rounded hover:bg-white dark:hover:bg-white/10 text-[#11140F]/70 dark:text-white/75 hover:text-[#11140F] dark:hover:text-white text-xs"
                     title="Hyperlink"
                   >
                     <Link2 className="w-3.5 h-3.5" />
@@ -845,18 +845,18 @@ export default function AdminPlatformMailingList({
                   <button
                     type="button"
                     onClick={() => insertFormat('• ', '\n', 'List item')}
-                    className="p-1.5 rounded hover:bg-white text-[#11140F]/70 hover:text-[#11140F] text-xs"
+                    className="p-1.5 rounded hover:bg-white dark:hover:bg-white/10 text-[#11140F]/70 dark:text-white/75 hover:text-[#11140F] dark:hover:text-white text-xs"
                     title="Bullet List"
                   >
                     <List className="w-3.5 h-3.5" />
                   </button>
 
-                  <div className="h-4 w-px bg-[#11140F]/15 mx-1" />
+                  <div className="h-4 w-px bg-[#11140F]/15 dark:bg-white/15 mx-1" />
 
                   <button
                     type="button"
                     onClick={() => insertFormat('{{first_name}}')}
-                    className="px-2 py-1 rounded bg-white hover:bg-[#EEF0EA] border border-[#11140F]/10 text-[10.5px] font-mono text-[#11140F]/80"
+                    className="px-2 py-1 rounded bg-white dark:bg-white/10 hover:bg-[#EEF0EA] dark:hover:bg-white/15 border border-[#11140F]/10 dark:border-white/12 text-[10.5px] font-mono text-[#11140F]/80 dark:text-white/85"
                     title="Insert recipient first name"
                   >
                     {'{{first_name}}'}
@@ -864,7 +864,7 @@ export default function AdminPlatformMailingList({
                   <button
                     type="button"
                     onClick={() => insertFormat('{{site_url}}')}
-                    className="px-2 py-1 rounded bg-white hover:bg-[#EEF0EA] border border-[#11140F]/10 text-[10.5px] font-mono text-[#11140F]/80"
+                    className="px-2 py-1 rounded bg-white dark:bg-white/10 hover:bg-[#EEF0EA] dark:hover:bg-white/15 border border-[#11140F]/10 dark:border-white/12 text-[10.5px] font-mono text-[#11140F]/80 dark:text-white/85"
                     title="Insert platform root URL"
                   >
                     {'{{site_url}}'}
@@ -878,21 +878,21 @@ export default function AdminPlatformMailingList({
                   onChange={(e) => setBroadcastBody(e.target.value)}
                   placeholder="Hello {{first_name}},&#10;&#10;Write your platform announcement or newsletter here..."
                   required
-                  className="w-full px-3 py-2.5 rounded-b-xl border border-[#11140F]/15 text-xs font-mono text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2.5 rounded-b-xl border border-[#11140F]/15 dark:border-white/12 bg-white dark:bg-black/40 text-xs font-mono text-[#11140F] dark:text-white placeholder:text-[#11140F]/35 dark:placeholder:text-white/30 focus:outline-none focus:border-[#2F6B4F] dark:focus:border-[#34D399]"
                 />
               </div>
 
               {/* Live Preview Panel */}
               {showPreview && (
-                <div className="rounded-xl border border-[#11140F]/15 bg-gray-100 p-4 space-y-3">
-                  <div className="flex items-center justify-between text-xs text-[#11140F]/60">
-                    <span className="font-semibold text-[#11140F]">Live Recipient Preview</span>
-                    <div className="flex items-center gap-1 bg-white rounded-lg p-0.5 border border-gray-200">
+                <div className="rounded-xl border border-[#11140F]/15 dark:border-white/12 bg-gray-100 dark:bg-white/[0.04] p-4 space-y-3">
+                  <div className="flex items-center justify-between text-xs text-[#11140F]/60 dark:text-white/60">
+                    <span className="font-semibold text-[#11140F] dark:text-white">Live Recipient Preview</span>
+                    <div className="flex items-center gap-1 bg-white dark:bg-black/40 rounded-lg p-0.5 border border-gray-200 dark:border-white/12">
                       <button
                         type="button"
                         onClick={() => setPreviewDevice('desktop')}
                         className={`p-1 rounded ${
-                          previewDevice === 'desktop' ? 'bg-[#11140F] text-white' : 'text-gray-500 hover:text-gray-900'
+                          previewDevice === 'desktop' ? 'bg-[#11140F] dark:bg-[#34D399] text-white dark:text-[#09110D]' : 'text-gray-500 dark:text-white/50 hover:text-gray-900 dark:hover:text-white'
                         }`}
                         title="Desktop view"
                       >
@@ -902,7 +902,7 @@ export default function AdminPlatformMailingList({
                         type="button"
                         onClick={() => setPreviewDevice('mobile')}
                         className={`p-1 rounded ${
-                          previewDevice === 'mobile' ? 'bg-[#11140F] text-white' : 'text-gray-500 hover:text-gray-900'
+                          previewDevice === 'mobile' ? 'bg-[#11140F] dark:bg-[#34D399] text-white dark:text-[#09110D]' : 'text-gray-500 dark:text-white/50 hover:text-gray-900 dark:hover:text-white'
                         }`}
                         title="Mobile view"
                       >
@@ -945,10 +945,10 @@ export default function AdminPlatformMailingList({
               )}
 
               {/* Test Send Section */}
-              <div className="p-3.5 rounded-xl bg-[#F7F8F5] border border-[#11140F]/10 space-y-2">
+              <div className="p-3.5 rounded-xl bg-[#F7F8F5] dark:bg-white/[0.03] border border-[#11140F]/10 dark:border-white/10 space-y-2">
                 <div className="flex items-center justify-between">
-                  <div className="text-xs font-semibold text-[#11140F]">Send a Test Preview</div>
-                  <span className="text-[10.5px] text-[#11140F]/50">Verify in your inbox before broadcasting</span>
+                  <div className="text-xs font-semibold text-[#11140F] dark:text-white">Send a Test Preview</div>
+                  <span className="text-[10.5px] text-[#11140F]/50 dark:text-white/50">Verify in your inbox before broadcasting</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <input
@@ -956,32 +956,32 @@ export default function AdminPlatformMailingList({
                     value={testEmail}
                     onChange={(e) => setTestEmail(e.target.value)}
                     placeholder="admin@example.com"
-                    className="flex-1 px-3 py-1.5 rounded-lg border border-[#11140F]/15 bg-white text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                    className="flex-1 px-3 py-1.5 rounded-lg border border-[#11140F]/15 dark:border-white/12 bg-white dark:bg-black/40 text-xs text-[#11140F] dark:text-white placeholder:text-[#11140F]/35 dark:placeholder:text-white/30 focus:outline-none focus:border-[#2F6B4F] dark:focus:border-[#34D399]"
                   />
                   <button
                     type="button"
                     onClick={handleSendTestEmail}
                     disabled={sendingTest || !broadcastSubject.trim() || !broadcastBody.trim()}
-                    className="px-3.5 py-1.5 rounded-lg border border-[#11140F]/20 bg-white hover:bg-[#EEF0EA] text-xs font-semibold text-[#11140F] transition-colors flex items-center gap-1.5 disabled:opacity-40 cursor-pointer"
+                    className="px-3.5 py-1.5 rounded-lg border border-[#11140F]/20 dark:border-white/12 bg-white dark:bg-white/[0.06] hover:bg-[#EEF0EA] dark:hover:bg-white/10 text-xs font-semibold text-[#11140F] dark:text-white transition-colors flex items-center gap-1.5 disabled:opacity-40 cursor-pointer"
                   >
-                    {sendingTest ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Eye className="w-3.5 h-3.5 text-[#2F6B4F]" />}
+                    {sendingTest ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Eye className="w-3.5 h-3.5 text-[#2F6B4F] dark:text-[#34D399]" />}
                     <span>{sendingTest ? 'Sending Test...' : 'Send Test'}</span>
                   </button>
                 </div>
               </div>
 
               {/* Platform Branding Notice */}
-              <div className="p-3 rounded-xl bg-gray-50 border border-gray-200 text-[11.5px] text-gray-600">
-                Emails are dispatched under the sovereign <strong>DynamicQR</strong> brand identity with one-click unsubscribe headers and Gmail delivery.
+              <div className="p-3 rounded-xl bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 text-[11.5px] text-gray-600 dark:text-white/60">
+                Emails are dispatched under the sovereign <strong className="dark:text-white">DynamicQR</strong> brand identity with one-click unsubscribe headers and Gmail delivery.
               </div>
             </div>
 
             {/* Modal Actions */}
-            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#11140F]/10">
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#11140F]/10 dark:border-white/10">
               <button
                 type="button"
                 onClick={() => setShowBroadcastModal(false)}
-                className="px-3.5 py-2 text-xs font-medium text-[#11140F]/60 hover:text-[#11140F] transition-colors cursor-pointer"
+                className="px-3.5 py-2 text-xs font-medium text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -995,7 +995,7 @@ export default function AdminPlatformMailingList({
                   !broadcastSubject.trim() ||
                   !broadcastBody.trim()
                 }
-                className="px-5 py-2 rounded-xl bg-[#2F6B4F] text-white text-xs font-bold hover:bg-[#25553E] transition-colors flex items-center gap-2 disabled:opacity-50 cursor-pointer shadow-xs"
+                className="px-5 py-2 rounded-xl bg-[#2F6B4F] dark:bg-[#34D399] text-white dark:text-[#09110D] text-xs font-bold hover:bg-[#25553E] dark:hover:bg-[#2EC28A] transition-colors flex items-center gap-2 disabled:opacity-50 cursor-pointer shadow-xs"
               >
                 {sendingBroadcast ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -1029,11 +1029,11 @@ export default function AdminPlatformMailingList({
       {/* Broadcast Campaign Audit & Details Modal */}
       {inspectingBroadcast && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="w-full max-w-lg bg-white rounded-2xl p-6 border border-[#11140F]/15 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-[#11140F]/10">
+          <div className="w-full max-w-lg bg-white dark:bg-[#101211] rounded-2xl p-6 border border-[#11140F]/15 dark:border-white/12 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto text-[#11140F] dark:text-white">
+            <div className="flex items-center justify-between pb-3 border-b border-[#11140F]/10 dark:border-white/10">
               <div>
-                <h4 className="font-bold text-sm text-[#11140F]">Broadcast Campaign Details</h4>
-                <p className="text-xs text-[#11140F]/50">
+                <h4 className="font-bold text-sm text-[#11140F] dark:text-white">Broadcast Campaign Details</h4>
+                <p className="text-xs text-[#11140F]/50 dark:text-white/50">
                   {inspectingBroadcast.sentAt
                     ? new Date(inspectingBroadcast.sentAt).toLocaleString()
                     : new Date(inspectingBroadcast.createdAt).toLocaleString()}
@@ -1042,7 +1042,7 @@ export default function AdminPlatformMailingList({
               <button
                 type="button"
                 onClick={() => setInspectingBroadcast(null)}
-                className="text-[#11140F]/40 hover:text-[#11140F] p-1"
+                className="text-[#11140F]/40 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white p-1"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1050,40 +1050,40 @@ export default function AdminPlatformMailingList({
 
             <div className="space-y-3 text-xs">
               <div>
-                <span className="font-semibold text-[#11140F]/60 block mb-0.5">Subject:</span>
-                <span className="font-bold text-[#11140F] text-sm">{inspectingBroadcast.subject}</span>
+                <span className="font-semibold text-[#11140F]/60 dark:text-white/60 block mb-0.5">Subject:</span>
+                <span className="font-bold text-[#11140F] dark:text-white text-sm">{inspectingBroadcast.subject}</span>
               </div>
 
-              <div className="flex items-center gap-4 py-2 border-y border-[#11140F]/10">
+              <div className="flex items-center gap-4 py-2 border-y border-[#11140F]/10 dark:border-white/10">
                 <div>
-                  <span className="text-[#11140F]/50 block">Status</span>
-                  <span className="font-bold text-emerald-700 capitalize">{inspectingBroadcast.status}</span>
+                  <span className="text-[#11140F]/50 dark:text-white/50 block">Status</span>
+                  <span className="font-bold text-emerald-700 dark:text-[#34D399] capitalize">{inspectingBroadcast.status}</span>
                 </div>
                 <div>
-                  <span className="text-[#11140F]/50 block">Recipients</span>
-                  <span className="font-bold text-[#11140F]">{inspectingBroadcast.recipientCount}</span>
+                  <span className="text-[#11140F]/50 dark:text-white/50 block">Recipients</span>
+                  <span className="font-bold text-[#11140F] dark:text-white">{inspectingBroadcast.recipientCount}</span>
                 </div>
                 <div>
-                  <span className="text-[#11140F]/50 block">Provider</span>
-                  <span className="font-bold text-[#11140F] uppercase">{inspectingBroadcast.sentVia || 'gmail'}</span>
+                  <span className="text-[#11140F]/50 dark:text-white/50 block">Provider</span>
+                  <span className="font-bold text-[#11140F] dark:text-white uppercase">{inspectingBroadcast.sentVia || 'gmail'}</span>
                 </div>
               </div>
 
               {/* Delivery Audit Logs */}
               {Array.isArray(inspectingBroadcast.recipients) && inspectingBroadcast.recipients.length > 0 && (
                 <div className="space-y-1.5">
-                  <span className="font-semibold text-[#11140F]">Recipient Delivery Audit:</span>
-                  <div className="max-h-48 overflow-y-auto rounded-lg border border-[#11140F]/10 divide-y divide-[#11140F]/5 text-[11px]">
+                  <span className="font-semibold text-[#11140F] dark:text-white">Recipient Delivery Audit:</span>
+                  <div className="max-h-48 overflow-y-auto rounded-lg border border-[#11140F]/10 dark:border-white/10 divide-y divide-[#11140F]/5 dark:divide-white/5 text-[11px]">
                     {inspectingBroadcast.recipients.map((rec: any, idx: number) => (
                       <div key={idx} className="p-2 flex items-center justify-between">
-                        <span className="font-medium text-[#11140F]">{rec.email}</span>
+                        <span className="font-medium text-[#11140F] dark:text-white">{rec.email}</span>
                         <div className="flex items-center gap-1.5">
                           {rec.status === 'sent' ? (
-                            <span className="text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded font-semibold text-[10px]">
+                            <span className="text-emerald-700 dark:text-[#34D399] bg-emerald-50 dark:bg-[#34D399]/15 px-1.5 py-0.2 rounded font-semibold text-[10px]">
                               Delivered
                             </span>
                           ) : (
-                            <span className="text-red-700 bg-red-50 px-1.5 py-0.2 rounded font-semibold text-[10px]">
+                            <span className="text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-500/15 px-1.5 py-0.2 rounded font-semibold text-[10px]">
                               Failed: {rec.error || 'Error'}
                             </span>
                           )}
@@ -1099,7 +1099,7 @@ export default function AdminPlatformMailingList({
               <button
                 type="button"
                 onClick={() => setInspectingBroadcast(null)}
-                className="px-4 py-1.5 rounded-lg bg-[#11140F] text-white text-xs font-semibold cursor-pointer"
+                className="px-4 py-1.5 rounded-lg bg-[#11140F] dark:bg-[#34D399] text-white dark:text-[#09110D] text-xs font-semibold cursor-pointer"
               >
                 Close
               </button>
@@ -1124,52 +1124,52 @@ export default function AdminPlatformMailingList({
       {/* Add Subscriber Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white rounded-2xl p-5 border border-[#11140F]/15 shadow-xl space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-[#11140F]/10">
-              <h4 className="font-semibold text-sm text-[#11140F]">Add Platform Subscriber</h4>
+          <div className="w-full max-w-md bg-white dark:bg-[#101211] rounded-2xl p-5 border border-[#11140F]/15 dark:border-white/12 shadow-xl space-y-4 text-[#11140F] dark:text-white">
+            <div className="flex items-center justify-between pb-2 border-b border-[#11140F]/10 dark:border-white/10">
+              <h4 className="font-semibold text-sm text-[#11140F] dark:text-white">Add Platform Subscriber</h4>
               <button
                 type="button"
                 onClick={() => setShowAddModal(false)}
-                className="text-[#11140F]/40 hover:text-[#11140F]"
+                className="text-[#11140F]/40 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {errorMsg && (
-              <div className="p-2.5 rounded-md bg-red-50 text-red-700 text-xs">{errorMsg}</div>
+              <div className="p-2.5 rounded-md bg-red-50 dark:bg-red-500/15 text-red-700 dark:text-red-300 text-xs">{errorMsg}</div>
             )}
 
             <form onSubmit={handleAddSubmit} className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-[#11140F] mb-1">Email Address *</label>
+                <label className="block text-xs font-medium text-[#11140F] dark:text-white/90 mb-1">Email Address *</label>
                 <input
                   type="email"
                   value={formEmail}
                   onChange={(e) => setFormEmail(e.target.value)}
                   placeholder="subscriber@example.com"
                   required
-                  className="w-full px-3 py-1.5 rounded-lg border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[#11140F]/15 dark:border-white/12 bg-white dark:bg-black/40 text-xs text-[#11140F] dark:text-white placeholder:text-[#11140F]/35 dark:placeholder:text-white/30 focus:outline-none focus:border-[#2F6B4F] dark:focus:border-[#34D399]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[#11140F] mb-1">Name (Optional)</label>
+                <label className="block text-xs font-medium text-[#11140F] dark:text-white/90 mb-1">Name (Optional)</label>
                 <input
                   type="text"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
                   placeholder="Alex Doe"
-                  className="w-full px-3 py-1.5 rounded-lg border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[#11140F]/15 dark:border-white/12 bg-white dark:bg-black/40 text-xs text-[#11140F] dark:text-white placeholder:text-[#11140F]/35 dark:placeholder:text-white/30 focus:outline-none focus:border-[#2F6B4F] dark:focus:border-[#34D399]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[#11140F] mb-1">Status</label>
+                <label className="block text-xs font-medium text-[#11140F] dark:text-white/90 mb-1">Status</label>
                 <select
                   value={formStatus}
                   onChange={(e) => setFormStatus(e.target.value)}
-                  className="w-full px-3 py-1.5 rounded-lg border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[#11140F]/15 dark:border-white/12 bg-white dark:bg-[#161917] text-xs text-[#11140F] dark:text-white focus:outline-none focus:border-[#2F6B4F] dark:focus:border-[#34D399]"
                 >
                   <option value="active">Active</option>
                   <option value="unsubscribed">Unsubscribed</option>
@@ -1177,18 +1177,18 @@ export default function AdminPlatformMailingList({
                 </select>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#11140F]/10">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#11140F]/10 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-3 py-1.5 text-xs font-medium text-[#11140F]/60 hover:text-[#11140F]"
+                  className="px-3 py-1.5 text-xs font-medium text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="px-4 py-1.5 rounded-lg bg-[#11140F] text-white text-xs font-medium hover:bg-[#2A2E25] transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-4 py-1.5 rounded-lg bg-[#11140F] dark:bg-[#34D399] text-white dark:text-[#09110D] text-xs font-semibold hover:bg-[#2A2E25] dark:hover:bg-[#2EC28A] transition-colors flex items-center gap-1.5 disabled:opacity-50"
                 >
                   {isPending && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   <span>Save Subscriber</span>
@@ -1202,50 +1202,50 @@ export default function AdminPlatformMailingList({
       {/* Edit Subscriber Modal */}
       {showEditModal && editingItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white rounded-2xl p-5 border border-[#11140F]/15 shadow-xl space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-[#11140F]/10">
-              <h4 className="font-semibold text-sm text-[#11140F]">Edit Platform Subscriber</h4>
+          <div className="w-full max-w-md bg-white dark:bg-[#101211] rounded-2xl p-5 border border-[#11140F]/15 dark:border-white/12 shadow-xl space-y-4 text-[#11140F] dark:text-white">
+            <div className="flex items-center justify-between pb-2 border-b border-[#11140F]/10 dark:border-white/10">
+              <h4 className="font-semibold text-sm text-[#11140F] dark:text-white">Edit Platform Subscriber</h4>
               <button
                 type="button"
                 onClick={() => setShowEditModal(false)}
-                className="text-[#11140F]/40 hover:text-[#11140F]"
+                className="text-[#11140F]/40 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {errorMsg && (
-              <div className="p-2.5 rounded-md bg-red-50 text-red-700 text-xs">{errorMsg}</div>
+              <div className="p-2.5 rounded-md bg-red-50 dark:bg-red-500/15 text-red-700 dark:text-red-300 text-xs">{errorMsg}</div>
             )}
 
             <form onSubmit={handleEditSubmit} className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-[#11140F] mb-1">Email Address *</label>
+                <label className="block text-xs font-medium text-[#11140F] dark:text-white/90 mb-1">Email Address *</label>
                 <input
                   type="email"
                   value={formEmail}
                   onChange={(e) => setFormEmail(e.target.value)}
                   required
-                  className="w-full px-3 py-1.5 rounded-lg border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[#11140F]/15 dark:border-white/12 bg-white dark:bg-black/40 text-xs text-[#11140F] dark:text-white focus:outline-none focus:border-[#2F6B4F] dark:focus:border-[#34D399]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[#11140F] mb-1">Name</label>
+                <label className="block text-xs font-medium text-[#11140F] dark:text-white/90 mb-1">Name</label>
                 <input
                   type="text"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
-                  className="w-full px-3 py-1.5 rounded-lg border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[#11140F]/15 dark:border-white/12 bg-white dark:bg-black/40 text-xs text-[#11140F] dark:text-white focus:outline-none focus:border-[#2F6B4F] dark:focus:border-[#34D399]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[#11140F] mb-1">Status</label>
+                <label className="block text-xs font-medium text-[#11140F] dark:text-white/90 mb-1">Status</label>
                 <select
                   value={formStatus}
                   onChange={(e) => setFormStatus(e.target.value)}
-                  className="w-full px-3 py-1.5 rounded-lg border border-[#11140F]/15 text-xs text-[#11140F] focus:outline-none focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[#11140F]/15 dark:border-white/12 bg-white dark:bg-[#161917] text-xs text-[#11140F] dark:text-white focus:outline-none focus:border-[#2F6B4F] dark:focus:border-[#34D399]"
                 >
                   <option value="active">Active</option>
                   <option value="unsubscribed">Unsubscribed</option>
@@ -1253,18 +1253,18 @@ export default function AdminPlatformMailingList({
                 </select>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#11140F]/10">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#11140F]/10 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setShowEditModal(false)}
-                  className="px-3 py-1.5 text-xs font-medium text-[#11140F]/60 hover:text-[#11140F]"
+                  className="px-3 py-1.5 text-xs font-medium text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="px-4 py-1.5 rounded-lg bg-[#11140F] text-white text-xs font-medium hover:bg-[#2A2E25] transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-4 py-1.5 rounded-lg bg-[#11140F] dark:bg-[#34D399] text-white dark:text-[#09110D] text-xs font-semibold hover:bg-[#2A2E25] dark:hover:bg-[#2EC28A] transition-colors flex items-center gap-1.5 disabled:opacity-50"
                 >
                   {isPending && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   <span>Update Subscriber</span>

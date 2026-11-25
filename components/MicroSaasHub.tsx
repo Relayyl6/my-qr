@@ -1162,17 +1162,17 @@ export default function MicroSaasHub({
           </div>
 
           {entitlements.microsaas.menu === 0 ? (
-            <div className="py-10 text-center border border-amber-200 bg-amber-50/50 rounded-2xl p-6 space-y-4">
-              <Utensils className="w-10 h-10 mx-auto text-amber-600/70" />
+            <div className="py-10 text-center border border-amber-200 dark:border-amber-500/25 bg-amber-50/50 dark:bg-amber-500/10 rounded-2xl p-6 space-y-4">
+              <Utensils className="w-10 h-10 mx-auto text-amber-600/70 dark:text-amber-400" />
               <div>
-                <h4 className="text-base font-bold text-[#11140F]">Restaurant Menu Builder is a Pro Feature</h4>
-                <p className="text-xs text-[#11140F]/70 max-w-md mx-auto mt-1">
+                <h4 className="text-base font-bold text-[#11140F] dark:text-white">Restaurant Menu Builder is a Pro Feature</h4>
+                <p className="text-xs text-[#11140F]/70 dark:text-white/70 max-w-md mx-auto mt-1">
                   Restaurants, cafes, and bars print dynamic table QR codes that let diners browse categorized menus, search dishes, and filter by gluten-free, vegan, or spicy options.
                 </p>
               </div>
               <Link
                 href="/pricing"
-                className="py-2.5 px-5 rounded-xl bg-[#11140F] text-white text-xs font-bold hover:bg-[#2A2E25] inline-flex items-center gap-2 shadow-sm transition-all"
+                className="py-2.5 px-5 rounded-xl bg-[#11140F] dark:bg-[#34D399] text-white dark:text-[#09110D] text-xs font-bold hover:bg-[#2A2E25] dark:hover:bg-[#2EC28A] inline-flex items-center gap-2 shadow-sm transition-all"
               >
                 <span>View Pro Plan Upgrade Options</span>
                 <ChevronRight className="w-3.5 h-3.5" />
@@ -1222,16 +1222,16 @@ export default function MicroSaasHub({
 
                       <div className="space-y-1 text-xs text-[#11140F]/70 dark:text-white/70">
                         <div className="flex items-center gap-1.5 pt-0.5 flex-wrap">
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-[#34D399]/10 text-emerald-700 dark:text-[#34D399] border border-emerald-200 dark:border-[#34D399]/25 font-mono">
                             ✓ Pro Contactless Menu
                           </span>
                           {entitlements.custom_domains > 0 && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 font-mono">
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-500/25 font-mono">
                               Branded Domain
                             </span>
                           )}
                         </div>
-                        <div className="truncate text-[#11140F]/50 font-mono text-[11px] pt-1">
+                        <div className="truncate text-[#11140F]/50 dark:text-white/50 font-mono text-[11px] pt-1">
                           URL: /m/{menu.slug}
                         </div>
                       </div>
@@ -1773,8 +1773,8 @@ export default function MicroSaasHub({
 
       {/* SHORTENER CREATION MODAL */}
       {showShortenerModal && (
-        <div className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl border border-[#11140F]/10 shadow-2xl max-w-lg w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 bg-black/65 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#101211] rounded-3xl border border-[#11140F]/10 dark:border-white/12 shadow-2xl max-w-lg w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 text-[#11140F] dark:text-white">
             <div className="flex items-center justify-between border-b border-[#11140F]/10 dark:border-white/10 pb-4">
               <div className="flex items-center gap-2">
                 <Link2 className="w-5 h-5 text-[#2F6B4F]" />
@@ -2081,7 +2081,7 @@ export default function MicroSaasHub({
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Custom Slug (Optional)</label>
                 <div className="flex items-center gap-1">
-                  <span className="text-xs font-mono text-[#11140F]/50">/w/</span>
+                  <span className="text-xs font-mono text-[#11140F]/50 dark:text-white/50">/w/</span>
                   <input
                     type="text"
                     value={wifiForm.slug}
@@ -3004,14 +3004,14 @@ export default function MicroSaasHub({
           <div className="bg-white dark:bg-[#0E1017] rounded-3xl border border-[#11140F]/10 dark:border-white/10 shadow-2xl max-w-xl w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[85vh] flex flex-col text-[#11140F] dark:text-white">
             <div className="flex items-center justify-between border-b border-[#11140F]/10 dark:border-white/10 pb-4 shrink-0">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-center">
-                  <Users className="w-5 h-5 text-emerald-600" />
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-[#34D399]/10 text-emerald-800 dark:text-[#34D399] border border-emerald-200 dark:border-[#34D399]/25 flex items-center justify-center">
+                  <Users className="w-5 h-5 text-emerald-600 dark:text-[#34D399]" />
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-[#11140F] dark:text-white">
                     Exchanged Contacts & Leads
                   </h3>
-                  <p className="text-xs text-[#11140F]/60">
+                  <p className="text-xs text-[#11140F]/60 dark:text-white/55">
                     Contacts captured via &ldquo;{leadsModalCard.title}&rdquo; (/c/{leadsModalCard.slug})
                   </p>
                 </div>
@@ -3019,7 +3019,7 @@ export default function MicroSaasHub({
               <button
                 type="button"
                 onClick={() => setLeadsModalCard(null)}
-                className="text-[#11140F]/50 hover:text-[#11140F] text-sm font-bold p-1 cursor-pointer"
+                className="text-[#11140F]/50 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white text-sm font-bold p-1 cursor-pointer"
               >
                 ✕
               </button>
@@ -3029,7 +3029,7 @@ export default function MicroSaasHub({
               {Array.isArray(leadsModalCard.spec?.leads) && leadsModalCard.spec.leads.length > 0 ? (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between pb-1">
-                    <span className="text-xs font-semibold text-[#11140F]">
+                    <span className="text-xs font-semibold text-[#11140F] dark:text-white">
                       {leadsModalCard.spec.leads.length} Contact{leadsModalCard.spec.leads.length === 1 ? '' : 's'} Captured
                     </span>
                     <button
@@ -3074,24 +3074,24 @@ export default function MicroSaasHub({
                   </div>
                 </div>
               ) : (
-                <div className="py-12 text-center border-2 border-dashed border-[#11140F]/10 rounded-2xl p-6 space-y-2">
-                  <Users className="w-8 h-8 mx-auto text-[#11140F]/30" />
-                  <div className="text-xs font-semibold text-[#11140F]">No Contacts Exchanged Yet</div>
-                  <p className="text-xs text-[#11140F]/60 max-w-sm mx-auto">
+                <div className="py-12 text-center border-2 border-dashed border-[#11140F]/10 dark:border-white/12 rounded-2xl p-6 space-y-2">
+                  <Users className="w-8 h-8 mx-auto text-[#11140F]/30 dark:text-white/30" />
+                  <div className="text-xs font-semibold text-[#11140F] dark:text-white">No Contacts Exchanged Yet</div>
+                  <p className="text-xs text-[#11140F]/60 dark:text-white/55 max-w-sm mx-auto">
                     When someone views your digital vCard and taps &ldquo;Exchange Contact Info&rdquo;, their contact details are saved here and instant emails are automatically sent to both of you.
                   </p>
                 </div>
               )}
             </div>
 
-            <div className="pt-3 border-t border-[#11140F]/10 dark:border-white/10 dark:border-white/10 dark:border-white/10 flex items-center justify-between gap-2 shrink-0">
-              <span className="text-[11px] text-[#11140F]/50">
+            <div className="pt-3 border-t border-[#11140F]/10 dark:border-white/10 flex items-center justify-between gap-2 shrink-0">
+              <span className="text-[11px] text-[#11140F]/50 dark:text-white/50">
                 Connected via two-way instant notification
               </span>
               <button
                 type="button"
                 onClick={() => setLeadsModalCard(null)}
-                className="px-4 py-2 text-xs font-semibold rounded-xl bg-gray-100 hover:bg-gray-200 text-[#11140F] cursor-pointer"
+                className="px-4 py-2 text-xs font-semibold rounded-xl bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 text-[#11140F] dark:text-white/85 cursor-pointer"
               >
                 Close
               </button>

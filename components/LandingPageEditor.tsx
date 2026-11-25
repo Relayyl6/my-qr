@@ -65,33 +65,33 @@ export default function LandingPageEditor({
 
   if (!isEligible) {
     return (
-      <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-[#11140F]/10 space-y-6 animate-in fade-in zoom-in-95 duration-150">
-        <div className="flex items-center justify-between pb-4 border-b border-[#11140F]/10">
+      <div className="bg-white dark:bg-[#101211] rounded-2xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-[#11140F]/10 dark:border-white/12 space-y-6 animate-in fade-in zoom-in-95 duration-150 text-[#11140F] dark:text-white">
+        <div className="flex items-center justify-between pb-4 border-b border-[#11140F]/10 dark:border-white/10">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-500/15 text-blue-700 dark:text-blue-300 flex items-center justify-center">
               <Smartphone className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-semibold text-[16px] text-[#11140F]">Prompt-to-Page (AI)</h3>
-              <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 uppercase tracking-wider">
+              <h3 className="font-semibold text-[16px] text-[#11140F] dark:text-white">Prompt-to-Page (AI)</h3>
+              <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-500/15 text-blue-700 dark:text-blue-300 uppercase tracking-wider">
                 Plus & Ultra
               </span>
             </div>
           </div>
           {onClose && (
-            <button onClick={onClose} className="p-1 rounded-lg text-[#11140F]/50 hover:bg-[#11140F]/5 cursor-pointer">
+            <button onClick={onClose} className="p-1 rounded-lg text-[#11140F]/50 dark:text-white/50 hover:bg-[#11140F]/5 dark:hover:bg-white/10 cursor-pointer">
               <X className="w-5 h-5" />
             </button>
           )}
         </div>
 
         <div className="space-y-4">
-          <p className="text-[14px] text-[#11140F]/70 leading-relaxed">
+          <p className="text-[14px] text-[#11140F]/70 dark:text-white/70 leading-relaxed">
             Prompt-to-Page generates high-converting, mobile-optimized micro landing pages from a simple text description.
           </p>
-          <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-4 space-y-2 text-[12.5px] text-blue-900">
+          <div className="rounded-xl border border-blue-100 dark:border-blue-500/20 bg-blue-50/50 dark:bg-blue-500/10 p-4 space-y-2 text-[12.5px] text-blue-900 dark:text-blue-200">
             <p className="font-semibold">Included on Plus & Ultra Plans:</p>
-            <ul className="space-y-1 list-disc pl-4 text-blue-800/80">
+            <ul className="space-y-1 list-disc pl-4 text-blue-800/80 dark:text-blue-200/80">
               <li>Up to 3 Mobile Showcases (Plus) or Unlimited (Ultra)</li>
               <li>Responsive live mobile & tablet preview simulator</li>
               <li>Zero-reprint activation: instantly point physical codes to the page</li>
@@ -103,16 +103,16 @@ export default function LandingPageEditor({
           {onClose && (
             <button
               onClick={onClose}
-              className="px-4 py-2.5 rounded-xl border border-[#11140F]/15 text-[#11140F] text-[13px] font-medium hover:bg-[#EEF0EA] cursor-pointer"
+              className="px-4 py-2.5 rounded-xl border border-[#11140F]/15 dark:border-white/12 text-[#11140F] dark:text-white/80 text-[13px] font-medium hover:bg-[#EEF0EA] dark:hover:bg-white/10 cursor-pointer"
             >
               Close
             </button>
           )}
           <Link
             href="/pricing"
-            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#11140F] text-white text-[13px] font-semibold hover:bg-[#2A2E25] transition-colors shadow-xs cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#11140F] dark:bg-[#34D399] text-white dark:text-[#09110D] text-[13px] font-semibold hover:bg-[#2A2E25] dark:hover:bg-[#2EC28A] transition-colors shadow-xs cursor-pointer"
           >
-            <Lock className="w-3.5 h-3.5 text-blue-400" />
+            <Lock className="w-3.5 h-3.5 text-blue-400 dark:text-[#09110D]" />
             <span>Upgrade to Plus</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
@@ -298,26 +298,26 @@ export default function LandingPageEditor({
   };
 
   return (
-    <div className="rounded-2xl border border-[#11140F]/15 bg-white p-5 sm:p-6 shadow-2xl space-y-4 max-w-3xl sm:max-w-4xl w-full max-h-[92vh] flex flex-col">
+    <div className="rounded-2xl border border-[#11140F]/15 dark:border-white/12 bg-white dark:bg-[#101211] p-5 sm:p-6 shadow-2xl space-y-4 max-w-3xl sm:max-w-4xl w-full max-h-[92vh] flex flex-col text-[#11140F] dark:text-white">
       {/* Header */}
       <div className="flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
-            <Sparkles className="w-4 h-4 text-emerald-600" />
+          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 dark:bg-[#34D399]/15 flex items-center justify-center shrink-0">
+            <Sparkles className="w-4 h-4 text-emerald-600 dark:text-[#34D399]" />
           </div>
           <div>
-            <h3 className="text-[15px] font-semibold text-[#11140F] flex items-center gap-2">
-              Adaptive Showcase Studio for <span className="font-mono text-emerald-700">/{shortCode}</span>
+            <h3 className="text-[15px] font-semibold text-[#11140F] dark:text-white flex items-center gap-2">
+              Adaptive Showcase Studio for <span className="font-mono text-emerald-700 dark:text-[#34D399]">/{shortCode}</span>
             </h3>
             <p className="text-[12px] text-[#11140F]/55 dark:text-white/50 truncate max-w-md">
-              Adaptive single-page showcase &middot; Primary: <span className="font-mono text-[#11140F]/80">{destinationUrl}</span>
+              Adaptive single-page showcase &middot; Primary: <span className="font-mono text-[#11140F]/80 dark:text-white/80">{destinationUrl}</span>
             </p>
           </div>
         </div>
         {onClose && (
           <button
             onClick={onClose}
-            className="text-[#11140F]/40 hover:text-[#11140F] p-1.5 rounded-lg hover:bg-[#11140F]/5 transition-colors"
+            className="text-[#11140F]/40 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white p-1.5 rounded-lg hover:bg-[#11140F]/5 dark:hover:bg-white/10 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -329,20 +329,20 @@ export default function LandingPageEditor({
         <div className="flex items-center gap-2">
           {isActive ? (
             <>
-              <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse shrink-0" />
+              <span className="w-2.5 h-2.5 rounded-full bg-blue-600 dark:bg-blue-400 animate-pulse shrink-0" />
               <div>
-                <strong className="text-blue-900 font-semibold">Active Mode: Adaptive Showcase (Mobile, Tablet & Desktop)</strong>
-                <p className="text-[#11140F]/60 text-[11px]">
+                <strong className="text-blue-900 dark:text-blue-300 font-semibold">Active Mode: Adaptive Showcase (Mobile, Tablet & Desktop)</strong>
+                <p className="text-[#11140F]/60 dark:text-white/55 text-[11px]">
                   Scans load your adaptive showcase at <code>/page/{shortCode}</code>
                 </p>
               </div>
             </>
           ) : (
             <>
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 shrink-0" />
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 dark:bg-[#34D399] shrink-0" />
               <div>
-                <strong className="text-emerald-900 font-semibold">Active Mode: Direct URL Redirect</strong>
-                <p className="text-[#11140F]/60 text-[11px]">
+                <strong className="text-emerald-900 dark:text-[#34D399] font-semibold">Active Mode: Direct URL Redirect</strong>
+                <p className="text-[#11140F]/60 dark:text-white/55 text-[11px]">
                   Scans instantly redirect directly to your destination URL
                 </p>
               </div>
@@ -355,7 +355,7 @@ export default function LandingPageEditor({
             type="button"
             onClick={handleRevert}
             disabled={reverting}
-            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 font-medium text-[11.5px] shadow-2xs transition-colors shrink-0 disabled:opacity-50 cursor-pointer"
+            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-red-500/10 border border-red-200 dark:border-red-500/25 text-red-600 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-500/20 hover:border-red-300 font-medium text-[11.5px] shadow-2xs transition-colors shrink-0 disabled:opacity-50 cursor-pointer"
           >
             {reverting ? (
               <>
@@ -364,7 +364,7 @@ export default function LandingPageEditor({
               </>
             ) : (
               <>
-                <Undo2 className="w-3.5 h-3.5 text-red-500" />
+                <Undo2 className="w-3.5 h-3.5 text-red-500 dark:text-red-400" />
                 Revert to Direct URL
               </>
             )}
@@ -373,14 +373,14 @@ export default function LandingPageEditor({
       </div>
 
       {/* Tabs Switcher */}
-      <div className="flex items-center justify-between border-b pb-2 shrink-0">
-        <div className="flex gap-1.5">
+      <div className="flex items-center justify-between border-b border-[#11140F]/10 dark:border-white/10 pb-2 shrink-0 gap-2 flex-wrap">
+        <div className="flex gap-1.5 flex-wrap">
           <button
             type="button"
             onClick={() => setActiveTab('prompt')}
             className={`px-3 py-1.5 rounded-lg text-[12px] font-medium flex items-center gap-1.5 transition-colors ${
               activeTab === 'prompt'
-                ? 'bg-[#11140F] text-white'
+                ? 'bg-[#11140F] dark:bg-[#34D399] text-white dark:text-[#09110D] font-semibold'
                 : 'text-[#11140F]/60 dark:text-white/60 hover:bg-[#11140F]/5 dark:hover:bg-white/5'
             }`}
           >
@@ -393,7 +393,7 @@ export default function LandingPageEditor({
             disabled={!spec}
             className={`px-3 py-1.5 rounded-lg text-[12px] font-medium flex items-center gap-1.5 transition-colors disabled:opacity-40 ${
               activeTab === 'links'
-                ? 'bg-[#11140F] text-white'
+                ? 'bg-[#11140F] dark:bg-[#34D399] text-white dark:text-[#09110D] font-semibold'
                 : 'text-[#11140F]/60 dark:text-white/60 hover:bg-[#11140F]/5 dark:hover:bg-white/5'
             }`}
           >
@@ -406,7 +406,7 @@ export default function LandingPageEditor({
             disabled={!spec}
             className={`px-3 py-1.5 rounded-lg text-[12px] font-medium flex items-center gap-1.5 transition-colors disabled:opacity-40 ${
               activeTab === 'preview'
-                ? 'bg-[#11140F] text-white'
+                ? 'bg-[#11140F] dark:bg-[#34D399] text-white dark:text-[#09110D] font-semibold'
                 : 'text-[#11140F]/60 dark:text-white/60 hover:bg-[#11140F]/5 dark:hover:bg-white/5'
             }`}
           >
@@ -420,7 +420,7 @@ export default function LandingPageEditor({
             type="button"
             onClick={handleSaveAndPublish}
             disabled={saving}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white text-[12px] font-semibold hover:bg-emerald-700 transition-colors shadow-xs disabled:opacity-50 cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 dark:bg-[#34D399] text-white dark:text-[#09110D] text-[12px] font-semibold hover:bg-emerald-700 dark:hover:bg-[#2EC28A] transition-colors shadow-xs disabled:opacity-50 cursor-pointer"
           >
             {saving ? (
               <>
@@ -443,7 +443,7 @@ export default function LandingPageEditor({
         {activeTab === 'prompt' && (
           <div className="space-y-4 pt-1">
             <div className="space-y-1.5">
-              <label className="block text-[12.5px] font-medium text-[#11140F]/70">
+              <label className="block text-[12.5px] font-medium text-[#11140F]/70 dark:text-white/75">
                 Describe what showcase page you want (Adapts across Mobile, Tablet & Desktop):
               </label>
               <textarea
@@ -451,41 +451,41 @@ export default function LandingPageEditor({
                 value={promptText}
                 onChange={(e) => setPromptText(e.target.value)}
                 placeholder="Describe your business, menu items, key actions, social links, and vibe..."
-                className="w-full rounded-xl border border-[#11140F]/15 bg-[#11140F]/[0.02] p-3 text-[13px] text-[#11140F] placeholder:text-[#11140F]/30 outline-none focus:border-[#11140F] transition-colors resize-none"
+                className="w-full rounded-xl border border-[#11140F]/15 dark:border-white/12 bg-[#11140F]/[0.02] dark:bg-black/40 p-3 text-[13px] text-[#11140F] dark:text-white placeholder:text-[#11140F]/30 dark:placeholder:text-white/30 outline-none focus:border-[#11140F] dark:focus:border-[#34D399] transition-colors resize-none"
               />
-              <p className="text-[11px] text-[#11140F]/50">
-                Your destination URL (<span className="font-mono text-[#11140F]/70">{destinationUrl}</span>) will be automatically assigned to the primary call-to-action button.
+              <p className="text-[11px] text-[#11140F]/50 dark:text-white/50">
+                Your destination URL (<span className="font-mono text-[#11140F]/70 dark:text-white/75">{destinationUrl}</span>) will be automatically assigned to the primary call-to-action button.
               </p>
             </div>
 
             {/* Quick Inspiration Pills */}
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-[11px] font-medium text-[#11140F]/60">Inspirations:</span>
+              <span className="text-[11px] font-medium text-[#11140F]/60 dark:text-white/55">Inspirations:</span>
               <button
                 type="button"
                 onClick={() => setPromptText('Create an artisanal showcase & links page with our core website, booking specials, opening hours, and Instagram link.')}
-                className="px-2 py-0.5 rounded-lg text-[11px] font-medium bg-[#11140F]/5 hover:bg-[#11140F]/10 text-[#11140F]/80 transition-colors"
+                className="px-2 py-0.5 rounded-lg text-[11px] font-medium bg-[#11140F]/5 dark:bg-white/[0.06] hover:bg-[#11140F]/10 dark:hover:bg-white/10 text-[#11140F]/80 dark:text-white/80 transition-colors"
               >
                 🌿 Artisanal Craft & Studio
               </button>
               <button
                 type="button"
                 onClick={() => setPromptText('Bistro & natural wine bar with seasonal dining menu, table reservations link, and evening cocktail specials.')}
-                className="px-2 py-0.5 rounded-lg text-[11px] font-medium bg-[#11140F]/5 hover:bg-[#11140F]/10 text-[#11140F]/80 transition-colors"
+                className="px-2 py-0.5 rounded-lg text-[11px] font-medium bg-[#11140F]/5 dark:bg-white/[0.06] hover:bg-[#11140F]/10 dark:hover:bg-white/10 text-[#11140F]/80 dark:text-white/80 transition-colors"
               >
                 🍽️ Dining & Bistro Specials
               </button>
               <button
                 type="button"
                 onClick={() => setPromptText('Luxury architectural estates & residences showcase with private viewing schedule, downloadable brochure, and concierge.')}
-                className="px-2 py-0.5 rounded-lg text-[11px] font-medium bg-[#11140F]/5 hover:bg-[#11140F]/10 text-[#11140F]/80 transition-colors"
+                className="px-2 py-0.5 rounded-lg text-[11px] font-medium bg-[#11140F]/5 dark:bg-white/[0.06] hover:bg-[#11140F]/10 dark:hover:bg-white/10 text-[#11140F]/80 dark:text-white/80 transition-colors"
               >
                 🏢 Luxury Real Estate
               </button>
               <button
                 type="button"
                 onClick={() => setPromptText('Digital software studio showcase with client case studies, live demo links, technical consulting, and calendar booking.')}
-                className="px-2 py-0.5 rounded-lg text-[11px] font-medium bg-[#11140F]/5 hover:bg-[#11140F]/10 text-[#11140F]/80 transition-colors"
+                className="px-2 py-0.5 rounded-lg text-[11px] font-medium bg-[#11140F]/5 dark:bg-white/[0.06] hover:bg-[#11140F]/10 dark:hover:bg-white/10 text-[#11140F]/80 dark:text-white/80 transition-colors"
               >
                 💼 Executive Tech Portfolio
               </button>
@@ -496,7 +496,7 @@ export default function LandingPageEditor({
                 type="button"
                 onClick={handleGenerate}
                 disabled={loading || !promptText.trim()}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#11140F] text-white text-[12.5px] font-medium hover:bg-[#2A2E25] transition-colors disabled:opacity-50 cursor-pointer shadow-sm"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#11140F] dark:bg-[#34D399] text-white dark:text-[#09110D] text-[12.5px] font-semibold hover:bg-[#2A2E25] dark:hover:bg-[#2EC28A] transition-colors disabled:opacity-50 cursor-pointer shadow-sm"
               >
                 {loading ? (
                   <>
@@ -505,7 +505,7 @@ export default function LandingPageEditor({
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-400 dark:text-[#09110D]" />
                     Generate Adaptive Showcase with AI
                   </>
                 )}
@@ -513,7 +513,7 @@ export default function LandingPageEditor({
             </div>
 
             {spec && (
-              <div className="mt-4 p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 text-[12px] text-emerald-900 flex items-center justify-between">
+              <div className="mt-4 p-4 rounded-xl border border-emerald-200 dark:border-[#34D399]/25 bg-emerald-50/50 dark:bg-[#34D399]/10 text-[12px] text-emerald-900 dark:text-emerald-200 flex items-center justify-between flex-wrap gap-2">
                 <div>
                   <strong>{spec.businessName}</strong> is ready with {spec.blocks.length} sections.
                 </div>
@@ -521,14 +521,14 @@ export default function LandingPageEditor({
                   <button
                     type="button"
                     onClick={() => setActiveTab('links')}
-                    className="font-semibold text-emerald-800 underline"
+                    className="font-semibold text-emerald-800 dark:text-[#34D399] underline"
                   >
                     Manage Buttons →
                   </button>
                   <button
                     type="button"
                     onClick={() => setActiveTab('preview')}
-                    className="font-semibold text-emerald-800 underline"
+                    className="font-semibold text-emerald-800 dark:text-[#34D399] underline"
                   >
                     Preview Mobile & Desktop →
                   </button>
@@ -545,19 +545,19 @@ export default function LandingPageEditor({
               if (block.type === 'linkList') {
                 return (
                   <div key={blockIdx} className="space-y-3">
-                    <div className="flex items-center justify-between pb-1 border-b">
+                    <div className="flex items-center justify-between pb-1 border-b border-[#11140F]/10 dark:border-white/10">
                       <div>
-                        <h4 className="text-[12.5px] font-semibold text-[#11140F] uppercase tracking-wider">
+                        <h4 className="text-[12.5px] font-semibold text-[#11140F] dark:text-white uppercase tracking-wider">
                           {block.title || 'Quick Links & Action Buttons'} ({block.items.length})
                         </h4>
-                        <p className="text-[11px] text-[#11140F]/55">
+                        <p className="text-[11px] text-[#11140F]/55 dark:text-white/55">
                           Add, reorder, or remove buttons. On desktop, buttons automatically flow into a responsive grid.
                         </p>
                       </div>
                       <button
                         type="button"
                         onClick={() => handleAddButton(blockIdx)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#11140F] text-white text-[11.5px] font-semibold hover:bg-[#2A2E25] transition-colors shadow-2xs cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#11140F] dark:bg-[#34D399] text-white dark:text-[#09110D] text-[11.5px] font-semibold hover:bg-[#2A2E25] dark:hover:bg-[#2EC28A] transition-colors shadow-2xs cursor-pointer"
                       >
                         <Plus className="w-3.5 h-3.5" />
                         Add Button
@@ -571,20 +571,20 @@ export default function LandingPageEditor({
                           key={itemIdx}
                           className={`p-3.5 rounded-xl border transition-all space-y-2.5 ${
                             item.highlight
-                              ? 'border-emerald-300 bg-emerald-50/40 shadow-xs'
-                              : 'border-[#11140F]/10 bg-[#F7F8F5]'
+                              ? 'border-emerald-300 dark:border-[#34D399]/35 bg-emerald-50/40 dark:bg-[#34D399]/10 shadow-xs'
+                              : 'border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5] dark:bg-white/[0.03]'
                           }`}
                         >
                           <div className="flex items-center justify-between gap-2 flex-wrap">
                             <div className="flex items-center gap-2">
-                              <span className="w-5 h-5 rounded-full bg-[#11140F]/10 text-[#11140F] flex items-center justify-center text-[10.5px] font-bold font-mono">
+                              <span className="w-5 h-5 rounded-full bg-[#11140F]/10 dark:bg-white/10 text-[#11140F] dark:text-white flex items-center justify-center text-[10.5px] font-bold font-mono">
                                 {itemIdx + 1}
                               </span>
-                              <span className="text-[12.5px] font-semibold text-[#11140F]">
+                              <span className="text-[12.5px] font-semibold text-[#11140F] dark:text-white">
                                 {item.title || 'Untitled Button'}
                               </span>
                               {item.highlight && (
-                                <span className="px-2 py-0.2 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-semibold">
+                                <span className="px-2 py-0.2 rounded-full bg-emerald-100 dark:bg-[#34D399]/20 text-emerald-800 dark:text-[#34D399] text-[10px] font-semibold">
                                   Primary CTA
                                 </span>
                               )}
@@ -596,38 +596,38 @@ export default function LandingPageEditor({
                                 <button
                                   type="button"
                                   onClick={() => handleSetToDestination(blockIdx, itemIdx)}
-                                  className="text-[11px] font-medium text-emerald-700 hover:text-emerald-800 underline flex items-center gap-1 cursor-pointer"
+                                  className="text-[11px] font-medium text-emerald-700 dark:text-[#34D399] hover:text-emerald-800 dark:hover:text-emerald-300 underline flex items-center gap-1 cursor-pointer"
                                   title="Point this button to your QR code's destination URL"
                                 >
                                   <LinkIcon className="w-3 h-3" />
                                   Point to Destination
                                 </button>
                               ) : (
-                                <span className="text-[10px] font-medium text-emerald-800 bg-emerald-100/70 px-2 py-0.5 rounded-full flex items-center gap-1">
-                                  <CheckCircle2 className="w-3 h-3 text-emerald-700" />
+                                <span className="text-[10px] font-medium text-emerald-800 dark:text-[#34D399] bg-emerald-100/70 dark:bg-[#34D399]/15 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                  <CheckCircle2 className="w-3 h-3 text-emerald-700 dark:text-[#34D399]" />
                                   Matches Destination
                                 </span>
                               )}
 
                               {/* Reorder Buttons */}
-                              <div className="flex items-center border border-[#11140F]/10 rounded-lg bg-white overflow-hidden">
+                              <div className="flex items-center border border-[#11140F]/10 dark:border-white/12 rounded-lg bg-white dark:bg-black/40 overflow-hidden">
                                 <button
                                   type="button"
                                   disabled={itemIdx === 0}
                                   onClick={() => handleMoveButton(blockIdx, itemIdx, 'up')}
-                                  className="p-1 hover:bg-[#EEF0EA] disabled:opacity-30 transition-colors"
+                                  className="p-1 hover:bg-[#EEF0EA] dark:hover:bg-white/10 disabled:opacity-30 transition-colors"
                                   title="Move button up"
                                 >
-                                  <ArrowUp className="w-3 h-3 text-[#11140F]/70" />
+                                  <ArrowUp className="w-3 h-3 text-[#11140F]/70 dark:text-white/70" />
                                 </button>
                                 <button
                                   type="button"
                                   disabled={itemIdx === block.items.length - 1}
                                   onClick={() => handleMoveButton(blockIdx, itemIdx, 'down')}
-                                  className="p-1 hover:bg-[#EEF0EA] disabled:opacity-30 transition-colors border-l border-[#11140F]/10"
+                                  className="p-1 hover:bg-[#EEF0EA] dark:hover:bg-white/10 disabled:opacity-30 transition-colors border-l border-[#11140F]/10 dark:border-white/12"
                                   title="Move button down"
                                 >
-                                  <ArrowDown className="w-3 h-3 text-[#11140F]/70" />
+                                  <ArrowDown className="w-3 h-3 text-[#11140F]/70 dark:text-white/70" />
                                 </button>
                               </div>
 
@@ -637,19 +637,19 @@ export default function LandingPageEditor({
                                 onClick={() => handleToggleHighlight(blockIdx, itemIdx)}
                                 className={`p-1.5 rounded-lg border text-[11px] font-medium transition-colors ${
                                   item.highlight
-                                    ? 'border-emerald-300 bg-emerald-100 text-emerald-900'
-                                    : 'border-[#11140F]/10 bg-white text-[#11140F]/60 hover:text-[#11140F]'
+                                    ? 'border-emerald-300 dark:border-[#34D399]/40 bg-emerald-100 dark:bg-[#34D399]/20 text-emerald-900 dark:text-[#34D399]'
+                                    : 'border-[#11140F]/10 dark:border-white/12 bg-white dark:bg-black/40 text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white'
                                 }`}
                                 title="Toggle primary button style"
                               >
-                                <Star className={`w-3.5 h-3.5 ${item.highlight ? 'fill-emerald-600 text-emerald-600' : ''}`} />
+                                <Star className={`w-3.5 h-3.5 ${item.highlight ? 'fill-emerald-600 dark:fill-[#34D399] text-emerald-600 dark:text-[#34D399]' : ''}`} />
                               </button>
 
                               {/* Remove Button */}
                               <button
                                 type="button"
                                 onClick={() => handleRemoveButton(blockIdx, itemIdx)}
-                                className="p-1.5 rounded-lg border border-red-200 bg-white text-red-500 hover:bg-red-50 hover:border-red-300 transition-colors cursor-pointer"
+                                className="p-1.5 rounded-lg border border-red-200 dark:border-red-500/25 bg-white dark:bg-red-500/10 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/20 hover:border-red-300 transition-colors cursor-pointer"
                                 title="Delete this button"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -659,7 +659,7 @@ export default function LandingPageEditor({
 
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             <div>
-                              <label className="block text-[11px] text-[#11140F]/50 mb-0.5">
+                              <label className="block text-[11px] text-[#11140F]/50 dark:text-white/55 mb-0.5">
                                 Button Label
                               </label>
                               <input
@@ -668,12 +668,12 @@ export default function LandingPageEditor({
                                 onChange={(e) =>
                                   handleUpdateLinkItem(blockIdx, itemIdx, 'title', e.target.value)
                                 }
-                                className="w-full rounded-lg border border-[#11140F]/15 bg-white p-2 text-[12px] outline-none focus:border-[#11140F]"
+                                className="w-full rounded-lg border border-[#11140F]/15 dark:border-white/12 bg-white dark:bg-black/40 p-2 text-[12px] text-[#11140F] dark:text-white outline-none focus:border-[#11140F] dark:focus:border-[#34D399]"
                               />
                             </div>
 
                             <div>
-                              <label className="block text-[11px] text-[#11140F]/50 mb-0.5">
+                              <label className="block text-[11px] text-[#11140F]/50 dark:text-white/55 mb-0.5">
                                 Target URL
                               </label>
                               <input
@@ -682,13 +682,13 @@ export default function LandingPageEditor({
                                 onChange={(e) =>
                                   handleUpdateLinkItem(blockIdx, itemIdx, 'url', e.target.value)
                                 }
-                                className="w-full rounded-lg border border-[#11140F]/15 bg-white p-2 text-[12px] font-mono text-[11.5px] outline-none focus:border-[#11140F]"
+                                className="w-full rounded-lg border border-[#11140F]/15 dark:border-white/12 bg-white dark:bg-black/40 p-2 text-[12px] font-mono text-[11.5px] text-[#11140F] dark:text-white outline-none focus:border-[#11140F] dark:focus:border-[#34D399]"
                               />
                             </div>
                           </div>
 
                           <div>
-                            <label className="block text-[11px] text-[#11140F]/50 mb-0.5">
+                            <label className="block text-[11px] text-[#11140F]/50 dark:text-white/55 mb-0.5">
                               Subtitle (optional)
                             </label>
                             <input
@@ -697,7 +697,7 @@ export default function LandingPageEditor({
                               onChange={(e) =>
                                 handleUpdateLinkItem(blockIdx, itemIdx, 'subtitle', e.target.value)
                               }
-                              className="w-full rounded-lg border border-[#11140F]/15 bg-white p-1.5 text-[11.5px] outline-none focus:border-[#11140F]"
+                              className="w-full rounded-lg border border-[#11140F]/15 dark:border-white/12 bg-white dark:bg-black/40 p-1.5 text-[11.5px] text-[#11140F] dark:text-white placeholder:text-[#11140F]/35 dark:placeholder:text-white/30 outline-none focus:border-[#11140F] dark:focus:border-[#34D399]"
                               placeholder="Add short description or callout"
                             />
                           </div>
@@ -710,32 +710,32 @@ export default function LandingPageEditor({
                       <button
                         type="button"
                         onClick={() => handleAddButton(blockIdx)}
-                        className="py-2 px-3 rounded-xl border border-dashed border-[#11140F]/30 bg-white text-[#11140F] hover:bg-[#EEF0EA] text-[12px] font-semibold transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                        className="py-2 px-3 rounded-xl border border-dashed border-[#11140F]/30 dark:border-white/25 bg-white dark:bg-white/[0.04] text-[#11140F] dark:text-white hover:bg-[#EEF0EA] dark:hover:bg-white/10 text-[12px] font-semibold transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
                       >
-                        <Plus className="w-3.5 h-3.5 text-[#2F6B4F]" />
+                        <Plus className="w-3.5 h-3.5 text-[#2F6B4F] dark:text-[#34D399]" />
                         + Add Another Button
                       </button>
 
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="text-[11px] text-[#11140F]/50">Quick add:</span>
+                        <span className="text-[11px] text-[#11140F]/50 dark:text-white/50">Quick add:</span>
                         <button
                           type="button"
                           onClick={() => handleAddButton(blockIdx, 'Follow on Instagram', 'https://instagram.com/')}
-                          className="px-2 py-1 rounded-lg border border-[#11140F]/10 bg-white hover:bg-[#EEF0EA] text-[11px] text-[#11140F]/80 transition-colors"
+                          className="px-2 py-1 rounded-lg border border-[#11140F]/10 dark:border-white/12 bg-white dark:bg-white/[0.05] hover:bg-[#EEF0EA] dark:hover:bg-white/10 text-[11px] text-[#11140F]/80 dark:text-white/80 transition-colors"
                         >
                           + Instagram
                         </button>
                         <button
                           type="button"
                           onClick={() => handleAddButton(blockIdx, 'Book Appointment', 'https://calendly.com/')}
-                          className="px-2 py-1 rounded-lg border border-[#11140F]/10 bg-white hover:bg-[#EEF0EA] text-[11px] text-[#11140F]/80 transition-colors"
+                          className="px-2 py-1 rounded-lg border border-[#11140F]/10 dark:border-white/12 bg-white dark:bg-white/[0.05] hover:bg-[#EEF0EA] dark:hover:bg-white/10 text-[11px] text-[#11140F]/80 dark:text-white/80 transition-colors"
                         >
                           + Booking
                         </button>
                         <button
                           type="button"
                           onClick={() => handleAddButton(blockIdx, 'View Catalog & Menu', destinationUrl)}
-                          className="px-2 py-1 rounded-lg border border-[#11140F]/10 bg-white hover:bg-[#EEF0EA] text-[11px] text-[#11140F]/80 transition-colors"
+                          className="px-2 py-1 rounded-lg border border-[#11140F]/10 dark:border-white/12 bg-white dark:bg-white/[0.05] hover:bg-[#EEF0EA] dark:hover:bg-white/10 text-[11px] text-[#11140F]/80 dark:text-white/80 transition-colors"
                         >
                           + Catalog
                         </button>
@@ -753,18 +753,18 @@ export default function LandingPageEditor({
         {activeTab === 'preview' && spec && (
           <div className="space-y-3">
             {/* Viewport Switcher */}
-            <div className="flex items-center justify-between pb-1 border-b">
-              <span className="text-[12px] font-medium text-[#11140F]/70">
+            <div className="flex items-center justify-between pb-1 border-b border-[#11140F]/10 dark:border-white/10 flex-wrap gap-2">
+              <span className="text-[12px] font-medium text-[#11140F]/70 dark:text-white/70">
                 Preview how visitors see your page:
               </span>
-              <div className="flex items-center gap-1 bg-[#EEF0EA] p-1 rounded-xl text-[12px]">
+              <div className="flex items-center gap-1 bg-[#EEF0EA] dark:bg-white/[0.05] p-1 rounded-xl text-[12px]">
                 <button
                   type="button"
                   onClick={() => setViewportMode('mobile')}
                   className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-medium transition-all ${
                     viewportMode === 'mobile'
-                      ? 'bg-white text-[#11140F] shadow-xs font-semibold'
-                      : 'text-[#11140F]/60 hover:text-[#11140F]'
+                      ? 'bg-white dark:bg-[#34D399] text-[#11140F] dark:text-[#09110D] shadow-xs font-semibold'
+                      : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white'
                   }`}
                 >
                   <Smartphone className="w-3.5 h-3.5" />
@@ -775,8 +775,8 @@ export default function LandingPageEditor({
                   onClick={() => setViewportMode('tablet')}
                   className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-medium transition-all ${
                     viewportMode === 'tablet'
-                      ? 'bg-white text-[#11140F] shadow-xs font-semibold'
-                      : 'text-[#11140F]/60 hover:text-[#11140F]'
+                      ? 'bg-white dark:bg-[#34D399] text-[#11140F] dark:text-[#09110D] shadow-xs font-semibold'
+                      : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white'
                   }`}
                 >
                   <Tablet className="w-3.5 h-3.5" />
@@ -787,8 +787,8 @@ export default function LandingPageEditor({
                   onClick={() => setViewportMode('desktop')}
                   className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-medium transition-all ${
                     viewportMode === 'desktop'
-                      ? 'bg-white text-[#11140F] shadow-xs font-semibold'
-                      : 'text-[#11140F]/60 hover:text-[#11140F]'
+                      ? 'bg-white dark:bg-[#34D399] text-[#11140F] dark:text-[#09110D] shadow-xs font-semibold'
+                      : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white'
                   }`}
                 >
                   <Monitor className="w-3.5 h-3.5" />
@@ -798,7 +798,7 @@ export default function LandingPageEditor({
             </div>
 
             {/* Preview Container */}
-            <div className="flex flex-col items-center p-3 sm:p-5 bg-[#11140F]/[0.03] rounded-2xl overflow-x-auto">
+            <div className="flex flex-col items-center p-3 sm:p-5 bg-[#11140F]/[0.03] dark:bg-black/30 rounded-2xl overflow-x-auto">
               {viewportMode === 'mobile' ? (
                 // Realistic Mobile Phone Mockup
                 <div className="w-[360px] max-w-full rounded-[38px] overflow-hidden shadow-2xl border-[8px] border-slate-900 bg-white relative">

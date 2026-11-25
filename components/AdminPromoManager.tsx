@@ -1013,16 +1013,16 @@ export default function AdminPromoManager({
       {/* CREATE PROMO CODE MODAL */}
       {showCreateCodeModal && (
         <div className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl border border-[#11140F]/10 shadow-2xl max-w-md w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between border-b border-[#11140F]/10 pb-4">
+          <div className="bg-white dark:bg-[#101211] rounded-3xl border border-[#11140F]/10 dark:border-white/12 shadow-2xl max-w-md w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 text-[#11140F] dark:text-white">
+            <div className="flex items-center justify-between border-b border-[#11140F]/10 dark:border-white/10 pb-4">
               <div className="flex items-center gap-2">
-                <Tag className="w-5 h-5 text-emerald-600" />
-                <h3 className="text-base font-bold text-[#11140F]">Create Sovereign Promo Code</h3>
+                <Tag className="w-5 h-5 text-emerald-600 dark:text-[#34D399]" />
+                <h3 className="text-base font-bold text-[#11140F] dark:text-white">Create Sovereign Promo Code</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowCreateCodeModal(false)}
-                className="text-[#11140F]/50 hover:text-[#11140F] text-sm font-bold cursor-pointer"
+                className="text-[#11140F]/50 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white text-sm font-bold cursor-pointer"
               >
                 ✕
               </button>
@@ -1030,8 +1030,8 @@ export default function AdminPromoManager({
 
             <form onSubmit={handleCreateCode} className="space-y-4">
               {/* Quick Preset Fillers */}
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#F7F8F5] border border-[#11140F]/8">
-                <span className="text-[11px] font-medium text-[#11140F]/60">Quick Presets:</span>
+              <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#F7F8F5] dark:bg-white/[0.03] border border-[#11140F]/8 dark:border-white/10">
+                <span className="text-[11px] font-medium text-[#11140F]/60 dark:text-white/55">Quick Presets:</span>
                 <div className="flex items-center gap-1.5">
                   <button
                     type="button"
@@ -1046,7 +1046,7 @@ export default function AdminPromoManager({
                         expiresAt: '',
                       })
                     }
-                    className="px-2 py-0.5 text-[10.5px] font-mono font-bold rounded-md bg-white border border-[#11140F]/15 hover:bg-[#EEF0EA] text-[#11140F] transition-all cursor-pointer"
+                    className="px-2 py-0.5 text-[10.5px] font-mono font-bold rounded-md bg-white dark:bg-white/10 border border-[#11140F]/15 dark:border-white/12 hover:bg-[#EEF0EA] dark:hover:bg-white/15 text-[#11140F] dark:text-white transition-all cursor-pointer"
                   >
                     BLACKFRIDAY40
                   </button>
@@ -1063,7 +1063,7 @@ export default function AdminPromoManager({
                         expiresAt: '',
                       })
                     }
-                    className="px-2 py-0.5 text-[10.5px] font-mono font-bold rounded-md bg-white border border-[#11140F]/15 hover:bg-[#EEF0EA] text-[#11140F] transition-all cursor-pointer"
+                    className="px-2 py-0.5 text-[10.5px] font-mono font-bold rounded-md bg-white dark:bg-white/10 border border-[#11140F]/15 dark:border-white/12 hover:bg-[#EEF0EA] dark:hover:bg-white/15 text-[#11140F] dark:text-white transition-all cursor-pointer"
                   >
                     FLASH25
                   </button>
@@ -1071,7 +1071,7 @@ export default function AdminPromoManager({
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#11140F]">Promo Code *</label>
+                <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Promo Code *</label>
                 <input
                   type="text"
                   required
@@ -1080,24 +1080,24 @@ export default function AdminPromoManager({
                     setNewCodeForm({ ...newCodeForm, code: e.target.value.toUpperCase() })
                   }
                   placeholder="e.g. CYBERMONDAY50"
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 font-mono font-bold focus:outline-hidden focus:border-[#2F6B4F]"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/12 bg-white dark:bg-black/40 text-[#11140F] dark:text-white placeholder:text-[#11140F]/35 dark:placeholder:text-white/30 font-mono font-bold focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-[#34D399]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">Discount Type</label>
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Discount Type</label>
                   <select
                     value={newCodeForm.type}
                     onChange={(e) => setNewCodeForm({ ...newCodeForm, type: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 bg-white"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/12 bg-white dark:bg-[#161917] text-[#11140F] dark:text-white"
                   >
                     <option value="percent">Percentage (%)</option>
                     <option value="fixed">Fixed Dollar ($)</option>
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">Discount Value *</label>
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Discount Value *</label>
                   <input
                     type="number"
                     min="1"
@@ -1107,18 +1107,18 @@ export default function AdminPromoManager({
                     onChange={(e) =>
                       setNewCodeForm({ ...newCodeForm, value: Number(e.target.value) })
                     }
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 font-mono"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/12 bg-white dark:bg-black/40 text-[#11140F] dark:text-white font-mono"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">Applies To Plan</label>
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Applies To Plan</label>
                   <select
                     value={newCodeForm.appliesTo}
                     onChange={(e) => setNewCodeForm({ ...newCodeForm, appliesTo: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 bg-white"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/12 bg-white dark:bg-[#161917] text-[#11140F] dark:text-white"
                   >
                     <option value="all">All Plans</option>
                     <option value="pro">Pro Only</option>
@@ -1127,13 +1127,13 @@ export default function AdminPromoManager({
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">Billing Frequency</label>
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Billing Frequency</label>
                   <select
                     value={newCodeForm.billingPeriod}
                     onChange={(e) =>
                       setNewCodeForm({ ...newCodeForm, billingPeriod: e.target.value })
                     }
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 bg-white"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/12 bg-white dark:bg-[#161917] text-[#11140F] dark:text-white"
                   >
                     <option value="both">Monthly & Annual</option>
                     <option value="annual">Annual Only</option>
@@ -1144,7 +1144,7 @@ export default function AdminPromoManager({
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">Max Uses (Optional)</label>
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Max Uses (Optional)</label>
                   <input
                     type="number"
                     min="1"
@@ -1153,34 +1153,34 @@ export default function AdminPromoManager({
                       setNewCodeForm({ ...newCodeForm, maxRedemptions: e.target.value })
                     }
                     placeholder="Unlimited"
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 font-mono"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/12 bg-white dark:bg-black/40 text-[#11140F] dark:text-white placeholder:text-[#11140F]/35 dark:placeholder:text-white/30 font-mono"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#11140F]">Expires On (Optional)</label>
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Expires On (Optional)</label>
                   <input
                     type="date"
                     value={newCodeForm.expiresAt}
                     onChange={(e) =>
                       setNewCodeForm({ ...newCodeForm, expiresAt: e.target.value })
                     }
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15"
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/12 bg-white dark:bg-black/40 text-[#11140F] dark:text-white"
                   />
                 </div>
               </div>
 
-              <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10">
+              <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setShowCreateCodeModal(false)}
-                  className="px-4 py-2 text-xs font-semibold text-[#11140F]/70 hover:text-[#11140F] cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold text-[#11140F]/70 dark:text-white/65 hover:text-[#11140F] dark:hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-5 py-2.5 rounded-xl bg-[#11140F] text-white text-xs font-bold hover:bg-[#2A2E25] transition-all cursor-pointer shadow-xs disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-xl bg-[#11140F] dark:bg-[#34D399] text-white dark:text-[#09110D] text-xs font-bold hover:bg-[#2A2E25] dark:hover:bg-[#2EC28A] transition-all cursor-pointer shadow-xs disabled:opacity-50"
                 >
                   {saving ? 'Creating...' : 'Create Promo Code'}
                 </button>
