@@ -204,13 +204,68 @@ export default function DnsManagerModal({ orderId, domainName, onClose }: Props)
           onSubmit={handleAddRecord}
           className="p-4 sm:p-5 rounded-2xl bg-[#F7F8F5] dark:bg-[#151912] border border-[#11140F]/10 dark:border-white/10 space-y-4"
         >
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
               Add New DNS Record
             </h3>
             <span className="text-[11px] text-[#11140F]/50 dark:text-white/50">
               {PLACEHOLDERS[type].hint}
             </span>
+          </div>
+
+          {/* Quick Presets for Vercel, Render, Netlify */}
+          <div className="flex flex-wrap items-center gap-1.5 p-2 rounded-xl bg-white dark:bg-[#1C2218] border border-[#11140F]/8 dark:border-white/8 text-xs">
+            <span className="text-[10px] uppercase font-bold tracking-wider text-[#11140F]/50 dark:text-white/50 mr-1">
+              Quick 1-Click Presets:
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                setType('A');
+                setName('@');
+                setContent('76.76.21.21');
+                setProxied(false);
+              }}
+              className="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-800 dark:text-[#34D399] text-[11px] font-semibold transition-colors cursor-pointer flex items-center gap-1"
+            >
+              <span>▲ Vercel Apex (76.76.21.21)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setType('CNAME');
+                setName('www');
+                setContent('cname.vercel-dns.com');
+                setProxied(false);
+              }}
+              className="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-800 dark:text-[#34D399] text-[11px] font-semibold transition-colors cursor-pointer flex items-center gap-1"
+            >
+              <span>▲ Vercel www</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setType('A');
+                setName('@');
+                setContent('216.24.57.1');
+                setProxied(false);
+              }}
+              className="px-2.5 py-1 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-700 dark:text-purple-300 text-[11px] font-semibold transition-colors cursor-pointer flex items-center gap-1"
+            >
+              <span>⚡ Render Apex (216.24.57.1)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setType('A');
+                setName('@');
+                setContent('100.24.208.97');
+                setProxied(false);
+              }}
+              className="px-2.5 py-1 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-700 dark:text-blue-300 text-[11px] font-semibold transition-colors cursor-pointer flex items-center gap-1"
+            >
+              <span>🌐 Netlify Apex (100.24.208.97)</span>
+            </button>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 text-xs">

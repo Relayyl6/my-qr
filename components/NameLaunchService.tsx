@@ -29,6 +29,7 @@ import {
 } from '@/app/domains-actions';
 import DnsManagerModal from './DnsManagerModal';
 import DomainFleetOperabilities from './DomainFleetOperabilities';
+import HostingConnectionHub from './HostingConnectionHub';
 
 interface Props {
   user: {
@@ -833,26 +834,31 @@ export default function NameLaunchService({ user }: Props) {
 
                   {/* 2. ACTIVE / PAID OWNED DOMAINS */}
                   {ownedDomains.length === 0 ? (
-                    <div className="p-10 rounded-2xl border border-dashed border-[#11140F]/15 dark:border-white/12 text-center space-y-3 bg-[#F7F8F5] dark:bg-white/[0.02]">
-                      <div className="w-11 h-11 rounded-2xl bg-black/[0.05] dark:bg-white/10 text-[#2F6B4F] dark:text-[#34D399] flex items-center justify-center mx-auto">
-                        <Globe className="w-5 h-5" />
+                    <div className="space-y-5">
+                      <div className="p-10 rounded-2xl border border-dashed border-[#11140F]/15 dark:border-white/12 text-center space-y-3 bg-[#F7F8F5] dark:bg-white/[0.02]">
+                        <div className="w-11 h-11 rounded-2xl bg-black/[0.05] dark:bg-white/10 text-[#2F6B4F] dark:text-[#34D399] flex items-center justify-center mx-auto">
+                          <Globe className="w-5 h-5" />
+                        </div>
+                        <h4 className="text-sm font-bold">No active domains yet</h4>
+                        <p className="text-xs text-[#11140F]/60 dark:text-white/55 max-w-sm mx-auto leading-relaxed">
+                          {pendingOrders.length > 0
+                            ? 'Complete payment on your pending order above to activate your domain and unlock DNS & email routing.'
+                            : 'Search for an available domain name to register your brand address and email forwarding.'}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab('search')}
+                          className="px-5 py-2.5 rounded-2xl bg-[#34D399] hover:bg-[#34D399]/90 text-[#09110D] text-xs font-bold shadow-sm cursor-pointer"
+                        >
+                          Search Domains
+                        </button>
                       </div>
-                      <h4 className="text-sm font-bold">No active domains yet</h4>
-                      <p className="text-xs text-[#11140F]/60 dark:text-white/55 max-w-sm mx-auto leading-relaxed">
-                        {pendingOrders.length > 0
-                          ? 'Complete payment on your pending order above to activate your domain and unlock DNS & email routing.'
-                          : 'Search for an available domain name to register your brand address and email forwarding.'}
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => setActiveTab('search')}
-                        className="px-5 py-2.5 rounded-2xl bg-[#34D399] hover:bg-[#34D399]/90 text-[#09110D] text-xs font-bold shadow-sm cursor-pointer"
-                      >
-                        Search Domains
-                      </button>
+
+                      {/* Hosting Connection Hub Preview */}
+                      <HostingConnectionHub activeDomainName="yemuel.xyz" />
                     </div>
                   ) : (
-                    <div className="space-y-4">
+                    <div className="space-y-5">
                       <div className="grid grid-cols-1 gap-4">
                         {ownedDomains.map((ord) => (
                           <div
@@ -951,6 +957,12 @@ export default function NameLaunchService({ user }: Props) {
                           </div>
                         ))}
                       </div>
+
+                      {/* Point Domain to Hosting Hub (Vercel, Render, Netlify) */}
+                      <HostingConnectionHub
+                        activeDomainName={ownedDomains[0]?.domainName}
+                        onOpenDnsModal={() => setSelectedDnsOrder(ownedDomains[0])}
+                      />
 
                       {/* Gmail Send Mail As Guide */}
                       <div className="rounded-2xl bg-[#F7F8F5] dark:bg-white/[0.03] border border-[#11140F]/10 dark:border-white/[0.08] p-5 space-y-3">

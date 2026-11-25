@@ -25,6 +25,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
+import HostingConnectionHub from './HostingConnectionHub';
 
 interface Domain {
   id: string;
@@ -480,6 +481,11 @@ export default function BrandedDomainsManager({ initialDomains, userTier, isAdmi
                   })}
                 </div>
               )}
+
+              {/* Point Domain to Vercel, Render, or Other Cloud Hosts */}
+              <div className="pt-2">
+                <HostingConnectionHub activeDomainName={domains[0]?.domain || 'yemuel.xyz'} />
+              </div>
             </>
           )}
         </div>
