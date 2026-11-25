@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { getTldTier } from './constants';
 
-export type RoundingStep = 100 | 500 | 1000 | 900;
+export type RoundingStep = 100 | 500 | 800 | 1000 | 900;
 
 export interface DomainPricingConfig {
   mode: 'auto_buffered' | 'manual_override';
@@ -9,25 +9,37 @@ export interface DomainPricingConfig {
   bufferPercent: number;       // e.g., 5.0% buffer spread against payment processor rate cuts
   bufferedRate: number;         // e.g., 1400 (scaled-up buffered rate)
   manualOverrideRate: number;  // e.g., 1450 (if admin opts to freeze an explicit FX rate)
-  platformMarkupNgn: number;   // e.g., 2500 fallback global platform fee added to wholesale cost
+  platformMarkupNgn: number;   // e.g., 3000 fallback global platform fee added to wholesale cost
   
   // Tiered Profit Margins (NGN)
-  budgetMarkupNgn?: number;    // e.g., 2000 for budget TLDs (.xyz, .site, .store, .online)
-  standardMarkupNgn?: number;  // e.g., 5000 for standard TLDs (.com, .net, .org)
-  premiumMarkupNgn?: number;   // e.g., 8000 for premium TLDs (.co, .io)
+  budgetMarkupNgn?: number;    // Starts from 3000 as added retail for budget TLDs (.xyz, .site, .store, .online)
+  standardMarkupNgn?: number;  // Mid-tier standard TLDs (.com, .net, .org)
+  premiumMarkupNgn?: number;   // Top-tier high-price TLDs (.co, .io, up to 8000)
   
-  // Per-TLD custom profit margins (NGN)
-  tldMargins?: Record<string, number>; // e.g. { io: 8000, co: 6000, net: 5000 }
+  // Per-TLD custom profit margins (NGN) - e.g. starts from 3000 and increases by 800-1000
+  tldMargins?: Record<string, number>;
   
   // Per-TLD fixed retail price overrides (NGN)
   tldOverrides: Record<string, number>; // Specific fixed retail prices in NGN (e.g., { com: 19500 })
   
-  // Clean pricing progression / rounding step (nearest 100, 500, 1000, or 900 charm)
+  // Clean pricing progression / rounding step (nearest 100, 500, 800, 1000, or 900 charm)
   roundingStep?: RoundingStep;
   
   lastFetchedAt: string;
   source: string;              // 'apilayer' | 'open_er_api' | 'fallback_env'
 }
+
+export const DEFAULT_TLD_MARGIN_PROGRESSION: Record<string, number> = {
+  xyz: 3000,    // Starts from 3,000 as added retail
+  online: 3000, // Starts from 3,000
+  site: 3000,   // Starts from 3,000
+  store: 3800,  // +₦800 step
+  com: 4800,    // +₦1,000 step
+  org: 5800,    // +₦1,000 step
+  co: 6800,     // +₦1,000 step
+  net: 7500,    // +₦700 step
+  io: 8000,     // Reaches ₦8,000 for higher priced domains
+};
 
 export const DEFAULT_PRICING_CONFIG: DomainPricingConfig = {
   mode: 'auto_buffered',
@@ -35,13 +47,13 @@ export const DEFAULT_PRICING_CONFIG: DomainPricingConfig = {
   bufferPercent: 5.0,
   bufferedRate: 1400,
   manualOverrideRate: 1500,
-  platformMarkupNgn: 2500,
-  budgetMarkupNgn: 2000,
-  standardMarkupNgn: 5000,
+  platformMarkupNgn: 3000,
+  budgetMarkupNgn: 3000,
+  standardMarkupNgn: 5500,
   premiumMarkupNgn: 8000,
-  tldMargins: {},
+  tldMargins: { ...DEFAULT_TLD_MARGIN_PROGRESSION },
   tldOverrides: {},
-  roundingStep: 500,
+  roundingStep: 1000,
   lastFetchedAt: new Date().toISOString(),
   source: 'currency_api_cdn',
 };
@@ -118,7 +130,15 @@ export async function getDomainPricingConfig(): Promise<DomainPricingConfig> {
     });
 
     if (record && record.value) {
-      return { ...DEFAULT_PRICING_CONFIG, ...(record.value as any) };
+      const val = record.value as any;
+      const merged: DomainPricingConfig = { ...DEFAULT_PRICING_CONFIG, ...val };
+      if (!merged.tldMargins || Object.keys(merged.tldMargins).length === 0) {
+        merged.tldMargins = { ...DEFAULT_TLD_MARGIN_PROGRESSION };
+      }
+      if (!merged.budgetMarkupNgn || merged.budgetMarkupNgn < 3000) {
+        merged.budgetMarkupNgn = 3000;
+      }
+      return merged;
     }
   } catch (err) {
     console.warn('[FX Engine] Could not read pricing config cache:', err);

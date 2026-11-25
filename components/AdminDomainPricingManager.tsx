@@ -16,8 +16,14 @@ import {
   Sparkles,
   Calculator,
   Tag,
+  Zap,
 } from 'lucide-react';
-import { DomainPricingConfig, RoundingStep, applyRoundingStep } from '@/lib/domains/fxEngine';
+import {
+  DomainPricingConfig,
+  RoundingStep,
+  applyRoundingStep,
+  DEFAULT_TLD_MARGIN_PROGRESSION,
+} from '@/lib/domains/fxEngine';
 import { adminSavePricingConfig, adminRefreshLiveFx } from '@/app/domains-actions';
 import { WHOLESALE_USD_PRICING, SUPPORTED_TLDS, getTldTier, TldTier } from '@/lib/domains/constants';
 
@@ -28,11 +34,14 @@ export default function AdminDomainPricingManager({
 }) {
   const [config, setConfig] = useState<DomainPricingConfig>(() => ({
     ...initialConfig,
-    budgetMarkupNgn: initialConfig.budgetMarkupNgn ?? 2000,
-    standardMarkupNgn: initialConfig.standardMarkupNgn ?? 5000,
+    budgetMarkupNgn: Math.max(3000, initialConfig.budgetMarkupNgn ?? 3000),
+    standardMarkupNgn: initialConfig.standardMarkupNgn ?? 5500,
     premiumMarkupNgn: initialConfig.premiumMarkupNgn ?? 8000,
-    roundingStep: initialConfig.roundingStep ?? 500,
-    tldMargins: initialConfig.tldMargins ?? {},
+    roundingStep: initialConfig.roundingStep ?? 1000,
+    tldMargins:
+      initialConfig.tldMargins && Object.keys(initialConfig.tldMargins).length > 0
+        ? initialConfig.tldMargins
+        : { ...DEFAULT_TLD_MARGIN_PROGRESSION },
     tldOverrides: initialConfig.tldOverrides ?? {},
   }));
 
@@ -40,13 +49,20 @@ export default function AdminDomainPricingManager({
   const [refreshing, setRefreshing] = useState(false);
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  // Ladder generator settings (Starts from ₦3,000, steps by ₦800 or ₦1,000)
+  const [ladderBaseNgn, setLadderBaseNgn] = useState<number>(3000);
+  const [ladderStepNgn, setLadderStepNgn] = useState<number>(1000);
+
   // Per-TLD margin inputs state
   const [tldMargins, setTldMargins] = useState<Record<string, string>>(() => {
     const map: Record<string, string> = {};
-    if (initialConfig.tldMargins) {
-      for (const [k, v] of Object.entries(initialConfig.tldMargins)) {
-        map[k] = String(v);
-      }
+    const source =
+      initialConfig.tldMargins && Object.keys(initialConfig.tldMargins).length > 0
+        ? initialConfig.tldMargins
+        : DEFAULT_TLD_MARGIN_PROGRESSION;
+
+    for (const [k, v] of Object.entries(source)) {
+      map[k] = String(v);
     }
     return map;
   });
@@ -61,6 +77,38 @@ export default function AdminDomainPricingManager({
     }
     return map;
   });
+
+  // 1-Click Auto-Ladder Generator: Starts from ₦3,000 and steps by ₦800 or ₦1,000
+  const handleGenerateLadder = (stepChoice?: number) => {
+    const step = stepChoice ?? ladderStepNgn;
+    const base = ladderBaseNgn || 3000;
+
+    // TLDs sorted by wholesale base cost
+    const newMargins: Record<string, string> = {
+      xyz: String(base),                     // ₦3,000 base
+      online: String(base),                  // ₦3,000 base
+      site: String(base),                    // ₦3,000 base
+      store: String(base + step),            // +₦800 - ₦1,000
+      com: String(base + step * 2),          // +2 steps (~₦4,800 - ₦5,000)
+      org: String(base + step * 3),          // +3 steps (~₦5,800 - ₦6,000)
+      co: String(base + step * 4),           // +4 steps (~₦6,800 - ₦7,000)
+      net: String(Math.min(8000, base + step * 4 + Math.round(step * 0.5))), // ~₦7,500
+      io: '8000',                            // Reaches ₦8,000 max for higher priced domains
+    };
+
+    setTldMargins(newMargins);
+    setConfig((prev) => ({
+      ...prev,
+      budgetMarkupNgn: base,
+      standardMarkupNgn: base + step * 2,
+      premiumMarkupNgn: 8000,
+    }));
+
+    setAlert({
+      type: 'success',
+      text: `Progression ladder applied! Starts at ₦${base.toLocaleString()} with +₦${step.toLocaleString()} increments up to ₦8,000. Click "Save Pricing & Margins" to activate.`,
+    });
+  };
 
   const handleRefreshFx = async () => {
     setRefreshing(true);
@@ -103,18 +151,18 @@ export default function AdminDomainPricingManager({
         mode: config.mode,
         bufferPercent: Number(config.bufferPercent),
         manualOverrideRate: Number(config.manualOverrideRate),
-        platformMarkupNgn: Number(config.platformMarkupNgn),
-        budgetMarkupNgn: Number(config.budgetMarkupNgn || 2000),
-        standardMarkupNgn: Number(config.standardMarkupNgn || 5000),
+        platformMarkupNgn: Number(config.platformMarkupNgn || 3000),
+        budgetMarkupNgn: Number(config.budgetMarkupNgn || 3000),
+        standardMarkupNgn: Number(config.standardMarkupNgn || 5500),
         premiumMarkupNgn: Number(config.premiumMarkupNgn || 8000),
-        roundingStep: config.roundingStep || 500,
+        roundingStep: config.roundingStep || 1000,
         tldMargins: cleanMargins,
         tldOverrides: cleanOverrides,
       });
 
       if (res.success && res.config) {
         setConfig(res.config);
-        setAlert({ type: 'success', text: 'Tiered margins, progressions, and pricing rules saved platform-wide!' });
+        setAlert({ type: 'success', text: 'Pricing engine saved! Base starts from ₦3,000 with ₦800–₦1,000 progressions active platform-wide.' });
       } else {
         setAlert({ type: 'error', text: res.message || 'Failed to save configuration.' });
       }
@@ -139,7 +187,7 @@ export default function AdminDomainPricingManager({
             </h3>
           </div>
           <p className="text-[12.5px] text-[#11140F]/50 dark:text-white/50 mt-0.5">
-            Configure tiered margins (₦5k–₦8k for premium tech domains), clean price progressions (₦500 / ₦1,000 steps), and per-TLD retail rules.
+            Added retail starts from <strong>₦3,000</strong> on base extensions, scaling by <strong>₦800–₦1,000</strong> increments up to <strong>₦8,000</strong> for high-value tech domains.
           </p>
         </div>
 
@@ -275,24 +323,28 @@ export default function AdminDomainPricingManager({
           )}
         </div>
 
-        {/* Card 3: Base Fallback & Conversion Summary */}
+        {/* Card 3: Base Added Retail Margin & Billing FX */}
         <div className="p-4 rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-white/[0.02] space-y-3">
           <label className="text-[11.5px] font-bold text-[#11140F] dark:text-white block">
-            Baseline Fallback Markup
+            Base Added Retail (Starts From ₦3,000)
           </label>
           <div className="space-y-1">
             <div className="relative">
               <span className="absolute left-3 top-2 text-xs font-bold text-[#11140F]/40 dark:text-white/40">₦</span>
               <input
                 type="number"
-                step="100"
-                value={config.platformMarkupNgn}
-                onChange={(e) => setConfig({ ...config, platformMarkupNgn: Number(e.target.value) })}
+                step="500"
+                value={config.budgetMarkupNgn || 3000}
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  setConfig({ ...config, budgetMarkupNgn: val, platformMarkupNgn: val });
+                  setLadderBaseNgn(val);
+                }}
                 className="w-full pl-7 pr-3 py-1.5 rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.04] text-[#11140F] dark:text-white font-mono text-xs font-bold outline-none focus:border-emerald-500"
               />
             </div>
             <p className="text-[11px] text-[#11140F]/50 dark:text-white/50 mt-1">
-              Fallback markup for any unclassified domain extension.
+              Minimum added retail profit for entry domains (.xyz, .site, .online).
             </p>
           </div>
 
@@ -303,16 +355,44 @@ export default function AdminDomainPricingManager({
         </div>
       </div>
 
-      {/* Row 2: Tiered Margins & Price Progression Controls */}
+      {/* Row 2: 1-Click Progression Ladder & Rounding Rules */}
       <div className="border-t border-[#11140F]/10 dark:border-white/10 p-5 bg-[#F7F8F5]/40 dark:bg-white/[0.01]">
-        <div className="mb-4">
-          <h4 className="font-semibold text-sm text-[#11140F] dark:text-white flex items-center gap-1.5">
-            <Calculator className="w-4 h-4 text-emerald-600 dark:text-[#34D399]" />
-            <span>Tiered Profit Margins &amp; Progression Engine</span>
-          </h4>
-          <p className="text-[12px] text-[#11140F]/50 dark:text-white/50">
-            Set higher profit margins (e.g. ₦5,000–₦8,000) for premium tech extensions and select clean retail rounding steps.
-          </p>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+          <div>
+            <h4 className="font-semibold text-sm text-[#11140F] dark:text-white flex items-center gap-1.5">
+              <Calculator className="w-4 h-4 text-emerald-600 dark:text-[#34D399]" />
+              <span>Added Retail Progression Engine (Starts From ₦3,000 + ₦800–₦1,000 Steps)</span>
+            </h4>
+            <p className="text-[12px] text-[#11140F]/50 dark:text-white/50">
+              Auto-generate or fine-tune retail margins so lower domains start at ₦3,000 and higher domains reach ₦5,000–₦8,000.
+            </p>
+          </div>
+
+          {/* Quick 1-Click Ladder Generator */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setLadderStepNgn(800);
+                handleGenerateLadder(800);
+              }}
+              className="px-3 py-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <Zap className="w-3.5 h-3.5 text-emerald-600 dark:text-[#34D399]" />
+              <span>Auto +₦800 Ladder</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setLadderStepNgn(1000);
+                handleGenerateLadder(1000);
+              }}
+              className="px-3 py-1.5 rounded-xl border border-emerald-600 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Auto +₦1,000 Ladder</span>
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -320,10 +400,10 @@ export default function AdminDomainPricingManager({
           <div className="p-3.5 rounded-xl border border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/20 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-400">
-                Budget TLDs Margin
+                Base Added Retail
               </span>
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 font-mono">
-                .site, .xyz, .store
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 font-mono font-bold">
+                .xyz, .site, .online
               </span>
             </div>
             <div className="relative">
@@ -331,24 +411,24 @@ export default function AdminDomainPricingManager({
               <input
                 type="number"
                 step="500"
-                value={config.budgetMarkupNgn || 2000}
+                value={config.budgetMarkupNgn || 3000}
                 onChange={(e) => setConfig({ ...config, budgetMarkupNgn: Number(e.target.value) })}
                 className="w-full pl-7 pr-3 py-1.5 rounded-lg border border-emerald-300 dark:border-emerald-500/30 bg-white dark:bg-white/[0.04] text-[#11140F] dark:text-white font-mono text-xs font-bold outline-none focus:border-emerald-500"
               />
             </div>
             <p className="text-[10.5px] text-emerald-900/60 dark:text-emerald-300/60 leading-tight">
-              Lower markup keeps high student &amp; local creator conversion.
+              Base profit margin for affordable entry extensions (starts at ₦3,000).
             </p>
           </div>
 
-          {/* Tier 2: Standard Domains Margin */}
+          {/* Tier 2: Mid-Tier Standard Margin */}
           <div className="p-3.5 rounded-xl border border-blue-500/20 bg-blue-50/50 dark:bg-blue-950/20 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-wider text-blue-800 dark:text-blue-400">
                 Standard TLDs Margin
               </span>
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 font-mono">
-                .com, .net, .org
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 font-mono font-bold">
+                .com, .org, .net
               </span>
             </div>
             <div className="relative">
@@ -356,21 +436,21 @@ export default function AdminDomainPricingManager({
               <input
                 type="number"
                 step="500"
-                value={config.standardMarkupNgn || 5000}
+                value={config.standardMarkupNgn || 5500}
                 onChange={(e) => setConfig({ ...config, standardMarkupNgn: Number(e.target.value) })}
                 className="w-full pl-7 pr-3 py-1.5 rounded-lg border border-blue-300 dark:border-blue-500/30 bg-white dark:bg-white/[0.04] text-[#11140F] dark:text-white font-mono text-xs font-bold outline-none focus:border-blue-500"
               />
             </div>
             <p className="text-[10.5px] text-blue-900/60 dark:text-blue-300/60 leading-tight">
-              Standard commercial margin for established businesses.
+              Increases by ₦800–₦1,000 increments for commercial domains (₦4.8k–₦6k).
             </p>
           </div>
 
-          {/* Tier 3: Premium Tech Domains Margin */}
+          {/* Tier 3: Top-Tier High Price Margin */}
           <div className="p-3.5 rounded-xl border border-purple-500/20 bg-purple-50/50 dark:bg-purple-950/20 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-wider text-purple-800 dark:text-purple-400">
-                Premium Tech Margin
+                Premium High Price Margin
               </span>
               <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 font-mono font-bold">
                 .co, .io
@@ -387,7 +467,7 @@ export default function AdminDomainPricingManager({
               />
             </div>
             <p className="text-[10.5px] text-purple-900/60 dark:text-purple-300/60 leading-tight">
-              High-value tech SaaS margin (₦5,000–₦8,000+ profit per order).
+              High-value tech SaaS target margin (reaches ₦8,000 profit).
             </p>
           </div>
 
@@ -398,17 +478,17 @@ export default function AdminDomainPricingManager({
             </span>
             <div className="grid grid-cols-2 gap-1.5">
               {[
-                { label: '₦500 Step', val: 500 },
                 { label: '₦1,000 Step', val: 1000 },
+                { label: '₦800 Step', val: 800 },
+                { label: '₦500 Step', val: 500 },
                 { label: '.900 Charm', val: 900 },
-                { label: '₦100 Fine', val: 100 },
               ].map((stepOption) => (
                 <button
                   key={stepOption.val}
                   type="button"
                   onClick={() => setConfig({ ...config, roundingStep: stepOption.val as RoundingStep })}
                   className={`py-1 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer text-center ${
-                    (config.roundingStep || 500) === stepOption.val
+                    (config.roundingStep || 1000) === stepOption.val
                       ? 'bg-emerald-600 text-white shadow-2xs'
                       : 'border border-[#11140F]/10 dark:border-white/10 text-[#11140F]/70 dark:text-white/70 hover:bg-[#F7F8F5] dark:hover:bg-white/5'
                   }`}
@@ -429,10 +509,10 @@ export default function AdminDomainPricingManager({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <h4 className="font-semibold text-sm text-[#11140F] dark:text-white">
-              Live Storefront TLD Catalog &amp; Per-Domain Profit Controls ({SUPPORTED_TLDS.length} Extensions)
+              Live Storefront TLD Catalog &amp; Per-Domain Profit Progression ({SUPPORTED_TLDS.length} Extensions)
             </h4>
             <p className="text-[12px] text-[#11140F]/50 dark:text-white/50">
-              Wholesale USD rates scale at live FX (₦{effectiveRate}). Enter a custom margin or a direct fixed retail override for any extension.
+              Wholesale USD rates scale at live FX (₦{effectiveRate}). Every extension starts from ₦3,000 and increments by ₦800–₦1,000 up to ₦8,000.
             </p>
           </div>
         </div>
@@ -444,8 +524,8 @@ export default function AdminDomainPricingManager({
                 <th className="py-2.5 px-3">Extension &amp; Tier</th>
                 <th className="py-2.5 px-3">Wholesale USD</th>
                 <th className="py-2.5 px-3">Wholesale NGN</th>
-                <th className="py-2.5 px-3">Tier Profit Margin</th>
-                <th className="py-2.5 px-3">Custom Margin Override (₦)</th>
+                <th className="py-2.5 px-3">Ladder Progression</th>
+                <th className="py-2.5 px-3">Added Retail Margin (₦)</th>
                 <th className="py-2.5 px-3">Storefront Price (₦)</th>
                 <th className="py-2.5 px-3">Fixed Price Override (₦)</th>
                 <th className="py-2.5 px-3 text-right">Net Profit / Sale</th>
@@ -457,13 +537,14 @@ export default function AdminDomainPricingManager({
                 const wholesaleUsd = WHOLESALE_USD_PRICING[tld] || 10.0;
                 const wholesaleNgn = Math.ceil(wholesaleUsd * effectiveRate);
 
-                // Tier default margin
+                // Tier default margin (Starts at 3000)
                 const tierDefaultMargin =
-                  tier === 'premium'
+                  DEFAULT_TLD_MARGIN_PROGRESSION[tld] ||
+                  (tier === 'premium'
                     ? (config.premiumMarkupNgn || 8000)
                     : tier === 'standard'
-                    ? (config.standardMarkupNgn || 5000)
-                    : (config.budgetMarkupNgn || 2000);
+                    ? (config.standardMarkupNgn || 5500)
+                    : (config.budgetMarkupNgn || 3000));
 
                 // Custom margin override
                 const customMarginVal = tldMargins[tld] ? Number(tldMargins[tld]) : null;
@@ -471,7 +552,7 @@ export default function AdminDomainPricingManager({
 
                 // Calculated retail price with progression rounding
                 const rawTotal = wholesaleNgn + activeMargin;
-                const autoRetailNgn = applyRoundingStep(rawTotal, config.roundingStep || 500);
+                const autoRetailNgn = applyRoundingStep(rawTotal, config.roundingStep || 1000);
 
                 // Fixed retail price override
                 const overrideVal = tldOverrides[tld] ? Number(tldOverrides[tld]) : null;
@@ -514,24 +595,32 @@ export default function AdminDomainPricingManager({
                       ₦{wholesaleNgn.toLocaleString()}
                     </td>
 
-                    {/* Tier Default Margin */}
+                    {/* Ladder Step Indicator */}
                     <td className="py-2.5 px-3 text-xs font-mono text-[#11140F]/60 dark:text-white/60">
-                      +₦{tierDefaultMargin.toLocaleString()}
+                      {activeMargin === 3000 ? (
+                        <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold">
+                          Base ₦3,000
+                        </span>
+                      ) : (
+                        <span className="px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-700 dark:text-purple-300 text-[10px] font-bold">
+                          +₦{(activeMargin - 3000).toLocaleString()} step
+                        </span>
+                      )}
                     </td>
 
-                    {/* Custom Margin Override */}
+                    {/* Added Retail Margin (Editable Input) */}
                     <td className="py-2.5 px-3">
-                      <div className="relative max-w-[120px]">
+                      <div className="relative max-w-[130px]">
                         <span className="absolute left-2.5 top-1.5 text-[11px] font-bold text-[#11140F]/40 dark:text-white/40">₦</span>
                         <input
                           type="number"
                           step="500"
                           placeholder={String(tierDefaultMargin)}
-                          value={tldMargins[tld] || ''}
+                          value={tldMargins[tld] ?? String(tierDefaultMargin)}
                           onChange={(e) =>
                             setTldMargins({ ...tldMargins, [tld]: e.target.value })
                           }
-                          className="w-full pl-6 pr-2 py-1 rounded border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.04] text-[#11140F] dark:text-white font-mono text-xs outline-none focus:border-emerald-500"
+                          className="w-full pl-6 pr-2 py-1 rounded border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.04] text-[#11140F] dark:text-white font-mono text-xs font-bold outline-none focus:border-emerald-500"
                         />
                       </div>
                     </td>
