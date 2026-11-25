@@ -157,6 +157,8 @@ export default function PrintTemplateModal({
   const [showBorder, setShowBorder] = useState(true);
 
   const [activeTab, setActiveTab] = useState<'content' | 'toggles' | 'design'>('content');
+  const [mobileTab, setMobileTab] = useState<'editor' | 'preview'>('editor');
+  const [lockedFeatureNotice, setLockedFeatureNotice] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
 
   if (!isOpen) return null;
@@ -457,86 +459,150 @@ export default function PrintTemplateModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/70 backdrop-blur-xs overflow-y-auto">
       {/* Container Card */}
-      <div className="bg-white dark:bg-[#0E1017] rounded-3xl max-w-5xl w-full border border-[#11140F]/15 dark:border-white/15 shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[92vh] text-[#11140F] dark:text-white">
+      <div className="bg-white dark:bg-[#0E1017] rounded-3xl max-w-5xl w-full border border-[#11140F]/15 dark:border-white/15 shadow-2xl overflow-hidden flex flex-col h-[94vh] sm:h-[88vh] max-h-[860px] text-[#11140F] dark:text-white">
         
-        {/* Left Side: Controls & Customization */}
-        <div className="p-5 sm:p-7 md:w-1/2 flex flex-col justify-between border-b md:border-b-0 md:border-r border-[#11140F]/10 dark:border-white/10 space-y-5 overflow-y-auto">
-          <div className="space-y-5">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-[#2F6B4F]/10 dark:bg-[#34D399]/15 text-[#2F6B4F] dark:text-[#34D399] flex items-center justify-center shrink-0">
-                  <Printer className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-[16px] sm:text-[17px] text-[#11140F] dark:text-white">Physical Print Studio</h3>
-                  <div className="flex items-center gap-1.5 text-[11px] text-emerald-700 dark:text-[#34D399] font-medium">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>Guaranteed 1-Page Output</span>
-                    {canWhiteLabel && (
-                      <span className="ml-1 px-1.5 py-0.2 rounded bg-purple-100 dark:bg-purple-500/20 text-purple-800 dark:text-purple-300 text-[10px] font-mono font-bold">
-                        100% White-Label
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={onClose}
-                className="text-[#11140F]/40 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white p-1 rounded-lg transition-colors md:hidden"
-              >
-                <X className="w-5 h-5" />
-              </button>
+        {/* Top Header Bar (Unified for Mobile, Tablet, and Desktop) */}
+        <div className="px-4 py-3 sm:px-6 sm:py-3.5 border-b border-[#11140F]/10 dark:border-white/10 flex items-center justify-between shrink-0 bg-white dark:bg-[#0E1017] z-10">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#2F6B4F]/10 dark:bg-[#34D399]/15 text-[#2F6B4F] dark:text-[#34D399] flex items-center justify-center shrink-0">
+              <Printer className="w-4 h-4" />
             </div>
-
-            {/* Feature Guidance Banner */}
-            {featureBannerText && (
-              <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-[11.5px] text-[#2F6B4F] dark:text-[#34D399] leading-relaxed flex items-start gap-2.5">
-                <Sparkles className="w-4 h-4 shrink-0 mt-0.5" />
-                <span>{featureBannerText}</span>
+            <div className="min-w-0">
+              <h3 className="font-bold text-[15px] sm:text-[17px] text-[#11140F] dark:text-white truncate">
+                Physical Print Studio
+              </h3>
+              <div className="flex items-center gap-1.5 text-[10.5px] sm:text-[11px] text-emerald-700 dark:text-[#34D399] font-medium truncate">
+                <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">Guaranteed 1-Page Output</span>
+                {canWhiteLabel && (
+                  <span className="ml-1 px-1.5 py-0.2 rounded bg-purple-100 dark:bg-purple-500/20 text-purple-800 dark:text-purple-300 text-[9.5px] font-mono font-bold shrink-0">
+                    White-Label
+                  </span>
+                )}
               </div>
-            )}
+            </div>
+          </div>
 
-            {/* Sub-tabs: Format, Text Content, Visibility Toggles, Theme */}
-            <div className="flex items-center gap-1.5 p-1 bg-[#EEF0EA] dark:bg-white/[0.05] rounded-xl text-[12px] font-medium">
+          <div className="flex items-center gap-2">
+            {/* Mobile / Tablet Segmented Tab Toggle (hidden on desktop lg:hidden) */}
+            <div className="lg:hidden flex items-center p-0.5 bg-[#EEF0EA] dark:bg-white/[0.08] rounded-xl text-[11px] font-medium">
               <button
                 type="button"
-                onClick={() => setActiveTab('content')}
-                className={`flex-1 py-1.5 px-2 rounded-lg transition-all cursor-pointer ${
-                  activeTab === 'content'
-                    ? 'bg-white dark:bg-white/15 text-[#11140F] dark:text-white shadow-xs font-semibold'
-                    : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white'
-                }`}
-              >
-                Layout &amp; Text
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab('toggles')}
-                className={`flex-1 py-1.5 px-2 rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer ${
-                  activeTab === 'toggles'
-                    ? 'bg-white dark:bg-white/15 text-[#11140F] dark:text-white shadow-xs font-semibold'
+                onClick={() => setMobileTab('editor')}
+                className={`py-1.5 px-2.5 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${
+                  mobileTab === 'editor'
+                    ? 'bg-white dark:bg-[#1E2330] text-[#11140F] dark:text-white shadow-xs font-semibold'
                     : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white'
                 }`}
               >
                 <SlidersHorizontal className="w-3 h-3" />
-                Element Toggles
+                <span>Customize</span>
               </button>
               <button
                 type="button"
-                onClick={() => setActiveTab('design')}
-                className={`flex-1 py-1.5 px-2 rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer ${
-                  activeTab === 'design'
-                    ? 'bg-white dark:bg-white/15 text-[#11140F] dark:text-white shadow-xs font-semibold'
+                onClick={() => setMobileTab('preview')}
+                className={`py-1.5 px-2.5 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${
+                  mobileTab === 'preview'
+                    ? 'bg-white dark:bg-[#1E2330] text-[#11140F] dark:text-white shadow-xs font-semibold'
                     : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white'
                 }`}
               >
-                <Palette className="w-3 h-3" />
-                Colors &amp; Logo
+                <Eye className="w-3 h-3" />
+                <span>Preview</span>
               </button>
             </div>
+
+            <button
+              onClick={onClose}
+              className="text-[#11140F]/40 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white p-1.5 rounded-xl hover:bg-[#EEF0EA] dark:hover:bg-white/10 transition-colors cursor-pointer"
+              title="Close Print Studio"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Modal Body: Split 50/50 on desktop (lg:flex-row), switchable tabs on mobile/tablet */}
+        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
+          
+          {/* Left Side: Controls & Customization */}
+          <div className={`p-4 sm:p-6 lg:p-7 lg:w-1/2 flex-col justify-between border-b lg:border-b-0 lg:border-r border-[#11140F]/10 dark:border-white/10 space-y-4 overflow-y-auto ${
+            mobileTab === 'editor' ? 'flex' : 'hidden lg:flex'
+          }`}>
+            <div className="space-y-4">
+              {/* Feature Guidance Banner */}
+              {featureBannerText && (
+                <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-[11.5px] text-[#2F6B4F] dark:text-[#34D399] leading-relaxed flex items-start gap-2.5">
+                  <Sparkles className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>{featureBannerText}</span>
+                </div>
+              )}
+
+              {/* Locked Feature Notice */}
+              {lockedFeatureNotice && (
+                <div className="p-3 rounded-xl bg-purple-500/10 border border-purple-500/25 flex items-center justify-between gap-3 text-[12px] text-purple-700 dark:text-purple-300 animate-in fade-in">
+                  <div className="flex items-center gap-2">
+                    <Lock className="w-3.5 h-3.5 shrink-0" />
+                    <span>{lockedFeatureNotice}</span>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Link
+                      href="/pricing"
+                      className="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold text-[11px] transition-colors"
+                    >
+                      Upgrade
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => setLockedFeatureNotice(null)}
+                      className="p-1 text-purple-700/60 dark:text-purple-300/60 hover:text-purple-700 dark:hover:text-purple-300"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Sub-tabs: Format, Text Content, Visibility Toggles, Theme */}
+              <div className="flex items-center gap-1.5 p-1 bg-[#EEF0EA] dark:bg-white/[0.05] rounded-xl text-[12px] font-medium">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('content')}
+                  className={`flex-1 py-1.5 px-2 rounded-lg transition-all cursor-pointer ${
+                    activeTab === 'content'
+                      ? 'bg-white dark:bg-white/15 text-[#11140F] dark:text-white shadow-xs font-semibold'
+                      : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white'
+                  }`}
+                >
+                  Layout &amp; Text
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('toggles')}
+                  className={`flex-1 py-1.5 px-2 rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer ${
+                    activeTab === 'toggles'
+                      ? 'bg-white dark:bg-white/15 text-[#11140F] dark:text-white shadow-xs font-semibold'
+                      : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white'
+                  }`}
+                >
+                  <SlidersHorizontal className="w-3 h-3" />
+                  Element Toggles
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('design')}
+                  className={`flex-1 py-1.5 px-2 rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer ${
+                    activeTab === 'design'
+                      ? 'bg-white dark:bg-white/15 text-[#11140F] dark:text-white shadow-xs font-semibold'
+                      : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white'
+                  }`}
+                >
+                  <Palette className="w-3 h-3" />
+                  Colors &amp; Logo
+                </button>
+              </div>
 
             {/* TAB 1: Layout & Text */}
             {activeTab === 'content' && (
@@ -602,7 +668,7 @@ export default function PrintTemplateModal({
                       type="button"
                       onClick={() => {
                         if (!canWhiteLabel) {
-                          alert('Full-Page Posters (A4/Letter) are unlocked on Plus & Ultra plans.');
+                          setLockedFeatureNotice('Full-Page Posters (A4/Letter) are unlocked on Plus & Ultra plans.');
                           return;
                         }
                         setTemplate('full-poster');
@@ -883,7 +949,7 @@ export default function PrintTemplateModal({
                         type="button"
                         onClick={() => {
                           if (!canCustomizeElements) {
-                            alert('Color palettes are unlocked on Pro, Plus, and Ultra plans.');
+                            setLockedFeatureNotice('Color palettes are unlocked on Pro, Plus, and Ultra plans.');
                             return;
                           }
                           setAccentColor(color.hex);
@@ -930,7 +996,7 @@ export default function PrintTemplateModal({
                           type="button"
                           onClick={() => {
                             if (!canUseLogos) {
-                              alert('Center QR Badges are unlocked on Plus & Ultra plans.');
+                              setLockedFeatureNotice('Center QR Badges are unlocked on Plus & Ultra plans.');
                               return;
                             }
                             setCenterLogo(item.id as CenterLogoType);
@@ -952,9 +1018,42 @@ export default function PrintTemplateModal({
             )}
           </div>
 
-          {/* Action Buttons */}
-          <div className="pt-4 space-y-2">
-            <div className="flex items-center gap-2">
+          {/* Action Buttons in Left Panel */}
+          <div className="pt-4 space-y-2 shrink-0 border-t border-[#11140F]/10 dark:border-white/10">
+            {/* On Mobile / Tablet: Primary button to view Live Preview & Print */}
+            <div className="lg:hidden space-y-2">
+              <button
+                type="button"
+                onClick={() => setMobileTab('preview')}
+                className="w-full py-3 px-4 rounded-xl text-white text-[13.5px] font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                style={{ backgroundColor: accentColor }}
+              >
+                <Eye className="w-4 h-4" />
+                <span>View Live Preview &amp; Print</span>
+              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handlePrint}
+                  className="flex-1 py-2.5 px-3 rounded-xl border border-[#11140F]/20 dark:border-white/15 bg-white dark:bg-white/[0.05] text-[#11140F] dark:text-white text-[12.5px] font-medium hover:bg-[#EEF0EA] dark:hover:bg-white/10 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>Quick Print</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDownloadPoster}
+                  disabled={isExporting}
+                  className="flex-1 py-2.5 px-3 rounded-xl border border-[#11140F]/20 dark:border-white/15 bg-white dark:bg-white/[0.05] text-[#11140F] dark:text-white text-[12.5px] font-medium hover:bg-[#EEF0EA] dark:hover:bg-white/10 transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>{isExporting ? 'Exporting…' : 'PNG'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* On Desktop: Full Print & Download Buttons */}
+            <div className="hidden lg:flex items-center gap-2">
               <button
                 onClick={handlePrint}
                 className="flex-1 py-3 px-4 rounded-xl text-white text-[13.5px] font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 cursor-pointer shadow-sm"
@@ -973,132 +1072,185 @@ export default function PrintTemplateModal({
                 {isExporting ? 'Exporting…' : 'PNG Poster'}
               </button>
             </div>
+
             <button
               onClick={onClose}
-              className="w-full py-2 px-4 rounded-xl text-[#11140F]/60 dark:text-white/55 text-[12.5px] font-medium hover:text-[#11140F] dark:hover:text-white transition-colors cursor-pointer"
+              className="w-full py-1.5 px-4 rounded-xl text-[#11140F]/60 dark:text-white/55 text-[12px] font-medium hover:text-[#11140F] dark:hover:text-white transition-colors cursor-pointer"
             >
-              Close
+              Close Print Studio
             </button>
           </div>
         </div>
 
         {/* Right Side: Live Printable Preview */}
-        <div className="p-6 md:p-8 md:w-1/2 bg-[#EEF0EA]/70 flex items-center justify-center overflow-auto min-h-[380px]">
-          {/* Printable Sheet Wrapper */}
-          <div
-            id="print-sheet"
-            className={`bg-white shadow-xl transition-all flex flex-col items-center justify-between text-center relative ${
-              showBorder ? 'border-2' : ''
-            } ${
-              template === 'table-tent'
-                ? 'w-[280px] h-[390px] p-6 rounded-2xl'
-                : template === 'window-sign'
-                ? 'w-[320px] h-[320px] p-6 rounded-2xl'
-                : template === 'full-poster'
-                ? 'w-[330px] h-[450px] p-7 rounded-2xl'
-                : 'w-[340px] h-[210px] p-4 rounded-xl flex-row text-left'
-            }`}
-            style={{ borderColor: accentColor }}
-          >
-            {template === 'card-badge' ? (
-              // Horizontal Card Layout
-              <div className="flex items-center justify-between w-full gap-4">
-                <div className="space-y-1 flex-1 min-w-0">
-                  {showHeaderTag && (
-                    <div
-                      className="text-[10px] uppercase font-mono tracking-wider font-bold"
-                      style={{ color: accentColor }}
-                    >
-                      {headerTag}
-                    </div>
-                  )}
-                  <h4 className="font-bold text-[16px] text-[#11140F] leading-tight truncate">
-                    {headline}
-                  </h4>
-                  {showSubline && (
-                    <p className="text-[11px] text-[#11140F]/65">{subline}</p>
-                  )}
-                  {showShortCode && (
-                    <div className="pt-1 font-mono text-[10px] text-[#11140F]/50 truncate">
-                      /{shortCode}
-                    </div>
-                  )}
-                </div>
+        <div className={`p-4 sm:p-6 lg:p-8 lg:w-1/2 bg-[#F4F5F1] dark:bg-black/40 flex-col items-center justify-between overflow-y-auto min-h-0 ${
+          mobileTab === 'preview' ? 'flex' : 'hidden lg:flex'
+        }`}>
+          {/* Mobile / Tablet Return Shortcut */}
+          <div className="w-full lg:hidden flex items-center justify-between pb-3 mb-2 border-b border-[#11140F]/10 dark:border-white/10 shrink-0">
+            <button
+              type="button"
+              onClick={() => setMobileTab('editor')}
+              className="text-[12px] font-semibold text-[#2F6B4F] dark:text-[#34D399] hover:underline flex items-center gap-1 cursor-pointer"
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              <span>← Back to Customizing</span>
+            </button>
+            <span className="text-[11px] font-mono text-[#11140F]/50 dark:text-white/50">
+              {template === 'table-tent' ? '4" × 6" Tent' : template === 'window-sign' ? '8" × 8" Sign' : template === 'full-poster' ? 'A4 Poster' : '3.5" × 2" Badge'}
+            </span>
+          </div>
 
-                <div className="p-2 border rounded-xl bg-white shadow-xs shrink-0 relative" style={{ borderColor: `${accentColor}30` }}>
-                  <QRCodeSVG value={url} size={96} level="H" fgColor={accentColor} />
-                  {centerLogo !== 'none' && (
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="w-5 h-5 rounded-full bg-white shadow-xs border border-[#11140F]/20 flex items-center justify-center">
-                        {centerLogo === 'star' && <Star className="w-3 h-3 text-amber-500 fill-amber-500" />}
-                        {centerLogo === 'utensils' && <Utensils className="w-3 h-3 text-[#11140F]" />}
-                        {centerLogo === 'wifi' && <Wifi className="w-3 h-3 text-blue-600" />}
-                        {centerLogo === 'coffee' && <Coffee className="w-3 h-3 text-amber-800" />}
-                        {centerLogo === 'bag' && <ShoppingBag className="w-3 h-3 text-[#2F6B4F]" />}
-                      </div>
+          {/* Centered Preview Canvas / Scaled Sheet Container */}
+          <div className="w-full flex-1 flex items-center justify-center py-2 sm:py-4 overflow-hidden min-h-[300px]">
+            <div className="transform scale-[0.78] sm:scale-90 md:scale-95 lg:scale-100 origin-center transition-transform">
+              <div
+                id="print-sheet"
+                className={`bg-white shadow-2xl transition-all flex flex-col items-center justify-between text-center relative ${
+                  showBorder ? 'border-2' : ''
+                } ${
+                  template === 'table-tent'
+                    ? 'w-[280px] h-[390px] p-6 rounded-2xl'
+                    : template === 'window-sign'
+                    ? 'w-[320px] h-[320px] p-6 rounded-2xl'
+                    : template === 'full-poster'
+                    ? 'w-[330px] h-[450px] p-7 rounded-2xl'
+                    : 'w-[340px] h-[210px] p-4 rounded-xl flex-row text-left'
+                }`}
+                style={{ borderColor: accentColor }}
+              >
+                {template === 'card-badge' ? (
+                  // Horizontal Card Layout
+                  <div className="flex items-center justify-between w-full gap-4">
+                    <div className="space-y-1 flex-1 min-w-0">
+                      {showHeaderTag && (
+                        <div
+                          className="text-[10px] uppercase font-mono tracking-wider font-bold"
+                          style={{ color: accentColor }}
+                        >
+                          {headerTag}
+                        </div>
+                      )}
+                      <h4 className="font-bold text-[16px] text-[#11140F] leading-tight truncate">
+                        {headline}
+                      </h4>
+                      {showSubline && (
+                        <p className="text-[11px] text-[#11140F]/65">{subline}</p>
+                      )}
+                      {showShortCode && (
+                        <div className="pt-1 font-mono text-[10px] text-[#11140F]/50 truncate">
+                          /{shortCode}
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
+
+                    <div className="p-2 border rounded-xl bg-white shadow-xs shrink-0 relative" style={{ borderColor: `${accentColor}30` }}>
+                      <QRCodeSVG value={url} size={96} level="H" fgColor={accentColor} />
+                      {centerLogo !== 'none' && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="w-5 h-5 rounded-full bg-white shadow-xs border border-[#11140F]/20 flex items-center justify-center">
+                            {centerLogo === 'star' && <Star className="w-3 h-3 text-amber-500 fill-amber-500" />}
+                            {centerLogo === 'utensils' && <Utensils className="w-3 h-3 text-[#11140F]" />}
+                            {centerLogo === 'wifi' && <Wifi className="w-3 h-3 text-blue-600" />}
+                            {centerLogo === 'coffee' && <Coffee className="w-3 h-3 text-amber-800" />}
+                            {centerLogo === 'bag' && <ShoppingBag className="w-3 h-3 text-[#2F6B4F]" />}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  // Vertical / Square Posters
+                  <>
+                    <div className="space-y-1">
+                      {showHeaderTag && (
+                        <div
+                          className="text-[10px] uppercase font-mono tracking-widest font-bold"
+                          style={{ color: accentColor }}
+                        >
+                          {headerTag}
+                        </div>
+                      )}
+                      <h4 className="font-bold text-[20px] text-[#11140F] leading-tight tracking-tight">
+                        {headline}
+                      </h4>
+                      {showSubline && (
+                        <p className="text-[12px] text-[#11140F]/65">{subline}</p>
+                      )}
+                    </div>
+
+                    <div className="p-3 border-2 rounded-2xl bg-white shadow-sm my-2 relative" style={{ borderColor: accentColor }}>
+                      <QRCodeSVG
+                        value={url}
+                        size={template === 'window-sign' ? 140 : template === 'full-poster' ? 150 : 130}
+                        level="H"
+                        fgColor={accentColor}
+                      />
+                      {centerLogo !== 'none' && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="w-7 h-7 rounded-full bg-white shadow-sm border border-[#11140F]/20 flex items-center justify-center">
+                            {centerLogo === 'star' && <Star className="w-4 h-4 text-amber-500 fill-amber-500" />}
+                            {centerLogo === 'utensils' && <Utensils className="w-4 h-4 text-[#11140F]" />}
+                            {centerLogo === 'wifi' && <Wifi className="w-4 h-4 text-blue-600" />}
+                            {centerLogo === 'coffee' && <Coffee className="w-4 h-4 text-amber-800" />}
+                            {centerLogo === 'bag' && <ShoppingBag className="w-4 h-4 text-[#2F6B4F]" />}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-1">
+                      {showShortCode && (
+                        <div
+                          className="inline-block px-3 py-1 rounded-full text-white text-[11px] font-mono shadow-2xs"
+                          style={{ backgroundColor: accentColor }}
+                        >
+                          /{shortCode}
+                        </div>
+                      )}
+                      {showFooterNote && (
+                        <p className="text-[10px] text-[#11140F]/50">{footerNote}</p>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
-            ) : (
-              // Vertical / Square Posters
-              <>
-                <div className="space-y-1">
-                  {showHeaderTag && (
-                    <div
-                      className="text-[10px] uppercase font-mono tracking-widest font-bold"
-                      style={{ color: accentColor }}
-                    >
-                      {headerTag}
-                    </div>
-                  )}
-                  <h4 className="font-bold text-[20px] text-[#11140F] leading-tight tracking-tight">
-                    {headline}
-                  </h4>
-                  {showSubline && (
-                    <p className="text-[12px] text-[#11140F]/65">{subline}</p>
-                  )}
-                </div>
+            </div>
+          </div>
 
-                <div className="p-3 border-2 rounded-2xl bg-white shadow-sm my-2 relative" style={{ borderColor: accentColor }}>
-                  <QRCodeSVG
-                    value={url}
-                    size={template === 'window-sign' ? 140 : template === 'full-poster' ? 150 : 130}
-                    level="H"
-                    fgColor={accentColor}
-                  />
-                  {centerLogo !== 'none' && (
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="w-7 h-7 rounded-full bg-white shadow-sm border border-[#11140F]/20 flex items-center justify-center">
-                        {centerLogo === 'star' && <Star className="w-4 h-4 text-amber-500 fill-amber-500" />}
-                        {centerLogo === 'utensils' && <Utensils className="w-4 h-4 text-[#11140F]" />}
-                        {centerLogo === 'wifi' && <Wifi className="w-4 h-4 text-blue-600" />}
-                        {centerLogo === 'coffee' && <Coffee className="w-4 h-4 text-amber-800" />}
-                        {centerLogo === 'bag' && <ShoppingBag className="w-4 h-4 text-[#2F6B4F]" />}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-1">
-                  {showShortCode && (
-                    <div
-                      className="inline-block px-3 py-1 rounded-full text-white text-[11px] font-mono shadow-2xs"
-                      style={{ backgroundColor: accentColor }}
-                    >
-                      /{shortCode}
-                    </div>
-                  )}
-                  {showFooterNote && (
-                    <p className="text-[10px] text-[#11140F]/50">{footerNote}</p>
-                  )}
-                </div>
-              </>
-            )}
+          {/* Action Buttons in Right Panel */}
+          <div className="w-full max-w-sm pt-4 space-y-2 shrink-0">
+            <button
+              onClick={handlePrint}
+              className="w-full py-3 px-4 rounded-xl text-white text-[13.5px] font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+              style={{ backgroundColor: accentColor }}
+            >
+              <Printer className="w-4 h-4" />
+              Print (1 Sheet) / Save PDF
+            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleDownloadPoster}
+                disabled={isExporting}
+                className="flex-1 py-2.5 px-3 rounded-xl border border-[#11140F]/20 dark:border-white/15 bg-white dark:bg-white/[0.05] text-[#11140F] dark:text-white text-[12.5px] font-medium hover:bg-[#EEF0EA] dark:hover:bg-white/10 transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                <Download className="w-4 h-4" />
+                {isExporting ? 'Exporting…' : 'PNG Poster'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setMobileTab('editor')}
+                className="lg:hidden py-2.5 px-3 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.05] text-[#11140F] dark:text-white text-[12.5px] font-medium hover:bg-[#EEF0EA] dark:hover:bg-white/10 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                <span>Edit</span>
+              </button>
+            </div>
           </div>
         </div>
 
       </div>
     </div>
-  );
+  </div>
+);
 }
