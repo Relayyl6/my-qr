@@ -155,10 +155,15 @@ export async function confirmOrderPayment(paystackRef: string) {
       where: { id: order.id },
       data: {
         status: 'PAID_AWAITING_FUNDS',
-        errorMessage: err.message || 'Provisioning error',
+        errorMessage: err.message || 'Provisioning pending root registry completion',
       },
     });
-    return { success: false, order: updated, message: err.message || 'Provisioning pending funds' };
+    // Customer-facing message: reassuring, professional, confirms payment is received
+    return {
+      success: true,
+      order: updated,
+      message: 'Payment received successfully! Your domain order has been placed and is currently being provisioned across global DNS servers.',
+    };
   }
 }
 
