@@ -216,6 +216,23 @@ export async function cancelPendingDomainOrder(orderId: string) {
   return { success: true, message: `Order for ${order.domainName} has been removed.` };
 }
 
+export async function adminDeleteDomainOrder(orderId: string) {
+  const user = await getCurrentUser();
+  const adminEmail = (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();
+  if (!user || user.email.toLowerCase() !== adminEmail) {
+    return { success: false, message: 'Super admin authorization required.' };
+  }
+
+  const order = await prisma.domainOrder.findUnique({ where: { id: orderId } });
+  if (!order) return { success: false, message: 'Order not found' };
+
+  await prisma.customDomain.deleteMany({ where: { domain: order.domainName } }).catch(() => {});
+  await prisma.domainOrder.delete({ where: { id: orderId } });
+  revalidatePath('/');
+  revalidatePath('/admin');
+  return { success: true, message: `Order for ${order.domainName} deleted successfully.` };
+}
+
 export async function adminRetryDomainProvision(orderId: string) {
   const user = await getCurrentUser();
   const adminEmail = (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();

@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { Globe, RefreshCw, CheckCircle2, Clock, Mail, Search } from 'lucide-react';
-import { adminRetryDomainProvision } from '@/app/domains-actions';
+import { Globe, RefreshCw, CheckCircle2, Clock, Mail, Search, Trash2 } from 'lucide-react';
+import { adminRetryDomainProvision, adminDeleteDomainOrder } from '@/app/domains-actions';
 import PaginationControls from './PaginationControls';
 
 interface AdminDomainOrder {
@@ -24,6 +24,7 @@ interface AdminDomainOrder {
 export default function AdminDomainOrdersManager({ initialOrders }: { initialOrders: AdminDomainOrder[] }) {
   const [orders, setOrders] = useState<AdminDomainOrder[]>(initialOrders);
   const [retryingId, setRetryingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ id: string; msg: string; success: boolean } | null>(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -63,6 +64,24 @@ export default function AdminDomainOrdersManager({ initialOrders }: { initialOrd
       setFeedback({ id: orderId, msg: e.message || 'Error occurred', success: false });
     } finally {
       setRetryingId(null);
+    }
+  };
+
+  const handleDelete = async (orderId: string, domainName: string) => {
+    if (!confirm(`Are you sure you want to permanently delete the domain order for "${domainName}"?`)) return;
+    setDeletingId(orderId);
+    setFeedback(null);
+    try {
+      const res = await adminDeleteDomainOrder(orderId);
+      if (res.success) {
+        setOrders((prev) => prev.filter((o) => o.id !== orderId));
+      } else {
+        setFeedback({ id: orderId, msg: res.message || 'Delete failed', success: false });
+      }
+    } catch (e: any) {
+      setFeedback({ id: orderId, msg: e.message || 'Error occurred', success: false });
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -204,7 +223,7 @@ export default function AdminDomainOrdersManager({ initialOrders }: { initialOrd
                       {o.status !== 'ACTIVE' && (
                         <button
                           type="button"
-                          disabled={retryingId === o.id}
+                          disabled={retryingId === o.id || deletingId === o.id}
                           onClick={() => handleRetry(o.id)}
                           className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-all disabled:opacity-50 flex items-center gap-1 cursor-pointer"
                         >
@@ -212,6 +231,15 @@ export default function AdminDomainOrdersManager({ initialOrders }: { initialOrd
                           <span>{retryingId === o.id ? 'Retrying...' : 'Retry Provision'}</span>
                         </button>
                       )}
+                      <button
+                        type="button"
+                        disabled={deletingId === o.id || retryingId === o.id}
+                        onClick={() => handleDelete(o.id, o.domainName)}
+                        className="p-1 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer disabled:opacity-50"
+                        title="Delete Domain Order"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                     {feedback && feedback.id === o.id && (
                       <div
