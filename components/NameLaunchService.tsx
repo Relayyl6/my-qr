@@ -274,69 +274,28 @@ export default function NameLaunchService({ user }: Props) {
   }
 
   return (
-    <div className="space-y-5 text-[#11140F] dark:text-white">
-      {/* Sub-Navigation Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="inline-flex items-center p-1 rounded-xl bg-white dark:bg-[#11140F] border border-[#11140F]/10 dark:border-white/10 self-start">
-          <button
-            type="button"
-            onClick={() => setActiveTab('search')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-              activeTab === 'search'
-                ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] font-semibold'
-                : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white'
-            }`}
-          >
-            Search Domains
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('domains')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer flex items-center gap-2 ${
-              activeTab === 'domains'
-                ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] font-semibold'
-                : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white'
-            }`}
-          >
-            <span>My Domains</span>
-            <span className="text-[10px] font-mono opacity-75">
-              {ownedDomains.length}
-            </span>
-            {pendingOrders.length > 0 && (
-              <span
-                className="w-1.5 h-1.5 rounded-full bg-amber-500"
-                title={`${pendingOrders.length} unpaid order(s)`}
-              />
-            )}
-          </button>
-        </div>
-
-        <p className="text-xs text-[#11140F]/55 dark:text-white/50">
-          1-year registration, SSL certificate, and custom email routing included.
-        </p>
-      </div>
-
+    <div className="space-y-6 text-[#11140F] dark:text-white">
       {/* Alert Notification */}
       {actionAlert && (
         <div
-          className={`p-3.5 rounded-xl text-xs font-medium flex items-center justify-between gap-2.5 ${
+          className={`p-3.5 rounded-2xl text-xs font-medium flex items-center justify-between gap-2.5 ${
             actionAlert.type === 'success'
-              ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30'
-              : 'bg-red-50 dark:bg-red-950/30 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-500/30'
+              ? 'bg-emerald-500/10 text-emerald-700 dark:text-[#34D399] border border-emerald-500/25'
+              : 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/25'
           }`}
         >
           <div className="flex items-center gap-2">
             {actionAlert.type === 'success' ? (
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <CheckCircle2 className="w-4 h-4 text-[#34D399] shrink-0" />
             ) : (
-              <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+              <AlertCircle className="w-4 h-4 text-rose-500 shrink-0" />
             )}
             <span>{actionAlert.text}</span>
           </div>
           <button
             type="button"
             onClick={() => setActionAlert(null)}
-            className="text-[11px] underline opacity-70 hover:opacity-100 cursor-pointer"
+            className="text-[11px] underline opacity-75 hover:opacity-100 cursor-pointer"
           >
             Dismiss
           </button>
@@ -345,162 +304,248 @@ export default function NameLaunchService({ user }: Props) {
 
       {/* Unpaid Order Reminder Banner (when on Search tab) */}
       {activeTab === 'search' && pendingOrders.length > 0 && (
-        <div className="px-4 py-3 rounded-xl border border-amber-500/25 bg-amber-500/[0.07] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="px-4 py-3 rounded-2xl border border-amber-500/25 bg-amber-500/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 text-xs">
-            <Clock className="w-4 h-4 text-amber-500 shrink-0" />
-            <span className="text-[#11140F]/85 dark:text-white/85">
+            <Clock className="w-4 h-4 text-amber-400 shrink-0" />
+            <span className="text-[#11140F]/85 dark:text-white/90">
               You have <strong>{pendingOrders.length}</strong> domain {pendingOrders.length === 1 ? 'order' : 'orders'} awaiting payment (
-              <span className="font-mono">{pendingOrders.map((p) => p.domainName).join(', ')}</span>).
+              <span className="font-mono text-amber-600 dark:text-amber-300">{pendingOrders.map((p) => p.domainName).join(', ')}</span>).
             </span>
           </div>
           <button
             type="button"
             onClick={() => setActiveTab('domains')}
-            className="text-xs font-semibold text-amber-700 dark:text-amber-400 hover:underline inline-flex items-center gap-1 shrink-0 cursor-pointer"
+            className="text-xs font-bold text-amber-700 dark:text-amber-300 hover:underline inline-flex items-center gap-1 shrink-0 cursor-pointer"
           >
-            <span>Review &amp; Pay</span>
+            <span>Complete Payment</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
 
-      {/* VIEW A: DOMAIN SEARCH & STOREFRONT */}
-      {activeTab === 'search' && (
-        <div className="space-y-5">
-          {/* Interactive Search Hero */}
-          <div className="rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#11140F] p-6 sm:p-8 relative overflow-hidden">
-            <div className="max-w-2xl space-y-5">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-[#11140F] dark:text-white">
-                  Search &amp; register your custom domain
-                </h2>
-                <p className="text-xs sm:text-[13.5px] text-[#11140F]/60 dark:text-white/55 mt-1">
-                  Check availability across global &amp; local extensions. Go live with your own website address and custom inbox in under two minutes.
-                </p>
-              </div>
+      {/* Signature Storefront Card Container */}
+      <div className="rounded-3xl border border-[#11140F]/10 dark:border-white/[0.08] bg-white dark:bg-[#101211] shadow-2xl overflow-hidden">
+        {/* Top Ambient Cover Banner (Signature Obsidian + Emerald Mesh + Grid) */}
+        <div className="relative px-5 sm:px-8 pt-5 pb-7 bg-[#0A0E0C] text-white overflow-hidden border-b border-white/[0.07]">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/75 via-[#101914] to-[#0A0E0C]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-500/20 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:16px_16px]" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0A0E0C]/80 via-transparent to-black/30 pointer-events-none" />
 
-              <form onSubmit={handleSearch}>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <div className="flex items-center gap-2.5 flex-1 px-4 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-white/[0.03] focus-within:ring-2 focus-within:ring-emerald-500/25 focus-within:border-emerald-500 transition-all">
-                    <Search className="w-4 h-4 text-[#11140F]/40 dark:text-white/40 shrink-0" />
-                    <input
-                      ref={searchInputRef}
-                      type="text"
-                      value={query}
-                      onChange={(e) => setQuery(e.target.value)}
-                      placeholder="Type a brand name or domain (e.g. acme, studio.xyz)"
-                      className="w-full py-3 text-sm bg-transparent outline-none text-[#11140F] dark:text-white placeholder:text-[#11140F]/40 dark:placeholder:text-white/35 font-mono"
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={searching}
-                    className="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm transition-colors disabled:opacity-50 shrink-0 cursor-pointer flex items-center justify-center gap-2"
-                  >
-                    <span>{searching ? 'Checking…' : 'Search'}</span>
-                  </button>
-                </div>
-              </form>
-
-              {searchError && (
-                <p className="text-xs text-red-600 dark:text-red-400">{searchError}</p>
-              )}
-
-              {/* Quick Interactive Brand Suggestions */}
-              <div className="flex items-center gap-2 flex-wrap text-xs text-[#11140F]/45 dark:text-white/45">
-                <span>Quick try:</span>
-                {['mybrand', 'studio', 'ventures', 'digital'].map((sug) => (
-                  <button
-                    key={sug}
-                    type="button"
-                    onClick={() => runDomainSearch(sug)}
-                    className="font-mono text-[11px] px-2.5 py-1 rounded-md bg-[#11140F]/5 dark:bg-white/[0.05] hover:bg-emerald-500/10 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors cursor-pointer"
-                  >
-                    {sug}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Empty-Search Showcase: Live TLD Pricing Grid + Included Capabilities */}
-          {results.length === 0 && !searching && (
-            <div className="space-y-5">
-              {/* Live TLD Pricing Strip */}
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between px-0.5">
-                  <h3 className="text-xs font-semibold uppercase tracking-wider text-[#11140F]/55 dark:text-white/50">
-                    Popular Extensions &amp; Annual Pricing
-                  </h3>
-                  <span className="text-[11px] text-[#11140F]/45 dark:text-white/40">
-                    Click an extension to search
+          <div className="relative z-10 space-y-5">
+            {/* Top Frosted Pill Navigation */}
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="inline-flex items-center gap-1.5 p-1 rounded-full bg-black/45 border border-white/15 backdrop-blur-md">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('search')}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                    activeTab === 'search'
+                      ? 'bg-[#34D399] text-[#09110D] shadow-sm'
+                      : 'text-white/75 hover:text-white'
+                  }`}
+                >
+                  Search Domains
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('domains')}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                    activeTab === 'domains'
+                      ? 'bg-[#34D399] text-[#09110D] shadow-sm'
+                      : 'text-white/75 hover:text-white'
+                  }`}
+                >
+                  <span>My Domains</span>
+                  <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
+                    activeTab === 'domains' ? 'bg-black/15 text-[#09110D]' : 'bg-white/10 text-white/80'
+                  }`}>
+                    {ownedDomains.length}
                   </span>
+                  {pendingOrders.length > 0 && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" title={`${pendingOrders.length} awaiting payment`} />
+                  )}
+                </button>
+              </div>
+
+              <span className="px-3 py-1 rounded-full bg-black/45 border border-white/15 backdrop-blur-md text-[11px] font-medium text-white/80 flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#34D399]" />
+                <span>SSL &amp; Email Included</span>
+              </span>
+            </div>
+
+            {/* Hero Copy + Search Input when on Search Tab */}
+            {activeTab === 'search' && (
+              <div className="max-w-2xl space-y-4 pt-1">
+                <div>
+                  <p className="text-xs font-semibold text-[#34D399] tracking-wide uppercase">
+                    Domains &amp; Business Email
+                  </p>
+                  <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white mt-0.5">
+                    Claim your brand address.
+                  </h2>
+                  <p className="text-xs sm:text-[13px] text-white/65 mt-1 leading-relaxed max-w-xl">
+                    Register a domain in local currency, route custom <span className="font-mono text-[#34D399]">you@yourbrand.com</span> emails, and link directly to your QR campaigns.
+                  </p>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
-                  {featuredTlds.map((item) => (
+                <form onSubmit={handleSearch}>
+                  <div className="flex flex-col sm:flex-row gap-2.5">
+                    <div className="flex items-center gap-2.5 flex-1 px-4 rounded-2xl bg-black/50 border border-white/15 focus-within:border-[#34D399] backdrop-blur-md transition-all">
+                      <Search className="w-4 h-4 text-[#34D399] shrink-0" />
+                      <input
+                        ref={searchInputRef}
+                        type="text"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        placeholder="Search domain name (e.g. mybrand, studio.xyz)"
+                        className="w-full py-3 text-sm bg-transparent outline-none text-white placeholder:text-white/40 font-mono"
+                      />
+                    </div>
                     <button
-                      key={item.tld}
-                      type="button"
-                      onClick={() => {
-                        const base = query.trim().split('.')[0] || 'mybrand';
-                        runDomainSearch(`${base}.${item.tld}`);
-                      }}
-                      className="p-3.5 rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#11140F] hover:border-emerald-500/40 hover:bg-emerald-500/[0.03] transition-all text-left cursor-pointer group flex flex-col justify-between gap-2"
+                      type="submit"
+                      disabled={searching}
+                      className="px-6 py-3 rounded-2xl bg-[#34D399] hover:bg-[#34D399]/90 active:scale-[0.99] text-[#09110D] font-bold text-xs sm:text-sm transition-all shadow-md disabled:opacity-50 shrink-0 cursor-pointer flex items-center justify-center gap-2"
                     >
-                      <div>
-                        <div className="font-mono font-bold text-base text-[#11140F] dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                          .{item.tld}
-                        </div>
-                        <div className="text-[11px] text-[#11140F]/50 dark:text-white/45 mt-0.5">
-                          {item.tagline}
-                        </div>
-                      </div>
-                      <div className="font-mono text-xs font-semibold text-[#11140F] dark:text-white/90 pt-1 border-t border-[#11140F]/6 dark:border-white/6">
-                        {formatNaira(item.priceNgn)}
-                        <span className="text-[10px] font-normal opacity-50">/yr</span>
-                      </div>
+                      <span>{searching ? 'Searching…' : 'Search Availability'}</span>
+                    </button>
+                  </div>
+                </form>
+
+                {searchError && (
+                  <p className="text-xs text-rose-400">{searchError}</p>
+                )}
+
+                <div className="flex items-center gap-2 flex-wrap text-xs text-white/50">
+                  <span>Try:</span>
+                  {['mybrand', 'studio', 'ventures', 'digital'].map((sug) => (
+                    <button
+                      key={sug}
+                      type="button"
+                      onClick={() => runDomainSearch(sug)}
+                      className="font-mono text-[11px] px-2.5 py-1 rounded-full bg-white/[0.06] hover:bg-white/[0.14] border border-white/10 text-white/80 hover:text-[#34D399] transition-all cursor-pointer"
+                    >
+                      {sug}
                     </button>
                   ))}
                 </div>
               </div>
+            )}
+          </div>
+        </div>
 
-              {/* Clean 4-Item Included Architecture Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                <div className="p-4 rounded-xl border border-[#11140F]/8 dark:border-white/8 bg-white/70 dark:bg-white/[0.02] space-y-1.5">
-                  <Mail className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                  <div className="text-xs font-semibold">Custom Brand Email</div>
-                  <p className="text-[11.5px] text-[#11140F]/55 dark:text-white/50 leading-relaxed">
-                    Route hello@yourbrand.com directly into your existing inbox with unlimited aliases.
-                  </p>
-                </div>
+        {/* Lower Content Canvas */}
+        <div className="p-5 sm:p-7 space-y-6">
+          {/* VIEW A: DOMAIN SEARCH & STOREFRONT */}
+          {activeTab === 'search' && (
+            <div className="space-y-6">
+              {/* Empty-Search Showcase: Live TLD Pricing Grid + Included Capabilities */}
+              {results.length === 0 && !searching && (
+                <div className="space-y-6">
+                  {/* Featured Extensions Section */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between px-1">
+                      <span className="text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 text-[#11140F]/70 dark:text-white/70">
+                        <Globe className="w-3.5 h-3.5 text-[#34D399]" />
+                        Featured Extensions
+                      </span>
+                      <span className="text-[10.5px] font-mono text-[#11140F]/45 dark:text-white/40">
+                        {featuredTlds.length} Extensions
+                      </span>
+                    </div>
 
-                <div className="p-4 rounded-xl border border-[#11140F]/8 dark:border-white/8 bg-white/70 dark:bg-white/[0.02] space-y-1.5">
-                  <Zap className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                  <div className="text-xs font-semibold">Zero-Config QR Linking</div>
-                  <p className="text-[11.5px] text-[#11140F]/55 dark:text-white/50 leading-relaxed">
-                    Connect your domain to your QR campaigns in one click with automatic SSL encryption.
-                  </p>
-                </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+                      {featuredTlds.map((item) => (
+                        <button
+                          key={item.tld}
+                          type="button"
+                          onClick={() => {
+                            const base = query.trim().split('.')[0] || 'mybrand';
+                            runDomainSearch(`${base}.${item.tld}`);
+                          }}
+                          className="group p-3.5 rounded-2xl bg-[#F7F8F5] dark:bg-white/[0.03] hover:bg-[#EEF0EA] dark:hover:bg-white/[0.07] border border-[#11140F]/8 dark:border-white/[0.08] hover:border-[#34D399]/50 transition-all text-left cursor-pointer shadow-xs flex flex-col justify-between gap-2.5"
+                        >
+                          <div>
+                            <div className="font-mono font-bold text-base text-[#11140F] dark:text-white group-hover:text-[#34D399] transition-colors">
+                              .{item.tld}
+                            </div>
+                            <div className="text-[11px] text-[#11140F]/55 dark:text-white/50 mt-0.5">
+                              {item.tagline}
+                            </div>
+                          </div>
+                          <div className="font-mono text-xs font-bold text-[#2F6B4F] dark:text-[#34D399] pt-1.5 border-t border-[#11140F]/6 dark:border-white/[0.06]">
+                            {formatNaira(item.priceNgn)}
+                            <span className="text-[10px] font-normal text-[#11140F]/45 dark:text-white/45">/yr</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
-                <div className="p-4 rounded-xl border border-[#11140F]/8 dark:border-white/8 bg-white/70 dark:bg-white/[0.02] space-y-1.5">
-                  <Sliders className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                  <div className="text-xs font-semibold">Full DNS Control</div>
-                  <p className="text-[11.5px] text-[#11140F]/55 dark:text-white/50 leading-relaxed">
-                    Manage A, CNAME, MX, and TXT records, web redirects, and custom nameservers anytime.
-                  </p>
-                </div>
+                  {/* Included Features Section (Signature Glass Cards with Squircle Icons) */}
+                  <div className="space-y-3 pt-2 border-t border-[#11140F]/8 dark:border-white/10">
+                    <div className="flex items-center justify-between px-1">
+                      <span className="text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 text-[#11140F]/70 dark:text-white/70">
+                        <ShieldCheck className="w-3.5 h-3.5 text-[#34D399]" />
+                        Included With Every Domain
+                      </span>
+                      <span className="text-[10.5px] font-mono text-[#11140F]/45 dark:text-white/40">
+                        4 Features
+                      </span>
+                    </div>
 
-                <div className="p-4 rounded-xl border border-[#11140F]/8 dark:border-white/8 bg-white/70 dark:bg-white/[0.02] space-y-1.5">
-                  <EyeOff className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                  <div className="text-xs font-semibold">WHOIS Privacy &amp; Lock</div>
-                  <p className="text-[11.5px] text-[#11140F]/55 dark:text-white/50 leading-relaxed">
-                    Keep your personal details hidden from public lookup records with transfer protection.
-                  </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-[#F7F8F5] dark:bg-white/[0.03] border border-[#11140F]/8 dark:border-white/[0.08]">
+                        <div className="w-9 h-9 rounded-xl bg-black/[0.06] dark:bg-white/10 flex items-center justify-center text-[#2F6B4F] dark:text-[#34D399] shrink-0">
+                          <Mail className="w-4 h-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-[#11140F] dark:text-white">Custom Brand Email</p>
+                          <p className="text-[11px] text-[#11140F]/55 dark:text-white/50 mt-0.5 leading-relaxed">
+                            Route hello@yourbrand.com into your personal inbox with custom aliases.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-[#F7F8F5] dark:bg-white/[0.03] border border-[#11140F]/8 dark:border-white/[0.08]">
+                        <div className="w-9 h-9 rounded-xl bg-black/[0.06] dark:bg-white/10 flex items-center justify-center text-[#2F6B4F] dark:text-[#34D399] shrink-0">
+                          <Zap className="w-4 h-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-[#11140F] dark:text-white">One-Click QR Linking</p>
+                          <p className="text-[11px] text-[#11140F]/55 dark:text-white/50 mt-0.5 leading-relaxed">
+                            Activate your domain for shortlinks and QR codes with automatic SSL.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-[#F7F8F5] dark:bg-white/[0.03] border border-[#11140F]/8 dark:border-white/[0.08]">
+                        <div className="w-9 h-9 rounded-xl bg-black/[0.06] dark:bg-white/10 flex items-center justify-center text-[#2F6B4F] dark:text-[#34D399] shrink-0">
+                          <Sliders className="w-4 h-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-[#11140F] dark:text-white">Full DNS Management</p>
+                          <p className="text-[11px] text-[#11140F]/55 dark:text-white/50 mt-0.5 leading-relaxed">
+                            Edit A, CNAME, MX, and TXT records, web forwarding, or custom nameservers.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-[#F7F8F5] dark:bg-white/[0.03] border border-[#11140F]/8 dark:border-white/[0.08]">
+                        <div className="w-9 h-9 rounded-xl bg-black/[0.06] dark:bg-white/10 flex items-center justify-center text-[#2F6B4F] dark:text-[#34D399] shrink-0">
+                          <EyeOff className="w-4 h-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-[#11140F] dark:text-white">WHOIS Privacy &amp; Lock</p>
+                          <p className="text-[11px] text-[#11140F]/55 dark:text-white/50 mt-0.5 leading-relaxed">
+                            Keep registrant information masked with automatic transfer lock protection.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          )}
+              )}
 
           {/* Search Results Table */}
           {results.length > 0 && (
@@ -682,7 +727,7 @@ export default function NameLaunchService({ user }: Props) {
                 <button
                   type="submit"
                   disabled={checkingOut}
-                  className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm transition-colors disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full py-3.5 rounded-2xl bg-[#34D399] hover:bg-[#34D399]/90 active:scale-[0.99] text-[#09110D] font-bold text-sm transition-all shadow-md disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
                 >
                   <Lock className="w-4 h-4" />
                   <span>
@@ -694,240 +739,245 @@ export default function NameLaunchService({ user }: Props) {
               </form>
             </div>
           )}
-        </div>
-      )}
-
-      {/* VIEW B: MY REGISTERED DOMAINS & PENDING CHECKOUTS */}
-      {activeTab === 'domains' && (
-        <div className="space-y-6">
-          {loadingOrders ? (
-            <div className="p-12 text-center text-xs text-[#11140F]/50 dark:text-white/50">
-              Loading domains…
             </div>
-          ) : (
-            <>
-              {/* 1. UNPAID / AWAITING PAYMENT SECTION (No DNS/WHOIS/Workspace buttons until paid!) */}
-              {pendingOrders.length > 0 && (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between px-0.5">
-                    <h4 className="text-xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-400">
-                      Awaiting Payment ({pendingOrders.length})
-                    </h4>
-                    <span className="text-[11px] text-[#11140F]/50 dark:text-white/45">
-                      Complete checkout to activate and unlock DNS management
-                    </span>
-                  </div>
+          )}
 
-                  <div className="grid grid-cols-1 gap-3">
-                    {pendingOrders.map((ord) => (
-                      <div
-                        key={ord.id}
-                        className="p-4 sm:p-5 rounded-2xl border border-amber-500/25 bg-amber-500/[0.04] flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-                      >
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2.5 flex-wrap">
-                            <span className="font-mono font-semibold text-base text-[#11140F] dark:text-white">
-                              {ord.domainName}
-                            </span>
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-700 dark:text-amber-300 text-[10.5px] font-semibold">
-                              <Clock className="w-3 h-3" />
-                              Payment Required
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 text-xs text-[#11140F]/60 dark:text-white/55 flex-wrap">
-                            <span className="font-mono">
-                              {ord.desiredAlias}@{ord.domainName} &rarr; {ord.userEmail}
-                            </span>
-                            <span className="opacity-40">•</span>
-                            <span className="font-mono font-semibold text-[#11140F] dark:text-white">
-                              {formatNaira(ord.totalPaidNgn)}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2 shrink-0">
-                          <button
-                            type="button"
-                            onClick={() => handleCancelPendingOrder(ord.id)}
-                            disabled={cancelingOrderId === ord.id || resumingOrderId === ord.id}
-                            className="px-3 py-2 rounded-lg border border-[#11140F]/15 dark:border-white/15 text-xs font-medium text-[#11140F]/70 dark:text-white/70 hover:text-rose-600 dark:hover:text-rose-400 hover:border-rose-500/30 transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                            <span>{cancelingOrderId === ord.id ? 'Removing…' : 'Cancel'}</span>
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => handleResumePendingPayment(ord.id)}
-                            disabled={resumingOrderId === ord.id || cancelingOrderId === ord.id}
-                            className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                          >
-                            <CreditCard className="w-3.5 h-3.5" />
-                            <span>
-                              {resumingOrderId === ord.id
-                                ? 'Opening Checkout…'
-                                : `Complete Payment · ${formatNaira(ord.totalPaidNgn)}`}
-                            </span>
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* 2. ACTIVE / PAID OWNED DOMAINS */}
-              {ownedDomains.length === 0 ? (
-                <div className="p-10 rounded-2xl border border-dashed border-[#11140F]/15 dark:border-white/15 text-center space-y-3 bg-white dark:bg-[#11140F]">
-                  <Globe className="w-7 h-7 text-[#11140F]/40 dark:text-white/40 mx-auto" />
-                  <h4 className="text-sm font-semibold">No active domains yet</h4>
-                  <p className="text-xs text-[#11140F]/60 dark:text-white/60 max-w-sm mx-auto">
-                    {pendingOrders.length > 0
-                      ? 'Complete payment on your pending order above to activate your domain and unlock DNS & email tools.'
-                      : 'Search for an available domain name to register your brand address and email forwarding.'}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('search')}
-                    className="px-4 py-2 rounded-lg bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] text-xs font-semibold hover:opacity-90 cursor-pointer"
-                  >
-                    Search Domains
-                  </button>
+          {/* VIEW B: MY REGISTERED DOMAINS & PENDING CHECKOUTS */}
+          {activeTab === 'domains' && (
+            <div className="space-y-6">
+              {loadingOrders ? (
+                <div className="p-12 text-center text-xs text-[#11140F]/50 dark:text-white/50">
+                  Loading domains…
                 </div>
               ) : (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 gap-4">
-                    {ownedDomains.map((ord) => (
-                      <div
-                        key={ord.id}
-                        className="p-5 rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#11140F] space-y-4"
-                      >
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-2.5 flex-wrap">
-                              <span className="font-mono font-semibold text-base sm:text-lg">
-                                {ord.domainName}
-                              </span>
-                              {ord.status === 'ACTIVE' ? (
-                                <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                  Active
+                <>
+                  {/* 1. UNPAID / AWAITING PAYMENT SECTION */}
+                  {pendingOrders.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between px-1">
+                        <span className="text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
+                          <Clock className="w-3.5 h-3.5" />
+                          Awaiting Payment
+                        </span>
+                        <span className="text-[10.5px] font-mono text-[#11140F]/45 dark:text-white/40">
+                          {pendingOrders.length} Pending
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-3">
+                        {pendingOrders.map((ord) => (
+                          <div
+                            key={ord.id}
+                            className="p-4 sm:p-5 rounded-2xl border border-amber-500/25 bg-amber-500/[0.05] flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                          >
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2.5 flex-wrap">
+                                <span className="font-mono font-bold text-base text-[#11140F] dark:text-white">
+                                  {ord.domainName}
                                 </span>
-                              ) : ord.status === 'PAID_AWAITING_FUNDS' ? (
-                                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-amber-700 dark:text-amber-400">
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 text-[10.5px] font-semibold">
                                   <Clock className="w-3 h-3" />
-                                  Provisioning Pending
+                                  Payment Required
                                 </span>
-                              ) : (
-                                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-blue-600 dark:text-blue-400">
-                                  <Clock className="w-3 h-3" />
-                                  {ord.status}
+                              </div>
+                              <div className="flex items-center gap-2 text-xs text-[#11140F]/60 dark:text-white/55 flex-wrap">
+                                <span className="font-mono">
+                                  {ord.desiredAlias}@{ord.domainName} &rarr; {ord.userEmail}
                                 </span>
-                              )}
+                                <span className="opacity-40">•</span>
+                                <span className="font-mono font-bold text-[#11140F] dark:text-white">
+                                  {formatNaira(ord.totalPaidNgn)}
+                                </span>
+                              </div>
                             </div>
 
-                            <div className="flex items-center gap-2 text-xs text-[#11140F]/60 dark:text-white/60 flex-wrap">
-                              <span className="flex items-center gap-1 font-mono text-[#11140F] dark:text-white">
-                                <Mail className="w-3 h-3 opacity-70" />
-                                {ord.desiredAlias}@{ord.domainName}
-                              </span>
-                              <span>&rarr;</span>
-                              <span className="font-mono">{ord.userEmail}</span>
-                              <span className="opacity-40">•</span>
-                              <span className="font-mono">{formatNaira(ord.totalPaidNgn)}</span>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => handleCancelPendingOrder(ord.id)}
+                                disabled={cancelingOrderId === ord.id || resumingOrderId === ord.id}
+                                className="px-3.5 py-2 rounded-xl border border-[#11140F]/15 dark:border-white/15 text-xs font-medium text-[#11140F]/70 dark:text-white/70 hover:text-rose-500 hover:border-rose-500/30 transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span>{cancelingOrderId === ord.id ? 'Removing…' : 'Cancel'}</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleResumePendingPayment(ord.id)}
+                                disabled={resumingOrderId === ord.id || cancelingOrderId === ord.id}
+                                className="px-4 py-2 rounded-xl bg-[#34D399] hover:bg-[#34D399]/90 text-[#09110D] text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                              >
+                                <CreditCard className="w-3.5 h-3.5" />
+                                <span>
+                                  {resumingOrderId === ord.id
+                                    ? 'Opening Checkout…'
+                                    : `Complete Payment · ${formatNaira(ord.totalPaidNgn)}`}
+                                </span>
+                              </button>
                             </div>
                           </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <button
-                              type="button"
-                              onClick={() => setSelectedDnsOrder(ord)}
-                              className="px-3 py-1.5 rounded-lg border border-[#11140F]/15 dark:border-white/15 text-xs font-medium hover:bg-black/5 dark:hover:bg-white/5 transition-colors flex items-center gap-1.5 cursor-pointer"
-                            >
-                              <Sliders className="w-3.5 h-3.5 opacity-70" />
-                              <span>DNS Records</span>
-                            </button>
+                  {/* 2. ACTIVE / PAID OWNED DOMAINS */}
+                  {ownedDomains.length === 0 ? (
+                    <div className="p-10 rounded-2xl border border-dashed border-[#11140F]/15 dark:border-white/12 text-center space-y-3 bg-[#F7F8F5] dark:bg-white/[0.02]">
+                      <div className="w-11 h-11 rounded-2xl bg-black/[0.05] dark:bg-white/10 text-[#2F6B4F] dark:text-[#34D399] flex items-center justify-center mx-auto">
+                        <Globe className="w-5 h-5" />
+                      </div>
+                      <h4 className="text-sm font-bold">No active domains yet</h4>
+                      <p className="text-xs text-[#11140F]/60 dark:text-white/55 max-w-sm mx-auto leading-relaxed">
+                        {pendingOrders.length > 0
+                          ? 'Complete payment on your pending order above to activate your domain and unlock DNS & email routing.'
+                          : 'Search for an available domain name to register your brand address and email forwarding.'}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('search')}
+                        className="px-5 py-2.5 rounded-2xl bg-[#34D399] hover:bg-[#34D399]/90 text-[#09110D] text-xs font-bold shadow-sm cursor-pointer"
+                      >
+                        Search Domains
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 gap-4">
+                        {ownedDomains.map((ord) => (
+                          <div
+                            key={ord.id}
+                            className="p-5 rounded-2xl border border-[#11140F]/10 dark:border-white/[0.08] bg-[#F7F8F5] dark:bg-white/[0.03] space-y-4"
+                          >
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-2.5 flex-wrap">
+                                  <span className="font-mono font-bold text-base sm:text-lg">
+                                    {ord.domainName}
+                                  </span>
+                                  {ord.status === 'ACTIVE' ? (
+                                    <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#2F6B4F] dark:text-[#34D399]">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-[#34D399]" />
+                                      Active
+                                    </span>
+                                  ) : ord.status === 'PAID_AWAITING_FUNDS' ? (
+                                    <span className="inline-flex items-center gap-1 text-[11px] font-medium text-amber-600 dark:text-amber-400">
+                                      <Clock className="w-3 h-3" />
+                                      Provisioning Pending
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-1 text-[11px] font-medium text-blue-500">
+                                      <Clock className="w-3 h-3" />
+                                      {ord.status}
+                                    </span>
+                                  )}
+                                </div>
 
-                            <button
-                              type="button"
-                              onClick={() => setExpandedOrderId(expandedOrderId === ord.id ? null : ord.id)}
-                              className="px-3 py-1.5 rounded-lg border border-[#11140F]/15 dark:border-white/15 text-xs font-medium hover:bg-black/5 dark:hover:bg-white/5 transition-colors flex items-center gap-1.5 cursor-pointer"
-                            >
-                              <ShieldCheck className="w-3.5 h-3.5 opacity-70" />
-                              <span>Domain Settings</span>
-                              {expandedOrderId === ord.id ? (
-                                <ChevronUp className="w-3 h-3 opacity-60" />
-                              ) : (
-                                <ChevronDown className="w-3 h-3 opacity-60" />
-                              )}
-                            </button>
+                                <div className="flex items-center gap-2 text-xs text-[#11140F]/60 dark:text-white/60 flex-wrap">
+                                  <span className="flex items-center gap-1 font-mono text-[#11140F] dark:text-white">
+                                    <Mail className="w-3 h-3 text-[#34D399]" />
+                                    {ord.desiredAlias}@{ord.domainName}
+                                  </span>
+                                  <span>&rarr;</span>
+                                  <span className="font-mono">{ord.userEmail}</span>
+                                  <span className="opacity-40">•</span>
+                                  <span className="font-mono">{formatNaira(ord.totalPaidNgn)}</span>
+                                </div>
+                              </div>
 
-                            <button
-                              type="button"
-                              onClick={() => handleLinkToWorkspace(ord)}
-                              disabled={linkingOrderId === ord.id}
-                              className="px-3 py-1.5 rounded-lg bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] text-xs font-semibold hover:opacity-90 transition-opacity flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                            >
-                              <Check className="w-3.5 h-3.5" />
-                              <span>
-                                {linkingOrderId === ord.id ? 'Linking…' : 'Use for QR Links'}
-                              </span>
-                            </button>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedDnsOrder(ord)}
+                                  className="px-3 py-1.5 rounded-xl border border-[#11140F]/15 dark:border-white/15 text-xs font-medium hover:bg-black/5 dark:hover:bg-white/5 transition-colors flex items-center gap-1.5 cursor-pointer"
+                                >
+                                  <Sliders className="w-3.5 h-3.5 text-[#34D399]" />
+                                  <span>DNS Records</span>
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => setExpandedOrderId(expandedOrderId === ord.id ? null : ord.id)}
+                                  className="px-3 py-1.5 rounded-xl border border-[#11140F]/15 dark:border-white/15 text-xs font-medium hover:bg-black/5 dark:hover:bg-white/5 transition-colors flex items-center gap-1.5 cursor-pointer"
+                                >
+                                  <ShieldCheck className="w-3.5 h-3.5 text-[#34D399]" />
+                                  <span>Domain Settings</span>
+                                  {expandedOrderId === ord.id ? (
+                                    <ChevronUp className="w-3 h-3 opacity-60" />
+                                  ) : (
+                                    <ChevronDown className="w-3 h-3 opacity-60" />
+                                  )}
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleLinkToWorkspace(ord)}
+                                  disabled={linkingOrderId === ord.id}
+                                  className="px-3.5 py-1.5 rounded-xl bg-[#34D399] hover:bg-[#34D399]/90 text-[#09110D] text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                                >
+                                  <Check className="w-3.5 h-3.5" />
+                                  <span>
+                                    {linkingOrderId === ord.id ? 'Linking…' : 'Use for QR Links'}
+                                  </span>
+                                </button>
+                              </div>
+                            </div>
+
+                            {ord.nameservers && ord.nameservers.length > 0 && (
+                              <div className="pt-2.5 border-t border-[#11140F]/8 dark:border-white/8 flex flex-wrap items-center justify-between gap-2 text-[11px] text-[#11140F]/45 dark:text-white/45 font-mono">
+                                <span>Nameservers: {ord.nameservers.join(', ')}</span>
+                                <span>Order ID: {ord.id.slice(-8).toUpperCase()}</span>
+                              </div>
+                            )}
+
+                            {expandedOrderId === ord.id && (
+                              <DomainFleetOperabilities
+                                order={ord}
+                                onOrderUpdated={(updated) =>
+                                  setOrders((prev) => prev.map((o) => (o.id === ord.id ? updated : o)))
+                                }
+                              />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Gmail Send Mail As Guide */}
+                      <div className="rounded-2xl bg-[#F7F8F5] dark:bg-white/[0.03] border border-[#11140F]/10 dark:border-white/[0.08] p-5 space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Mail className="w-4 h-4 text-[#34D399]" />
+                          <h4 className="font-bold text-xs uppercase tracking-wider text-[#11140F]/75 dark:text-white/75">
+                            Send Emails From Your Custom Domain in Gmail
+                          </h4>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs leading-relaxed text-[#11140F]/75 dark:text-white/75">
+                          <div className="p-3.5 rounded-xl bg-white dark:bg-[#151814] border border-[#11140F]/8 dark:border-white/8 space-y-1">
+                            <span className="font-bold text-[#2F6B4F] dark:text-[#34D399]">1. App Password</span>
+                            <p>Enable 2-Step Verification in your Google Account and generate an App Password.</p>
+                          </div>
+                          <div className="p-3.5 rounded-xl bg-white dark:bg-[#151814] border border-[#11140F]/8 dark:border-white/8 space-y-1">
+                            <span className="font-bold text-[#2F6B4F] dark:text-[#34D399]">2. Accounts &amp; Import</span>
+                            <p>In Gmail Settings, go to Accounts and Import and click Add another email address.</p>
+                          </div>
+                          <div className="p-3.5 rounded-xl bg-white dark:bg-[#151814] border border-[#11140F]/8 dark:border-white/8 space-y-1">
+                            <span className="font-bold text-[#2F6B4F] dark:text-[#34D399]">3. SMTP Setup</span>
+                            <p>Use <code className="font-mono">smtp.gmail.com</code> (Port 587, TLS) with your Gmail and App Password.</p>
+                          </div>
+                          <div className="p-3.5 rounded-xl bg-white dark:bg-[#151814] border border-[#11140F]/8 dark:border-white/8 space-y-1">
+                            <span className="font-bold text-[#2F6B4F] dark:text-[#34D399]">4. Verify</span>
+                            <p>Click the confirmation link sent to your inbox to reply from your custom address.</p>
                           </div>
                         </div>
-
-                        {ord.nameservers && ord.nameservers.length > 0 && (
-                          <div className="pt-2.5 border-t border-[#11140F]/8 dark:border-white/8 flex flex-wrap items-center justify-between gap-2 text-[11px] text-[#11140F]/45 dark:text-white/45 font-mono">
-                            <span>Nameservers: {ord.nameservers.join(', ')}</span>
-                            <span>Order ID: {ord.id.slice(-8).toUpperCase()}</span>
-                          </div>
-                        )}
-
-                        {expandedOrderId === ord.id && (
-                          <DomainFleetOperabilities
-                            order={ord}
-                            onOrderUpdated={(updated) =>
-                              setOrders((prev) => prev.map((o) => (o.id === ord.id ? updated : o)))
-                            }
-                          />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Gmail Send Mail As Guide */}
-                  <div className="rounded-2xl bg-[#F7F8F5] dark:bg-white/[0.03] border border-[#11140F]/10 dark:border-white/10 p-5 space-y-3">
-                    <div className="flex items-center gap-2">
-                      <Mail className="w-4 h-4 opacity-70" />
-                      <h4 className="font-semibold text-xs uppercase tracking-wider text-[#11140F]/70 dark:text-white/70">
-                        Send Emails From Your Custom Domain in Gmail
-                      </h4>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs leading-relaxed text-[#11140F]/75 dark:text-white/75">
-                      <div className="p-3.5 rounded-xl bg-white dark:bg-[#151814] border border-[#11140F]/8 dark:border-white/8 space-y-1">
-                        <span className="font-semibold text-[#11140F] dark:text-white">1. App Password</span>
-                        <p>Enable 2-Step Verification in your Google Account and generate an App Password.</p>
-                      </div>
-                      <div className="p-3.5 rounded-xl bg-white dark:bg-[#151814] border border-[#11140F]/8 dark:border-white/8 space-y-1">
-                        <span className="font-semibold text-[#11140F] dark:text-white">2. Accounts &amp; Import</span>
-                        <p>In Gmail Settings, go to Accounts and Import and click Add another email address.</p>
-                      </div>
-                      <div className="p-3.5 rounded-xl bg-white dark:bg-[#151814] border border-[#11140F]/8 dark:border-white/8 space-y-1">
-                        <span className="font-semibold text-[#11140F] dark:text-white">3. SMTP Setup</span>
-                        <p>Use <code className="font-mono">smtp.gmail.com</code> (Port 587, TLS) with your Gmail and App Password.</p>
-                      </div>
-                      <div className="p-3.5 rounded-xl bg-white dark:bg-[#151814] border border-[#11140F]/8 dark:border-white/8 space-y-1">
-                        <span className="font-semibold text-[#11140F] dark:text-white">4. Verify</span>
-                        <p>Click the confirmation link sent to your inbox to reply from your custom address.</p>
                       </div>
                     </div>
-                  </div>
-                </div>
+                  )}
+                </>
               )}
-            </>
+            </div>
           )}
         </div>
-      )}
+      </div>
 
       {/* DNS Management Modal */}
       {selectedDnsOrder && (

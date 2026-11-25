@@ -340,84 +340,82 @@ export default function HeaderNav({
                     />
                   </button>
 
-                  {/* Clean Dropdown Menu */}
+                  {/* Signature Obsidian & Mint Profile Dropdown */}
                   {userMenuOpen && (
                     <div
-                      className={`absolute right-0 top-full mt-2 w-60 rounded-xl border shadow-xl p-1.5 z-50 ${
+                      className={`absolute right-0 top-full mt-2 w-64 rounded-3xl border shadow-2xl p-2 z-50 backdrop-blur-xl ${
                         isDark
-                          ? 'bg-[#141615] border-white/12 text-white shadow-black/60'
-                          : 'bg-white dark:bg-[#141615] border-[#11140F]/12 dark:border-white/12 text-[#11140F] dark:text-white'
+                          ? 'bg-[#101211]/95 border-white/[0.08] text-white shadow-black/70'
+                          : 'bg-white/95 dark:bg-[#101211]/95 border-[#11140F]/12 dark:border-white/[0.08] text-[#11140F] dark:text-white'
                       }`}
                     >
-                      {/* Identity Header */}
-                      <div
-                        className={`px-2.5 py-2 mb-1 border-b flex items-center gap-2.5 ${
-                          isDark
-                            ? 'border-white/10'
-                            : 'border-[#11140F]/8 dark:border-white/10'
-                        }`}
-                      >
-                        <div className="w-8 h-8 rounded-full overflow-hidden bg-[#11140F] dark:bg-white/15 text-white font-semibold text-xs flex items-center justify-center shrink-0">
-                          {avatarUrl && !avatarError ? (
-                            <img
-                              src={getOptimizedStorageUrl(avatarUrl)}
-                              alt={displayName}
-                              loading="lazy"
-                              decoding="async"
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <span>{userInitial}</span>
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center justify-between gap-1.5">
-                            <span className="text-[13px] font-semibold truncate">{displayName}</span>
-                            <span className={`px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold uppercase shrink-0 ${
-                              isDark ? 'bg-white/10 text-white/80' : 'bg-[#11140F]/8 dark:bg-white/10 text-[#11140F]/75 dark:text-white/80'
-                            }`}>
-                              {isAdmin ? 'Admin' : userTier}
-                            </span>
+                      {/* Compact Cover + Identity */}
+                      <div className="relative rounded-2xl overflow-hidden mb-1.5 bg-[#0A0E0C] border border-white/[0.08] p-3">
+                        <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/70 via-[#101914] to-[#0A0E0C] pointer-events-none" />
+                        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff06_1px,transparent_1px),linear-gradient(to_bottom,#ffffff06_1px,transparent_1px)] bg-[size:14px_14px] pointer-events-none" />
+                        <div className="relative z-10 flex items-center gap-2.5">
+                          <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-[#34D399] bg-[#121614] text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-md">
+                            {avatarUrl && !avatarError ? (
+                              <img
+                                src={getOptimizedStorageUrl(avatarUrl)}
+                                alt={displayName}
+                                loading="lazy"
+                                decoding="async"
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <span>{userInitial}</span>
+                            )}
                           </div>
-                          <p className={`text-[11px] truncate font-mono ${
-                            isDark ? 'text-white/50' : 'text-[#11140F]/55 dark:text-white/50'
-                          }`}>
-                            {user.email}
-                          </p>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-1.5">
+                              <span className="text-[13px] font-bold text-white truncate">{displayName}</span>
+                              <span className="text-[9.5px] font-mono font-bold uppercase text-[#34D399] shrink-0">
+                                {isAdmin ? 'Admin' : userTier}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-white/55 truncate font-mono">
+                              {user.email}
+                            </p>
+                          </div>
                         </div>
                       </div>
 
-                      {/* Dropdown Options */}
-                      <div className="space-y-0.5">
+                      {/* Dropdown Cards */}
+                      <div className="space-y-1">
                         {isAdmin && (
                           <Link
                             href="/admin"
                             onClick={() => setUserMenuOpen(false)}
-                            className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12.5px] font-medium transition-colors ${
+                            className={`w-full flex items-center gap-2.5 p-2 rounded-2xl border transition-all ${
                               isDark
-                                ? 'text-white/85 hover:text-white hover:bg-white/8'
-                                : 'text-[#11140F]/80 dark:text-white/85 hover:bg-black/5 dark:hover:bg-white/8'
+                                ? 'bg-white/[0.03] hover:bg-white/[0.07] border-white/[0.06] text-white'
+                                : 'bg-[#F7F8F5] dark:bg-white/[0.03] hover:bg-[#EEF0EA] dark:hover:bg-white/[0.07] border-[#11140F]/6 dark:border-white/[0.06]'
                             }`}
                           >
-                            <Shield className="w-3.5 h-3.5 opacity-75 shrink-0" />
-                            <span>Admin Console</span>
+                            <div className="w-7 h-7 rounded-xl bg-amber-500/15 flex items-center justify-center text-amber-400 shrink-0">
+                              <Shield className="w-3.5 h-3.5" />
+                            </div>
+                            <span className="text-[12.5px] font-semibold">Admin Console</span>
                           </Link>
                         )}
 
                         <Link
                           href="/pricing"
                           onClick={() => setUserMenuOpen(false)}
-                          className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-[12.5px] font-medium transition-colors ${
+                          className={`w-full flex items-center justify-between p-2 rounded-2xl border transition-all ${
                             isDark
-                              ? 'text-white/85 hover:text-white hover:bg-white/8'
-                              : 'text-[#11140F]/80 dark:text-white/85 hover:bg-black/5 dark:hover:bg-white/8'
+                              ? 'bg-white/[0.03] hover:bg-white/[0.07] border-white/[0.06] text-white'
+                              : 'bg-[#F7F8F5] dark:bg-white/[0.03] hover:bg-[#EEF0EA] dark:hover:bg-white/[0.07] border-[#11140F]/6 dark:border-white/[0.06]'
                           }`}
                         >
                           <span className="flex items-center gap-2.5">
-                            <CreditCard className="w-3.5 h-3.5 opacity-75 shrink-0" />
-                            <span>Plan &amp; Billing</span>
+                            <div className="w-7 h-7 rounded-xl bg-[#34D399]/15 flex items-center justify-center text-[#34D399] shrink-0">
+                              <CreditCard className="w-3.5 h-3.5" />
+                            </div>
+                            <span className="text-[12.5px] font-semibold">Plan &amp; Billing</span>
                           </span>
-                          <span className="text-[10px] font-mono uppercase opacity-60">
+                          <span className="text-[10px] font-mono uppercase text-[#34D399] font-semibold">
                             {userTier}
                           </span>
                         </Link>
@@ -428,22 +426,20 @@ export default function HeaderNav({
                             setUserMenuOpen(false);
                             setAccountModalOpen(true);
                           }}
-                          className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12.5px] font-medium transition-colors cursor-pointer text-left ${
+                          className={`w-full flex items-center gap-2.5 p-2 rounded-2xl border transition-all cursor-pointer text-left ${
                             isDark
-                              ? 'text-white/85 hover:text-white hover:bg-white/8'
-                              : 'text-[#11140F]/80 dark:text-white/85 hover:bg-black/5 dark:hover:bg-white/8'
+                              ? 'bg-white/[0.03] hover:bg-white/[0.07] border-white/[0.06] text-white'
+                              : 'bg-[#F7F8F5] dark:bg-white/[0.03] hover:bg-[#EEF0EA] dark:hover:bg-white/[0.07] border-[#11140F]/6 dark:border-white/[0.06]'
                           }`}
                         >
-                          <Settings className="w-3.5 h-3.5 opacity-75 shrink-0" />
-                          <span>Settings</span>
+                          <div className="w-7 h-7 rounded-xl bg-[#34D399]/15 flex items-center justify-center text-[#34D399] shrink-0">
+                            <Settings className="w-3.5 h-3.5" />
+                          </div>
+                          <span className="text-[12.5px] font-semibold">Settings</span>
                         </button>
                       </div>
 
-                      <div
-                        className={`h-px my-1 ${
-                          isDark ? 'bg-white/10' : 'bg-[#11140F]/8 dark:bg-white/10'
-                        }`}
-                      />
+                      <div className={`h-px my-1.5 ${isDark ? 'bg-white/10' : 'bg-[#11140F]/8 dark:bg-white/10'}`} />
 
                       <button
                         type="button"
@@ -451,7 +447,7 @@ export default function HeaderNav({
                           setUserMenuOpen(false);
                           signOut();
                         }}
-                        className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12.5px] font-medium text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer text-left"
+                        className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-2xl text-[12px] font-semibold text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
                       >
                         <LogOut className="w-3.5 h-3.5 shrink-0" />
                         <span>Log out</span>

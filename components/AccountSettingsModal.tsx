@@ -24,6 +24,12 @@ import {
   Laptop,
   Sliders,
   Check,
+  Layout,
+  QrCode,
+  Volume2,
+  Bell,
+  Sparkles,
+  ArrowUpRight,
 } from 'lucide-react';
 import {
   ThemeMode,
@@ -173,98 +179,133 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
   };
 
   const initials = (user.name || user.email || 'U').charAt(0).toUpperCase();
+  const displayName = user.name || user.email.split('@')[0];
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-black/65 backdrop-blur-sm flex items-center justify-center p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget && !loading) onClose();
       }}
     >
-      <div className="bg-white dark:bg-[#111312] rounded-2xl border border-[#11140F]/12 dark:border-white/12 shadow-2xl max-w-lg w-full overflow-hidden text-[#11140F] dark:text-[#EEF0EA]">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#11140F]/8 dark:border-white/8">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-full overflow-hidden bg-[#11140F] dark:bg-white/15 text-white flex items-center justify-center text-xs font-semibold shrink-0">
-              {avatarUrl ? (
-                <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
-              ) : (
-                initials
+      <div className="bg-white dark:bg-[#101211] rounded-3xl border border-[#11140F]/12 dark:border-white/[0.08] shadow-2xl max-w-md w-full overflow-hidden text-[#11140F] dark:text-white">
+        {/* Ambient Mesh Banner Header (matching signature card aesthetic) */}
+        <div className="relative h-28 overflow-hidden bg-[#0A0E0C]">
+          <div className="w-full h-full bg-gradient-to-br from-emerald-950/75 via-[#101914] to-[#0A0E0C] relative">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-500/25 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:16px_16px]" />
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-black/30 pointer-events-none" />
+
+          {/* Top Frosted Controls */}
+          <div className="absolute top-3.5 inset-x-4 flex items-center justify-between z-20">
+            <div className="px-3 py-1 rounded-full bg-black/45 border border-white/15 backdrop-blur-md text-white text-[11px] font-medium flex items-center gap-1.5">
+              <Sparkles className="w-3 h-3 text-[#34D399]" />
+              <span>Account</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {prefSavedMsg && (
+                <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 backdrop-blur-md text-[#34D399] text-[11px] font-medium flex items-center gap-1">
+                  <Check className="w-3 h-3" /> Saved
+                </span>
               )}
-            </div>
-            <div className="min-w-0">
-              <h3 className="font-semibold text-[14.5px] leading-tight text-[#11140F] dark:text-white truncate">
-                {user.name || 'Account Settings'}
-              </h3>
-              <p className="text-[12px] text-[#11140F]/55 dark:text-white/55 truncate">
-                {user.email}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            {prefSavedMsg && (
-              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-medium">
-                <Check className="w-3 h-3" /> Saved
-              </span>
-            )}
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={loading}
-              className="p-1.5 rounded-lg text-[#11140F]/45 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
-              aria-label="Close settings"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* Clean Balanced Tab Bar */}
-        <div className="flex gap-1 border-b border-[#11140F]/8 dark:border-white/8 px-6 pt-2">
-          {[
-            { id: 'preferences', label: 'Preferences', icon: Sliders },
-            { id: 'profile', label: 'Profile', icon: User },
-            { id: 'privacy', label: 'Privacy', icon: Shield },
-          ].map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
               <button
-                key={tab.id}
                 type="button"
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`pb-2.5 px-3 text-[12.5px] font-medium border-b-2 transition-colors flex items-center gap-1.5 cursor-pointer ${
-                  isActive
-                    ? tab.id === 'privacy'
-                      ? 'border-rose-500 text-rose-600 dark:text-rose-400 font-semibold'
-                      : 'border-[#11140F] dark:border-white text-[#11140F] dark:text-white font-semibold'
-                    : 'border-transparent text-[#11140F]/50 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white'
-                }`}
+                onClick={onClose}
+                disabled={loading}
+                className="w-8 h-8 rounded-full bg-black/45 hover:bg-black/70 text-white/90 hover:text-white border border-white/15 backdrop-blur-md flex items-center justify-center transition-colors cursor-pointer"
+                aria-label="Close settings"
               >
-                <Icon className="w-3.5 h-3.5 opacity-80" />
-                <span>{tab.label}</span>
+                <X className="w-4 h-4" />
               </button>
-            );
-          })}
+            </div>
+          </div>
         </div>
 
-        {/* Body */}
-        <div className="p-6 max-h-[72vh] overflow-y-auto">
+        {/* Overlapping Circular Avatar + Centered Identity */}
+        <div className="px-6 text-center -mt-10 relative z-20 space-y-1.5">
+          <div className="w-20 h-20 mx-auto rounded-full overflow-hidden border-2 border-[#34D399] ring-4 ring-white dark:ring-[#101211] bg-[#121614] flex items-center justify-center shadow-xl">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-xl font-bold text-white">{initials}</span>
+            )}
+          </div>
+          <div>
+            <h3 className="text-lg font-extrabold tracking-tight text-[#11140F] dark:text-white">
+              {displayName}
+            </h3>
+            <p className="text-xs font-semibold text-[#2F6B4F] dark:text-[#34D399] uppercase tracking-wider">
+              {(user.tier || 'free').toUpperCase()} Plan
+            </p>
+            <p className="text-[11.5px] text-[#11140F]/55 dark:text-white/50 font-mono">
+              {user.email}
+            </p>
+          </div>
+
+          {/* Primary Action Pill inside Profile Header */}
+          <div className="pt-2">
+            <a
+              href="/pricing"
+              className="w-full py-2.5 px-5 rounded-2xl bg-[#34D399] hover:bg-[#34D399]/90 text-[#09110D] font-bold text-xs transition-all shadow-md inline-flex items-center justify-center gap-1.5"
+            >
+              <span>Manage Plan &amp; Upgrades</span>
+              <ArrowUpRight className="w-3.5 h-3.5" />
+            </a>
+          </div>
+        </div>
+
+        {/* Navigation Pill Strip */}
+        <div className="px-6 pt-4">
+          <div className="grid grid-cols-3 gap-1 p-1 rounded-2xl bg-[#F4F5F1] dark:bg-white/[0.04] border border-[#11140F]/8 dark:border-white/[0.08]">
+            {[
+              { id: 'preferences', label: 'Preferences', icon: Sliders },
+              { id: 'profile', label: 'Profile', icon: User },
+              { id: 'privacy', label: 'Privacy', icon: Shield },
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`py-2 px-2.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    isActive
+                      ? tab.id === 'privacy'
+                        ? 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/25'
+                        : 'bg-white dark:bg-white/10 text-[#11140F] dark:text-white shadow-xs'
+                      : 'text-[#11140F]/55 dark:text-white/55 hover:text-[#11140F] dark:hover:text-white'
+                  }`}
+                >
+                  <Icon className={`w-3.5 h-3.5 ${isActive && tab.id !== 'privacy' ? 'text-[#2F6B4F] dark:text-[#34D399]' : ''}`} />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Scrollable Content Body */}
+        <div className="p-6 pt-4 max-h-[54vh] overflow-y-auto space-y-4">
           {/* TAB 1: PREFERENCES */}
           {activeTab === 'preferences' && (
-            <div className="divide-y divide-[#11140F]/8 dark:divide-white/8 text-[13px]">
-              {/* Appearance Row */}
-              <div className="pb-5 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-medium text-[#11140F] dark:text-white">Appearance</div>
-                    <div className="text-[11.5px] text-[#11140F]/50 dark:text-white/50">
-                      Choose how DynamicQR looks on your device
-                    </div>
-                  </div>
+            <div className="space-y-3 text-[13px]">
+              {/* Section Eyebrow */}
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[10.5px] font-bold uppercase tracking-wider text-[#11140F]/50 dark:text-white/50 flex items-center gap-1.5">
+                  <Sparkles className="w-3 h-3 text-[#34D399]" />
+                  Appearance &amp; Workspace
+                </span>
+              </div>
+
+              {/* Theme Segmented Selector Card */}
+              <div className="p-3 rounded-2xl bg-[#F7F8F5] dark:bg-white/[0.03] border border-[#11140F]/8 dark:border-white/[0.08] space-y-2.5">
+                <div className="text-xs font-semibold text-[#11140F] dark:text-white px-0.5">
+                  Theme
                 </div>
-                <div className="grid grid-cols-3 gap-1.5 p-1 rounded-xl bg-[#F4F5F1] dark:bg-white/[0.04] border border-[#11140F]/8 dark:border-white/8">
+                <div className="grid grid-cols-3 gap-1.5">
                   {(
                     [
                       { id: 'light', label: 'Light', icon: Sun },
@@ -279,13 +320,13 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
                         key={mode.id}
                         type="button"
                         onClick={() => handleThemeChange(mode.id)}
-                        className={`py-2 px-3 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                        className={`py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 border transition-all cursor-pointer ${
                           active
-                            ? 'bg-white dark:bg-[#1E221E] text-[#11140F] dark:text-white shadow-xs font-semibold'
-                            : 'text-[#11140F]/60 dark:text-white/55 hover:text-[#11140F] dark:hover:text-white'
+                            ? 'bg-white dark:bg-[#171B19] border-[#34D399] text-[#11140F] dark:text-[#34D399] shadow-xs'
+                            : 'bg-transparent border-[#11140F]/8 dark:border-white/[0.06] text-[#11140F]/60 dark:text-white/55 hover:text-[#11140F] dark:hover:text-white'
                         }`}
                       >
-                        <Icon className="w-3.5 h-3.5 opacity-80" />
+                        <Icon className="w-3.5 h-3.5" />
                         <span>{mode.label}</span>
                       </button>
                     );
@@ -293,21 +334,24 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
                 </div>
               </div>
 
-              {/* Default Home Tab */}
-              <div className="py-4 flex items-center justify-between gap-4">
-                <div>
-                  <div className="font-medium text-[#11140F] dark:text-white">Default Home View</div>
-                  <div className="text-[11.5px] text-[#11140F]/50 dark:text-white/50">
-                    Starting screen when opening the app
+              {/* Default Home View Card */}
+              <div className="p-3 rounded-2xl bg-[#F7F8F5] dark:bg-white/[0.03] border border-[#11140F]/8 dark:border-white/[0.08] flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-8 h-8 rounded-xl bg-black/[0.05] dark:bg-white/10 flex items-center justify-center text-[#2F6B4F] dark:text-[#34D399] shrink-0">
+                    <Layout className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs font-bold text-[#11140F] dark:text-white truncate">Default View</div>
+                    <div className="text-[11px] text-[#11140F]/50 dark:text-white/50 truncate">Opening screen</div>
                   </div>
                 </div>
-                <div className="flex rounded-lg border border-[#11140F]/10 dark:border-white/10 p-0.5 bg-[#F4F5F1] dark:bg-white/[0.04] shrink-0">
+                <div className="flex rounded-xl border border-[#11140F]/10 dark:border-white/10 p-0.5 bg-white dark:bg-black/30 shrink-0">
                   <button
                     type="button"
                     onClick={() => handleUpdatePref({ defaultLanding: 'workspace' })}
-                    className={`px-2.5 py-1 rounded-md text-[11.5px] font-medium transition-colors cursor-pointer ${
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
                       preferences.defaultLanding === 'workspace'
-                        ? 'bg-white dark:bg-[#1E221E] text-[#11140F] dark:text-white shadow-2xs font-semibold'
+                        ? 'bg-[#34D399] text-[#09110D]'
                         : 'text-[#11140F]/55 dark:text-white/55'
                     }`}
                   >
@@ -316,9 +360,9 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
                   <button
                     type="button"
                     onClick={() => handleUpdatePref({ defaultLanding: 'overview' })}
-                    className={`px-2.5 py-1 rounded-md text-[11.5px] font-medium transition-colors cursor-pointer ${
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
                       preferences.defaultLanding === 'overview'
-                        ? 'bg-white dark:bg-[#1E221E] text-[#11140F] dark:text-white shadow-2xs font-semibold'
+                        ? 'bg-[#34D399] text-[#09110D]'
                         : 'text-[#11140F]/55 dark:text-white/55'
                     }`}
                   >
@@ -327,32 +371,35 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
                 </div>
               </div>
 
-              {/* Analytics Density */}
-              <div className="py-4 flex items-center justify-between gap-4">
-                <div>
-                  <div className="font-medium text-[#11140F] dark:text-white">Interface Density</div>
-                  <div className="text-[11.5px] text-[#11140F]/50 dark:text-white/50">
-                    Spacing for tables and cards
+              {/* Interface Density Card */}
+              <div className="p-3 rounded-2xl bg-[#F7F8F5] dark:bg-white/[0.03] border border-[#11140F]/8 dark:border-white/[0.08] flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-8 h-8 rounded-xl bg-black/[0.05] dark:bg-white/10 flex items-center justify-center text-[#2F6B4F] dark:text-[#34D399] shrink-0">
+                    <Sliders className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs font-bold text-[#11140F] dark:text-white truncate">Layout Density</div>
+                    <div className="text-[11px] text-[#11140F]/50 dark:text-white/50 truncate">Table &amp; card spacing</div>
                   </div>
                 </div>
-                <div className="flex rounded-lg border border-[#11140F]/10 dark:border-white/10 p-0.5 bg-[#F4F5F1] dark:bg-white/[0.04] shrink-0">
+                <div className="flex rounded-xl border border-[#11140F]/10 dark:border-white/10 p-0.5 bg-white dark:bg-black/30 shrink-0">
                   <button
                     type="button"
                     onClick={() => handleUpdatePref({ analyticsDensity: 'comfortable' })}
-                    className={`px-2.5 py-1 rounded-md text-[11.5px] font-medium transition-colors cursor-pointer ${
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
                       preferences.analyticsDensity === 'comfortable'
-                        ? 'bg-white dark:bg-[#1E221E] text-[#11140F] dark:text-white shadow-2xs font-semibold'
+                        ? 'bg-[#34D399] text-[#09110D]'
                         : 'text-[#11140F]/55 dark:text-white/55'
                     }`}
                   >
-                    Comfortable
+                    Comfort
                   </button>
                   <button
                     type="button"
                     onClick={() => handleUpdatePref({ analyticsDensity: 'compact' })}
-                    className={`px-2.5 py-1 rounded-md text-[11.5px] font-medium transition-colors cursor-pointer ${
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
                       preferences.analyticsDensity === 'compact'
-                        ? 'bg-white dark:bg-[#1E221E] text-[#11140F] dark:text-white shadow-2xs font-semibold'
+                        ? 'bg-[#34D399] text-[#09110D]'
                         : 'text-[#11140F]/55 dark:text-white/55'
                     }`}
                   >
@@ -361,18 +408,21 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
                 </div>
               </div>
 
-              {/* QR Error Correction */}
-              <div className="py-4 flex items-center justify-between gap-4">
-                <div>
-                  <div className="font-medium text-[#11140F] dark:text-white">Default QR Precision</div>
-                  <div className="text-[11.5px] text-[#11140F]/50 dark:text-white/50">
-                    Error correction resilience for printed codes
+              {/* QR Precision Card */}
+              <div className="p-3 rounded-2xl bg-[#F7F8F5] dark:bg-white/[0.03] border border-[#11140F]/8 dark:border-white/[0.08] flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-8 h-8 rounded-xl bg-black/[0.05] dark:bg-white/10 flex items-center justify-center text-[#2F6B4F] dark:text-[#34D399] shrink-0">
+                    <QrCode className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs font-bold text-[#11140F] dark:text-white truncate">QR Precision</div>
+                    <div className="text-[11px] text-[#11140F]/50 dark:text-white/50 truncate">Print error recovery</div>
                   </div>
                 </div>
                 <select
                   value={preferences.qrPrecision}
                   onChange={(e) => handleUpdatePref({ qrPrecision: e.target.value as any })}
-                  className="px-2.5 py-1.5 rounded-lg border border-[#11140F]/12 dark:border-white/12 bg-white dark:bg-[#1A1C1B] text-[12px] font-medium text-[#11140F] dark:text-white outline-hidden cursor-pointer shrink-0"
+                  className="px-2.5 py-1.5 rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#171B19] text-[11.5px] font-semibold text-[#11140F] dark:text-white outline-hidden cursor-pointer shrink-0"
                 >
                   <option value="H">High (30%)</option>
                   <option value="Q">Quartile (25%)</option>
@@ -380,54 +430,61 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
                 </select>
               </div>
 
-              {/* Audio Feedback */}
-              <div className="py-4 flex items-center justify-between gap-4">
-                <div>
-                  <div className="font-medium text-[#11140F] dark:text-white">Sound Effects</div>
-                  <div className="text-[11.5px] text-[#11140F]/50 dark:text-white/50">
-                    Subtle audio feedback when copying links or generating codes
+              {/* Audio & Digest Card */}
+              <div className="p-3 rounded-2xl bg-[#F7F8F5] dark:bg-white/[0.03] border border-[#11140F]/8 dark:border-white/[0.08] space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-black/[0.05] dark:bg-white/10 flex items-center justify-center text-[#2F6B4F] dark:text-[#34D399] shrink-0">
+                      <Volume2 className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-xs font-bold text-[#11140F] dark:text-white truncate">Sound Effects</div>
+                      <div className="text-[11px] text-[#11140F]/50 dark:text-white/50 truncate">Copy &amp; generate clicks</div>
+                    </div>
                   </div>
+                  <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={preferences.soundEffects}
+                      onChange={(e) => handleUpdatePref({ soundEffects: e.target.checked })}
+                      className="sr-only peer"
+                    />
+                    <div className="w-9 h-5 bg-black/15 dark:bg-white/15 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#34D399]" />
+                  </label>
                 </div>
-                <label className="relative inline-flex items-center cursor-pointer shrink-0">
-                  <input
-                    type="checkbox"
-                    checked={preferences.soundEffects}
-                    onChange={(e) => handleUpdatePref({ soundEffects: e.target.checked })}
-                    className="sr-only peer"
-                  />
-                  <div className="w-9 h-5 bg-black/15 dark:bg-white/15 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600" />
-                </label>
-              </div>
 
-              {/* Weekly Digest */}
-              <div className="pt-4 flex items-center justify-between gap-4">
-                <div>
-                  <div className="font-medium text-[#11140F] dark:text-white">Weekly Analytics Digest</div>
-                  <div className="text-[11.5px] text-[#11140F]/50 dark:text-white/50">
-                    Email summary of scan traffic and top links
+                <div className="flex items-center justify-between gap-3 pt-2.5 border-t border-[#11140F]/6 dark:border-white/[0.06]">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-black/[0.05] dark:bg-white/10 flex items-center justify-center text-[#2F6B4F] dark:text-[#34D399] shrink-0">
+                      <Bell className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-xs font-bold text-[#11140F] dark:text-white truncate">Weekly Digest</div>
+                      <div className="text-[11px] text-[#11140F]/50 dark:text-white/50 truncate">Scan performance report</div>
+                    </div>
                   </div>
+                  <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={preferences.emailDigests}
+                      onChange={(e) => handleUpdatePref({ emailDigests: e.target.checked })}
+                      className="sr-only peer"
+                    />
+                    <div className="w-9 h-5 bg-black/15 dark:bg-white/15 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#34D399]" />
+                  </label>
                 </div>
-                <label className="relative inline-flex items-center cursor-pointer shrink-0">
-                  <input
-                    type="checkbox"
-                    checked={preferences.emailDigests}
-                    onChange={(e) => handleUpdatePref({ emailDigests: e.target.checked })}
-                    className="sr-only peer"
-                  />
-                  <div className="w-9 h-5 bg-black/15 dark:bg-white/15 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600" />
-                </label>
               </div>
             </div>
           )}
 
           {/* TAB 2: PROFILE */}
           {activeTab === 'profile' && (
-            <div className="space-y-5 text-[13px]">
-              <div className="space-y-2.5">
+            <div className="space-y-4 text-[13px]">
+              <div className="p-4 rounded-2xl bg-[#F7F8F5] dark:bg-white/[0.03] border border-[#11140F]/8 dark:border-white/[0.08] space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <span className="font-medium text-[#11140F] dark:text-white">Profile Photo</span>
+                  <span className="text-xs font-bold text-[#11140F] dark:text-white">Profile Photo</span>
                   {avatarMsg && (
-                    <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                    <span className="text-[11px] text-[#34D399] font-semibold">
                       {avatarMsg}
                     </span>
                   )}
@@ -438,35 +495,8 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
                   value={avatarUrl}
                   onChange={handleAvatarChange}
                   recommendedDimensions="500x500 JPG or PNG"
-                  helpText="Shown in your workspace and navigation header."
+                  helpText="Displayed on your workspace avatar and navigation bar."
                 />
-              </div>
-
-              <div className="divide-y divide-[#11140F]/8 dark:divide-white/8 border-t border-[#11140F]/8 dark:border-white/8 pt-1">
-                {user.name && (
-                  <div className="py-3 flex justify-between items-center">
-                    <span className="text-[#11140F]/55 dark:text-white/55">Name</span>
-                    <span className="font-medium text-[#11140F] dark:text-white">{user.name}</span>
-                  </div>
-                )}
-                <div className="py-3 flex justify-between items-center">
-                  <span className="text-[#11140F]/55 dark:text-white/55">Email</span>
-                  <span className="font-mono text-xs text-[#11140F] dark:text-white">{user.email}</span>
-                </div>
-                <div className="py-3 flex justify-between items-center">
-                  <span className="text-[#11140F]/55 dark:text-white/55">Subscription Plan</span>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-semibold uppercase tracking-wide text-[#11140F] dark:text-white">
-                      {user.tier || 'free'}
-                    </span>
-                    <a
-                      href="/pricing"
-                      className="text-xs font-medium text-emerald-700 dark:text-emerald-400 hover:underline"
-                    >
-                      Manage plan &rarr;
-                    </a>
-                  </div>
-                </div>
               </div>
             </div>
           )}
@@ -476,26 +506,26 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
             <div className="space-y-4">
               {successMsg ? (
                 <div className="py-8 text-center space-y-2">
-                  <CheckCircle2 className="w-9 h-9 text-emerald-600 mx-auto" />
-                  <h4 className="font-semibold text-[15px]">Done</h4>
+                  <CheckCircle2 className="w-9 h-9 text-[#34D399] mx-auto" />
+                  <h4 className="font-semibold text-[15px]">Completed</h4>
                   <p className="text-[13px] text-[#11140F]/60 dark:text-white/60">{successMsg}</p>
                 </div>
               ) : (
                 <>
                   {user.isDeactivated && (
-                    <div className="p-4 rounded-xl border border-emerald-500/25 bg-emerald-500/10 space-y-2.5">
-                      <div className="flex items-center gap-2 font-semibold text-[13px] text-emerald-700 dark:text-emerald-400">
+                    <div className="p-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 space-y-2.5">
+                      <div className="flex items-center gap-2 font-semibold text-[13px] text-[#34D399]">
                         <RotateCcw className="w-4 h-4 shrink-0" />
                         <span>Account Deactivated</span>
                       </div>
                       <p className="text-[12px] text-[#11140F]/75 dark:text-white/75">
-                        Your links are currently paused. Reactivate to restore access immediately.
+                        Your links are paused. Reactivate to restore access right away.
                       </p>
                       <button
                         type="button"
                         onClick={handleReactivate}
                         disabled={loading}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 disabled:opacity-40 cursor-pointer"
+                        className="w-full py-2.5 rounded-xl bg-[#34D399] text-[#09110D] text-xs font-bold hover:opacity-90 disabled:opacity-40 cursor-pointer flex items-center justify-center gap-1.5"
                       >
                         {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RotateCcw className="w-3.5 h-3.5" />}
                         <span>{loading ? 'Reactivating…' : 'Reactivate Account'}</span>
@@ -503,7 +533,7 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
                     </div>
                   )}
 
-                  <div className="grid grid-cols-2 gap-1.5 p-1 bg-[#F4F5F1] dark:bg-white/[0.04] rounded-xl border border-[#11140F]/8 dark:border-white/8">
+                  <div className="grid grid-cols-2 gap-1.5 p-1 bg-[#F4F5F1] dark:bg-white/[0.04] rounded-2xl border border-[#11140F]/8 dark:border-white/[0.08]">
                     <button
                       type="button"
                       onClick={() => {
@@ -511,9 +541,9 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
                         setConfirmText('');
                         setError(null);
                       }}
-                      className={`py-2 px-3 rounded-lg text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
+                      className={`py-2 px-3 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                         actionType === 'deactivate'
-                          ? 'bg-white dark:bg-[#1E221E] text-amber-700 dark:text-amber-400 font-semibold shadow-2xs'
+                          ? 'bg-white dark:bg-[#171B19] text-amber-500 shadow-xs'
                           : 'text-[#11140F]/60 dark:text-white/60'
                       }`}
                     >
@@ -527,67 +557,67 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
                         setConfirmText('');
                         setError(null);
                       }}
-                      className={`py-2 px-3 rounded-lg text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
+                      className={`py-2 px-3 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                         actionType === 'delete'
-                          ? 'bg-white dark:bg-[#1E221E] text-rose-600 dark:text-rose-400 font-semibold shadow-2xs'
+                          ? 'bg-white dark:bg-[#171B19] text-rose-500 shadow-xs'
                           : 'text-[#11140F]/60 dark:text-white/60'
                       }`}
                     >
                       <Trash2 className="w-3.5 h-3.5" />
-                      <span>Delete Permanently</span>
+                      <span>Delete</span>
                     </button>
                   </div>
 
                   {actionType === 'deactivate' ? (
-                    <div className="p-4 rounded-xl border border-amber-500/25 bg-amber-500/[0.06] space-y-3 text-xs">
+                    <div className="p-4 rounded-2xl border border-amber-500/25 bg-amber-500/[0.06] space-y-3 text-xs">
                       <p className="text-[#11140F]/80 dark:text-white/80 leading-relaxed">
-                        Deactivating pauses your QR links and removes your login session. You can contact support or sign back in to restore later.
+                        Pauses your QR links and signs you out. You can sign back in to restore later.
                       </p>
                       <div className="space-y-1.5">
-                        <label className="block font-medium text-[#11140F] dark:text-white">
-                          Type <span className="font-mono font-bold">DEACTIVATE</span> to confirm
+                        <label className="block font-medium">
+                          Type <span className="font-mono font-bold text-amber-400">DEACTIVATE</span> to confirm
                         </label>
                         <input
                           type="text"
                           value={confirmText}
                           onChange={(e) => setConfirmText(e.target.value)}
                           placeholder="DEACTIVATE"
-                          className="w-full px-3 py-2 rounded-lg border border-[#11140F]/15 dark:border-white/15 text-xs font-mono bg-white dark:bg-[#161817] text-[#11140F] dark:text-white outline-hidden focus:border-amber-500"
+                          className="w-full px-3 py-2 rounded-xl border border-[#11140F]/15 dark:border-white/15 text-xs font-mono bg-white dark:bg-black/30 text-[#11140F] dark:text-white outline-hidden focus:border-amber-500"
                         />
                       </div>
                     </div>
                   ) : (
-                    <div className="p-4 rounded-xl border border-rose-500/25 bg-rose-500/[0.06] space-y-3 text-xs">
-                      <div className="flex items-center gap-2 font-semibold text-rose-600 dark:text-rose-400">
+                    <div className="p-4 rounded-2xl border border-rose-500/25 bg-rose-500/[0.06] space-y-3 text-xs">
+                      <div className="flex items-center gap-2 font-semibold text-rose-500">
                         <AlertTriangle className="w-4 h-4 shrink-0" />
-                        <span>This action cannot be undone</span>
+                        <span>This cannot be undone</span>
                       </div>
                       <p className="text-[#11140F]/80 dark:text-white/80 leading-relaxed">
-                        Permanently deletes your account, all QR codes, scan analytics, custom domains, and workspace apps.
+                        Permanently removes your account, QR links, scan logs, domains, and workspace data.
                       </p>
                       <div className="space-y-1.5">
-                        <label className="block font-medium text-[#11140F] dark:text-white">
-                          Type <span className="font-mono font-bold">DELETE</span> to confirm
+                        <label className="block font-medium">
+                          Type <span className="font-mono font-bold text-rose-400">DELETE</span> to confirm
                         </label>
                         <input
                           type="text"
                           value={confirmText}
                           onChange={(e) => setConfirmText(e.target.value)}
                           placeholder="DELETE"
-                          className="w-full px-3 py-2 rounded-lg border border-[#11140F]/15 dark:border-white/15 text-xs font-mono bg-white dark:bg-[#161817] text-[#11140F] dark:text-white outline-hidden focus:border-rose-500"
+                          className="w-full px-3 py-2 rounded-xl border border-[#11140F]/15 dark:border-white/15 text-xs font-mono bg-white dark:bg-black/30 text-[#11140F] dark:text-white outline-hidden focus:border-rose-500"
                         />
                       </div>
                     </div>
                   )}
 
-                  {error && <p className="text-xs text-rose-600 dark:text-rose-400 font-medium">{error}</p>}
+                  {error && <p className="text-xs text-rose-500 font-medium">{error}</p>}
 
-                  <div className="flex items-center justify-end gap-2.5 pt-2">
+                  <div className="flex items-center justify-end gap-2 pt-1">
                     <button
                       type="button"
                       onClick={onClose}
                       disabled={loading}
-                      className="px-4 py-2 rounded-lg border border-[#11140F]/12 dark:border-white/12 text-xs font-medium hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                      className="px-4 py-2.5 rounded-xl border border-[#11140F]/12 dark:border-white/12 text-xs font-semibold hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
                     >
                       Cancel
                     </button>
@@ -596,9 +626,9 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
                         type="button"
                         onClick={handleDeactivate}
                         disabled={confirmText.trim().toUpperCase() !== 'DEACTIVATE' || loading}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold disabled:opacity-40 cursor-pointer"
+                        className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-black text-xs font-bold disabled:opacity-40 cursor-pointer flex items-center gap-1.5"
                       >
-                        {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+                        {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                         <span>{loading ? 'Deactivating…' : 'Deactivate Account'}</span>
                       </button>
                     ) : (
@@ -606,9 +636,9 @@ export default function AccountSettingsModal({ user, onClose }: Props) {
                         type="button"
                         onClick={handleDelete}
                         disabled={confirmText.trim().toUpperCase() !== 'DELETE' || loading}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold disabled:opacity-40 cursor-pointer"
+                        className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold disabled:opacity-40 cursor-pointer flex items-center gap-1.5"
                       >
-                        {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+                        {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                         <span>{loading ? 'Deleting…' : 'Delete Account'}</span>
                       </button>
                     )}

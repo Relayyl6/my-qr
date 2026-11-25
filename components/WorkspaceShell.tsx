@@ -789,7 +789,7 @@ export default function WorkspaceShell({
         {user && (
           <div className="p-2 lg:p-3 border-t border-[#11140F]/10 dark:border-white/10 shrink-0">
             {!sidebarCollapsed ? (
-              <div className="flex items-center justify-between gap-2 p-1.5 rounded-xl hover:bg-[#11140F]/[0.04] dark:hover:bg-white/[0.04] transition-colors">
+              <div className="flex items-center justify-between gap-2 p-2 rounded-2xl bg-black/[0.03] dark:bg-white/[0.03] border border-[#11140F]/8 dark:border-white/[0.08] hover:border-[#34D399]/35 transition-all">
                 {/* Entire Identity Area Clickable for Settings */}
                 <button
                   type="button"
@@ -797,7 +797,7 @@ export default function WorkspaceShell({
                   className="flex items-center gap-2.5 min-w-0 flex-1 text-left cursor-pointer group"
                   title="Account Settings"
                 >
-                  <div className="w-8 h-8 rounded-full overflow-hidden bg-[#11140F] dark:bg-white/15 text-white flex items-center justify-center text-xs font-semibold shrink-0 ring-1 ring-black/10 dark:ring-white/15">
+                  <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-[#34D399] bg-[#121614] text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-sm">
                     {userAvatar ? (
                       <img
                         src={getOptimizedStorageUrl(userAvatar)}
@@ -812,14 +812,14 @@ export default function WorkspaceShell({
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-semibold text-[#11140F] dark:text-white truncate group-hover:underline">
+                      <span className="text-xs font-bold text-[#11140F] dark:text-white truncate group-hover:text-[#34D399] transition-colors">
                         {userName}
                       </span>
-                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[#11140F]/8 dark:bg-white/10 text-[#11140F]/70 dark:text-white/70 font-semibold uppercase">
+                      <span className="text-[9px] font-mono font-bold uppercase text-[#2F6B4F] dark:text-[#34D399]">
                         {tierName}
                       </span>
                     </div>
-                    <span className="text-[11px] text-[#11140F]/50 dark:text-white/45 truncate block">
+                    <span className="text-[11px] text-[#11140F]/50 dark:text-white/45 truncate block font-mono">
                       {user.email}
                     </span>
                   </div>
@@ -1110,16 +1110,16 @@ export default function WorkspaceShell({
       >
         {/* Unified Contextual Page Header (Consistent across all sidebar menu pages) */}
         {activeSection !== 'overview' && (
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#11140F]/10 dark:border-white/10">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#11140F]/10 dark:border-white/[0.08]">
             <div>
-              <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#11140F]/45 dark:text-white/45">
+              <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#11140F]/45 dark:text-white/45">
                 <span>Workspace</span>
                 <span>/</span>
-                <span className="text-[#11140F]/80 dark:text-white/80">
+                <span className="text-[#2F6B4F] dark:text-[#34D399]">
                   {activeMeta.breadcrumb}
                 </span>
               </div>
-              <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-[#11140F] dark:text-white mt-1">
+              <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#11140F] dark:text-white mt-0.5">
                 {activeMeta.title}
               </h1>
               <p className="text-xs sm:text-[13px] text-[#11140F]/60 dark:text-white/55 mt-0.5">
@@ -1127,16 +1127,16 @@ export default function WorkspaceShell({
               </p>
             </div>
 
-            {/* Clean Quick Actions */}
+            {/* Clean Pill Actions */}
             <div className="flex items-center gap-2 flex-wrap">
               {isAdmin && (
                 <button
                   type="button"
                   onClick={() => setShowPromoModalPreview(true)}
-                  className="px-3 py-1.5 rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.04] hover:bg-black/[0.03] dark:hover:bg-white/[0.08] text-xs font-medium text-[#11140F]/80 dark:text-white/80 transition-colors flex items-center gap-1.5 cursor-pointer"
+                  className="px-3.5 py-1.5 rounded-full border border-[#11140F]/12 dark:border-white/12 bg-white dark:bg-white/[0.04] hover:bg-black/[0.03] dark:hover:bg-white/[0.08] text-xs font-medium text-[#11140F]/80 dark:text-white/85 transition-all flex items-center gap-1.5 cursor-pointer"
                   title="Test Promotional Entry Popup"
                 >
-                  <Eye className="w-3.5 h-3.5 opacity-70" />
+                  <Eye className="w-3.5 h-3.5 text-[#34D399]" />
                   <span>Preview Promo</span>
                 </button>
               )}
@@ -1145,7 +1145,7 @@ export default function WorkspaceShell({
                 <button
                   type="button"
                   onClick={handleCreateNewClick}
-                  className="px-3.5 py-1.5 rounded-lg bg-[#11140F] dark:bg-white text-white dark:text-[#11140F] text-xs font-semibold hover:opacity-90 transition-opacity flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-1.5 rounded-full bg-[#34D399] hover:bg-[#34D399]/90 text-[#09110D] text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>New QR Link</span>
@@ -1156,9 +1156,9 @@ export default function WorkspaceShell({
                 <button
                   type="button"
                   onClick={() => handleSelectSection('all')}
-                  className="px-3 py-1.5 rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.04] text-xs font-medium text-[#11140F]/80 dark:text-white/80 hover:bg-black/[0.03] dark:hover:bg-white/[0.08] transition-colors cursor-pointer flex items-center gap-1.5"
+                  className="px-3.5 py-1.5 rounded-full border border-[#11140F]/12 dark:border-white/12 bg-white dark:bg-white/[0.04] text-xs font-medium text-[#11140F]/80 dark:text-white/85 hover:bg-black/[0.03] dark:hover:bg-white/[0.08] transition-all cursor-pointer flex items-center gap-1.5"
                 >
-                  <LayoutDashboard className="w-3.5 h-3.5 opacity-70" />
+                  <LayoutDashboard className="w-3.5 h-3.5 text-[#34D399]" />
                   <span>All Tools</span>
                 </button>
               )}
