@@ -79,9 +79,27 @@ export async function provisionDomainAndEmail(order: {
           },
         }),
       });
-      const dnaData = await dnaRes.json();
-      if (!dnaRes.ok || dnaData.error) {
-        throw new Error(dnaData.message || dnaData.error || 'Failed to register domain via DomainResellerAPI');
+
+      const rawText = await dnaRes.text();
+      let dnaData: any = {};
+      try {
+        dnaData = JSON.parse(rawText);
+      } catch {
+        dnaData = { message: rawText || 'Empty response from registrar' };
+      }
+
+      if (!dnaRes.ok || dnaData.error || dnaData.status === 'ERROR') {
+        const errorMsg = String(dnaData.message || dnaData.error || dnaData.info || rawText || '');
+        if (
+          dnaRes.status === 402 ||
+          errorMsg.toLowerCase().includes('balance') ||
+          errorMsg.toLowerCase().includes('credit') ||
+          errorMsg.toLowerCase().includes('funds') ||
+          rawText.length === 0
+        ) {
+          throw new Error('Registrar wallet unfunded ($0.00 balance): Deposit funds in your Domain Name API account to purchase real root domains.');
+        }
+        throw new Error(`Registrar error: ${errorMsg}`);
       }
     } catch (apiErr: any) {
       console.error('[DNA Reseller API] Registration error:', apiErr);
