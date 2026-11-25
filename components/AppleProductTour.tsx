@@ -2,6 +2,7 @@
 
 import { useState, useTransition, memo } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import DomainFeatureComparisonMatrix from './DomainFeatureComparisonMatrix';
 
 const MemoizedQRCode = memo(function MemoizedQRCode({
   value,
@@ -1698,6 +1699,9 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
           </div>
         </div>
       </section>
+
+      {/* 4.5 Industry Domain Features Comparison: Legacy Registrars vs NameLaunch */}
+      <DomainFeatureComparisonMatrix />
 
       {/* 5. Minimalist Apple-Style Closing CTA */}
       <section className="py-24 md:py-32 px-5 md:px-8 max-w-[960px] mx-auto text-center space-y-6 border-t border-white/10">

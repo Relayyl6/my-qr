@@ -31,6 +31,7 @@ import {
 import DnsManagerModal from './DnsManagerModal';
 import DomainFleetOperabilities from './DomainFleetOperabilities';
 import HostingConnectionHub from './HostingConnectionHub';
+import DomainFeatureComparisonMatrix from './DomainFeatureComparisonMatrix';
 
 interface Props {
   user: {
@@ -915,6 +916,9 @@ export default function NameLaunchService({ user }: Props) {
               </form>
             </div>
           )}
+
+          {/* Industry Domain Features Comparison Matrix */}
+          <DomainFeatureComparisonMatrix />
             </div>
           )}
 
