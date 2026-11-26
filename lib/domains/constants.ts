@@ -1,6 +1,24 @@
-export const SUPPORTED_TLDS = ['xyz', 'site', 'store', 'online', 'com', 'net', 'org', 'co', 'io'] as const;
-export const BUDGET_TLDS = new Set(['xyz', 'site', 'store', 'online']);
-export const STANDARD_TLDS = new Set(['com', 'net', 'org']);
+export const PRIMARY_TLDS = [
+  'com', 'xyz', 'site', 'online', 'store', 'net', 'org', 'co', 'io', 'tech'
+] as const;
+
+export const EXTENDED_TLDS = [
+  // Batch 1 (Primary 10)
+  'com', 'xyz', 'site', 'online', 'store', 'net', 'org', 'co', 'io', 'tech',
+  // Batch 2 (Dev, Creators & App)
+  'app', 'dev', 'me', 'space', 'design', 'art', 'live', 'link', 'shop', 'cloud',
+  // Batch 3 (Business & Modern Identity)
+  'biz', 'club', 'pro', 'agency', 'digital', 'vip', 'one', 'fit', 'global', 'work',
+] as const;
+
+export const SUPPORTED_TLDS = EXTENDED_TLDS;
+
+export const BUDGET_TLDS = new Set([
+  'xyz', 'site', 'store', 'online', 'space', 'live', 'club', 'work', 'fit', 'art', 'design', 'biz', 'link', 'pro', 'shop'
+]);
+export const STANDARD_TLDS = new Set([
+  'com', 'net', 'org', 'tech', 'app', 'dev', 'me', 'cloud', 'digital', 'agency', 'one', 'global', 'vip'
+]);
 export const PREMIUM_TLDS = new Set(['co', 'io']);
 
 export type TldTier = 'budget' | 'standard' | 'premium';
@@ -23,6 +41,27 @@ export const WHOLESALE_USD_PRICING: Record<string, number> = {
   org: 10.90,
   co: 11.50,
   io: 34.00,
+  tech: 7.50,
+  app: 12.00,
+  dev: 12.00,
+  me: 10.00,
+  space: 1.80,
+  design: 4.50,
+  art: 4.00,
+  live: 3.00,
+  link: 4.00,
+  shop: 4.50,
+  cloud: 5.00,
+  biz: 3.50,
+  club: 3.00,
+  pro: 4.50,
+  agency: 6.00,
+  digital: 5.50,
+  vip: 5.00,
+  one: 6.00,
+  fit: 3.00,
+  global: 8.00,
+  work: 3.00,
 };
 
 export interface DomainPricing {

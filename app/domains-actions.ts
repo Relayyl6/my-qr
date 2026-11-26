@@ -38,9 +38,15 @@ export async function getUserDomainOrders(emailQuery?: string) {
 export async function confirmOrderPayment(paystackRef: string) {
   const user = await getCurrentUser();
 
-  const order = await prisma.domainOrder.findUnique({
-    where: { paystackRef },
-  });
+  let order: any = null;
+  try {
+    order = await prisma.domainOrder.findUnique({
+      where: { paystackRef },
+    });
+  } catch (err) {
+    console.warn('[confirmOrderPayment] DB lookup error:', err);
+    return { success: false, isNotFound: true, isPending: true, message: 'Could not connect to order registry. Please try again shortly.' };
+  }
 
   if (!order) {
     return { success: false, isNotFound: true, isPending: true, message: 'Checkout session ended or replaced by a new session.' };
@@ -523,6 +529,7 @@ export async function requestDomainEppCode(orderId: string) {
  */
 export async function updateDomainCustomNameservers(orderId: string, nameservers: string[]) {
   const user = await getCurrentUser();
+  if (!user) return { success: false, message: 'Unauthorized' };
   const order = await prisma.domainOrder.findUnique({ where: { id: orderId } });
   if (!order) return { success: false, message: 'Order not found' };
 
@@ -560,6 +567,7 @@ export async function toggleDomainCatchAll(
   customTargetEmail?: string
 ) {
   const user = await getCurrentUser();
+  if (!user) return { success: false, message: 'Unauthorized' };
   const order = await prisma.domainOrder.findUnique({ where: { id: orderId } });
   if (!order) return { success: false, message: 'Order not found' };
 
@@ -602,6 +610,7 @@ export async function toggleDomainCatchAll(
  */
 export async function activateDomainDeliverabilityShield(orderId: string) {
   const user = await getCurrentUser();
+  if (!user) return { success: false, message: 'Unauthorized' };
   const order = await prisma.domainOrder.findUnique({ where: { id: orderId } });
   if (!order) return { success: false, message: 'Order not found' };
 
@@ -636,6 +645,7 @@ export async function activateDomainDeliverabilityShield(orderId: string) {
  */
 export async function toggleDomainBioPage(orderId: string, enabled: boolean) {
   const user = await getCurrentUser();
+  if (!user) return { success: false, message: 'Unauthorized' };
   const order = await prisma.domainOrder.findUnique({ where: { id: orderId } });
   if (!order) return { success: false, message: 'Order not found' };
 
@@ -678,6 +688,7 @@ export async function saveDomainBioConfig(
   }
 ) {
   const user = await getCurrentUser();
+  if (!user) return { success: false, message: 'Unauthorized' };
   const order = await prisma.domainOrder.findUnique({ where: { id: orderId } });
   if (!order) return { success: false, message: 'Order not found' };
 

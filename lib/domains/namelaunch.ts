@@ -68,22 +68,54 @@ async function checkDnsRegistered(domain: string): Promise<boolean> {
   }
 }
 
+export interface SearchDomainsOptions {
+  offset?: number;
+  limit?: number;
+}
+
+export type DomainSearchResponse = DomainSearchResult[] & {
+  hasMore?: boolean;
+  nextOffset?: number | null;
+  totalAvailableTlds?: number;
+};
+
 /**
  * Searches domain availability across TLDs using live Registrar API or DNS probing
+ * Safely fetches in batches of 10 to protect DNS rate limits and maintain fast search performance
  */
-export async function searchDomains(rawQuery: string): Promise<DomainSearchResult[]> {
+export async function searchDomains(
+  rawQuery: string,
+  options?: SearchDomainsOptions
+): Promise<DomainSearchResponse> {
   const cleaned = rawQuery.trim().toLowerCase().replace(/[^a-z0-9.-]/g, '');
   if (!cleaned || cleaned.length < 2) {
-    return [];
+    const empty: any = [];
+    empty.hasMore = false;
+    empty.nextOffset = null;
+    empty.totalAvailableTlds = 0;
+    return empty;
   }
 
   const parts = cleaned.split('.');
   const label = parts[0];
   const requestedTld = parts[1];
 
-  const tldsToCheck = requestedTld
-    ? Array.from(new Set([requestedTld, ...SUPPORTED_TLDS]))
-    : [...SUPPORTED_TLDS];
+  let tldsToCheck: string[];
+  let hasMore = false;
+  let nextOffset: number | null = null;
+  const totalAvailableTlds = requestedTld ? 1 : SUPPORTED_TLDS.length;
+
+  if (requestedTld) {
+    tldsToCheck = [requestedTld];
+    hasMore = false;
+    nextOffset = null;
+  } else {
+    const offset = Math.max(0, options?.offset || 0);
+    const limit = Math.max(1, Math.min(10, options?.limit || 10)); // strictly capped at 10 to protect DNS rate limits
+    tldsToCheck = SUPPORTED_TLDS.slice(offset, offset + limit);
+    hasMore = offset + limit < SUPPORTED_TLDS.length;
+    nextOffset = hasMore ? offset + limit : null;
+  }
 
   // Check if live Domain Name API is configured (either API Key or Username/Password)
   const dnaApiKey = process.env.DNA_API_KEY;
@@ -93,6 +125,8 @@ export async function searchDomains(rawQuery: string): Promise<DomainSearchResul
 
   // Load active dynamic pricing & scaled FX configuration
   const pricingConfig = await getDomainPricingConfig().catch(() => null);
+
+  let results: DomainSearchResult[] = [];
 
   if (dnaApiKey) {
     try {
@@ -123,7 +157,7 @@ export async function searchDomains(rawQuery: string): Promise<DomainSearchResul
       });
       const settled = await Promise.all(searchPromises);
       const valid = settled.filter(Boolean) as DomainSearchResult[];
-      if (valid.length > 0) return valid;
+      if (valid.length > 0) results = valid;
     } catch (err) {
       console.warn('[DomainResellerAPI] Live search error, falling back:', err);
     }
@@ -141,7 +175,7 @@ export async function searchDomains(rawQuery: string): Promise<DomainSearchResul
       });
       const dnaData = await dnaRes.json();
       if (dnaData && Array.isArray(dnaData.data)) {
-        return dnaData.data.map((item: any) => {
+        results = dnaData.data.map((item: any) => {
           const tld = item.TLD || item.DomainName.split('.').pop() || 'xyz';
           const available = item.Status?.toLowerCase() === 'available' || item.IsAvailable === true;
           const wholesaleUsd = Number(item.Price || WHOLESALE_USD_PRICING[tld] || 10.0);
@@ -159,21 +193,27 @@ export async function searchDomains(rawQuery: string): Promise<DomainSearchResul
   }
 
   // Fallback: Check DNS resolution for each TLD concurrently
-  const results = await Promise.all(
-    tldsToCheck.map(async (tld) => {
-      const domain = `${label}.${tld}`;
-      const isTaken = await checkDnsRegistered(domain);
-      const available = !isTaken;
-      const wholesaleUsd = WHOLESALE_USD_PRICING[tld] || 12.0;
+  if (results.length === 0) {
+    results = await Promise.all(
+      tldsToCheck.map(async (tld) => {
+        const domain = `${label}.${tld}`;
+        const isTaken = await checkDnsRegistered(domain);
+        const available = !isTaken;
+        const wholesaleUsd = WHOLESALE_USD_PRICING[tld] || 12.0;
 
-      return {
-        domain,
-        tld,
-        available,
-        pricing: available ? calculateNgnPricing(wholesaleUsd, tld, pricingConfig || undefined) : null,
-      };
-    })
-  );
+        return {
+          domain,
+          tld,
+          available,
+          pricing: available ? calculateNgnPricing(wholesaleUsd, tld, pricingConfig || undefined) : null,
+        };
+      })
+    );
+  }
 
-  return results;
+  const response: any = results;
+  response.hasMore = hasMore;
+  response.nextOffset = nextOffset;
+  response.totalAvailableTlds = totalAvailableTlds;
+  return response;
 }

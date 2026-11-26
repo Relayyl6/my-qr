@@ -66,6 +66,9 @@ export default function NameLaunchService({ user, isAdmin = false }: Props) {
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [results, setResults] = useState<DomainSearchResult[]>([]);
+  const [hasMore, setHasMore] = useState(false);
+  const [nextOffset, setNextOffset] = useState(10);
+  const [loadingMore, setLoadingMore] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Featured live TLD prices (strictly matched to admin sovereignty pricing engine)
@@ -203,14 +206,17 @@ export default function NameLaunchService({ user, isAdmin = false }: Props) {
     setSearching(true);
     setSearchError(null);
     setSelectedDomain(null);
+    setHasMore(false);
+    setNextOffset(10);
 
     try {
-      const res = await fetch(`/api/domains/search?q=${encodeURIComponent(trimmed)}`, {
+      const res = await fetch(`/api/domains/search?q=${encodeURIComponent(trimmed)}&offset=0&limit=10`, {
         cache: 'no-store',
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Search failed');
-      const syncedResults = (data.results || []).map((r: DomainSearchResult) => {
+      const incomingList = Array.isArray(data.results) ? data.results : (Array.isArray(data) ? data : []);
+      const syncedResults = incomingList.map((r: DomainSearchResult) => {
         if (!r.pricing) return r;
         const live = featuredTlds.find((t) => t.tld.toLowerCase() === r.tld.toLowerCase());
         return {
@@ -222,10 +228,52 @@ export default function NameLaunchService({ user, isAdmin = false }: Props) {
         };
       });
       setResults(syncedResults);
+      setHasMore(Boolean(data.hasMore));
+      setNextOffset(typeof data.nextOffset === 'number' ? data.nextOffset : 10);
     } catch (err: any) {
       setSearchError(err.message || 'Could not search domains');
     } finally {
       setSearching(false);
+    }
+  }
+
+  async function handleLoadMore() {
+    if (loadingMore || !hasMore || !query.trim()) return;
+    setLoadingMore(true);
+
+    try {
+      const res = await fetch(
+        `/api/domains/search?q=${encodeURIComponent(query.trim())}&offset=${nextOffset}&limit=10`,
+        { cache: 'no-store' }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load more extensions');
+      const incomingResults = Array.isArray(data.results) ? data.results : [];
+      const syncedNew = incomingResults.map((r: DomainSearchResult) => {
+        if (!r.pricing) return r;
+        const live = featuredTlds.find((t) => t.tld.toLowerCase() === r.tld.toLowerCase());
+        return {
+          ...r,
+          pricing: {
+            ...r.pricing,
+            totalNgn: live?.priceNgn || r.pricing.totalNgn,
+          },
+        };
+      });
+
+      setResults((prev) => {
+        const existingDomains = new Set(prev.map((p) => p.domain.toLowerCase()));
+        const uniqueIncoming = syncedNew.filter(
+          (item: DomainSearchResult) => !existingDomains.has(item.domain.toLowerCase())
+        );
+        return [...prev, ...uniqueIncoming];
+      });
+      setHasMore(Boolean(data.hasMore));
+      setNextOffset(typeof data.nextOffset === 'number' ? data.nextOffset : nextOffset + 10);
+    } catch (err: any) {
+      console.error('Error loading more domains:', err);
+    } finally {
+      setLoadingMore(false);
     }
   }
 
@@ -646,25 +694,55 @@ export default function NameLaunchService({ user, isAdmin = false }: Props) {
                 </div>
               )}
 
-          {/* Search Results Table */}
-          {results.length > 0 && (
+          {/* Selected Domain Spotlight Bar (Shown when a domain is chosen) */}
+          {selectedDomain && selectedDomain.pricing && (
+            <div className="p-4 sm:p-5 rounded-2xl bg-emerald-500/[0.08] border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-700 dark:text-[#34D399] flex items-center justify-center shrink-0">
+                  <CheckCircle2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-mono font-bold text-lg text-[#11140F] dark:text-white">
+                      {selectedDomain.domain}
+                    </span>
+                    <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-800 dark:text-[#34D399]">
+                      Selected for Registration
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#11140F]/60 dark:text-white/60">
+                    {formatNaira(selectedDomain.pricing.totalNgn)}/yr · Includes custom email &amp; automated SSL
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedDomain(null);
+                  setCheckoutError(null);
+                }}
+                className="px-3.5 py-2 rounded-xl text-xs font-semibold border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#1A1F16] hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer self-start sm:self-auto text-[#11140F] dark:text-white flex items-center gap-1.5"
+              >
+                <span>← Change Domain / Show All Results</span>
+              </button>
+            </div>
+          )}
+
+          {/* Search Results Table (Shown when no domain is actively selected) */}
+          {!selectedDomain && results.length > 0 && (
             <div className="rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#11140F] overflow-hidden divide-y divide-[#11140F]/8 dark:divide-white/8">
               <div className="px-5 py-3 bg-[#F7F8F5] dark:bg-white/[0.02] flex items-center justify-between text-[11px] font-medium text-[#11140F]/55 dark:text-white/50">
-                <span className="uppercase tracking-wider">Domain Availability</span>
+                <span className="uppercase tracking-wider">
+                  Domain Availability ({results.length} Extensions Checked)
+                </span>
                 <span>1-year registration • Email &amp; SSL included</span>
               </div>
 
               {results.map((item) => {
-                const isSelected = selectedDomain?.domain === item.domain;
-
                 return (
                   <div
                     key={item.domain}
-                    className={`px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors ${
-                      isSelected
-                        ? 'bg-emerald-500/[0.06]'
-                        : 'hover:bg-black/[0.015] dark:hover:bg-white/[0.02]'
-                    }`}
+                    className="px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors hover:bg-black/[0.015] dark:hover:bg-white/[0.02]"
                   >
                     <div className="space-y-0.5">
                       <div className="flex items-center gap-2.5 flex-wrap">
@@ -712,13 +790,9 @@ export default function NameLaunchService({ user, isAdmin = false }: Props) {
                                 });
                                 setCheckoutError(null);
                               }}
-                              className={`px-4 py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
-                                isSelected
-                                  ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F]'
-                                  : 'bg-emerald-600 text-white hover:bg-emerald-700'
-                              }`}
+                              className="px-4 py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer bg-emerald-600 text-white hover:bg-emerald-700"
                             >
-                              {isSelected ? 'Selected' : 'Select'}
+                              Select
                             </button>
                           </div>
                         );
@@ -731,6 +805,34 @@ export default function NameLaunchService({ user, isAdmin = false }: Props) {
                   </div>
                 );
               })}
+
+              {/* Load More Extensions Button */}
+              {hasMore ? (
+                <div className="p-4 bg-[#F7F8F5] dark:bg-white/[0.02] border-t border-[#11140F]/8 dark:border-white/8 flex items-center justify-center">
+                  <button
+                    type="button"
+                    disabled={loadingMore}
+                    onClick={handleLoadMore}
+                    className="px-5 py-2.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 active:scale-[0.99] text-emerald-800 dark:text-[#34D399] font-bold text-xs transition-all shadow-xs disabled:opacity-50 cursor-pointer flex items-center gap-2"
+                  >
+                    {loadingMore ? (
+                      <>
+                        <div className="w-3.5 h-3.5 border-2 border-emerald-600 dark:border-[#34D399] border-t-transparent rounded-full animate-spin" />
+                        <span>Checking Next 10 Extensions…</span>
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="w-4 h-4" />
+                        <span>Load More Extensions (+10)</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              ) : (
+                <div className="py-3 px-4 text-center text-[11px] font-mono text-[#11140F]/45 dark:text-white/40 bg-[#F7F8F5] dark:bg-white/[0.01]">
+                  All curated extensions checked ({results.length} total)
+                </div>
+              )}
             </div>
           )}
 
