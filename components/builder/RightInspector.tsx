@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Doc, Node, Style, Bp, BP } from '@/lib/builder/schema';
 import { isOverridden, resolveStyle } from '@/lib/builder/resolve';
 import {
@@ -17,6 +17,86 @@ import {
   ArrowRight,
   ChevronDown,
 } from 'lucide-react';
+
+interface SmoothInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
+  value: string;
+  onChangeValue: (val: string) => void;
+}
+
+function SmoothInput({ value, onChangeValue, onFocus, onBlur, className, ...props }: SmoothInputProps) {
+  const [localValue, setLocalValue] = useState(value);
+  const isFocused = useRef(false);
+
+  useEffect(() => {
+    if (!isFocused.current) {
+      setLocalValue(value);
+    }
+  }, [value]);
+
+  return (
+    <input
+      {...props}
+      value={localValue}
+      className={className}
+      onFocus={(e) => {
+        isFocused.current = true;
+        onFocus?.(e);
+      }}
+      onBlur={(e) => {
+        isFocused.current = false;
+        if (localValue !== value) {
+          onChangeValue(localValue);
+        }
+        onBlur?.(e);
+      }}
+      onChange={(e) => {
+        const next = e.target.value;
+        setLocalValue(next);
+        onChangeValue(next);
+      }}
+    />
+  );
+}
+
+interface SmoothTextareaProps extends Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'onChange'> {
+  value: string;
+  onChangeValue: (val: string) => void;
+}
+
+function SmoothTextarea({ value, onChangeValue, onFocus, onBlur, className, ...props }: SmoothTextareaProps) {
+  const [localValue, setLocalValue] = useState(value);
+  const isFocused = useRef(false);
+
+  useEffect(() => {
+    if (!isFocused.current) {
+      setLocalValue(value);
+    }
+  }, [value]);
+
+  return (
+    <textarea
+      {...props}
+      value={localValue}
+      className={className}
+      onFocus={(e) => {
+        isFocused.current = true;
+        onFocus?.(e);
+      }}
+      onBlur={(e) => {
+        isFocused.current = false;
+        if (localValue !== value) {
+          onChangeValue(localValue);
+        }
+        onBlur?.(e);
+      }}
+      onChange={(e) => {
+        const next = e.target.value;
+        setLocalValue(next);
+        onChangeValue(next);
+      }}
+    />
+  );
+}
 
 interface RightInspectorProps {
   doc: Doc;
@@ -129,10 +209,11 @@ export function RightInspector({
               <div className="space-y-3">
                 <div>
                   <label className="text-[11px] font-semibold uppercase opacity-60 mb-1 block">Button Label</label>
-                  <input
+                  <SmoothInput
+                    key={`${node.id}_btn_label`}
                     type="text"
                     value={(node.props.label as string) || ''}
-                    onChange={(e) => onUpdateProps(node.id, { label: e.target.value })}
+                    onChangeValue={(val) => onUpdateProps(node.id, { label: val })}
                     className="w-full bg-[#181D1A] border border-white/10 rounded-lg px-2.5 py-1.5 text-white"
                   />
                 </div>
@@ -148,10 +229,11 @@ export function RightInspector({
                 ) : (
                   <div>
                     <label className="text-[11px] font-semibold uppercase opacity-60 mb-1 block">Link URL</label>
-                    <input
+                    <SmoothInput
+                      key={`${node.id}_btn_bind`}
                       type="text"
                       value={(node.props.bind as string) || ''}
-                      onChange={(e) => onUpdateProps(node.id, { bind: e.target.value })}
+                      onChangeValue={(val) => onUpdateProps(node.id, { bind: val })}
                       placeholder="https://..."
                       className="w-full bg-[#181D1A] border border-white/10 rounded-lg px-2.5 py-1.5 text-white"
                     />
@@ -165,10 +247,11 @@ export function RightInspector({
               <div className="space-y-3">
                 <div>
                   <label className="text-[11px] font-semibold uppercase opacity-60 mb-1 block">Heading Text</label>
-                  <textarea
+                  <SmoothTextarea
+                    key={`${node.id}_heading_text`}
                     rows={2}
                     value={(node.props.text as string) || ''}
-                    onChange={(e) => onUpdateProps(node.id, { text: e.target.value })}
+                    onChangeValue={(val) => onUpdateProps(node.id, { text: val })}
                     className="w-full bg-[#181D1A] border border-white/10 rounded-lg px-2.5 py-1.5 text-white text-[12px]"
                   />
                 </div>
@@ -197,10 +280,11 @@ export function RightInspector({
             {(node.type === 'text' || node.type === 'badge') && (
               <div>
                 <label className="text-[11px] font-semibold uppercase opacity-60 mb-1 block">Text Content</label>
-                <textarea
+                <SmoothTextarea
+                  key={`${node.id}_text_content`}
                   rows={3}
                   value={(node.props.text as string) || ''}
-                  onChange={(e) => onUpdateProps(node.id, { text: e.target.value })}
+                  onChangeValue={(val) => onUpdateProps(node.id, { text: val })}
                   className="w-full bg-[#181D1A] border border-white/10 rounded-lg px-2.5 py-1.5 text-white text-[12px]"
                 />
               </div>
@@ -211,29 +295,32 @@ export function RightInspector({
               <div className="space-y-2">
                 <div>
                   <label className="text-[11px] font-semibold uppercase opacity-60 mb-1 block">Item Name</label>
-                  <input
+                  <SmoothInput
+                    key={`${node.id}_price_name`}
                     type="text"
                     value={(node.props.name as string) || ''}
-                    onChange={(e) => onUpdateProps(node.id, { name: e.target.value })}
+                    onChangeValue={(val) => onUpdateProps(node.id, { name: val })}
                     className="w-full bg-[#181D1A] border border-white/10 rounded-lg px-2.5 py-1.5 text-white"
                   />
                 </div>
                 <div>
                   <label className="text-[11px] font-semibold uppercase opacity-60 mb-1 block">Price</label>
-                  <input
+                  <SmoothInput
+                    key={`${node.id}_price_val`}
                     type="text"
                     value={(node.props.price as string) || ''}
-                    onChange={(e) => onUpdateProps(node.id, { price: e.target.value })}
+                    onChangeValue={(val) => onUpdateProps(node.id, { price: val })}
                     placeholder="e.g. ₦3,500"
                     className="w-full bg-[#181D1A] border border-white/10 rounded-lg px-2.5 py-1.5 text-white"
                   />
                 </div>
                 <div>
                   <label className="text-[11px] font-semibold uppercase opacity-60 mb-1 block">Description</label>
-                  <input
+                  <SmoothInput
+                    key={`${node.id}_price_desc`}
                     type="text"
                     value={(node.props.desc as string) || ''}
-                    onChange={(e) => onUpdateProps(node.id, { desc: e.target.value })}
+                    onChangeValue={(val) => onUpdateProps(node.id, { desc: val })}
                     className="w-full bg-[#181D1A] border border-white/10 rounded-lg px-2.5 py-1.5 text-white"
                   />
                 </div>

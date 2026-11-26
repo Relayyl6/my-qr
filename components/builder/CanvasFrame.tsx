@@ -17,6 +17,7 @@ interface CanvasFrameProps {
   onWidthChange: (w: number) => void;
   onRotateTablet: () => void;
   iframeRef: React.RefObject<HTMLIFrameElement>;
+  children?: React.ReactNode;
 }
 
 export function CanvasFrame({
@@ -29,6 +30,7 @@ export function CanvasFrame({
   onWidthChange,
   onRotateTablet,
   iframeRef,
+  children,
 }: CanvasFrameProps) {
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [mountNode, setMountNode] = useState<HTMLElement | null>(null);
@@ -44,12 +46,12 @@ export function CanvasFrame({
     if (!iframe) return;
 
     const handleLoad = () => {
-      const doc = iframe.contentDocument;
-      if (!doc) return;
+      const iframeDoc = iframe.contentDocument;
+      if (!iframeDoc) return;
 
       // Ensure base HTML layout
-      doc.open();
-      doc.write(`
+      iframeDoc.open();
+      iframeDoc.write(`
         <!DOCTYPE html>
         <html>
           <head>
@@ -58,7 +60,7 @@ export function CanvasFrame({
             <style id="builder-styles"></style>
             <style>
               *, *::before, *::after { box-sizing: border-box; }
-              body { margin: 0; padding: 0; overflow-x: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+              body { margin: 0; padding: 0; overflow-x: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: ${doc.tokens?.colors?.bg || '#ffffff'}; }
               [data-node-id] { cursor: pointer; }
             </style>
           </head>
@@ -67,9 +69,9 @@ export function CanvasFrame({
           </body>
         </html>
       `);
-      doc.close();
+      iframeDoc.close();
 
-      const root = doc.getElementById('root');
+      const root = iframeDoc.getElementById('root');
       setMountNode(root);
       setIframeLoaded(true);
     };
@@ -183,12 +185,13 @@ export function CanvasFrame({
 
         {/* The Exact-Width Iframe Canvas */}
         <div
-          className={`relative bg-white overflow-hidden ${
+          className={`relative overflow-hidden ${
             isMobile ? 'rounded-[36px]' : isTablet ? 'rounded-[22px]' : 'rounded-b-lg'
           }`}
           style={{
             width: `${frameWidth}px`,
             height: isMobile ? '844px' : isTablet ? (isRotated ? '820px' : '1180px') : '800px',
+            backgroundColor: doc.tokens?.colors?.bg || '#ffffff',
           }}
         >
           <iframe
@@ -208,6 +211,9 @@ export function CanvasFrame({
               />,
               mountNode
             )}
+
+          {/* Selection and interaction overlay anchored directly over the iframe */}
+          {children}
         </div>
 
         {/* Mobile Home Bar */}

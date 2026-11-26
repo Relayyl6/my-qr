@@ -59,15 +59,89 @@ export function BuilderShell({ initialDoc, pageId, onSave }: BuilderShellProps) 
     renameNode,
     toggleLockNode,
     toggleHiddenNode,
+    reorderNode,
     deleteNode,
     exec,
   } = useStore();
 
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const workspaceRef = useRef<HTMLDivElement>(null);
   const [activeInspectorTab, setActiveInspectorTab] = useState<'content' | 'layout' | 'style' | 'responsive' | 'ai'>('content');
   const [aiPrompt, setAiPrompt] = useState('');
   const [isPublishing, setIsPublishing] = useState(false);
   const [saveBanner, setSaveBanner] = useState<string | null>(null);
+
+  // Trackpad pinch-to-zoom & Ctrl+mousewheel non-passive listener
+  useEffect(() => {
+    const el = workspaceRef.current;
+    if (!el) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const currentZoom = useStore.getState().ui.zoom;
+        const newZoom = Math.min(2.5, Math.max(0.3, +(currentZoom - e.deltaY * 0.005).toFixed(2)));
+        setZoom(newZoom);
+      }
+    };
+
+    el.addEventListener('wheel', handleWheel, { passive: false });
+    return () => {
+      el.removeEventListener('wheel', handleWheel);
+    };
+  }, [setZoom, useStore]);
+
+  const handleCommitResize = React.useCallback(
+    (nodeId: string, dims: { width?: number; height?: number }) => {
+      exec({
+        label: `Resize element`,
+        run: (draft) => {
+          const target = draft.nodes[nodeId];
+          if (!target) return;
+          const targetStyle = ui.bp === 'mobile' ? target.style.mobile : (target.style[ui.bp] ||= {});
+          if (dims.width !== undefined) {
+            targetStyle.width = { u: 'px', v: dims.width };
+          }
+          if (dims.height !== undefined) {
+            targetStyle.height = { u: 'px', v: dims.height };
+          }
+        },
+      });
+    },
+    [exec, ui.bp]
+  );
+
+  const handleResetDimensionToHug = React.useCallback(
+    (nodeId: string, dims: { width?: boolean; height?: boolean }) => {
+      exec({
+        label: `Reset dimension to hug`,
+        run: (draft) => {
+          const target = draft.nodes[nodeId];
+          if (!target) return;
+          const targetStyle = ui.bp === 'mobile' ? target.style.mobile : (target.style[ui.bp] ||= {});
+          if (dims.width) targetStyle.width = 'hug';
+          if (dims.height) targetStyle.height = 'hug';
+        },
+      });
+    },
+    [exec, ui.bp]
+  );
+
+  const handleMoveFreeNode = React.useCallback(
+    (id: string, x: number, y: number) => {
+      exec({
+        label: `Move element`,
+        run: (draft) => {
+          const target = draft.nodes[id];
+          if (!target) return;
+          const targetStyle = ui.bp === 'mobile' ? target.style.mobile : (target.style[ui.bp] ||= {});
+          targetStyle.x = x;
+          targetStyle.y = y;
+        },
+      });
+    },
+    [exec, ui.bp]
+  );
 
   // Keyboard shortcuts (1, 2, 3, Ctrl+Z, Undo, Redo, Delete)
   useEffect(() => {
@@ -109,12 +183,12 @@ export function BuilderShell({ initialDoc, pageId, onSave }: BuilderShellProps) 
   }, [clearSelection, deleteNode, redo, setBreakpoint, ui.selection, undo]);
 
   const handleAddNode = (type: NodeType) => {
+    let createdId: string | null = null;
     exec({
       label: `Add ${type} node`,
       run: (draft) => {
         const newId = `${type.slice(0, 3)}_${Math.random().toString(36).substring(2, 8)}`;
-        const parentId = ui.selection[0] && draft.nodes[ui.selection[0]] ? ui.selection[0] : draft.root;
-        const parentNode = draft.nodes[parentId];
+        createdId = newId;
 
         const defaultPropsMap: Partial<Record<NodeType, Record<string, unknown>>> = {
           heading: { text: 'New Heading', level: 2 },
@@ -126,26 +200,84 @@ export function BuilderShell({ initialDoc, pageId, onSave }: BuilderShellProps) 
         };
         const defaultProps: Record<string, unknown> = defaultPropsMap[type] || {};
 
-        draft.nodes[newId] = {
+        const newNode = {
           id: newId,
           type,
           name: `New ${type}`,
-          parent: parentId,
-          children: [],
+          parent: '',
+          children: [] as string[],
           style: {
             mobile: {
-              width: 'fill',
-              padding: [8, 8, 8, 8],
+              width: 'fill' as const,
+              padding: [8, 8, 8, 8] as [number, number, number, number],
             },
           },
           props: defaultProps,
         };
 
+        const containerTypes = ['section', 'stack', 'grid', 'card', 'free'];
+        const selectedId = ui.selection[0];
+        const selectedNode = selectedId ? draft.nodes[selectedId] : null;
+
+        let targetParentId = draft.root;
+        let insertIndex = -1; // -1 means append
+
+        if (type === 'section') {
+          // Sections can ONLY go into root
+          targetParentId = draft.root;
+          if (selectedNode && selectedNode.type === 'section') {
+            const rootChildren = draft.nodes[draft.root]?.children || [];
+            const idx = rootChildren.indexOf(selectedId);
+            insertIndex = idx !== -1 ? idx + 1 : -1;
+          }
+        } else if (selectedNode) {
+          if (containerTypes.includes(selectedNode.type)) {
+            // Selected element is a container: add inside it
+            targetParentId = selectedId;
+            insertIndex = -1;
+          } else {
+            // Selected element is a leaf node: insert immediately after it inside parent
+            const parentId = selectedNode.parent || draft.root;
+            const parentNode = draft.nodes[parentId];
+            if (parentNode) {
+              targetParentId = parentId;
+              const idx = parentNode.children.indexOf(selectedId);
+              insertIndex = idx !== -1 ? idx + 1 : -1;
+            }
+          }
+        } else {
+          // Nothing selected: append into primary section or stack
+          const rootNode = draft.nodes[draft.root];
+          const firstSectionId = rootNode?.children.find((cid) => draft.nodes[cid]?.type === 'section');
+          if (firstSectionId) {
+            const sectionNode = draft.nodes[firstSectionId];
+            const firstStackId = sectionNode?.children.find((cid) => draft.nodes[cid]?.type === 'stack');
+            if (firstStackId) {
+              targetParentId = firstStackId;
+            } else {
+              targetParentId = firstSectionId;
+            }
+          } else {
+            targetParentId = draft.root;
+          }
+        }
+
+        const parentNode = draft.nodes[targetParentId];
         if (parentNode) {
-          parentNode.children.push(newId);
+          newNode.parent = targetParentId;
+          draft.nodes[newId] = newNode;
+          if (insertIndex >= 0 && insertIndex <= parentNode.children.length) {
+            parentNode.children.splice(insertIndex, 0, newId);
+          } else {
+            parentNode.children.push(newId);
+          }
         }
       },
     });
+
+    if (createdId) {
+      selectNode(createdId);
+    }
   };
 
   const handleSavePublish = async () => {
@@ -325,7 +457,10 @@ export function BuilderShell({ initialDoc, pageId, onSave }: BuilderShellProps) 
         />
 
         {/* Center Canvas Workspace */}
-        <div className="flex-1 bg-[#171B18] overflow-auto relative flex flex-col items-center justify-start py-10 px-6">
+        <div
+          ref={workspaceRef}
+          className="flex-1 bg-[#171B18] overflow-auto relative flex flex-col items-center justify-start py-10 px-6"
+        >
           <div className="relative">
             <CanvasFrame
               doc={doc}
@@ -337,19 +472,24 @@ export function BuilderShell({ initialDoc, pageId, onSave }: BuilderShellProps) 
               onWidthChange={setFrameWidth}
               onRotateTablet={toggleRotateTablet}
               iframeRef={iframeRef}
-            />
-
-            {/* Selection Overlay */}
-            <CanvasOverlay
-              doc={doc}
-              selection={ui.selection}
-              hoverId={ui.hoverId}
-              zoom={ui.zoom}
-              mode={ui.mode}
-              iframeRef={iframeRef}
-              onSelectNode={selectNode}
-              onHoverNode={setHoverId}
-            />
+            >
+              {/* Selection and interaction overlay anchored directly over the iframe inside the device frame */}
+              <CanvasOverlay
+                doc={doc}
+                bp={ui.bp}
+                selection={ui.selection}
+                hoverId={ui.hoverId}
+                zoom={ui.zoom}
+                mode={ui.mode}
+                iframeRef={iframeRef}
+                onSelectNode={selectNode}
+                onHoverNode={setHoverId}
+                onCommitResize={handleCommitResize}
+                onResetDimensionToHug={handleResetDimensionToHug}
+                onReorderNode={reorderNode}
+                onMoveFreeNode={handleMoveFreeNode}
+              />
+            </CanvasFrame>
           </div>
 
           {/* Floating AI Command Bar (Always visible at bottom of Canvas) */}

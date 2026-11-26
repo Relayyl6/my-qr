@@ -220,7 +220,7 @@ export const createBuilderStore = (initialDoc: Doc) => {
       set((state) => ({
         ui: {
           ...state.ui,
-          zoom: Math.max(0.25, Math.min(2.0, zoom)),
+          zoom: Math.max(0.25, Math.min(2.5, zoom)),
         },
       }));
     },
