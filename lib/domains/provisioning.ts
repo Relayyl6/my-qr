@@ -118,6 +118,8 @@ export async function provisionDomainAndEmail(order: {
   emailAliases?: any;
   registrationYears?: number;
   catchAllEnabled?: boolean;
+  cloudflareZoneId?: string | null;
+  nameservers?: string[] | null;
 }): Promise<{ zoneId: string; nameservers: string[] }> {
   const cfHeaders = getCfHeaders();
 
@@ -126,26 +128,84 @@ export async function provisionDomainAndEmail(order: {
     throw new Error('CLOUDFLARE_API_TOKEN is not configured in .env. Cannot provision DNS zone and email routing.');
   }
 
-  // STEP 1: Create Cloudflare DNS Zone to receive nameservers
-  const zoneRes = await fetch(`${CF_BASE}/zones`, {
-    method: 'POST',
-    headers: cfHeaders,
-    body: JSON.stringify({
-      name: order.domainName,
-      jump_start: false,
-      type: 'full',
-    }),
-  });
-  const zoneData = await zoneRes.json();
-  if (!zoneData.success) {
-    throw new Error(`Cloudflare Zone creation failed: ${zoneData.errors?.[0]?.message || 'Unknown error'}`);
+  // STEP 1: Get or Create Cloudflare DNS Zone (Idempotent to avoid 'already exists' conflicts)
+  let zoneId: string = order.cloudflareZoneId || '';
+  let nameservers: string[] = Array.isArray(order.nameservers) && order.nameservers.length > 0 ? order.nameservers : [];
+
+  // Check if zoneId was already recorded on the order and still valid in Cloudflare
+  if (zoneId) {
+    try {
+      const zoneCheckRes = await fetch(`${CF_BASE}/zones/${zoneId}`, { headers: cfHeaders });
+      const zoneCheckData = await zoneCheckRes.json();
+      if (zoneCheckData.success && zoneCheckData.result) {
+        if (!nameservers || nameservers.length === 0) {
+          nameservers = zoneCheckData.result.name_servers || [];
+        }
+      } else {
+        zoneId = ''; // Reset to search fresh by name if invalid
+      }
+    } catch {
+      // Fall through to query by name
+    }
   }
 
-  const zoneId: string = zoneData.result.id;
-  const nameservers: string[] = zoneData.result.name_servers || [
-    'ada.ns.cloudflare.com',
-    'bob.ns.cloudflare.com',
-  ];
+  // If not found by ID, query Cloudflare account by domain name to see if zone was already created
+  if (!zoneId) {
+    try {
+      const searchRes = await fetch(`${CF_BASE}/zones?name=${encodeURIComponent(order.domainName.trim())}`, {
+        headers: cfHeaders,
+      });
+      const searchData = await searchRes.json();
+      if (searchData.success && Array.isArray(searchData.result) && searchData.result.length > 0) {
+        zoneId = searchData.result[0].id;
+        nameservers = searchData.result[0].name_servers || nameservers;
+      }
+    } catch (searchErr) {
+      console.warn('[Cloudflare Zone Query] Search failed:', searchErr);
+    }
+  }
+
+  // If still not found, create new Cloudflare DNS Zone
+  if (!zoneId) {
+    const zoneRes = await fetch(`${CF_BASE}/zones`, {
+      method: 'POST',
+      headers: cfHeaders,
+      body: JSON.stringify({
+        name: order.domainName.trim(),
+        jump_start: false,
+        type: 'full',
+      }),
+    });
+    const zoneData = await zoneRes.json();
+    if (!zoneData.success) {
+      const errorMsg = zoneData.errors?.[0]?.message || 'Unknown error';
+      // If error indicates already exists (code 1061 or message contains 'already exists'), fetch existing zone
+      if (errorMsg.toLowerCase().includes('already exists')) {
+        const fallbackRes = await fetch(`${CF_BASE}/zones?name=${encodeURIComponent(order.domainName.trim())}`, {
+          headers: cfHeaders,
+        });
+        const fallbackData = await fallbackRes.json();
+        if (fallbackData.success && Array.isArray(fallbackData.result) && fallbackData.result.length > 0) {
+          zoneId = fallbackData.result[0].id;
+          nameservers = fallbackData.result[0].name_servers || nameservers;
+        } else {
+          throw new Error(`Cloudflare Zone creation failed: ${errorMsg}`);
+        }
+      } else {
+        throw new Error(`Cloudflare Zone creation failed: ${errorMsg}`);
+      }
+    } else {
+      zoneId = zoneData.result.id;
+      nameservers = zoneData.result.name_servers || nameservers;
+    }
+  }
+
+  if (!nameservers || nameservers.length === 0) {
+    nameservers = [
+      'ada.ns.cloudflare.com',
+      'bob.ns.cloudflare.com',
+    ];
+  }
 
   // STEP 2: Register Domain via Domain Name API if credentials exist
   const dnaApiKey = process.env.DNA_API_KEY;
@@ -201,7 +261,16 @@ export async function provisionDomainAndEmail(order: {
         ) {
           throw new Error('Registrar wallet unfunded ($0.00 balance): Deposit funds in your Domain Name API account to purchase real root domains.');
         }
-        throw new Error(`Registrar error: ${errorMsg}`);
+        if (
+          errorMsg.toLowerCase().includes('already registered') ||
+          errorMsg.toLowerCase().includes('already taken') ||
+          errorMsg.toLowerCase().includes('not available') ||
+          errorMsg.toLowerCase().includes('already exists')
+        ) {
+          console.warn('[DNA Reseller API] Domain already registered at registrar, proceeding with DNS & Email routing configuration.');
+        } else {
+          throw new Error(`Registrar error: ${errorMsg}`);
+        }
       }
     } catch (apiErr: any) {
       console.error('[DNA Reseller API] Registration error:', apiErr);
@@ -232,7 +301,17 @@ export async function provisionDomainAndEmail(order: {
     });
     const dnaData = await dnaRes.json();
     if (!dnaData.IsSuccess && !dnaData.success) {
-      throw new Error(`Registrar error: ${dnaData.Message || 'Insufficient balance in wallet'}`);
+      const msg = String(dnaData.Message || 'Insufficient balance in wallet');
+      if (
+        msg.toLowerCase().includes('already registered') ||
+        msg.toLowerCase().includes('already taken') ||
+        msg.toLowerCase().includes('not available') ||
+        msg.toLowerCase().includes('already exists')
+      ) {
+        console.warn('[Classic DNA API] Domain already registered, proceeding with configuration.');
+      } else {
+        throw new Error(`Registrar error: ${msg}`);
+      }
     }
   }
 
@@ -262,7 +341,31 @@ export async function provisionDomainAndEmail(order: {
     });
   }
 
+  // Fetch existing email routing rules to prevent duplicates on retry
+  let existingRules: any[] = [];
+  try {
+    const rulesListRes = await fetch(`${CF_BASE}/zones/${zoneId}/email/routing/rules`, {
+      headers: cfHeaders,
+    });
+    const rulesListData = await rulesListRes.json();
+    if (rulesListData.success && Array.isArray(rulesListData.result)) {
+      existingRules = rulesListData.result;
+    }
+  } catch (e) {
+    console.warn('Failed to query existing email routing rules:', e);
+  }
+
   for (const { alias, forwardTo } of aliasesToProvision) {
+    const targetAddr = `${alias}@${order.domainName.trim()}`.toLowerCase();
+    const alreadyExists = existingRules.some((r: any) =>
+      r.matchers?.some((m: any) => m.type === 'literal' && m.field === 'to' && m.value?.toLowerCase() === targetAddr)
+    );
+
+    if (alreadyExists) {
+      console.log(`Email routing rule for ${targetAddr} already exists in Cloudflare, skipping recreation.`);
+      continue;
+    }
+
     try {
       await fetch(`${CF_BASE}/zones/${zoneId}/email/routing/rules`, {
         method: 'POST',
@@ -274,7 +377,7 @@ export async function provisionDomainAndEmail(order: {
             {
               type: 'literal',
               field: 'to',
-              value: `${alias}@${order.domainName}`,
+              value: targetAddr,
             },
           ],
           actions: [
