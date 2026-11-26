@@ -3,6 +3,7 @@ import {
   calculateDomainPrice,
   DomainPricingConfig,
   DEFAULT_PRICING_CONFIG,
+  getActivePricingConfigSync,
 } from './fxEngine';
 import {
   SUPPORTED_TLDS,
@@ -19,8 +20,8 @@ export function calculateNgnPricing(
   tld: string = 'xyz',
   config?: DomainPricingConfig
 ): DomainPricing {
-  // Rely solely on Admin Sovereignty Console configuration and tiered progression
-  const activeConfig = config || DEFAULT_PRICING_CONFIG;
+  // Rely strictly on Admin Sovereignty Console configuration (with active in-memory DB sync)
+  const activeConfig = config || getActivePricingConfigSync();
   const calc = calculateDomainPrice(wholesaleUsd, tld, activeConfig);
   return {
     wholesaleUsd,

@@ -64,6 +64,13 @@ export const DEFAULT_PRICING_CONFIG: DomainPricingConfig = {
 
 const CACHE_KEY = 'domain_pricing_config';
 
+// Active in-memory cache of the admin's database configuration to guarantee synchronous calls never use stale static seeds
+let activeAdminPricingConfig: DomainPricingConfig | null = null;
+
+export function getActivePricingConfigSync(): DomainPricingConfig {
+  return activeAdminPricingConfig || DEFAULT_PRICING_CONFIG;
+}
+
 /**
  * Scale up a raw market rate with safety buffer (e.g. 1333 -> 1400)
  */
@@ -145,6 +152,7 @@ export async function getDomainPricingConfig(): Promise<DomainPricingConfig> {
       if (typeof merged.extraEmailPriceNgn !== 'number' || merged.extraEmailPriceNgn <= 0) {
         merged.extraEmailPriceNgn = 1500;
       }
+      activeAdminPricingConfig = merged;
       return merged;
     }
   } catch (err) {
@@ -211,6 +219,7 @@ export async function saveDomainPricingConfig(updates: Partial<DomainPricingConf
     },
   });
 
+  activeAdminPricingConfig = next;
   return next;
 }
 
