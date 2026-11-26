@@ -57,6 +57,8 @@ interface DomainOrderData {
   bioPageEnabled?: boolean;
   bioConfig?: any;
   registrationYears?: number;
+  expiresAt?: string | Date | null;
+  createdAt?: string | Date;
 }
 
 export default function DomainFleetOperabilities({
@@ -478,9 +480,15 @@ export default function DomainFleetOperabilities({
               </div>
               <p className="text-[11px] text-[#11140F]/60 dark:text-white/60">
                 {autoRenew
-                  ? 'Enabled: Domain will automatically renew before expiration.'
-                  : 'Disabled: Domain will expire at end of term.'}
+                  ? 'Enabled: Domain will automatically prompt or renew annually before expiration.'
+                  : 'Disabled: Domain will expire at end of current term.'}
               </p>
+              {order.expiresAt && (
+                <div className="pt-2 border-t border-[#11140F]/8 dark:border-white/8 text-[11px] font-mono text-emerald-600 dark:text-emerald-400 flex items-center justify-between">
+                  <span>Term: {order.registrationYears || 1} Year{(order.registrationYears || 1) > 1 ? 's' : ''}</span>
+                  <span>Renews: {new Date(order.expiresAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+                </div>
+              )}
             </div>
           </div>
 

@@ -1400,6 +1400,14 @@ export default function NameLaunchService({ user, isAdmin = false }: Props) {
                                   <span className="font-mono">{ord.userEmail}</span>
                                   <span className="opacity-40">•</span>
                                   <span className="font-mono">{formatNaira(ord.totalPaidNgn)}</span>
+                                  {ord.expiresAt && (
+                                    <>
+                                      <span className="opacity-40">•</span>
+                                      <span className="font-mono text-emerald-600 dark:text-emerald-400">
+                                        Renews {new Date(ord.expiresAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                                      </span>
+                                    </>
+                                  )}
                                 </div>
                               </div>
 

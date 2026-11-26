@@ -47,12 +47,16 @@ export async function POST(req: Request) {
 
           const { zoneId, nameservers } = await provisionDomainAndEmail(order);
 
+          const regYears = order.registrationYears || 1;
+          const expiresAt = order.expiresAt || new Date(Date.now() + regYears * 365 * 24 * 60 * 60 * 1000);
+
           await prisma.domainOrder.update({
             where: { id: order.id },
             data: {
               status: 'ACTIVE',
               cloudflareZoneId: zoneId,
               nameservers,
+              expiresAt,
               errorMessage: null,
             },
           });
