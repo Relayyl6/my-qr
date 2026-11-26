@@ -353,8 +353,14 @@ export default function ExportCustomizerModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#11140F]/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
-      <div className="rounded-3xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#0E1017] p-5 sm:p-7 shadow-2xl max-w-4xl w-full max-h-[94vh] flex flex-col space-y-5 my-auto text-[#11140F] dark:text-white">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 bg-[#11140F]/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="rounded-3xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#0E1017] p-5 sm:p-7 shadow-2xl max-w-4xl w-full max-h-[94vh] flex flex-col space-y-5 my-auto text-[#11140F] dark:text-white"
+      >
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-[#11140F]/10 dark:border-white/10 shrink-0">
           <div className="flex items-center gap-2.5">

@@ -27,15 +27,31 @@ export async function GET(
     }
 
     const fallbackUrl = landingPage.qrLink?.destinationUrl || "https://example.com";
-    const page = migrateLegacySpec(landingPage.spec, fallbackUrl);
+    let destination = fallbackUrl;
 
-    // 2. Resolve destination URL based on linkIndex
-    let destination = page.cta.url || fallbackUrl;
+    const rawSpec = landingPage.spec as any;
+    if (rawSpec && rawSpec.schemaVersion === 3 && rawSpec.nodes) {
+      // V3 Normalized Tree Doc
+      if (linkIndex === 'cta' || linkIndex === 'btn_cta') {
+        destination = rawSpec.destination?.url || fallbackUrl;
+      } else if (rawSpec.nodes[linkIndex]) {
+        const targetNode = rawSpec.nodes[linkIndex];
+        if (targetNode.type === 'button') {
+          destination = rawSpec.destination?.url || fallbackUrl;
+        } else if (targetNode.type === 'linkRow' && targetNode.props?.href) {
+          destination = targetNode.props.href;
+        }
+      }
+    } else {
+      // V2 Legacy Page Spec
+      const page = migrateLegacySpec(landingPage.spec, fallbackUrl);
+      destination = page.cta.url || fallbackUrl;
 
-    if (linkIndex !== "cta") {
-      const idx = parseInt(linkIndex, 10);
-      if (!isNaN(idx) && page.links && page.links[idx]?.url) {
-        destination = page.links[idx].url;
+      if (linkIndex !== "cta") {
+        const idx = parseInt(linkIndex, 10);
+        if (!isNaN(idx) && page.links && page.links[idx]?.url) {
+          destination = page.links[idx].url;
+        }
       }
     }
 

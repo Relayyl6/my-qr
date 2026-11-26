@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import Link from 'next/link';
 import { deleteLink, updateLink, toggleArchiveLink, checkDestinationHealth } from '@/app/actions';
 import QrCodeCard from './QrCodeCard';
 import DeleteConfirmModal from './DeleteConfirmModal';
@@ -456,6 +457,14 @@ export default function LinkList({
                             </span>
                           )}
                         </button>
+                        <Link
+                          href={`/builder/${link.id}`}
+                          title="Open in Framer-style visual builder canvas (3 breakpoints, drag & drop, AI commands)"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-purple-500/30 bg-purple-50/60 dark:bg-purple-950/30 hover:bg-purple-100/80 dark:hover:bg-purple-900/40 text-purple-800 dark:text-purple-300 text-[11px] font-semibold transition-colors cursor-pointer"
+                        >
+                          <Sparkles className="w-3 h-3 text-purple-600 dark:text-purple-400" />
+                          <span>Visual Studio (v3)</span>
+                        </Link>
                         {isAdmin || ['pro', 'plus', 'ultra'].includes(userTier.toLowerCase()) ? (
                           <a
                             href={`/api/links/${link.id}/export`}

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getLandingPageByShortCode } from "@/lib/ai/features/landing-page-builder";
 import { RenderPage } from "@/lib/page/render";
+import { RenderDoc } from "@/lib/builder/render";
 import { migrateLegacySpec } from "@/lib/page/migrate";
 import { PALETTES, PaletteKey } from "@/lib/page/config";
 import { Metadata } from "next";
@@ -69,6 +70,21 @@ export default async function LandingViewPage({
 
   if (!result || !result.landingPage.published) {
     notFound();
+  }
+
+  // If published doc is V3 Normalized Tree
+  const rawSpec = result.spec as any;
+  if (rawSpec && rawSpec.schemaVersion === 3 && rawSpec.nodes) {
+    return (
+      <div
+        className="min-h-screen w-full flex flex-col items-center justify-start py-8 px-4"
+        style={{ backgroundColor: rawSpec.tokens?.colors?.bg || '#0F172A' }}
+      >
+        <div className="w-full max-w-[1280px] mx-auto">
+          <RenderDoc doc={rawSpec} pageId={result.landingPage.id} mode="published" />
+        </div>
+      </div>
+    );
   }
 
   const page = migrateLegacySpec(result.spec, result.link.destinationUrl);

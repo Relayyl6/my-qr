@@ -133,8 +133,14 @@ export default function DnsManagerModal({ orderId, domainName, onClose }: Props)
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
-      <div className="w-full max-w-4xl bg-white dark:bg-[#11140F] border border-[#11140F]/15 dark:border-white/15 rounded-2xl shadow-2xl p-5 sm:p-7 space-y-6 text-[#11140F] dark:text-white max-h-[90vh] overflow-y-auto">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-4xl bg-white dark:bg-[#11140F] border border-[#11140F]/15 dark:border-white/15 rounded-2xl shadow-2xl p-5 sm:p-7 space-y-6 text-[#11140F] dark:text-white max-h-[90vh] overflow-y-auto"
+      >
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-[#11140F]/10 dark:border-white/10">
           <div className="flex items-center gap-3">

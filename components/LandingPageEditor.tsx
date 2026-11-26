@@ -99,17 +99,46 @@ export default function LandingPageEditor({
   const initialPage = initialSpec ? migrateLegacySpec(initialSpec, destinationUrl) : null;
 
   return (
-    <PageEditor
-      linkId={linkId}
-      shortCode={shortCode}
-      destinationUrl={destinationUrl}
-      initialPage={initialPage}
-      isCurrentlyActive={isCurrentlyActive}
-      userTier={userTier}
-      isAdmin={isAdmin}
-      onSaved={onSaved}
-      onReverted={onReverted}
-      onClose={onClose}
-    />
+    <div className="space-y-3 w-full max-w-6xl mx-auto">
+      {/* Studio switcher banner */}
+      <div className="p-3 sm:p-4 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-purple-500/15 to-blue-500/15 border border-emerald-500/25 flex flex-wrap items-center justify-between gap-3 text-[#11140F] dark:text-white shadow-sm">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+            <Smartphone className="w-4 h-4" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-[13.5px]">Visual Studio Engine (v3)</span>
+              <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-mono text-[10px] font-bold uppercase">
+                Framer Mode
+              </span>
+            </div>
+            <p className="text-[11.5px] opacity-75">
+              Drag-and-drop canvas, 3 exact breakpoints (390px, 820px, 1280px), device bezels, and auto-layout.
+            </p>
+          </div>
+        </div>
+        <Link
+          href={`/builder/${linkId}`}
+          className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-[12px] transition-all flex items-center gap-1.5 shadow-xs cursor-pointer ml-auto"
+        >
+          <span>Open in Visual Studio</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </div>
+
+      <PageEditor
+        linkId={linkId}
+        shortCode={shortCode}
+        destinationUrl={destinationUrl}
+        initialPage={initialPage}
+        isCurrentlyActive={isCurrentlyActive}
+        userTier={userTier}
+        isAdmin={isAdmin}
+        onSaved={onSaved}
+        onReverted={onReverted}
+        onClose={onClose}
+      />
+    </div>
   );
 }

@@ -268,6 +268,15 @@ export default function PageEditor({
             </button>
           )}
 
+          <Link
+            href={`/builder/${linkId}`}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-purple-600/10 hover:bg-purple-600/20 text-purple-700 dark:text-purple-300 border border-purple-500/20 text-[12.5px] font-semibold transition-colors cursor-pointer"
+            title="Open in Framer-style visual builder canvas with Mobile, Tablet, and Desktop windows"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+            <span>Visual Studio (v3)</span>
+          </Link>
+
           <button
             onClick={() => handleSave(false)}
             disabled={isSaving}

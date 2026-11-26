@@ -356,7 +356,7 @@ export default function PrintTemplateModal({
   // Pointer drag events for QR positioning
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     e.preventDefault();
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     setIsDragging(true);
     dragStartRef.current = {
       startX: e.clientX,
@@ -380,7 +380,7 @@ export default function PrintTemplateModal({
     if (isDragging) {
       setIsDragging(false);
       try {
-        (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+        (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
       } catch {}
     }
   };
