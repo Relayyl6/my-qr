@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Copy, Check, ExternalLink, Server, ShieldCheck, Zap, Globe, Sparkles } from 'lucide-react';
+import { Copy, Check, ExternalLink, Server, ShieldCheck, Zap, Globe, Sparkles, ChevronDown } from 'lucide-react';
 
 interface Props {
   activeDomainName?: string;
@@ -11,6 +11,7 @@ interface Props {
 type HostingPlatform = 'vercel' | 'render' | 'netlify';
 
 export default function HostingConnectionHub({ activeDomainName, onOpenDnsModal }: Props) {
+  const [isExpanded, setIsExpanded] = useState(false);
   const [platform, setPlatform] = useState<HostingPlatform>('vercel');
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
@@ -23,16 +24,22 @@ export default function HostingConnectionHub({ activeDomainName, onOpenDnsModal 
   };
 
   return (
-    <div className="rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5] dark:bg-white/[0.03] p-5 sm:p-6 space-y-5">
+    <div className={`rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5] dark:bg-white/[0.03] transition-all ${isExpanded ? 'p-5 sm:p-6 space-y-5' : 'p-4 sm:p-5'}`}>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="space-y-1">
+        <div
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="space-y-1 cursor-pointer select-none flex-1"
+        >
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-[#34D399] flex items-center justify-center shrink-0">
               <Server className="w-4 h-4" />
             </div>
-            <h4 className="font-bold text-sm text-[#11140F] dark:text-white">
-              Point Domain to Your Website / Portfolio
+            <h4 className="font-bold text-sm text-[#11140F] dark:text-white flex items-center gap-2">
+              <span>Point Domain to Your Website / Portfolio</span>
+              <span className="text-[10.5px] font-medium px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[#11140F]/60 dark:text-white/60">
+                {isExpanded ? 'Collapse' : 'Setup Guide'}
+              </span>
             </h4>
           </div>
           <p className="text-[12px] text-[#11140F]/65 dark:text-white/60">
@@ -40,46 +47,71 @@ export default function HostingConnectionHub({ activeDomainName, onOpenDnsModal 
           </p>
         </div>
 
-        {/* Platform Selector Segmented Tabs */}
-        <div className="flex items-center p-1 rounded-xl bg-white dark:bg-[#121518] border border-[#11140F]/10 dark:border-white/10 gap-1 self-start sm:self-auto shrink-0 shadow-2xs">
+        <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+          {/* Platform Selector Segmented Tabs */}
+          <div className="flex items-center p-1 rounded-xl bg-white dark:bg-[#121518] border border-[#11140F]/10 dark:border-white/10 gap-1 shadow-2xs">
+            <button
+              type="button"
+              onClick={() => {
+                setPlatform('vercel');
+                if (!isExpanded) setIsExpanded(true);
+              }}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                platform === 'vercel'
+                  ? 'bg-emerald-600 text-white shadow-2xs'
+                  : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white'
+              }`}
+            >
+              <span>▲</span>
+              <span>Vercel</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setPlatform('render');
+                if (!isExpanded) setIsExpanded(true);
+              }}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                platform === 'render'
+                  ? 'bg-emerald-600 text-white shadow-2xs'
+                  : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white'
+              }`}
+            >
+              <span>⚡</span>
+              <span>Render</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setPlatform('netlify');
+                if (!isExpanded) setIsExpanded(true);
+              }}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                platform === 'netlify'
+                  ? 'bg-emerald-600 text-white shadow-2xs'
+                  : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white'
+              }`}
+            >
+              <span>🌐</span>
+              <span>Netlify &amp; Others</span>
+            </button>
+          </div>
+
+          {/* Dropdown Chevron Toggle Button */}
           <button
             type="button"
-            onClick={() => setPlatform('vercel')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-              platform === 'vercel'
-                ? 'bg-emerald-600 text-white shadow-2xs'
-                : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white'
-            }`}
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="p-2 rounded-xl bg-white dark:bg-[#121518] border border-[#11140F]/10 dark:border-white/10 text-[#11140F]/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer shadow-2xs flex items-center justify-center"
+            title={isExpanded ? 'Collapse instructions' : 'Expand full instructions'}
+            aria-label={isExpanded ? 'Collapse instructions' : 'Expand full instructions'}
           >
-            <span>▲</span>
-            <span>Vercel</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setPlatform('render')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-              platform === 'render'
-                ? 'bg-emerald-600 text-white shadow-2xs'
-                : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white'
-            }`}
-          >
-            <span>⚡</span>
-            <span>Render</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setPlatform('netlify')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-              platform === 'netlify'
-                ? 'bg-emerald-600 text-white shadow-2xs'
-                : 'text-[#11140F]/60 dark:text-white/60 hover:text-[#11140F] dark:hover:text-white'
-            }`}
-          >
-            <span>🌐</span>
-            <span>Netlify &amp; Others</span>
+            <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
           </button>
         </div>
       </div>
+
+      {isExpanded && (
+        <>
 
       {/* Dynamic Platform Walkthrough: Vercel */}
       {platform === 'vercel' && (
@@ -506,6 +538,8 @@ export default function HostingConnectionHub({ activeDomainName, onOpenDnsModal 
           Propagation Time: ~60 Seconds
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 }
