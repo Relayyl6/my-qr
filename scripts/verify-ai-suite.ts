@@ -2,6 +2,11 @@ import { prompt as routeResolverPrompt } from '../lib/ai/prompts/route-resolver.
 import { prompt as landingPagePrompt } from '../lib/ai/prompts/landing-page-builder.v1';
 import { prompt as orchestratorPrompt } from '../lib/ai/prompts/campaign-orchestrator.v1';
 import { landingPageSpecSchema, LandingPageSpec } from '../lib/landing/types';
+import { PageSchema, Page, AiCopy } from '../lib/page/schema';
+import { migrateLegacySpec } from '../lib/page/migrate';
+import { stripInventedFacts } from '../lib/page/generate-copy';
+import { assemble } from '../lib/page/assemble';
+import { PALETTES } from '../lib/page/config';
 import { normalizeLandingUrl } from '../lib/landing/render';
 import { normalizeUrl } from '../lib/normalizeUrl';
 import { generateCleanVectorSvg } from '../lib/qr/exportVector';
@@ -539,6 +544,154 @@ async function main() {
     assert(normalizeUrl("https://secure.com") === "https://secure.com", "Preserves explicit https://");
     assert(normalizeUrl("HTTP://UPPERCASE.COM") === "HTTP://UPPERCASE.COM", "Case-insensitive check preserves HTTP://");
     assert(normalizeUrl("HTTPS://UPPERCASE.COM") === "HTTPS://UPPERCASE.COM", "Case-insensitive check preserves HTTPS://");
+  })();
+
+  // Test 21: Flat Page schema validation and word count constraints
+  await runTest(21, "Flat Page schema: validates 6 WCAG AA palettes, slot constraints and word limits", (assert) => {
+    const validPage: Page = {
+      schemaVersion: 1,
+      template: "restaurant",
+      brand: {
+        name: "Mama Tee Kitchen",
+        headline: "Authentic Nigerian Dishes",
+        tagline: "Slow-cooked jollof rice and artisanal suya platters.",
+        palette: "clay",
+      },
+      cta: {
+        label: "Order on WhatsApp",
+        url: "https://wa.me/2348012345678",
+      },
+      links: [
+        { label: "Instagram", url: "https://instagram.com/mamatee" },
+        { label: "Google Maps", url: "https://maps.google.com" },
+      ],
+      services: [
+        { name: "Party Jollof Rice", price: "₦4,500", desc: "Smoky firewood-cooked jollof portion." },
+        { name: "Suya Beef Skewers", price: "₦3,000", desc: "Spiced flank steak with fresh onions." },
+      ],
+      contact: {
+        phone: "+2348012345678",
+        whatsapp: "08012345678",
+        email: "order@mamatee.ng",
+        address: "14 Admiralty Way, Lekki Phase 1",
+      },
+    };
+
+    const parsed = PageSchema.safeParse(validPage);
+    assert(parsed.success, "Valid flat Page must validate against PageSchema");
+
+    // Palette verification
+    assert(Object.keys(PALETTES).length === 6, "Must define exactly 6 curated palettes");
+    assert(PALETTES.ink && PALETTES.sand && PALETTES.forest && PALETTES.clay && PALETTES.sky && PALETTES.mono, "Palettes include ink, sand, forest, clay, sky, mono");
+
+    // Headline too long (> 5 words)
+    const badHeadline = {
+      ...validPage,
+      brand: { ...validPage.brand, headline: "One Two Three Four Five Six Seven" },
+    };
+    assert(!PageSchema.safeParse(badHeadline).success, "PageSchema must reject headlines exceeding 5 words");
+
+    // Tagline too long (> 14 words)
+    const badTagline = {
+      ...validPage,
+      brand: { ...validPage.brand, tagline: "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 words in this tagline" },
+    };
+    assert(!PageSchema.safeParse(badTagline).success, "PageSchema must reject taglines exceeding 14 words");
+
+    // CTA too long (> 4 words)
+    const badCta = {
+      ...validPage,
+      cta: { ...validPage.cta, label: "Click here right now today please" },
+    };
+    assert(!PageSchema.safeParse(badCta).success, "PageSchema must reject CTA labels exceeding 4 words");
+  })();
+
+  // Test 22: Legacy block specification migration (migrateLegacySpec)
+  await runTest(22, "Legacy migration: converts polymorphic block spec into 480px flat Page", (assert) => {
+    const legacySpec: LandingPageSpec = {
+      businessName: "Lagos Grill House",
+      bio: "Fresh flame-grilled barbecue and cocktails in Victoria Island",
+      theme: {
+        primaryColor: "#059669",
+        accentColor: "#10B981",
+        backgroundColor: "#F3F7F4",
+        textColor: "#14532D",
+        cardBg: "#FFFFFF",
+      },
+      blocks: [
+        {
+          type: "hero",
+          title: "Lagos Grill House",
+          subtitle: "Wood-fired grills and craft cocktails",
+        },
+        {
+          type: "linkList",
+          items: [
+            { title: "Table Reservations", url: "https://grillhouse.ng/book", highlight: true },
+            { title: "Drink Menu", url: "https://grillhouse.ng/drinks", highlight: false },
+          ],
+        },
+        {
+          type: "menu",
+          title: "Our Grills",
+          items: [
+            { name: "Smoked Ribs", price: "₦12,000", description: "Basted in local honey sauce" },
+          ],
+        },
+        {
+          type: "contact",
+          title: "Visit Us",
+          phone: "+2348000000000",
+          instagram: "@lagosgrillhouse",
+        },
+      ],
+    };
+
+    const migrated = migrateLegacySpec(legacySpec, "https://grillhouse.ng");
+    assert(migrated.schemaVersion === 1, "Migrated page has schemaVersion: 1");
+    assert(migrated.template === "restaurant", "Templates with menu items map to 'restaurant'");
+    assert(migrated.brand.name === "Lagos Grill House", "Brand name matches legacy");
+    assert(migrated.cta.label === "Table Reservations", "Highlighted link becomes primary CTA");
+    assert(migrated.cta.url === "https://grillhouse.ng/book", "CTA URL preserved from highlight item");
+    assert(migrated.services.length === 1 && migrated.services[0].name === "Smoked Ribs", "Menu items map to services");
+    assert(migrated.contact.phone === "+2348000000000", "Phone contact preserved");
+    assert(migrated.brand.palette === "forest", "Green hex color maps to 'forest' palette");
+  })();
+
+  // Test 23: Guardrail enforcement (stripInventedFacts and assemble URL override)
+  await runTest(23, "Guardrail enforcement: strips invented prices and strictly enforces destination URL in code", (assert) => {
+    // 1. stripInventedFacts test
+    const aiOutputWithHallucinations: AiCopy = {
+      template: "restaurant",
+      headline: "Mama Tee Kitchen",
+      tagline: "Authentic Lagos recipes made fresh.",
+      ctaLabel: "Order Online",
+      services: [
+        { name: "Jollof Rice", price: "4500", desc: "Party portions." },
+        { name: "Invented Lobster", price: "99000", desc: "Never mentioned anywhere." },
+      ],
+    };
+
+    const userInput = {
+      name: "Mama Tee Kitchen",
+      description: "Jollof rice for 4500. Order on WhatsApp.",
+      destinationUrl: "https://actual-destination.com",
+    };
+
+    const stripped = stripInventedFacts(aiOutputWithHallucinations, userInput);
+    assert(stripped.services[0].price === "4500", "Price '4500' found in prompt input is retained");
+    assert(stripped.services[1].price === "", "Invented price '99000' not in prompt input is stripped to ''");
+
+    // 2. assemble() strictly overwriting CTA URL
+    const assembled = assemble(stripped, {
+      brandName: "Mama Tee Kitchen",
+      palette: "ink",
+      destinationUrl: "https://owner-site.com/real-page",
+    });
+
+    assert(assembled.cta.url === "https://owner-site.com/real-page", "assemble() strictly overwrites CTA URL with owner's destination URL");
+    assert(assembled.brand.palette === "ink", "Palette correctly assigned");
+    assert(PageSchema.safeParse(assembled).success, "Assembled page passes PageSchema validation");
   })();
 
   // Print Summary Table

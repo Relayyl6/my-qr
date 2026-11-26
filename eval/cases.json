@@ -1,0 +1,134 @@
+[
+  {
+    "id": "bakery",
+    "name": "Sweet Crumb Artisan Bakery",
+    "description": "Artisan sourdough bread, croissants, and pastries in Lagos. Pre-orders for weekends.",
+    "items": "Sourdough loaf 4500, Almond croissant 2500, Pain au chocolat 2800",
+    "contact": "WhatsApp 08012345678, Lekki Phase 1",
+    "destinationUrl": "https://sweetcrumb.com",
+    "expectTemplate": "restaurant"
+  },
+  {
+    "id": "creator",
+    "name": "Ada Writes",
+    "description": "Weekly newsletter and practical guides about remote work, freelance writing, and tech careers.",
+    "contact": "ada@adawrites.sub, @adawrites",
+    "destinationUrl": "https://adawrites.substack.com",
+    "expectTemplate": "creator"
+  },
+  {
+    "id": "salon",
+    "name": "Bloom Hair Studio",
+    "description": "Premium hair care, natural twists, knotless braids, and locs in Abuja. Walk-ins welcome.",
+    "items": "Knotless braids 25000, Loc maintenance 15000, Wash & set 8000",
+    "contact": "+2348098765432, Wuse 2",
+    "destinationUrl": "https://bloomhair.ng",
+    "expectTemplate": "restaurant"
+  },
+  {
+    "id": "messy",
+    "name": "",
+    "description": "u no wat i mean? sneakers and drippy tees for sale, dm me on ig",
+    "items": "Dunks, Jordan 4s, oversized vintage tees",
+    "contact": "@dripdealer_lagos",
+    "destinationUrl": "https://instagram.com/dripdealer_lagos",
+    "expectTemplate": "creator"
+  },
+  {
+    "id": "lawyer",
+    "name": "Okafor & Associates",
+    "description": "Commercial law, intellectual property, and venture advisory firm in Victoria Island.",
+    "items": "CAC Registration, Contract Drafting, IP Trademark Filing",
+    "contact": "info@okaforlaw.com, +2341234567",
+    "destinationUrl": "https://okaforlaw.com",
+    "expectTemplate": "creator"
+  },
+  {
+    "id": "coffee",
+    "name": "Artisan Roast Café",
+    "description": "Specialty pour-overs, single origin espresso, and cold brew bar.",
+    "items": "V60 Ethiopian Roast 3500, Flat White 3000, Cold Brew 3200",
+    "contact": "hello@artisanroast.ng",
+    "destinationUrl": "https://artisanroast.ng",
+    "expectTemplate": "restaurant"
+  },
+  {
+    "id": "gym",
+    "name": "Ironclad Fitness Club",
+    "description": "High-intensity functional training, powerlifting racks, and expert coaching.",
+    "items": "Monthly pass 35000, Personal training session 12000",
+    "contact": "gym@ironclad.fit, Ikeja GRA",
+    "destinationUrl": "https://ironclad.fit",
+    "expectTemplate": "creator"
+  },
+  {
+    "id": "photographer",
+    "name": "Kola Visuals",
+    "description": "Editorial portraits, intimate wedding photography, and brand lookbooks.",
+    "items": "Mini portrait session 85000, Full wedding coverage 450000",
+    "contact": "@kolavisuals, bookings@kolavisuals.com",
+    "destinationUrl": "https://kolavisuals.com",
+    "expectTemplate": "creator"
+  },
+  {
+    "id": "pizzeria",
+    "name": "Nonna Rosa Woodfired Pizza",
+    "description": "Authentic Neapolitan sourdough pizzas baked in 900-degree wood-burning ovens.",
+    "items": "Margherita 7500, Truffle Funghi 9800, Diavola 8900",
+    "contact": "Orders on WhatsApp 08123456789",
+    "destinationUrl": "https://nonnarosa.ng",
+    "expectTemplate": "restaurant"
+  },
+  {
+    "id": "dentist",
+    "name": "Smilecraft Dental Clinic",
+    "description": "Gentle family dentistry, teeth whitening, clear aligners, and dental hygiene.",
+    "items": "Teeth cleaning 30000, In-office whitening 85000",
+    "contact": "0800-SMILE, Ikoyi",
+    "destinationUrl": "https://smilecraft.ng",
+    "expectTemplate": "creator"
+  },
+  {
+    "id": "dj",
+    "name": "DJ Spinz Lagos",
+    "description": "Afrobeats, amapiano, and house music sets for festivals, corporate galas, and private weddings.",
+    "contact": "bookings@djspinz.com, @djspinz_lagos",
+    "destinationUrl": "https://djspinz.com",
+    "expectTemplate": "creator"
+  },
+  {
+    "id": "spa",
+    "name": "Serenity Day Spa & Wellness",
+    "description": "Holistic body massages, deep tissue treatments, and rejuvenating organic facials.",
+    "items": "Swedish massage 60min 22000, Deep tissue 28000, Hydra-facial 35000",
+    "contact": "+2347012345678, Lekki Phase 1",
+    "destinationUrl": "https://serenityspa.ng",
+    "expectTemplate": "creator"
+  },
+  {
+    "id": "tacos",
+    "name": "El Fuego Taqueria",
+    "description": "Handmade corn tortillas, birria tacos with consommé, and fresh hibiscus agua fresca.",
+    "items": "Birria Taco Trio 6500, Carne Asada 6000, Churros 2500",
+    "contact": "Orders on WhatsApp: 08033344455",
+    "destinationUrl": "https://elfuego.ng",
+    "expectTemplate": "restaurant"
+  },
+  {
+    "id": "church_event",
+    "name": "Grace Assembly Annual Conference",
+    "description": "Three days of worship, keynote sessions, and spiritual empowerment in November.",
+    "contact": "conference@graceassembly.org",
+    "destinationUrl": "https://graceassembly.org/conference",
+    "expectTemplate": "creator"
+  },
+  {
+    "id": "tech_startup",
+    "name": "Payflow Developer API",
+    "description": "Universal developer payments API for fast bank transfers and recurring billing across West Africa.",
+    "items": "Starter tier 0/mo, Growth 49/mo, Enterprise custom",
+    "contact": "team@payflow.dev",
+    "destinationUrl": "https://payflow.dev",
+    "expectTemplate": "creator"
+  }
+]

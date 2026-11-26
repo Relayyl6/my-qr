@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { getLandingPageByShortCode } from "@/lib/ai/features/landing-page-builder";
-import { RenderLandingPage } from "@/lib/landing/render";
+import { RenderPage } from "@/lib/page/render";
+import { migrateLegacySpec } from "@/lib/page/migrate";
+import { PALETTES, PaletteKey } from "@/lib/page/config";
 import { Metadata } from "next";
 import { APP_URL } from "@/lib/config";
 import { getOptimizedStorageUrl } from "@/lib/media";
@@ -15,13 +17,14 @@ export async function generateMetadata({
   const result = await getLandingPageByShortCode(params.shortCode);
   if (!result) return { title: "Page Not Found — DynamicQR" };
 
-  const spec = result.spec as any;
-  const heroBlock = Array.isArray(spec.blocks) ? spec.blocks.find((b: any) => b.type === 'hero') : null;
-  const pageTitle = `${spec.businessName || heroBlock?.title || 'Exclusive Landing Page'} | DynamicQR`;
-  const pageDesc = spec.bio || heroBlock?.subtitle || 'Official mobile destination powered by DynamicQR.';
+  const page = migrateLegacySpec(result.spec, result.link.destinationUrl);
+  const pageTitle = `${page.brand.name} | DynamicQR`;
+  const pageDesc =
+    page.brand.tagline || page.brand.headline || "Official mobile destination powered by DynamicQR.";
   const canonicalUrl = `${APP_URL}/page/${params.shortCode}`;
-  const rawImage = heroBlock?.avatarUrl || spec.heroImageUrl || spec.logoUrl;
+  const rawImage = page.brand.logoUrl;
   const ogImageUrl = rawImage ? getOptimizedStorageUrl(rawImage) : `${APP_URL}/icon.svg`;
+  const palette = PALETTES[page.brand.palette as PaletteKey] || PALETTES.ink;
 
   return {
     metadataBase: new URL(APP_URL),
@@ -41,7 +44,7 @@ export async function generateMetadata({
           url: ogImageUrl,
           width: 1200,
           height: 630,
-          alt: `${spec.businessName} Mobile Page`,
+          alt: `${page.brand.name} Mobile Page`,
         },
       ],
     },
@@ -52,7 +55,7 @@ export async function generateMetadata({
       images: [ogImageUrl],
     },
     other: {
-      "theme-color": spec.theme?.accentColor || spec.themeColor || "#10B981",
+      "theme-color": palette.accent,
     },
   };
 }
@@ -68,11 +71,12 @@ export default async function LandingViewPage({
     notFound();
   }
 
+  const page = migrateLegacySpec(result.spec, result.link.destinationUrl);
+
   return (
-    <RenderLandingPage
-      spec={result.spec}
-      destinationUrl={result.link.destinationUrl}
-      shortCode={params.shortCode}
+    <RenderPage
+      page={page}
+      pageId={result.landingPage.id}
     />
   );
 }

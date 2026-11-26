@@ -6,7 +6,48 @@ import { getCurrentUser } from "@/lib/auth";
 import { runAI } from "@/lib/ai/run";
 import { assertFeatureAccess } from "@/lib/ai/flags";
 import { LandingPageSpec } from "@/lib/landing/types";
+import { generateCopy, GenerateInput } from "@/lib/page/generate-copy";
+import { assemble } from "@/lib/page/assemble";
+import { Page, PageSchema } from "@/lib/page/schema";
+import { migrateLegacySpec, isPageSchema } from "@/lib/page/migrate";
+import { getAIProvider } from "@/lib/ai/provider";
 import "@/lib/ai/prompts/landing-page-builder.v1";
+
+/**
+ * Modern AI Copy Generator for the flat Page architecture
+ */
+export async function generatePageCopyAction(input: GenerateInput) {
+  const user = await getCurrentUser();
+  if (!user) {
+    throw new Error("Authentication required to generate page copy.");
+  }
+
+  const access = await assertFeatureAccess(user.id, "landing-page-builder");
+  if (!access.allowed) {
+    throw new Error(access.reason || "Mobile Landing Pages require a Plus or Ultra subscription.");
+  }
+
+  const provider = getAIProvider();
+  const callModel = async (system: string, userPrompt: string) => {
+    const res = await provider.generateText({
+      system,
+      prompt: userPrompt,
+      temperature: 0.2,
+      feature: "landing-page-builder",
+    });
+    return res.text;
+  };
+
+  const result = await generateCopy(input, callModel);
+  if (!result.ok) {
+    throw new Error(result.errors?.join(", ") || "Failed to generate copy. Please try again or fill in the form directly.");
+  }
+
+  return {
+    copy: result.copy,
+    source: result.source,
+  };
+}
 
 export async function buildLandingPageSpecAction(
   promptText: string,
@@ -45,7 +86,7 @@ export async function buildLandingPageSpecAction(
 
 export async function saveLandingPageAction(
   linkId: string,
-  spec: LandingPageSpec,
+  spec: Page | LandingPageSpec | any,
   published = true
 ) {
   const user = await getCurrentUser();
