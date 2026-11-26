@@ -442,6 +442,14 @@ model DomainOrder {
   emailAliases      Json?    // Multi-alias list [{ alias, forwardTo, enabled }]
   expiresAt         DateTime? // Domain expiration date
 
+  // Multi-Year, Catch-All, Spam Shield & Instant Bio
+  registrationYears Int      @default(1)
+  catchAllEnabled   Boolean  @default(false)
+  catchAllEmail     String?
+  spamShieldActive  Boolean  @default(false)
+  bioPageEnabled    Boolean  @default(false)
+  bioConfig         Json?    // { title, bio, theme, whatsapp, phone, avatarUrl, socialLinks: [] }
+
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -450,4 +458,17 @@ model DomainOrder {
   @@index([userEmail])
   @@index([status])
 }
+
+model DomainContact {
+  id         String   @id @default(cuid())
+  domainName String
+  name       String
+  email      String
+  phone      String?
+  message    String?
+  createdAt  DateTime @default(now())
+
+  @@index([domainName, createdAt])
+}
+
 

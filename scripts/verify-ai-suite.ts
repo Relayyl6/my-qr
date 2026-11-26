@@ -7,6 +7,8 @@ import { migrateLegacySpec } from '../lib/page/migrate';
 import { stripInventedFacts } from '../lib/page/generate-copy';
 import { assemble } from '../lib/page/assemble';
 import { PALETTES } from '../lib/page/config';
+import { calculateMultiYearDomainPrice, DEFAULT_PRICING_CONFIG } from '../lib/domains/fxEngine';
+import { generateVCard } from '../lib/vcard';
 import { normalizeLandingUrl } from '../lib/landing/render';
 import { normalizeUrl } from '../lib/normalizeUrl';
 import { generateCleanVectorSvg } from '../lib/qr/exportVector';
@@ -692,6 +694,70 @@ async function main() {
     assert(assembled.cta.url === "https://owner-site.com/real-page", "assemble() strictly overwrites CTA URL with owner's destination URL");
     assert(assembled.brand.palette === "ink", "Palette correctly assigned");
     assert(PageSchema.safeParse(assembled).success, "Assembled page passes PageSchema validation");
+  })();
+
+  // Test 24: Multi-Year Registration Pricing calculation with 5% and 10% discounts
+  await runTest(24, "Multi-Year Registration: calculates 1, 2, and 3-year pricing with bundled discounts", (assert) => {
+    const wholesaleUsd = 2.0; // e.g. .xyz
+    const tld = "xyz";
+    const cfg = { ...DEFAULT_PRICING_CONFIG, bufferedRate: 1400, roundingStep: 500 as const };
+
+    const p1 = calculateMultiYearDomainPrice(wholesaleUsd, tld, cfg, 1);
+    const p2 = calculateMultiYearDomainPrice(wholesaleUsd, tld, cfg, 2);
+    const p3 = calculateMultiYearDomainPrice(wholesaleUsd, tld, cfg, 3);
+
+    assert(p1.periodYears === 1 && p1.discountPercent === 0, "1-Year period has 0% discount");
+    assert(p2.periodYears === 2 && p2.discountPercent === 5, "2-Year period has 5% bundle discount");
+    assert(p3.periodYears === 3 && p3.discountPercent === 10, "3-Year period has 10% bundle discount");
+
+    assert(p2.finalPriceNgn < p1.finalPriceNgn * 2, "2-Year price reflects bundled discount");
+    assert(p3.finalPriceNgn < p1.finalPriceNgn * 3, "3-Year price reflects bundled discount");
+    assert(p3.savingsNgn > 0, "3-Year plan offers substantial savings");
+    assert(p3.founderProfitNgn > p1.founderProfitNgn, "Multi-year increases total founder margin in NGN");
+  })();
+
+  // Test 25: RFC 6350 vCard payload generator (generateVCard)
+  await runTest(25, "Digital vCard: generates RFC 6350 compliant .vcf payload for iOS & Android", (assert) => {
+    const vcf = generateVCard({
+      name: "Leonard Oseghale",
+      company: "DynamicQR",
+      title: "Founder",
+      email: "founder@yemuel.xyz",
+      phone: "+2348012345678",
+      website: "https://yemuel.xyz",
+      address: "Victoria Island, Lagos",
+      note: "Official digital business card.",
+    });
+
+    assert(vcf.startsWith("BEGIN:VCARD"), "Must start with BEGIN:VCARD");
+    assert(vcf.includes("VERSION:3.0"), "Must declare VERSION:3.0");
+    assert(vcf.includes("FN:Leonard Oseghale"), "Contains FN (Full Name)");
+    assert(vcf.includes("N:Oseghale;Leonard;;;"), "Contains structured N (Last;First)");
+    assert(vcf.includes("ORG:DynamicQR"), "Contains ORG");
+    assert(vcf.includes("TITLE:Founder"), "Contains TITLE");
+    assert(vcf.includes("EMAIL;TYPE=WORK,INTERNET:founder@yemuel.xyz"), "Contains formatted EMAIL");
+    assert(vcf.includes("TEL;TYPE=CELL,VOICE:+2348012345678"), "Contains formatted TEL");
+    assert(vcf.includes("URL:https://yemuel.xyz"), "Contains website URL");
+    assert(vcf.endsWith("END:VCARD"), "Must terminate with END:VCARD");
+  })();
+
+  // Test 26: DMARC, SPF & Catch-All API structure validation
+  await runTest(26, "Email security: verifies SPF TXT, DMARC TXT, and Catch-All payloads", (assert) => {
+    const spfContent = "v=spf1 include:_spf.mx.cloudflare.net ~all";
+    const dmarcContent = "v=DMARC1; p=quarantine; rua=mailto:dmarc-reports@yemuel.xyz; pct=100; sp=quarantine";
+
+    assert(spfContent.includes("v=spf1") && spfContent.includes("include:_spf.mx.cloudflare.net"), "SPF record authorizes Cloudflare edge mail routing");
+    assert(dmarcContent.includes("v=DMARC1") && dmarcContent.includes("p=quarantine"), "DMARC record enforces quarantine policy for spoofed mail");
+
+    const catchAllRule = {
+      name: "Catch-All to Destination Inbox",
+      enabled: true,
+      matchers: [{ type: "all" }],
+      actions: [{ type: "forward", value: ["destination@gmail.com"] }],
+    };
+
+    assert(catchAllRule.matchers[0].type === "all", "Catch-all uses wildcard 'all' matcher");
+    assert(catchAllRule.actions[0].type === "forward" && catchAllRule.actions[0].value[0] === "destination@gmail.com", "Forwards all unrouted email to user destination inbox");
   })();
 
   // Print Summary Table

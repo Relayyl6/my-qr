@@ -295,3 +295,51 @@ export function calculateDomainPrice(
     isOverride: false,
   };
 }
+
+export interface MultiYearDomainPrice {
+  periodYears: 1 | 2 | 3;
+  discountPercent: number; // 0 for 1yr, 5 for 2yr, 10 for 3yr
+  wholesaleUsd: number;
+  wholesaleNgn: number;
+  yearlyPriceNgn: number;
+  finalPriceNgn: number;
+  savingsNgn: number;
+  founderProfitNgn: number;
+}
+
+/**
+ * Calculates multi-year bundled registration pricing with incentives:
+ * - 1 Year: Standard base price
+ * - 2 Years: 5% Bundle Discount
+ * - 3 Years: 10% Bundle Discount
+ */
+export function calculateMultiYearDomainPrice(
+  wholesaleUsd: number,
+  tld: string,
+  config: DomainPricingConfig,
+  periodYears: 1 | 2 | 3 = 1
+): MultiYearDomainPrice {
+  const base1Year = calculateDomainPrice(wholesaleUsd, tld, config);
+  const discountPercent = periodYears === 3 ? 10 : periodYears === 2 ? 5 : 0;
+  const effectiveRate = config.mode === 'manual_override' ? config.manualOverrideRate : config.bufferedRate;
+
+  const totalWholesaleUsd = wholesaleUsd * periodYears;
+  const totalWholesaleNgn = Math.ceil(totalWholesaleUsd * effectiveRate);
+
+  const rawSubtotal = base1Year.finalPriceNgn * periodYears;
+  const discounted = rawSubtotal * (1 - discountPercent / 100);
+  const finalPriceNgn = applyRoundingStep(discounted, config.roundingStep || 500);
+  const savingsNgn = Math.max(0, rawSubtotal - finalPriceNgn);
+  const founderProfitNgn = Math.max(0, finalPriceNgn - totalWholesaleNgn);
+
+  return {
+    periodYears,
+    discountPercent,
+    wholesaleUsd: totalWholesaleUsd,
+    wholesaleNgn: totalWholesaleNgn,
+    yearlyPriceNgn: Math.round(finalPriceNgn / periodYears),
+    finalPriceNgn,
+    savingsNgn,
+    founderProfitNgn,
+  };
+}

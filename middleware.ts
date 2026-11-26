@@ -35,7 +35,7 @@ export async function middleware(req: NextRequest) {
 
     // If visiting root of the custom domain
     if (pathname === '/') {
-      return NextResponse.rewrite(new URL('/id', req.url));
+      return NextResponse.rewrite(new URL(`/bio/${encodeURIComponent(hostname)}`, req.url));
     }
 
     // If pathname is a direct short code (e.g., qr.acme.com/promo-2024)

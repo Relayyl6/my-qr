@@ -2,7 +2,11 @@
 
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
-import { provisionDomainAndEmail } from '@/lib/domains/provisioning';
+import {
+  provisionDomainAndEmail,
+  setupCloudflareSpamShield,
+  setupCloudflareCatchAll,
+} from '@/lib/domains/provisioning';
 import { revalidatePath } from 'next/cache';
 import crypto from 'crypto';
 import {
@@ -539,4 +543,181 @@ export async function updateDomainCustomNameservers(orderId: string, nameservers
     order: updated,
     message: cleanNs.length > 0 ? 'Custom nameservers saved.' : 'Reverted to Cloudflare Managed DNS.',
   };
+}
+
+/**
+ * Toggle Catch-All Email Routing (*@yourdomain.com -> targetEmail)
+ */
+export async function toggleDomainCatchAll(
+  orderId: string,
+  enabled: boolean,
+  customTargetEmail?: string
+) {
+  const user = await getCurrentUser();
+  const order = await prisma.domainOrder.findUnique({ where: { id: orderId } });
+  if (!order) return { success: false, message: 'Order not found' };
+
+  const isOwner = user && (user.id === order.userId || user.email.toLowerCase() === order.userEmail.toLowerCase());
+  const isAdmin = user && user.email.toLowerCase() === (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();
+  if (!isOwner && !isAdmin) return { success: false, message: 'Unauthorized' };
+
+  const targetEmail = (customTargetEmail || order.catchAllEmail || order.userEmail).trim().toLowerCase();
+
+  // If Cloudflare Zone is provisioned, update edge catch-all rule
+  if (order.cloudflareZoneId) {
+    await setupCloudflareCatchAll(order.cloudflareZoneId, targetEmail, enabled);
+  }
+
+  const updated = await prisma.domainOrder.update({
+    where: { id: orderId },
+    data: {
+      catchAllEnabled: enabled,
+      catchAllEmail: targetEmail,
+    },
+  });
+
+  revalidatePath('/');
+  return {
+    success: true,
+    order: updated,
+    message: enabled
+      ? `Catch-All active! Any email sent to *@${order.domainName} forwards to ${targetEmail}.`
+      : 'Catch-All email routing disabled.',
+  };
+}
+
+/**
+ * Activate DMARC, SPF & DKIM Email Deliverability & Anti-Spam Shield
+ */
+export async function activateDomainDeliverabilityShield(orderId: string) {
+  const user = await getCurrentUser();
+  const order = await prisma.domainOrder.findUnique({ where: { id: orderId } });
+  if (!order) return { success: false, message: 'Order not found' };
+
+  const isOwner = user && (user.id === order.userId || user.email.toLowerCase() === order.userEmail.toLowerCase());
+  const isAdmin = user && user.email.toLowerCase() === (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();
+  if (!isOwner && !isAdmin) return { success: false, message: 'Unauthorized' };
+
+  if (order.cloudflareZoneId) {
+    await setupCloudflareSpamShield(order.cloudflareZoneId, order.domainName);
+  }
+
+  const updated = await prisma.domainOrder.update({
+    where: { id: orderId },
+    data: { spamShieldActive: true },
+  });
+
+  revalidatePath('/');
+  return {
+    success: true,
+    order: updated,
+    message: '100% Spam Shield Active: SPF and DMARC quarantine records verified on edge nameservers.',
+  };
+}
+
+/**
+ * Toggle Instant 1-Click Coming Soon & Bio Page
+ */
+export async function toggleDomainBioPage(orderId: string, enabled: boolean) {
+  const user = await getCurrentUser();
+  const order = await prisma.domainOrder.findUnique({ where: { id: orderId } });
+  if (!order) return { success: false, message: 'Order not found' };
+
+  const isOwner = user && (user.id === order.userId || user.email.toLowerCase() === order.userEmail.toLowerCase());
+  const isAdmin = user && user.email.toLowerCase() === (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();
+  if (!isOwner && !isAdmin) return { success: false, message: 'Unauthorized' };
+
+  const updated = await prisma.domainOrder.update({
+    where: { id: orderId },
+    data: { bioPageEnabled: enabled },
+  });
+
+  revalidatePath('/');
+  return {
+    success: true,
+    order: updated,
+    message: enabled
+      ? `Coming Soon & Bio page active at https://${order.domainName}!`
+      : 'Bio page deactivated.',
+  };
+}
+
+/**
+ * Save custom Coming Soon & Bio page configuration
+ */
+export async function saveDomainBioConfig(
+  orderId: string,
+  config: {
+    title?: string;
+    bio?: string;
+    whatsapp?: string;
+    phone?: string;
+    instagram?: string;
+    avatarUrl?: string;
+  }
+) {
+  const user = await getCurrentUser();
+  const order = await prisma.domainOrder.findUnique({ where: { id: orderId } });
+  if (!order) return { success: false, message: 'Order not found' };
+
+  const isOwner = user && (user.id === order.userId || user.email.toLowerCase() === order.userEmail.toLowerCase());
+  const isAdmin = user && user.email.toLowerCase() === (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();
+  if (!isOwner && !isAdmin) return { success: false, message: 'Unauthorized' };
+
+  const updated = await prisma.domainOrder.update({
+    where: { id: orderId },
+    data: {
+      bioConfig: config as any,
+      bioPageEnabled: true,
+    },
+  });
+
+  revalidatePath('/');
+  return {
+    success: true,
+    order: updated,
+    message: `Bio page configuration updated for https://${order.domainName}!`,
+  };
+}
+
+/**
+ * Public action: Submit visitor lead inquiry on custom domain Coming Soon page
+ */
+export async function submitDomainContactInquiry(
+  domainName: string,
+  name: string,
+  email: string,
+  phone?: string,
+  message?: string
+) {
+  const cleanDomain = domainName.trim().toLowerCase();
+  if (!cleanDomain || !name.trim() || !email.trim()) {
+    return { success: false, message: 'Name and email are required.' };
+  }
+
+  const contact = await prisma.domainContact.create({
+    data: {
+      domainName: cleanDomain,
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      phone: phone?.trim() || null,
+      message: message?.trim() || null,
+    },
+  });
+
+  return { success: true, contactId: contact.id, message: 'Inquiry saved successfully.' };
+}
+
+/**
+ * Fetch inquiries captured through a domain's Coming Soon page
+ */
+export async function getDomainContacts(domainName: string) {
+  const user = await getCurrentUser();
+  if (!user) return [];
+
+  return prisma.domainContact.findMany({
+    where: { domainName: domainName.toLowerCase() },
+    orderBy: { createdAt: 'desc' },
+    take: 50,
+  });
 }

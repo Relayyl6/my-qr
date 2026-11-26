@@ -82,6 +82,9 @@ export default function NameLaunchService({ user }: Props) {
   const [emailAlias, setEmailAlias] = useState('hello');
   const [forwardingEmail, setForwardingEmail] = useState(user?.email || '');
   const [extraEmailPriceNgn, setExtraEmailPriceNgn] = useState(1500);
+  const [registrationYears, setRegistrationYears] = useState<1 | 2 | 3>(1);
+  const [enableCatchAll, setEnableCatchAll] = useState(true);
+  const [enableBioPage, setEnableBioPage] = useState(true);
   const [additionalAliases, setAdditionalAliases] = useState<
     Array<{ id: string; alias: string; forwardTo: string }>
   >([]);
@@ -240,8 +243,11 @@ export default function NameLaunchService({ user }: Props) {
       return;
     }
 
-    const additionalCostNgn = cleanedAdditional.length * extraEmailPriceNgn;
-    const finalExpectedTotal = selectedDomain.pricing.totalNgn + additionalCostNgn;
+    const discountPercent = registrationYears === 3 ? 10 : registrationYears === 2 ? 5 : 0;
+    const baseYearsCost = selectedDomain.pricing.totalNgn * registrationYears;
+    const discountedBase = Math.round(baseYearsCost * (1 - discountPercent / 100));
+    const additionalCostNgn = cleanedAdditional.length * extraEmailPriceNgn * registrationYears;
+    const finalExpectedTotal = discountedBase + additionalCostNgn;
 
     setCheckingOut(true);
     setCheckoutError(null);
@@ -258,6 +264,9 @@ export default function NameLaunchService({ user }: Props) {
           desiredAlias: cleanAlias,
           userEmail: cleanTargetEmail,
           additionalAliases: cleanedAdditional,
+          periodYears: registrationYears,
+          enableCatchAll,
+          enableBioPage,
           expectedPriceNgn: finalExpectedTotal,
         }),
       });
@@ -854,27 +863,127 @@ export default function NameLaunchService({ user }: Props) {
                   )}
                 </div>
 
-                {/* 3. Order Summary & Price Breakdown */}
+                {/* 3. Multi-Year Registration Selector (1, 2, or 3 Years) */}
+                <div className="pt-2 border-t border-[#11140F]/8 dark:border-white/8 space-y-2">
+                  <div className="flex justify-between items-center">
+                    <label className="text-xs font-bold text-[#11140F] dark:text-white uppercase tracking-wider">
+                      Registration Term
+                    </label>
+                    {registrationYears > 1 && (
+                      <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-[#34D399] font-bold">
+                        Save {registrationYears === 2 ? '5%' : '10%'} with Multi-Year
+                      </span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { years: 1, label: '1 Year', badge: 'Standard' },
+                      { years: 2, label: '2 Years', badge: 'Save 5%' },
+                      { years: 3, label: '3 Years', badge: 'Save 10%' },
+                    ].map((opt) => (
+                      <button
+                        key={opt.years}
+                        type="button"
+                        onClick={() => setRegistrationYears(opt.years as 1 | 2 | 3)}
+                        className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+                          registrationYears === opt.years
+                            ? 'border-[#34D399] bg-[#34D399]/10 text-[#09110D] dark:text-white font-bold ring-1 ring-[#34D399]/40'
+                            : 'border-[#11140F]/10 dark:border-white/10 opacity-70 hover:opacity-100'
+                        }`}
+                      >
+                        <div className="text-[12.5px] font-semibold">{opt.label}</div>
+                        <div className="text-[10px] opacity-75 font-mono">{opt.badge}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 4. Frontier Built-In Features */}
+                <div className="pt-2 border-t border-[#11140F]/8 dark:border-white/8 space-y-2.5 text-xs">
+                  <label className="text-xs font-bold text-[#11140F] dark:text-white uppercase tracking-wider block">
+                    Included Frontier Features
+                  </label>
+
+                  {/* Catch-All Checkbox */}
+                  <label className="p-3 rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5] dark:bg-white/[0.02] flex items-start gap-2.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={enableCatchAll}
+                      onChange={(e) => setEnableCatchAll(e.target.checked)}
+                      className="w-4 h-4 accent-emerald-600 mt-0.5"
+                    />
+                    <div>
+                      <div className="font-semibold text-[#11140F] dark:text-white flex items-center gap-1.5">
+                        <span>Catch-All Email Routing (*@{selectedDomain.domain})</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-700 dark:text-[#34D399] font-bold">Free</span>
+                      </div>
+                      <p className="text-[11px] text-[#11140F]/60 dark:text-white/60 mt-0.5">
+                        Never miss a lead. Delivers mistyped or random emails directly to your primary inbox.
+                      </p>
+                    </div>
+                  </label>
+
+                  {/* Instant Coming Soon & Bio Page Checkbox */}
+                  <label className="p-3 rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5] dark:bg-white/[0.02] flex items-start gap-2.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={enableBioPage}
+                      onChange={(e) => setEnableBioPage(e.target.checked)}
+                      className="w-4 h-4 accent-emerald-600 mt-0.5"
+                    />
+                    <div>
+                      <div className="font-semibold text-[#11140F] dark:text-white flex items-center gap-1.5">
+                        <span>Instant 1-Click &quot;Coming Soon&quot; Bio &amp; vCard Page</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-700 dark:text-[#34D399] font-bold">Free</span>
+                      </div>
+                      <p className="text-[11px] text-[#11140F]/60 dark:text-white/60 mt-0.5">
+                        Live within 60 seconds with digital contact download, WhatsApp chat, and visitor inquiry capture.
+                      </p>
+                    </div>
+                  </label>
+                </div>
+
+                {/* 5. Order Summary & Price Breakdown */}
                 {(() => {
                   const validCount = additionalAliases.filter((a) => a.alias.trim()).length;
-                  const extraCost = validCount * extraEmailPriceNgn;
-                  const totalDue = selectedDomain.pricing.totalNgn + extraCost;
+                  const discountPercent = registrationYears === 3 ? 10 : registrationYears === 2 ? 5 : 0;
+                  const baseYearsCost = selectedDomain.pricing.totalNgn * registrationYears;
+                  const discountedBase = Math.round(baseYearsCost * (1 - discountPercent / 100));
+                  const extraCost = validCount * extraEmailPriceNgn * registrationYears;
+                  const savingsNgn = baseYearsCost - discountedBase;
+                  const totalDue = discountedBase + extraCost;
 
                   return (
                     <>
                       <div className="rounded-xl p-4 bg-[#F7F8F5] dark:bg-white/[0.03] border border-[#11140F]/8 dark:border-white/10 space-y-2 text-xs">
                         <div className="flex justify-between text-[#11140F]/70 dark:text-white/70">
-                          <span>1-Year Domain Registration ({selectedDomain.domain})</span>
-                          <span className="font-mono text-emerald-700 dark:text-emerald-400">Included</span>
+                          <span>
+                            {registrationYears}-Year Registration ({selectedDomain.domain})
+                          </span>
+                          <span className="font-mono text-emerald-700 dark:text-emerald-400">
+                            {formatNaira(discountedBase)}
+                          </span>
                         </div>
+                        {savingsNgn > 0 && (
+                          <div className="flex justify-between text-emerald-700 dark:text-[#34D399] font-medium text-[11px]">
+                            <span>Multi-Year Bundle Discount ({discountPercent}% Off)</span>
+                            <span className="font-mono font-bold">-{formatNaira(savingsNgn)}</span>
+                          </div>
+                        )}
                         <div className="flex justify-between text-[#11140F]/70 dark:text-white/70">
                           <span>Primary Email Routing ({emailAlias || 'hello'}@{selectedDomain.domain})</span>
                           <span className="font-mono text-emerald-700 dark:text-emerald-400">Included (Free)</span>
                         </div>
+                        {enableCatchAll && (
+                          <div className="flex justify-between text-[#11140F]/70 dark:text-white/70">
+                            <span>Catch-All Wildcard Routing (*@{selectedDomain.domain})</span>
+                            <span className="font-mono text-emerald-700 dark:text-emerald-400">Included (Free)</span>
+                          </div>
+                        )}
                         {validCount > 0 && (
                           <div className="flex justify-between text-[#11140F]/85 dark:text-white/85 font-medium">
                             <span>
-                              {validCount} Extra Email {validCount === 1 ? 'Address' : 'Addresses'} (+{formatNaira(extraEmailPriceNgn)}/ea)
+                              {validCount} Extra Email {validCount === 1 ? 'Address' : 'Addresses'} ({registrationYears} yr)
                             </span>
                             <span className="font-mono font-bold text-emerald-700 dark:text-[#34D399]">
                               +{formatNaira(extraCost)}
@@ -882,8 +991,8 @@ export default function NameLaunchService({ user }: Props) {
                           </div>
                         )}
                         <div className="flex justify-between text-[#11140F]/70 dark:text-white/70">
-                          <span>Managed DNS, Edge SSL &amp; WHOIS Privacy</span>
-                          <span className="font-mono text-emerald-700 dark:text-emerald-400">Included</span>
+                          <span>DMARC/SPF Spam Shield, Edge SSL &amp; WHOIS Privacy</span>
+                          <span className="font-mono text-emerald-700 dark:text-emerald-400">100% Free Forever</span>
                         </div>
                         <div className="border-t border-[#11140F]/10 dark:border-white/10 pt-2.5 flex justify-between font-bold text-sm">
                           <span>Total Due Today</span>

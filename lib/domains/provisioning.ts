@@ -11,12 +11,113 @@ function getCfHeaders() {
   };
 }
 
+export async function setupCloudflareSpamShield(zoneId: string, domainName: string): Promise<{ success: boolean; message: string }> {
+  const cfHeaders = getCfHeaders();
+  if (!cfHeaders) {
+    return { success: false, message: 'Cloudflare credentials not configured' };
+  }
+
+  try {
+    // 1. Invalidate / fetch existing TXT records to avoid duplicate conflicts
+    const listRes = await fetch(`${CF_BASE}/zones/${zoneId}/dns_records?type=TXT`, {
+      headers: cfHeaders,
+    });
+    const listData = await listRes.json();
+    const existingTxts = Array.isArray(listData.result) ? listData.result : [];
+
+    // SPF Record
+    const hasSpf = existingTxts.some((r: any) => (r.name === domainName || r.name === `@`) && r.content?.includes('v=spf1'));
+    if (!hasSpf) {
+      await fetch(`${CF_BASE}/zones/${zoneId}/dns_records`, {
+        method: 'POST',
+        headers: cfHeaders,
+        body: JSON.stringify({
+          type: 'TXT',
+          name: '@',
+          content: 'v=spf1 include:_spf.mx.cloudflare.net ~all',
+          ttl: 3600,
+        }),
+      });
+    }
+
+    // DMARC Record
+    const hasDmarc = existingTxts.some((r: any) => r.name?.startsWith('_dmarc'));
+    if (!hasDmarc) {
+      await fetch(`${CF_BASE}/zones/${zoneId}/dns_records`, {
+        method: 'POST',
+        headers: cfHeaders,
+        body: JSON.stringify({
+          type: 'TXT',
+          name: '_dmarc',
+          content: `v=DMARC1; p=quarantine; rua=mailto:dmarc-reports@${domainName}; pct=100; sp=quarantine`,
+          ttl: 3600,
+        }),
+      });
+    }
+
+    return { success: true, message: 'DMARC & SPF Spam Shield active with 100% deliverability protection.' };
+  } catch (err: any) {
+    console.warn('[Cloudflare Spam Shield] Setup warning:', err);
+    return { success: false, message: err.message || 'Spam shield configuration warning' };
+  }
+}
+
+export async function setupCloudflareCatchAll(
+  zoneId: string,
+  forwardToEmail: string,
+  enabled: boolean = true
+): Promise<{ success: boolean; message: string }> {
+  const cfHeaders = getCfHeaders();
+  if (!cfHeaders) {
+    return { success: false, message: 'Cloudflare credentials not configured' };
+  }
+
+  try {
+    const res = await fetch(`${CF_BASE}/zones/${zoneId}/email/routing/rules/catch_all`, {
+      method: 'PUT',
+      headers: cfHeaders,
+      body: JSON.stringify({
+        name: 'Catch-All to Destination Inbox',
+        enabled,
+        matchers: [
+          {
+            type: 'all',
+          },
+        ],
+        actions: [
+          {
+            type: 'forward',
+            value: [forwardToEmail],
+          },
+        ],
+      }),
+    });
+
+    const data = await res.json();
+    if (!data.success) {
+      throw new Error(data.errors?.[0]?.message || 'Failed to update catch-all rule');
+    }
+
+    return {
+      success: true,
+      message: enabled
+        ? `Catch-all routing active! Any email sent to *@${zoneId} forwards to ${forwardToEmail}.`
+        : 'Catch-all email routing disabled.',
+    };
+  } catch (err: any) {
+    console.warn('[Cloudflare Catch-All] Setup warning:', err);
+    return { success: false, message: err.message || 'Catch-all configuration failed' };
+  }
+}
+
 export async function provisionDomainAndEmail(order: {
   id: string;
   domainName: string;
   desiredAlias: string;
   userEmail: string;
   emailAliases?: any;
+  registrationYears?: number;
+  catchAllEnabled?: boolean;
 }): Promise<{ zoneId: string; nameservers: string[] }> {
   const cfHeaders = getCfHeaders();
 
@@ -64,7 +165,7 @@ export async function provisionDomainAndEmail(order: {
         },
         body: JSON.stringify({
           domain: order.domainName,
-          period: 1,
+          period: order.registrationYears || 1,
           nameservers,
           contacts: {
             registrant: {
@@ -115,7 +216,7 @@ export async function provisionDomainAndEmail(order: {
         UserName: dnaUsername,
         Password: dnaPassword,
         DomainName: order.domainName,
-        Period: 1,
+        Period: order.registrationYears || 1,
         NameServerList: nameservers,
         RegistrantContact: {
           FirstName: 'DynamicQR',
@@ -186,6 +287,22 @@ export async function provisionDomainAndEmail(order: {
       });
     } catch (err) {
       console.warn(`Failed to create email routing rule for ${alias}:`, err);
+    }
+  }
+
+  // STEP 5: Automated DMARC/SPF Deliverability & Spam Shield Injection
+  try {
+    await setupCloudflareSpamShield(zoneId, order.domainName);
+  } catch (err) {
+    console.warn('Failed to inject spam shield records:', err);
+  }
+
+  // STEP 6: Optional Catch-All Routing
+  if (order.catchAllEnabled) {
+    try {
+      await setupCloudflareCatchAll(zoneId, order.userEmail, true);
+    } catch (err) {
+      console.warn('Failed to configure catch-all rule:', err);
     }
   }
 

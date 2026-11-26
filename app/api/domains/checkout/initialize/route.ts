@@ -3,7 +3,11 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
 import { calculateNgnPricing, WHOLESALE_USD_PRICING } from '@/lib/domains/namelaunch';
-import { getDomainPricingConfig } from '@/lib/domains/fxEngine';
+import {
+  getDomainPricingConfig,
+  calculateMultiYearDomainPrice,
+  DEFAULT_PRICING_CONFIG,
+} from '@/lib/domains/fxEngine';
 
 export const dynamic = 'force-dynamic';
 
@@ -105,6 +109,17 @@ export async function POST(req: Request) {
           : pricingConfig.bufferedRate
         : 1400;
 
+      const periodYears = [1, 2, 3].includes(Number(body.periodYears))
+        ? (Number(body.periodYears) as 1 | 2 | 3)
+        : 1;
+
+      const multiYear = calculateMultiYearDomainPrice(
+        wholesaleUsd,
+        tld,
+        pricingConfig || DEFAULT_PRICING_CONFIG,
+        periodYears
+      );
+
       // Parse and validate additional email forwarding aliases (+money per email)
       const rawAdditional = Array.isArray(body.additionalAliases) ? body.additionalAliases : [];
       const validAdditional: Array<{ alias: string; forwardTo: string }> = [];
@@ -121,22 +136,22 @@ export async function POST(req: Request) {
       }
 
       const extraEmailPriceNgn = pricingConfig?.extraEmailPriceNgn ?? 1500;
-      const additionalCostNgn = validAdditional.length * extraEmailPriceNgn;
-      const totalExpectedNgn = pricing.totalNgn + additionalCostNgn;
+      const additionalCostNgn = validAdditional.length * extraEmailPriceNgn * periodYears;
+      const totalExpectedNgn = multiYear.finalPriceNgn + additionalCostNgn;
 
-      // Lock charge to exact storefront card price if within tolerance (<= 1000 NGN)
+      // Lock charge to exact storefront card price if within tolerance (<= 1500 NGN)
       // guaranteeing Paystack checkout matches the exact button price seen by the user!
       const clientExpectedNgn = body.expectedPriceNgn ? Number(body.expectedPriceNgn) : null;
       let finalChargeNgn = totalExpectedNgn;
-      let finalMarkupNgn = pricing.platformFeeNgn + additionalCostNgn;
+      let finalMarkupNgn = (multiYear.finalPriceNgn - multiYear.wholesaleNgn) + additionalCostNgn;
 
       if (
         clientExpectedNgn &&
         clientExpectedNgn > 0 &&
-        Math.abs(totalExpectedNgn - clientExpectedNgn) <= 1000
+        Math.abs(totalExpectedNgn - clientExpectedNgn) <= 1500
       ) {
         finalChargeNgn = clientExpectedNgn;
-        finalMarkupNgn = Math.max(0, finalChargeNgn - pricing.wholesaleNgn);
+        finalMarkupNgn = Math.max(0, finalChargeNgn - multiYear.wholesaleNgn);
       }
 
       // Compile complete emailAliases list (primary + additional)
@@ -144,6 +159,9 @@ export async function POST(req: Request) {
         { alias: desiredAlias, forwardTo: userEmail, enabled: true },
         ...validAdditional.map((a) => ({ alias: a.alias, forwardTo: a.forwardTo, enabled: true })),
       ];
+
+      const enableCatchAll = Boolean(body.enableCatchAll);
+      const enableBioPage = body.enableBioPage !== undefined ? Boolean(body.enableBioPage) : true;
 
       // Reuse existing PENDING_PAYMENT order for the same domain & customer if present
       const existingPending = await prisma.domainOrder.findFirst({
@@ -164,8 +182,13 @@ export async function POST(req: Request) {
             userId: user?.id || existingPending.userId,
             userEmail,
             desiredAlias,
+            registrationYears: periodYears,
+            catchAllEnabled: enableCatchAll,
+            catchAllEmail: enableCatchAll ? userEmail : null,
+            bioPageEnabled: enableBioPage,
+            spamShieldActive: true,
             emailAliases: compiledEmailAliases as any,
-            wholesaleUsd: pricing.wholesaleUsd,
+            wholesaleUsd: multiYear.wholesaleUsd,
             exchangeRate: effectiveRate,
             platformMarkupNgn: finalMarkupNgn,
             totalPaidNgn: finalChargeNgn,
@@ -179,8 +202,13 @@ export async function POST(req: Request) {
             userEmail,
             domainName,
             desiredAlias,
+            registrationYears: periodYears,
+            catchAllEnabled: enableCatchAll,
+            catchAllEmail: enableCatchAll ? userEmail : null,
+            bioPageEnabled: enableBioPage,
+            spamShieldActive: true,
             emailAliases: compiledEmailAliases as any,
-            wholesaleUsd: pricing.wholesaleUsd,
+            wholesaleUsd: multiYear.wholesaleUsd,
             exchangeRate: effectiveRate,
             platformMarkupNgn: finalMarkupNgn,
             totalPaidNgn: finalChargeNgn,

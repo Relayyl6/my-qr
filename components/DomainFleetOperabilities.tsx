@@ -19,6 +19,9 @@ import {
   AlertCircle,
   CheckCircle2,
   ArrowRight,
+  Sparkles,
+  Download,
+  Send,
 } from 'lucide-react';
 import {
   updateDomainFleetSettings,
@@ -27,6 +30,10 @@ import {
   removeDomainEmailAlias,
   requestDomainEppCode,
   updateDomainCustomNameservers,
+  toggleDomainCatchAll,
+  activateDomainDeliverabilityShield,
+  toggleDomainBioPage,
+  saveDomainBioConfig,
 } from '@/app/domains-actions';
 
 interface DomainOrderData {
@@ -44,6 +51,12 @@ interface DomainOrderData {
   urlRedirectType?: string | null;
   emailAliases?: any;
   nameservers?: string[];
+  catchAllEnabled?: boolean;
+  catchAllEmail?: string | null;
+  spamShieldActive?: boolean;
+  bioPageEnabled?: boolean;
+  bioConfig?: any;
+  registrationYears?: number;
 }
 
 export default function DomainFleetOperabilities({
@@ -53,7 +66,7 @@ export default function DomainFleetOperabilities({
   order: DomainOrderData;
   onOrderUpdated: (updated: DomainOrderData) => void;
 }) {
-  const [activeTab, setActiveTab] = useState<'security' | 'redirect' | 'emails' | 'nameservers'>('security');
+  const [activeTab, setActiveTab] = useState<'security' | 'redirect' | 'emails' | 'nameservers' | 'bio'>('security');
   const [saving, setSaving] = useState(false);
   const [copiedEpp, setCopiedEpp] = useState(false);
   const [eppCode, setEppCode] = useState<string | null>(order.eppCode || null);
@@ -77,12 +90,114 @@ export default function DomainFleetOperabilities({
     Array.isArray(order.emailAliases) ? order.emailAliases : []
   );
 
+  // Catch-All & Spam Shield State
+  const [catchAllEnabled, setCatchAllEnabled] = useState(order.catchAllEnabled !== false);
+  const [catchAllEmail, setCatchAllEmail] = useState(order.catchAllEmail || order.userEmail || '');
+  const [spamShieldActive, setSpamShieldActive] = useState(order.spamShieldActive !== false);
+  const [updatingCatchAll, setUpdatingCatchAll] = useState(false);
+  const [updatingShield, setUpdatingShield] = useState(false);
+
+  // Instant Bio Page State
+  const initialBio = (order.bioConfig as any) || {};
+  const [bioPageEnabled, setBioPageEnabled] = useState(order.bioPageEnabled !== false);
+  const [bioTitle, setBioTitle] = useState(initialBio.title || order.domainName);
+  const [bioDesc, setBioDesc] = useState(initialBio.bio || '');
+  const [bioWhatsapp, setBioWhatsapp] = useState(initialBio.whatsapp || '');
+  const [bioPhone, setBioPhone] = useState(initialBio.phone || '');
+  const [bioInstagram, setBioInstagram] = useState(initialBio.instagram || '');
+  const [savingBio, setSavingBio] = useState(false);
+
   // Nameservers State
   const [nsMode, setNsMode] = useState<'cloudflare' | 'custom'>(
     order.customNameservers && order.customNameservers.length > 0 ? 'custom' : 'cloudflare'
   );
   const [customNs1, setCustomNs1] = useState(order.customNameservers?.[0] || '');
   const [customNs2, setCustomNs2] = useState(order.customNameservers?.[1] || '');
+
+  // Catch-All Handler
+  const handleToggleCatchAll = async (enabled: boolean) => {
+    setUpdatingCatchAll(true);
+    setAlert(null);
+    try {
+      const res = await toggleDomainCatchAll(order.id, enabled, catchAllEmail);
+      if (res.success && res.order) {
+        setCatchAllEnabled(enabled);
+        onOrderUpdated(res.order as any);
+        setAlert({ type: 'success', text: res.message });
+      } else {
+        setAlert({ type: 'error', text: res.message || 'Failed to update catch-all.' });
+      }
+    } catch (err: any) {
+      setAlert({ type: 'error', text: err.message || 'Catch-all error.' });
+    } finally {
+      setUpdatingCatchAll(false);
+    }
+  };
+
+  // Deliverability Shield Handler
+  const handleRefreshSpamShield = async () => {
+    setUpdatingShield(true);
+    setAlert(null);
+    try {
+      const res = await activateDomainDeliverabilityShield(order.id);
+      if (res.success && res.order) {
+        setSpamShieldActive(true);
+        onOrderUpdated(res.order as any);
+        setAlert({ type: 'success', text: res.message });
+      } else {
+        setAlert({ type: 'error', text: res.message || 'Failed to activate shield.' });
+      }
+    } catch (err: any) {
+      setAlert({ type: 'error', text: err.message || 'Spam shield error.' });
+    } finally {
+      setUpdatingShield(false);
+    }
+  };
+
+  // Save Bio Page Handler
+  const handleSaveBio = async () => {
+    setSavingBio(true);
+    setAlert(null);
+    try {
+      const res = await saveDomainBioConfig(order.id, {
+        title: bioTitle,
+        bio: bioDesc,
+        whatsapp: bioWhatsapp,
+        phone: bioPhone,
+        instagram: bioInstagram,
+      });
+      if (res.success && res.order) {
+        onOrderUpdated(res.order as any);
+        setAlert({ type: 'success', text: res.message });
+      } else {
+        setAlert({ type: 'error', text: res.message || 'Failed to update bio.' });
+      }
+    } catch (err: any) {
+      setAlert({ type: 'error', text: err.message || 'Bio update error.' });
+    } finally {
+      setSavingBio(false);
+    }
+  };
+
+  // Toggle Bio Page on/off
+  const handleToggleBioPage = async (enabled: boolean) => {
+    setSavingBio(true);
+    setAlert(null);
+    try {
+      const res = await toggleDomainBioPage(order.id, enabled);
+      if (res.success && res.order) {
+        setBioPageEnabled(enabled);
+        onOrderUpdated(res.order as any);
+        setAlert({ type: 'success', text: res.message });
+      } else {
+        setAlert({ type: 'error', text: res.message || 'Failed to toggle bio.' });
+      }
+    } catch (err: any) {
+      setAlert({ type: 'error', text: err.message || 'Error toggling bio.' });
+    } finally {
+      setSavingBio(false);
+    }
+  };
 
   // 1. Save Security Settings (WhoisGuard, Transfer Lock, AutoRenew)
   const handleSaveSecurity = async () => {
@@ -221,8 +336,9 @@ export default function DomainFleetOperabilities({
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-[#11140F]/5 dark:border-white/5">
         {[
           { id: 'security', label: 'WHOIS & Transfer Lock', icon: ShieldCheck },
+          { id: 'emails', label: 'Email, Catch-All & Spam Shield', icon: Mail },
+          { id: 'bio', label: 'Instant Bio & vCard', icon: Sparkles },
           { id: 'redirect', label: 'Web / URL Forwarding', icon: Share2 },
-          { id: 'emails', label: 'Email Aliases & Catch-All', icon: Mail },
           { id: 'nameservers', label: 'Custom Nameservers', icon: Server },
         ].map((tab) => {
           const Icon = tab.icon;
@@ -433,11 +549,85 @@ export default function DomainFleetOperabilities({
         </div>
       )}
 
-      {/* TAB 3: MULTI-ALIAS EMAIL ROUTING */}
+      {/* TAB 3: MULTI-ALIAS EMAIL ROUTING, CATCH-ALL & SPAM SHIELD */}
       {activeTab === 'emails' && (
         <div className="space-y-4">
+          {/* Deliverability & Spam Shield Banner */}
+          <div className="p-3.5 rounded-xl border border-emerald-500/25 bg-emerald-500/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-start gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-[#34D399] flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-[12.5px] text-[#11140F] dark:text-white">
+                    Deliverability &amp; Anti-Spam Shield
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-[#34D399] text-[10px] font-bold">
+                    100% Protected
+                  </span>
+                </div>
+                <p className="text-[11px] text-[#11140F]/60 dark:text-white/60 leading-relaxed mt-0.5">
+                  SPF (Cloudflare Edge) and DMARC quarantine policies are automatically active. Outbound replies avoid spam filters.
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              disabled={updatingShield}
+              onClick={handleRefreshSpamShield}
+              className="px-3 py-1.5 rounded-xl border border-emerald-500/30 hover:bg-emerald-500/10 text-emerald-700 dark:text-[#34D399] font-semibold text-[11px] transition-all cursor-pointer flex items-center gap-1.5 self-start sm:self-center shrink-0"
+            >
+              <RefreshCw className={`w-3 h-3 ${updatingShield ? 'animate-spin' : ''}`} />
+              <span>{updatingShield ? 'Verifying...' : 'Refresh Deliverability Shield'}</span>
+            </button>
+          </div>
+
+          {/* Catch-All Email Routing Card */}
+          <div className="p-3.5 rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5]/60 dark:bg-white/[0.02] space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="font-bold text-[12px] flex items-center gap-1.5">
+                  <Mail className="w-3.5 h-3.5 text-emerald-600" />
+                  Catch-All Email Routing (*@{order.domainName})
+                </span>
+                <p className="text-[11px] text-[#11140F]/60 dark:text-white/60 mt-0.5">
+                  Automatically delivers mistyped or random prefixes (e.g. support@, sales@, info@) to your primary inbox.
+                </p>
+              </div>
+              <input
+                type="checkbox"
+                checked={catchAllEnabled}
+                disabled={updatingCatchAll}
+                onChange={(e) => handleToggleCatchAll(e.target.checked)}
+                className="w-4 h-4 accent-emerald-600 cursor-pointer"
+              />
+            </div>
+
+            {catchAllEnabled && (
+              <div className="pt-1 flex items-center gap-2">
+                <span className="text-[11px] text-[#11140F]/60 dark:text-white/60">Forward all mistyped mail to:</span>
+                <input
+                  type="email"
+                  value={catchAllEmail}
+                  onChange={(e) => setCatchAllEmail(e.target.value)}
+                  className="px-2.5 py-1 text-xs font-mono rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#151912] flex-1 max-w-xs"
+                />
+                <button
+                  type="button"
+                  disabled={updatingCatchAll}
+                  onClick={() => handleToggleCatchAll(true)}
+                  className="px-2.5 py-1 rounded-lg bg-black/5 dark:bg-white/10 hover:bg-black/10 font-semibold text-[11px] cursor-pointer"
+                >
+                  Save
+                </button>
+              </div>
+            )}
+          </div>
+
           <p className="text-[11.5px] text-[#11140F]/70 dark:text-white/70 leading-relaxed">
-            Create unlimited custom business email aliases on <strong>@{order.domainName}</strong> forwarding into your personal Gmail or work inbox.
+            Specific custom business email aliases forwarding into your inbox:
           </p>
 
           {/* Existing Aliases List */}
@@ -509,6 +699,132 @@ export default function DomainFleetOperabilities({
               <span>Add Alias</span>
             </button>
           </form>
+        </div>
+      )}
+
+      {/* TAB: INSTANT 1-CLICK BIO & DIGITAL VCARD PAGE */}
+      {activeTab === 'bio' && (
+        <div className="space-y-4">
+          <div className="p-3.5 rounded-xl border border-emerald-500/25 bg-emerald-500/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-start gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-[#34D399] flex items-center justify-center shrink-0">
+                <Sparkles className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-[12.5px] text-[#11140F] dark:text-white">
+                    Instant Coming Soon &amp; Bio vCard Page
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-[#34D399] text-[10px] font-bold">
+                    {bioPageEnabled ? 'Live & Active' : 'Disabled'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-[#11140F]/60 dark:text-white/60 leading-relaxed mt-0.5">
+                  Hosts an instant digital business card with lead capture running directly on <strong>https://{order.domainName}</strong>.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <a
+                href={`https://${order.domainName}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-[11px] transition-all flex items-center gap-1"
+              >
+                <span>Visit Live Page</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+              <input
+                type="checkbox"
+                checked={bioPageEnabled}
+                onChange={(e) => handleToggleBioPage(e.target.checked)}
+                className="w-4 h-4 accent-emerald-600 cursor-pointer ml-1"
+              />
+            </div>
+          </div>
+
+          <div className="p-4 rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5]/60 dark:bg-white/[0.02] space-y-3">
+            <h4 className="font-bold text-xs uppercase tracking-wider text-[#11140F]/70 dark:text-white/70">
+              Customize Bio &amp; Digital Card
+            </h4>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div className="space-y-1">
+                <label className="text-[11px] font-semibold text-[#11140F]/60 dark:text-white/60">Brand / Name:</label>
+                <input
+                  type="text"
+                  value={bioTitle}
+                  onChange={(e) => setBioTitle(e.target.value)}
+                  placeholder={order.domainName}
+                  className="w-full px-3 py-1.5 rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#151912]"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-semibold text-[#11140F]/60 dark:text-white/60">WhatsApp Number:</label>
+                <input
+                  type="text"
+                  value={bioWhatsapp}
+                  onChange={(e) => setBioWhatsapp(e.target.value)}
+                  placeholder="e.g. +2348012345678"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#151912]"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-semibold text-[#11140F]/60 dark:text-white/60">Phone Contact:</label>
+                <input
+                  type="text"
+                  value={bioPhone}
+                  onChange={(e) => setBioPhone(e.target.value)}
+                  placeholder="e.g. +2348000000000"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#151912]"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-semibold text-[#11140F]/60 dark:text-white/60">Instagram Handle:</label>
+                <input
+                  type="text"
+                  value={bioInstagram}
+                  onChange={(e) => setBioInstagram(e.target.value)}
+                  placeholder="@yourhandle"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#151912]"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1 text-xs">
+              <label className="text-[11px] font-semibold text-[#11140F]/60 dark:text-white/60">Tagline / Launch Note:</label>
+              <textarea
+                rows={2}
+                value={bioDesc}
+                onChange={(e) => setBioDesc(e.target.value)}
+                placeholder="Our official website is currently in development. Reach out or save our contact card below."
+                className="w-full px-3 py-2 rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#151912] resize-none"
+              />
+            </div>
+
+            <div className="flex items-center justify-between pt-1">
+              <button
+                type="button"
+                disabled={savingBio}
+                onClick={handleSaveBio}
+                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition-all disabled:opacity-50 cursor-pointer"
+              >
+                <span>{savingBio ? 'Saving...' : 'Save Bio Settings'}</span>
+              </button>
+
+              <a
+                href={`/api/domains/vcard?domain=${encodeURIComponent(order.domainName)}&orderId=${order.id}`}
+                className="px-3 py-1.5 rounded-xl border border-[#11140F]/15 dark:border-white/15 hover:bg-black/5 dark:hover:bg-white/5 font-semibold text-[11px] transition-all flex items-center gap-1.5"
+              >
+                <Download className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Test vCard Download (.vcf)</span>
+              </a>
+            </div>
+          </div>
         </div>
       )}
 
