@@ -37,7 +37,7 @@ export default function AdminDomainPricingManager({
     budgetMarkupNgn: Math.max(3000, initialConfig.budgetMarkupNgn ?? 3000),
     standardMarkupNgn: initialConfig.standardMarkupNgn ?? 5500,
     premiumMarkupNgn: initialConfig.premiumMarkupNgn ?? 8000,
-    roundingStep: initialConfig.roundingStep ?? 1000,
+    roundingStep: initialConfig.roundingStep ?? 100,
     extraEmailPriceNgn: initialConfig.extraEmailPriceNgn ?? 1500,
     tldMargins:
       initialConfig.tldMargins && Object.keys(initialConfig.tldMargins).length > 0
@@ -156,7 +156,7 @@ export default function AdminDomainPricingManager({
         budgetMarkupNgn: Number(config.budgetMarkupNgn || 3000),
         standardMarkupNgn: Number(config.standardMarkupNgn || 5500),
         premiumMarkupNgn: Number(config.premiumMarkupNgn || 8000),
-        roundingStep: config.roundingStep || 1000,
+        roundingStep: config.roundingStep || 100,
         extraEmailPriceNgn: Number(config.extraEmailPriceNgn || 1500),
         tldMargins: cleanMargins,
         tldOverrides: cleanOverrides,
@@ -506,11 +506,12 @@ export default function AdminDomainPricingManager({
             <span className="text-[11px] font-bold uppercase tracking-wider text-[#11140F]/70 dark:text-white/70 block">
               Price Progression Step
             </span>
-            <div className="grid grid-cols-2 gap-1.5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
               {[
-                { label: '₦1,000 Step', val: 1000 },
-                { label: '₦800 Step', val: 800 },
+                { label: '₦100 Exact', val: 100 },
                 { label: '₦500 Step', val: 500 },
+                { label: '₦800 Step', val: 800 },
+                { label: '₦1,000 Step', val: 1000 },
                 { label: '.900 Charm', val: 900 },
               ].map((stepOption) => (
                 <button
@@ -518,7 +519,7 @@ export default function AdminDomainPricingManager({
                   type="button"
                   onClick={() => setConfig({ ...config, roundingStep: stepOption.val as RoundingStep })}
                   className={`py-1 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer text-center ${
-                    (config.roundingStep || 1000) === stepOption.val
+                    (config.roundingStep || 100) === stepOption.val
                       ? 'bg-emerald-600 text-white shadow-2xs'
                       : 'border border-[#11140F]/10 dark:border-white/10 text-[#11140F]/70 dark:text-white/70 hover:bg-[#F7F8F5] dark:hover:bg-white/5'
                   }`}
@@ -528,7 +529,7 @@ export default function AdminDomainPricingManager({
               ))}
             </div>
             <p className="text-[10.5px] text-[#11140F]/50 dark:text-white/50 leading-tight">
-              Rounds final price to clean numbers (e.g. ₦24,000 vs ₦23,200).
+              Rounds final price to clean numbers (e.g. ₦100 exact preserves increments like ₦7,200).
             </p>
           </div>
         </div>
@@ -582,7 +583,7 @@ export default function AdminDomainPricingManager({
 
                 // Calculated retail price with progression rounding
                 const rawTotal = wholesaleNgn + activeMargin;
-                const autoRetailNgn = applyRoundingStep(rawTotal, config.roundingStep || 1000);
+                const autoRetailNgn = applyRoundingStep(rawTotal, config.roundingStep || 100);
 
                 // Fixed retail price override
                 const overrideVal = tldOverrides[tld] ? Number(tldOverrides[tld]) : null;

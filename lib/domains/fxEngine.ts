@@ -56,7 +56,7 @@ export const DEFAULT_PRICING_CONFIG: DomainPricingConfig = {
   premiumMarkupNgn: 8000,
   tldMargins: { ...DEFAULT_TLD_MARGIN_PROGRESSION },
   tldOverrides: {},
-  roundingStep: 1000,
+  roundingStep: 100,
   extraEmailPriceNgn: 1500,
   lastFetchedAt: new Date().toISOString(),
   source: 'currency_api_cdn',
@@ -227,13 +227,13 @@ export async function saveDomainPricingConfig(updates: Partial<DomainPricingConf
  * Clean retail price rounding / progression step (e.g. 500, 800, 1000, 900 charm, or 100)
  * Uses Math.round to round to the nearest progression step so a ₦3 variance does not jump a full ₦1,000!
  */
-export function applyRoundingStep(rawAmount: number, step: RoundingStep = 1000): number {
+export function applyRoundingStep(rawAmount: number, step: RoundingStep = 100): number {
   if (step === 900) {
     const roundedThousand = Math.round(rawAmount / 1000) * 1000;
     const charm = roundedThousand - 100;
     return charm > 0 ? charm : 900;
   }
-  const s = step || 1000;
+  const s = step || 100;
   return Math.max(s, Math.round(rawAmount / s) * s);
 }
 
@@ -292,7 +292,7 @@ export function calculateDomainPrice(
 
   // 3. Raw retail = wholesaleNgn + targetMargin
   const rawTotal = wholesaleNgn + targetMargin;
-  const roundingStep = config.roundingStep || 500;
+  const roundingStep = config.roundingStep || 100;
   const finalPriceNgn = applyRoundingStep(rawTotal, roundingStep);
 
   return {
