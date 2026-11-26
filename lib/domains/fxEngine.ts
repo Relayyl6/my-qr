@@ -33,15 +33,43 @@ export interface DomainPricingConfig {
 }
 
 export const DEFAULT_TLD_MARGIN_PROGRESSION: Record<string, number> = {
-  xyz: 3200,    // Starts from ₦3,200 (+₦200 step) -> yields ₦6,000 storefront
-  site: 3500,   // +₦500 step -> yields ₦7,000 storefront
-  online: 3500, // +₦500 step -> yields ₦7,000 storefront
-  store: 3800,  // +₦800 step -> yields ₦8,000 storefront
-  com: 4800,    // +₦1,800 step -> yields ₦20,000 storefront
-  net: 7500,    // +₦1,500 step -> yields ₦24,000 storefront
-  org: 5800,    // +₦2,800 step -> yields ₦21,000 storefront
-  co: 6800,     // +₦3,800 step -> yields ₦23,000 storefront
-  io: 8000,     // +₦5,000 step -> yields ₦57,000 storefront
+  // Budget entry: Base profit margin starts at ₦4,000 (user's exact setting)
+  xyz: 4200,     // wholesale $2.10 (₦3,003) + ₦4,200 margin = ₦7,200 storefront (user's exact configuration)
+  space: 4000,   // wholesale $2.00 (₦2,860) + ₦4,000 margin = ₦6,900 storefront
+  site: 4000,    // wholesale $2.50 (₦3,575) + ₦4,000 margin = ₦7,600 storefront
+  online: 4000,  // wholesale $2.50 (₦3,575) + ₦4,000 margin = ₦7,600 storefront
+  store: 4100,   // wholesale $2.80 (₦4,004) + ₦4,100 margin = ₦8,100 storefront
+  club: 4000,    // wholesale $3.00 (₦4,290) + ₦4,000 margin = ₦8,300 storefront
+  work: 4000,    // wholesale $3.00 (₦4,290) + ₦4,000 margin = ₦8,300 storefront
+  live: 4000,    // wholesale $3.00 (₦4,290) + ₦4,000 margin = ₦8,300 storefront
+  fit: 4000,     // wholesale $3.00 (₦4,290) + ₦4,000 margin = ₦8,300 storefront
+  biz: 4100,     // wholesale $3.50 (₦5,005) + ₦4,100 margin = ₦9,100 storefront
+
+  // Standard mid-tier: steps up to ₦4,200 - ₦5,200
+  art: 4200,     // wholesale $4.00 (₦5,720) + ₦4,200 margin = ₦9,900 storefront
+  link: 4200,    // wholesale $4.00 (₦5,720) + ₦4,200 margin = ₦9,900 storefront
+  design: 4500,  // wholesale $4.50 (₦6,435) + ₦4,500 margin = ₦10,900 storefront
+  shop: 4500,    // wholesale $4.50 (₦6,435) + ₦4,500 margin = ₦10,900 storefront
+  pro: 4500,     // wholesale $4.50 (₦6,435) + ₦4,500 margin = ₦10,900 storefront
+  vip: 4800,     // wholesale $5.00 (₦7,150) + ₦4,800 margin = ₦12,000 storefront
+  cloud: 4800,   // wholesale $5.00 (₦7,150) + ₦4,800 margin = ₦12,000 storefront
+  digital: 5000, // wholesale $5.50 (₦7,865) + ₦5,000 margin = ₦12,900 storefront
+  agency: 5200,  // wholesale $6.00 (₦8,580) + ₦5,200 margin = ₦13,800 storefront
+  one: 5200,     // wholesale $6.00 (₦8,580) + ₦5,200 margin = ₦13,800 storefront
+
+  // Tech, Developer & Commercial: steps up to ₦5,500 - ₦7,500
+  global: 5500,  // wholesale $8.00 (₦11,440) + ₦5,500 margin = ₦16,900 storefront
+  tech: 5500,    // wholesale $7.50 (₦10,725) + ₦5,500 margin = ₦16,200 storefront
+  me: 5500,      // wholesale $10.00 (₦14,300) + ₦5,500 margin = ₦19,800 storefront
+  com: 5800,     // wholesale $10.50 (₦15,015) + ₦5,800 margin = ₦20,800 storefront
+  org: 6800,     // wholesale $10.90 (₦15,587) + ₦6,800 margin = ₦22,400 storefront
+  app: 5500,     // wholesale $12.00 (₦17,160) + ₦5,500 margin = ₦22,700 storefront
+  dev: 5500,     // wholesale $12.00 (₦17,160) + ₦5,500 margin = ₦22,700 storefront
+  co: 7000,      // wholesale $11.50 (₦16,445) + ₦7,000 margin = ₦23,400 storefront
+  net: 7500,     // wholesale $11.80 (₦16,874) + ₦7,500 margin = ₦24,400 storefront
+
+  // Premium: reaches ₦8,000
+  io: 8000,      // wholesale $34.00 (₦48,620) + ₦8,000 margin = ₦56,600 storefront
 };
 
 export const DEFAULT_PRICING_CONFIG: DomainPricingConfig = {
@@ -142,10 +170,14 @@ export async function getDomainPricingConfig(): Promise<DomainPricingConfig> {
 
     if (record && record.value) {
       const val = record.value as any;
-      const merged: DomainPricingConfig = { ...DEFAULT_PRICING_CONFIG, ...val };
-      if (!merged.tldMargins || Object.keys(merged.tldMargins).length === 0) {
-        merged.tldMargins = { ...DEFAULT_TLD_MARGIN_PROGRESSION };
-      }
+      const merged: DomainPricingConfig = {
+        ...DEFAULT_PRICING_CONFIG,
+        ...val,
+        tldMargins: {
+          ...DEFAULT_TLD_MARGIN_PROGRESSION,
+          ...(val.tldMargins || {}),
+        },
+      };
       if (!merged.budgetMarkupNgn || merged.budgetMarkupNgn < 3000) {
         merged.budgetMarkupNgn = 3000;
       }

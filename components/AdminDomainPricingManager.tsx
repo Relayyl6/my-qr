@@ -39,10 +39,10 @@ export default function AdminDomainPricingManager({
     premiumMarkupNgn: initialConfig.premiumMarkupNgn ?? 8000,
     roundingStep: initialConfig.roundingStep ?? 100,
     extraEmailPriceNgn: initialConfig.extraEmailPriceNgn ?? 1500,
-    tldMargins:
-      initialConfig.tldMargins && Object.keys(initialConfig.tldMargins).length > 0
-        ? initialConfig.tldMargins
-        : { ...DEFAULT_TLD_MARGIN_PROGRESSION },
+    tldMargins: {
+      ...DEFAULT_TLD_MARGIN_PROGRESSION,
+      ...(initialConfig.tldMargins || {}),
+    },
     tldOverrides: initialConfig.tldOverrides ?? {},
   }));
 
@@ -57,10 +57,10 @@ export default function AdminDomainPricingManager({
   // Per-TLD margin inputs state
   const [tldMargins, setTldMargins] = useState<Record<string, string>>(() => {
     const map: Record<string, string> = {};
-    const source =
-      initialConfig.tldMargins && Object.keys(initialConfig.tldMargins).length > 0
-        ? initialConfig.tldMargins
-        : DEFAULT_TLD_MARGIN_PROGRESSION;
+    const source = {
+      ...DEFAULT_TLD_MARGIN_PROGRESSION,
+      ...(initialConfig.tldMargins || {}),
+    };
 
     for (const [k, v] of Object.entries(source)) {
       map[k] = String(v);

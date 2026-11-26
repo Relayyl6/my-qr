@@ -69,19 +69,17 @@ export default function NameLaunchService({ user, isAdmin = false }: Props) {
   const [hasMore, setHasMore] = useState(false);
   const [nextOffset, setNextOffset] = useState(10);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [showAllFeatured, setShowAllFeatured] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Featured live TLD prices (strictly matched to admin sovereignty pricing engine)
   const [featuredTlds, setFeaturedTlds] = useState<FeaturedTld[]>([
-    { tld: 'xyz', tagline: 'Modern & startups', priceNgn: 6000 },
-    { tld: 'site', tagline: 'Portfolios & creators', priceNgn: 7000 },
-    { tld: 'online', tagline: 'Everyday identity', priceNgn: 7000 },
-    { tld: 'store', tagline: 'E-commerce & retail', priceNgn: 8000 },
-    { tld: 'com', tagline: 'Global standard', priceNgn: 20000 },
-    { tld: 'net', tagline: 'Networks & infrastructure', priceNgn: 24000 },
-    { tld: 'org', tagline: 'Communities & NGOs', priceNgn: 21000 },
-    { tld: 'co', tagline: 'Startups & modern brands', priceNgn: 23000 },
-    { tld: 'io', tagline: 'Tech & SaaS', priceNgn: 57000 },
+    { tld: 'com', tagline: 'Global standard', priceNgn: 20800 },
+    { tld: 'xyz', tagline: 'Modern & startups', priceNgn: 7200 },
+    { tld: 'space', tagline: 'Creative spaces & ideas', priceNgn: 4000 },
+    { tld: 'site', tagline: 'Portfolios & creators', priceNgn: 5500 },
+    { tld: 'online', tagline: 'Everyday identity', priceNgn: 5500 },
+    { tld: 'store', tagline: 'E-commerce & retail', priceNgn: 6000 },
   ]);
 
   // Checkout drawer state
@@ -589,20 +587,31 @@ export default function NameLaunchService({ user, isAdmin = false }: Props) {
               {/* Empty-Search Showcase: Live TLD Pricing Grid + Included Capabilities */}
               {results.length === 0 && !searching && (
                 <div className="space-y-6">
-                  {/* Featured Extensions Section */}
+                  {/* Featured Extensions Section (Collapsible: 6 at a time by default) */}
                   <div className="space-y-3">
                     <div className="flex items-center justify-between px-1">
                       <span className="text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 text-[#11140F]/70 dark:text-white/70">
                         <Globe className="w-3.5 h-3.5 text-[#34D399]" />
                         Featured Extensions
                       </span>
-                      <span className="text-[10.5px] font-mono text-[#11140F]/45 dark:text-white/40">
-                        {featuredTlds.length} Extensions
-                      </span>
+                      {featuredTlds.length > 6 && (
+                        <button
+                          type="button"
+                          onClick={() => setShowAllFeatured(!showAllFeatured)}
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#2F6B4F] dark:text-[#34D399] hover:underline cursor-pointer transition-colors"
+                        >
+                          <span>{showAllFeatured ? 'Show Top 6' : `Show All (${featuredTlds.length})`}</span>
+                          {showAllFeatured ? (
+                            <ChevronUp className="w-3.5 h-3.5" />
+                          ) : (
+                            <ChevronDown className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
-                      {featuredTlds.map((item) => (
+                      {(showAllFeatured ? featuredTlds : featuredTlds.slice(0, 6)).map((item) => (
                         <button
                           key={item.tld}
                           type="button"
@@ -627,6 +636,27 @@ export default function NameLaunchService({ user, isAdmin = false }: Props) {
                         </button>
                       ))}
                     </div>
+
+                    {featuredTlds.length > 6 && (
+                      <div className="flex justify-center pt-1">
+                        <button
+                          type="button"
+                          onClick={() => setShowAllFeatured(!showAllFeatured)}
+                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5] dark:bg-white/[0.03] hover:bg-[#EEF0EA] dark:hover:bg-white/[0.07] text-[11.5px] font-medium text-[#11140F]/75 dark:text-white/75 hover:text-[#11140F] dark:hover:text-white transition-all cursor-pointer shadow-2xs"
+                        >
+                          <span>
+                            {showAllFeatured
+                              ? 'Show Fewer Extensions (6)'
+                              : `View All Extensions (${featuredTlds.length})`}
+                          </span>
+                          {showAllFeatured ? (
+                            <ChevronUp className="w-3.5 h-3.5 text-[#34D399]" />
+                          ) : (
+                            <ChevronDown className="w-3.5 h-3.5 text-[#34D399]" />
+                          )}
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   {/* Included Features Section (Signature Glass Cards with Squircle Icons) */}
