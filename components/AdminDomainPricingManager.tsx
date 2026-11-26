@@ -129,6 +129,54 @@ export default function AdminDomainPricingManager({
     }
   };
 
+  // Smart stepper handlers that prevent browser number inputs from jumping to 500 when stepping an empty field
+  const handleOverrideChange = (tld: string, valStr: string, autoPrice: number, wholesaleNgn: number) => {
+    if (valStr === '') {
+      const next = { ...tldOverrides };
+      delete next[tld];
+      setTldOverrides(next);
+      return;
+    }
+    const num = Number(valStr);
+    const minSafePrice = wholesaleNgn + 4000;
+    // If field was previously empty and browser stepped to 500 (or anything < minSafePrice),
+    // initialize from the domain's auto-calculated retail price + 500!
+    if (!tldOverrides[tld] && num < minSafePrice) {
+      setTldOverrides((prev) => ({
+        ...prev,
+        [tld]: String(autoPrice + 500),
+      }));
+      return;
+    }
+    setTldOverrides((prev) => ({
+      ...prev,
+      [tld]: valStr,
+    }));
+  };
+
+  const handleMarginChange = (tld: string, valStr: string, defaultMargin: number) => {
+    if (valStr === '') {
+      const next = { ...tldMargins };
+      delete next[tld];
+      setTldMargins(next);
+      return;
+    }
+    const num = Number(valStr);
+    // If field was previously empty and browser stepped to 500 (below 4k base),
+    // initialize from defaultMargin + 500!
+    if (!tldMargins[tld] && num < 4000) {
+      setTldMargins((prev) => ({
+        ...prev,
+        [tld]: String(Math.max(4000, defaultMargin + 500)),
+      }));
+      return;
+    }
+    setTldMargins((prev) => ({
+      ...prev,
+      [tld]: valStr,
+    }));
+  };
+
   const handleSave = async () => {
     setSaving(true);
     setAlert(null);
@@ -137,7 +185,18 @@ export default function AdminDomainPricingManager({
     const cleanOverrides: Record<string, number> = {};
     for (const [k, v] of Object.entries(tldOverrides)) {
       const num = Number(v);
-      if (num > 0) cleanOverrides[k] = num;
+      if (num > 0) {
+        const wholesaleNgn = Math.ceil((WHOLESALE_USD_PRICING[k] || 10) * effectiveRate);
+        if (num < wholesaleNgn) {
+          setAlert({
+            type: 'error',
+            text: `Cannot save: Fixed price override for .${k} (₦${num.toLocaleString()}) is below wholesale cost (₦${wholesaleNgn.toLocaleString()}). You would lose money!`,
+          });
+          setSaving(false);
+          return;
+        }
+        cleanOverrides[k] = num;
+      }
     }
 
     // Clean TLD margins
@@ -645,11 +704,12 @@ export default function AdminDomainPricingManager({
                         <span className="absolute left-2.5 top-1.5 text-[11px] font-bold text-[#11140F]/40 dark:text-white/40">₦</span>
                         <input
                           type="number"
-                          step="500"
+                          step="100"
+                          min="4000"
                           placeholder={String(tierDefaultMargin)}
                           value={tldMargins[tld] ?? String(tierDefaultMargin)}
                           onChange={(e) =>
-                            setTldMargins({ ...tldMargins, [tld]: e.target.value })
+                            handleMarginChange(tld, e.target.value, tierDefaultMargin)
                           }
                           className="w-full pl-6 pr-2 py-1 rounded border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.04] text-[#11140F] dark:text-white font-mono text-xs font-bold outline-none focus:border-emerald-500"
                         />
@@ -663,31 +723,82 @@ export default function AdminDomainPricingManager({
 
                     {/* Fixed Retail Price Override */}
                     <td className="py-2.5 px-3">
-                      <div className="relative max-w-[120px]">
-                        <span className="absolute left-2.5 top-1.5 text-[11px] font-bold text-[#11140F]/40 dark:text-white/40">₦</span>
-                        <input
-                          type="number"
-                          step="500"
-                          placeholder={String(autoRetailNgn)}
-                          value={tldOverrides[tld] || ''}
-                          onChange={(e) =>
-                            setTldOverrides({ ...tldOverrides, [tld]: e.target.value })
-                          }
-                          className="w-full pl-6 pr-2 py-1 rounded border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.04] text-[#11140F] dark:text-white font-mono text-xs outline-none focus:border-emerald-500"
-                        />
+                      <div className="flex items-center gap-1.5 max-w-[140px]">
+                        <div className="relative flex-1">
+                          <span className="absolute left-2.5 top-1.5 text-[11px] font-bold text-[#11140F]/40 dark:text-white/40">₦</span>
+                          <input
+                            type="number"
+                            step="500"
+                            min={wholesaleNgn + 4000}
+                            placeholder={String(autoRetailNgn)}
+                            value={tldOverrides[tld] || ''}
+                            onChange={(e) =>
+                              handleOverrideChange(tld, e.target.value, autoRetailNgn, wholesaleNgn)
+                            }
+                            className={`w-full pl-6 pr-2 py-1 rounded border font-mono text-xs outline-none ${
+                              overrideVal && overrideVal < wholesaleNgn + 4000
+                                ? 'border-red-500 bg-red-500/10 text-red-600 font-bold'
+                                : overrideVal
+                                ? 'border-emerald-500 bg-emerald-500/5 text-[#11140F] dark:text-white font-bold'
+                                : 'border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.04] text-[#11140F] dark:text-white'
+                            }`}
+                          />
+                        </div>
+                        {tldOverrides[tld] && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const next = { ...tldOverrides };
+                              delete next[tld];
+                              setTldOverrides(next);
+                            }}
+                            title="Clear override & revert to formula price"
+                            className="text-xs text-[#11140F]/40 dark:text-white/40 hover:text-red-500 p-0.5 cursor-pointer"
+                          >
+                            ✕
+                          </button>
+                        )}
                       </div>
                     </td>
 
                     {/* Platform Net Profit & Margin % */}
                     <td className="py-2.5 px-3 text-right">
-                      <div className="flex flex-col items-end">
-                        <span className="font-mono font-bold text-xs text-emerald-700 dark:text-[#34D399]">
-                          +₦{profitNgn.toLocaleString()}
-                        </span>
-                        <span className="text-[10px] text-emerald-600/70 dark:text-emerald-400/70 font-mono">
-                          {profitPercent}% margin
-                        </span>
-                      </div>
+                      {(() => {
+                        const isLoss = profitNgn < 0;
+                        const isBelow4k = profitNgn < 4000;
+                        return (
+                          <div className="flex flex-col items-end">
+                            <span
+                              className={`font-mono font-bold text-xs ${
+                                isLoss
+                                  ? 'text-rose-600 dark:text-rose-400'
+                                  : isBelow4k
+                                  ? 'text-amber-600 dark:text-amber-400'
+                                  : 'text-emerald-700 dark:text-[#34D399]'
+                              }`}
+                            >
+                              {isLoss
+                                ? `-₦${Math.abs(profitNgn).toLocaleString()}`
+                                : `+₦${profitNgn.toLocaleString()}`}
+                            </span>
+                            <span
+                              className={`text-[10px] font-mono ${
+                                isLoss
+                                  ? 'text-rose-600/80 dark:text-rose-400/80 font-bold'
+                                  : isBelow4k
+                                  ? 'text-amber-600/80 dark:text-amber-400/80 font-semibold'
+                                  : 'text-emerald-600/70 dark:text-emerald-400/70'
+                              }`}
+                            >
+                              {isLoss
+                                ? `${profitPercent}% LOSS`
+                                : isBelow4k
+                                ? `${profitPercent}% (< 4k min)`
+                                : `${profitPercent}% margin`}
+                            </span>
+                          </div>
+                        );
+                      })()}
                     </td>
                   </tr>
                 );

@@ -69,7 +69,7 @@ export default function NameLaunchService({ user, isAdmin = false }: Props) {
   const [hasMore, setHasMore] = useState(false);
   const [nextOffset, setNextOffset] = useState(10);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [showAllFeatured, setShowAllFeatured] = useState(false);
+  const [featuredLimit, setFeaturedLimit] = useState(6);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Featured live TLD prices (strictly matched to admin sovereignty pricing engine)
@@ -587,31 +587,41 @@ export default function NameLaunchService({ user, isAdmin = false }: Props) {
               {/* Empty-Search Showcase: Live TLD Pricing Grid + Included Capabilities */}
               {results.length === 0 && !searching && (
                 <div className="space-y-6">
-                  {/* Featured Extensions Section (Collapsible: 6 at a time by default) */}
+                  {/* Featured Extensions Section (Progressive: 6 -> 12 -> 18 -> 24 -> 30) */}
                   <div className="space-y-3">
                     <div className="flex items-center justify-between px-1">
                       <span className="text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 text-[#11140F]/70 dark:text-white/70">
                         <Globe className="w-3.5 h-3.5 text-[#34D399]" />
                         Featured Extensions
                       </span>
-                      {featuredTlds.length > 6 && (
-                        <button
-                          type="button"
-                          onClick={() => setShowAllFeatured(!showAllFeatured)}
-                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#2F6B4F] dark:text-[#34D399] hover:underline cursor-pointer transition-colors"
-                        >
-                          <span>{showAllFeatured ? 'Show Top 6' : `Show All (${featuredTlds.length})`}</span>
-                          {showAllFeatured ? (
-                            <ChevronUp className="w-3.5 h-3.5" />
-                          ) : (
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10.5px] font-mono text-[#11140F]/45 dark:text-white/40">
+                          Showing {Math.min(featuredLimit, featuredTlds.length)} of {featuredTlds.length}
+                        </span>
+                        {featuredLimit < featuredTlds.length ? (
+                          <button
+                            type="button"
+                            onClick={() => setFeaturedLimit((prev) => Math.min(featuredTlds.length, prev + 6))}
+                            className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#2F6B4F] dark:text-[#34D399] hover:underline cursor-pointer transition-colors"
+                          >
+                            <span>+{Math.min(6, featuredTlds.length - featuredLimit)} More</span>
                             <ChevronDown className="w-3.5 h-3.5" />
-                          )}
-                        </button>
-                      )}
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setFeaturedLimit(6)}
+                            className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#2F6B4F] dark:text-[#34D399] hover:underline cursor-pointer transition-colors"
+                          >
+                            <span>Collapse to 6</span>
+                            <ChevronUp className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
-                      {(showAllFeatured ? featuredTlds : featuredTlds.slice(0, 6)).map((item) => (
+                      {featuredTlds.slice(0, featuredLimit).map((item) => (
                         <button
                           key={item.tld}
                           type="button"
@@ -638,23 +648,30 @@ export default function NameLaunchService({ user, isAdmin = false }: Props) {
                     </div>
 
                     {featuredTlds.length > 6 && (
-                      <div className="flex justify-center pt-1">
-                        <button
-                          type="button"
-                          onClick={() => setShowAllFeatured(!showAllFeatured)}
-                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5] dark:bg-white/[0.03] hover:bg-[#EEF0EA] dark:hover:bg-white/[0.07] text-[11.5px] font-medium text-[#11140F]/75 dark:text-white/75 hover:text-[#11140F] dark:hover:text-white transition-all cursor-pointer shadow-2xs"
-                        >
-                          <span>
-                            {showAllFeatured
-                              ? 'Show Fewer Extensions (6)'
-                              : `View All Extensions (${featuredTlds.length})`}
-                          </span>
-                          {showAllFeatured ? (
-                            <ChevronUp className="w-3.5 h-3.5 text-[#34D399]" />
-                          ) : (
-                            <ChevronDown className="w-3.5 h-3.5 text-[#34D399]" />
-                          )}
-                        </button>
+                      <div className="flex items-center justify-center gap-2.5 pt-1">
+                        {featuredLimit < featuredTlds.length && (
+                          <button
+                            type="button"
+                            onClick={() => setFeaturedLimit((prev) => Math.min(featuredTlds.length, prev + 6))}
+                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 active:scale-[0.99] text-[12px] font-bold text-emerald-800 dark:text-[#34D399] transition-all cursor-pointer shadow-xs"
+                          >
+                            <ChevronDown className="w-4 h-4 text-[#34D399]" />
+                            <span>
+                              Show Next 6 Extensions ({featuredLimit + 1}–{Math.min(featuredLimit + 6, featuredTlds.length)} of {featuredTlds.length})
+                            </span>
+                          </button>
+                        )}
+
+                        {featuredLimit > 6 && (
+                          <button
+                            type="button"
+                            onClick={() => setFeaturedLimit(6)}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5] dark:bg-white/[0.03] hover:bg-[#EEF0EA] dark:hover:bg-white/[0.07] text-[12px] font-medium text-[#11140F]/65 dark:text-white/65 hover:text-[#11140F] dark:hover:text-white transition-all cursor-pointer"
+                          >
+                            <ChevronUp className="w-3.5 h-3.5" />
+                            <span>Collapse to 6</span>
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>
