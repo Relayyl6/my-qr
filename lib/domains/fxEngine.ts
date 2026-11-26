@@ -266,18 +266,18 @@ export function calculateDomainPrice(
     };
   }
 
-  // 2. Determine target profit margin:
+  // 2. Determine target profit margin from Admin Console:
   // a) Check per-TLD margin override first
   let targetMargin = config.tldMargins?.[cleanTld];
   if (typeof targetMargin !== 'number' || targetMargin <= 0) {
-    // b) Check tiered margin
+    // b) Check tiered margin configured in admin console
     const tier = getTldTier(cleanTld);
     if (tier === 'premium') {
-      targetMargin = typeof config.premiumMarkupNgn === 'number' ? config.premiumMarkupNgn : 8000;
+      targetMargin = typeof config.premiumMarkupNgn === 'number' && config.premiumMarkupNgn > 0 ? config.premiumMarkupNgn : 8000;
     } else if (tier === 'standard') {
-      targetMargin = typeof config.standardMarkupNgn === 'number' ? config.standardMarkupNgn : 5000;
+      targetMargin = typeof config.standardMarkupNgn === 'number' && config.standardMarkupNgn > 0 ? config.standardMarkupNgn : 5500;
     } else {
-      targetMargin = typeof config.budgetMarkupNgn === 'number' ? config.budgetMarkupNgn : (config.platformMarkupNgn || 2000);
+      targetMargin = typeof config.budgetMarkupNgn === 'number' && config.budgetMarkupNgn > 0 ? config.budgetMarkupNgn : (config.platformMarkupNgn || 3000);
     }
   }
 

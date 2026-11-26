@@ -68,14 +68,15 @@ export default function NameLaunchService({ user, isAdmin = false }: Props) {
   const [results, setResults] = useState<DomainSearchResult[]>([]);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Featured live TLD prices
+  // Featured live TLD prices (strictly matched to admin sovereignty pricing engine)
   const [featuredTlds, setFeaturedTlds] = useState<FeaturedTld[]>([
-    { tld: 'xyz', tagline: 'Modern & startups', priceNgn: 5600 },
-    { tld: 'com', tagline: 'Global standard', priceNgn: 17500 },
-    { tld: 'com.ng', tagline: 'Nigerian brands', priceNgn: 9500 },
-    { tld: 'ng', tagline: 'Direct local identity', priceNgn: 18500 },
-    { tld: 'org', tagline: 'Communities & NGOs', priceNgn: 16500 },
-    { tld: 'io', tagline: 'Tech & SaaS', priceNgn: 58000 },
+    { tld: 'xyz', tagline: 'Modern & startups', priceNgn: 6000 },
+    { tld: 'site', tagline: 'Portfolios & creators', priceNgn: 7000 },
+    { tld: 'online', tagline: 'Everyday identity', priceNgn: 7000 },
+    { tld: 'store', tagline: 'E-commerce & retail', priceNgn: 8000 },
+    { tld: 'com', tagline: 'Global standard', priceNgn: 20000 },
+    { tld: 'org', tagline: 'Communities & NGOs', priceNgn: 21000 },
+    { tld: 'io', tagline: 'Tech & SaaS', priceNgn: 57000 },
   ]);
 
   // Checkout drawer state

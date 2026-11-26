@@ -54,18 +54,9 @@ export async function POST(req: Request) {
           : pricingConfig.bufferedRate
         : 1400;
 
-      const clientExpectedNgn = body.expectedPriceNgn ? Number(body.expectedPriceNgn) : null;
-      let finalChargeNgn = pricing.totalNgn;
-      let finalMarkupNgn = pricing.platformFeeNgn;
-
-      if (
-        clientExpectedNgn &&
-        clientExpectedNgn > 0 &&
-        Math.abs(pricing.totalNgn - clientExpectedNgn) <= 1000
-      ) {
-        finalChargeNgn = clientExpectedNgn;
-        finalMarkupNgn = Math.max(0, finalChargeNgn - pricing.wholesaleNgn);
-      }
+      // Strictly rely on the active admin sovereignty pricing calculation
+      const finalChargeNgn = pricing.totalNgn;
+      const finalMarkupNgn = pricing.platformFeeNgn;
 
       order = await prisma.domainOrder.update({
         where: { id: existing.id },
@@ -139,20 +130,9 @@ export async function POST(req: Request) {
       const additionalCostNgn = validAdditional.length * extraEmailPriceNgn * periodYears;
       const totalExpectedNgn = multiYear.finalPriceNgn + additionalCostNgn;
 
-      // Lock charge to exact storefront card price if within tolerance (<= 1500 NGN)
-      // guaranteeing Paystack checkout matches the exact button price seen by the user!
-      const clientExpectedNgn = body.expectedPriceNgn ? Number(body.expectedPriceNgn) : null;
-      let finalChargeNgn = totalExpectedNgn;
-      let finalMarkupNgn = (multiYear.finalPriceNgn - multiYear.wholesaleNgn) + additionalCostNgn;
-
-      if (
-        clientExpectedNgn &&
-        clientExpectedNgn > 0 &&
-        Math.abs(totalExpectedNgn - clientExpectedNgn) <= 1500
-      ) {
-        finalChargeNgn = clientExpectedNgn;
-        finalMarkupNgn = Math.max(0, finalChargeNgn - multiYear.wholesaleNgn);
-      }
+      // Strictly rely on the active admin sovereignty pricing calculation
+      const finalChargeNgn = totalExpectedNgn;
+      const finalMarkupNgn = (multiYear.finalPriceNgn - multiYear.wholesaleNgn) + additionalCostNgn;
 
       // Compile complete emailAliases list (primary + additional)
       const compiledEmailAliases = [

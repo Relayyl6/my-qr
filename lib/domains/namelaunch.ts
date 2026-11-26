@@ -1,4 +1,9 @@
-import { getDomainPricingConfig, calculateDomainPrice, DomainPricingConfig } from './fxEngine';
+import {
+  getDomainPricingConfig,
+  calculateDomainPrice,
+  DomainPricingConfig,
+  DEFAULT_PRICING_CONFIG,
+} from './fxEngine';
 import {
   SUPPORTED_TLDS,
   BUDGET_TLDS,
@@ -14,27 +19,14 @@ export function calculateNgnPricing(
   tld: string = 'xyz',
   config?: DomainPricingConfig
 ): DomainPricing {
-  if (config) {
-    const calc = calculateDomainPrice(wholesaleUsd, tld, config);
-    return {
-      wholesaleUsd,
-      wholesaleNgn: calc.wholesaleNgn,
-      platformFeeNgn: calc.platformMarkupNgn,
-      totalNgn: calc.finalPriceNgn,
-    };
-  }
-
-  // Fallback buffered rate calculation
-  const fxRate = Number(process.env.USD_TO_NGN_RATE || 1400);
-  const platformFeeNgn = Number(process.env.PLATFORM_MARKUP_NGN || 2500);
-  const wholesaleNgn = Math.ceil(wholesaleUsd * fxRate);
-  const totalNgn = Math.ceil((wholesaleNgn + platformFeeNgn) / 100) * 100;
-
+  // Rely solely on Admin Sovereignty Console configuration and tiered progression
+  const activeConfig = config || DEFAULT_PRICING_CONFIG;
+  const calc = calculateDomainPrice(wholesaleUsd, tld, activeConfig);
   return {
     wholesaleUsd,
-    wholesaleNgn,
-    platformFeeNgn,
-    totalNgn,
+    wholesaleNgn: calc.wholesaleNgn,
+    platformFeeNgn: calc.platformMarkupNgn,
+    totalNgn: calc.finalPriceNgn,
   };
 }
 
