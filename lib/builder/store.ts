@@ -70,6 +70,10 @@ export interface BuilderState {
   toggleHiddenNode: (id: string, bp: Bp) => void;
   reorderNode: (id: string, parentId: string, targetIndex: number) => void;
   deleteNode: (id: string) => void;
+  duplicateNode: (id: string) => void;
+  groupNodes: (ids: string[]) => void;
+  ungroupNode: (id: string) => void;
+  setNodeDimension: (id: string, bp: Bp, dim: 'width' | 'height', mode: 'fill' | 'hug' | 'fixed', px?: number) => void;
 }
 
 export const createBuilderStore = (initialDoc: Doc) => {
@@ -405,6 +409,124 @@ export const createBuilderStore = (initialDoc: Doc) => {
             delete draft.nodes[nid];
           };
           deleteRecursive(id);
+        },
+      });
+    },
+
+    duplicateNode: (id: string) => {
+      get().exec({
+        label: `Duplicate node ${id}`,
+        run: (draft) => {
+          const source = draft.nodes[id];
+          if (!source || !source.parent || !draft.nodes[source.parent]) return;
+
+          const cloneSubtree = (srcId: string, newParentId: string): string => {
+            const src = draft.nodes[srcId];
+            if (!src) return '';
+            const newId = `${src.type.slice(0, 3)}_${Math.random().toString(36).substring(2, 8)}`;
+            const clonedChildren = src.children.map((cid) => cloneSubtree(cid, newId)).filter(Boolean);
+
+            draft.nodes[newId] = {
+              ...JSON.parse(JSON.stringify(src)),
+              id: newId,
+              name: src.name ? `${src.name} (Copy)` : undefined,
+              parent: newParentId,
+              children: clonedChildren,
+              locked: false, // Duplicates are unlocked
+            };
+            return newId;
+          };
+
+          const parent = draft.nodes[source.parent];
+          const newRootId = cloneSubtree(id, source.parent);
+          const srcIdx = parent.children.indexOf(id);
+          parent.children.splice(srcIdx + 1, 0, newRootId);
+        },
+      });
+    },
+
+    groupNodes: (ids: string[]) => {
+      get().exec({
+        label: `Group nodes into stack`,
+        run: (draft) => {
+          if (ids.length === 0) return;
+          const firstNode = draft.nodes[ids[0]];
+          if (!firstNode || !firstNode.parent || !draft.nodes[firstNode.parent]) return;
+
+          const parent = draft.nodes[firstNode.parent];
+          const stackId = `stk_${Math.random().toString(36).substring(2, 8)}`;
+          const insertIdx = parent.children.indexOf(ids[0]);
+
+          // Create new stack node
+          draft.nodes[stackId] = {
+            id: stackId,
+            type: 'stack',
+            name: 'Group Stack',
+            parent: firstNode.parent,
+            children: [...ids],
+            style: {
+              mobile: {
+                display: 'flex',
+                direction: 'column',
+                gap: 12,
+                width: 'fill',
+              },
+            },
+            props: {},
+          };
+
+          // Reparent selected nodes and remove from original parent
+          parent.children = parent.children.filter((cid) => !ids.includes(cid));
+          parent.children.splice(insertIdx, 0, stackId);
+
+          ids.forEach((nid) => {
+            if (draft.nodes[nid]) {
+              draft.nodes[nid].parent = stackId;
+            }
+          });
+        },
+      });
+    },
+
+    ungroupNode: (id: string) => {
+      get().exec({
+        label: `Ungroup node ${id}`,
+        run: (draft) => {
+          const container = draft.nodes[id];
+          if (!container || !container.parent || !draft.nodes[container.parent]) return;
+          if (container.children.length === 0) return;
+
+          const parent = draft.nodes[container.parent];
+          const insertIdx = parent.children.indexOf(id);
+
+          // Move children into parent
+          parent.children.splice(insertIdx, 1, ...container.children);
+          container.children.forEach((cid) => {
+            if (draft.nodes[cid]) {
+              draft.nodes[cid].parent = container.parent;
+            }
+          });
+
+          delete draft.nodes[id];
+        },
+      });
+    },
+
+    setNodeDimension: (id: string, bp: Bp, dim: 'width' | 'height', mode: 'fill' | 'hug' | 'fixed', px?: number) => {
+      get().exec({
+        label: `Set ${dim} ${mode} on ${id}`,
+        run: (draft) => {
+          const node = draft.nodes[id];
+          if (!node) return;
+          const targetStyle = bp === 'mobile' ? node.style.mobile : (node.style[bp] ||= {});
+
+          if (mode === 'fill') {
+            targetStyle[dim] = 'fill';
+          } else if (mode === 'hug') {
+            targetStyle[dim] = 'hug';
+          } else if (mode === 'fixed' && px !== undefined) {
+            targetStyle[dim] = { u: 'px', v: Math.max(1, Math.round(px)) };
+          }
         },
       });
     },
