@@ -775,12 +775,23 @@ export default function DomainFleetOperabilities({
 
             <div className="flex items-center gap-2">
               <a
+                href={`/bio/${order.domainName}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-[11px] transition-all flex items-center gap-1 shadow-xs"
+                title="Preview the Bio page directly on this app before global root DNS propagation"
+              >
+                <span>Preview Bio Hub</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+              <a
                 href={`https://${order.domainName}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-[11px] transition-all flex items-center gap-1"
+                title="Resolves on root nameservers once live registrar (DNA) credentials register the domain"
               >
-                <span>Visit Live Page</span>
+                <span>Visit Live Domain</span>
                 <ExternalLink className="w-3 h-3" />
               </a>
               <input
