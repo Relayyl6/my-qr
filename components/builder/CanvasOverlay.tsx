@@ -278,9 +278,23 @@ export function CanvasOverlay({
               onSelectNode(dragTargetId, false);
             }
             const parentNode = node.parent ? doc.nodes[node.parent] : null;
-            const isFree = parentNode?.type === 'free';
-            const initialX = node.style[bp]?.x ?? node.style.mobile?.x ?? 0;
-            const initialY = node.style[bp]?.y ?? node.style.mobile?.y ?? 0;
+            const isFree =
+              parentNode?.type === 'free' ||
+              node.style[bp]?.position === 'absolute' ||
+              node.style.mobile?.position === 'absolute' ||
+              e.altKey;
+
+            const nodeRect = rects[dragTargetId];
+            const parentRect = node.parent && rects[node.parent] ? rects[node.parent] : null;
+            const currentComputedX = parentRect && nodeRect
+              ? Math.round(nodeRect.left - parentRect.left)
+              : Math.round(nodeRect?.left ?? 0);
+            const currentComputedY = parentRect && nodeRect
+              ? Math.round(nodeRect.top - parentRect.top)
+              : Math.round(nodeRect?.top ?? 0);
+
+            const initialX = node.style[bp]?.x ?? node.style.mobile?.x ?? currentComputedX;
+            const initialY = node.style[bp]?.y ?? node.style.mobile?.y ?? currentComputedY;
 
             setDragMoveState({
               nodeId: dragTargetId,
@@ -346,6 +360,11 @@ export function CanvasOverlay({
             dragMoveState.dropTarget.containerId,
             dragMoveState.dropTarget.index
           );
+        } else {
+          // If no drop target was hit, treat as free move so drag is never lost
+          const finalX = Math.round(dragMoveState.initialNodeX + dragMoveState.currentDeltaX);
+          const finalY = Math.round(dragMoveState.initialNodeY + dragMoveState.currentDeltaY);
+          onMoveFreeNode?.(dragMoveState.nodeId, finalX, finalY);
         }
       } else {
         // Pointer moved <= 3px: IT IS A CLICK!
@@ -400,7 +419,7 @@ export function CanvasOverlay({
   ) => {
     e.stopPropagation();
     try {
-      (e.target as HTMLElement).setPointerCapture(e.pointerId);
+      (overlayRef.current as HTMLElement)?.setPointerCapture(e.pointerId);
     } catch {}
 
     setResizeState({
@@ -449,8 +468,8 @@ export function CanvasOverlay({
       }
     }
 
-    newWidth = Math.max(20, Math.round(newWidth));
-    newHeight = Math.max(20, Math.round(newHeight));
+    newWidth = Math.max(16, Math.round(newWidth));
+    newHeight = Math.max(16, Math.round(newHeight));
 
     setResizeState((prev) =>
       prev ? { ...prev, currentWidth: newWidth, currentHeight: newHeight } : null
@@ -461,7 +480,7 @@ export function CanvasOverlay({
     if (!resizeState) return;
     e.stopPropagation();
     try {
-      (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+      (overlayRef.current as HTMLElement)?.releasePointerCapture(e.pointerId);
     } catch {}
 
     const { handle, nodeId, currentWidth, currentHeight } = resizeState;

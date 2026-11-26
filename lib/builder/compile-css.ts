@@ -33,6 +33,8 @@ export function serializeSize(size: any, prop: 'width' | 'height' | 'min-width' 
     return [`${prop}:100%`];
   }
   if (size === 'hug') {
+    if (prop === 'width') return ['width:fit-content', 'max-width:fit-content', 'flex:0 0 auto'];
+    if (prop === 'height') return ['height:fit-content', 'max-height:fit-content', 'flex:0 0 auto'];
     return [`${prop}:fit-content`];
   }
   if (size === 'auto') {
@@ -41,8 +43,21 @@ export function serializeSize(size: any, prop: 'width' | 'height' | 'min-width' 
   if (typeof size === 'object' && size.u && typeof size.v === 'number') {
     const v = Number(size.v);
     if (!Number.isFinite(v)) return [];
-    if (size.u === 'px') return [`${prop}:${v}px`];
-    if (size.u === '%') return [`${prop}:${v}%`];
+    if (size.u === 'px') {
+      if (prop === 'width') {
+        return [`width:${v}px`, `max-width:${v}px`, `flex:0 0 ${v}px`];
+      }
+      if (prop === 'height') {
+        return [`height:${v}px`, `max-height:${v}px`, `flex-shrink:0`];
+      }
+      return [`${prop}:${v}px`];
+    }
+    if (size.u === '%') {
+      if (prop === 'width') {
+        return [`width:${v}%`, `max-width:${v}%`, `flex:0 0 ${v}%`];
+      }
+      return [`${prop}:${v}%`];
+    }
   }
   return [];
 }
@@ -126,6 +141,8 @@ export function serializeStyleDeclarations(style: Style): Record<string, string>
   // Positioning
   if (style.position) {
     decls['position'] = style.position === 'absolute' ? 'absolute' : 'static';
+  } else if (style.x !== undefined || style.y !== undefined) {
+    decls['position'] = 'absolute';
   }
   if (style.x !== undefined) {
     decls['left'] = `${Number(style.x)}px`;
@@ -135,6 +152,8 @@ export function serializeStyleDeclarations(style: Style): Record<string, string>
   }
   if (style.zIndex !== undefined) {
     decls['z-index'] = `${Number(style.zIndex)}`;
+  } else if (style.position === 'absolute' || style.x !== undefined || style.y !== undefined) {
+    decls['z-index'] = '10';
   }
   if (style.rotate !== undefined && style.rotate !== 0) {
     decls['transform'] = `rotate(${Number(style.rotate)}deg)`;
@@ -265,6 +284,13 @@ export function compileDocumentCss(doc: Doc): string {
       if (!mobileDecls['margin'] && !mobileDecls['margin-left']) {
         mobileDecls['margin-left'] = 'auto';
         mobileDecls['margin-right'] = 'auto';
+      }
+    }
+
+    // Ensure containers establish a positioning context for absolute/freely positioned children
+    if (['section', 'card', 'stack', 'grid', 'free'].includes(node.type)) {
+      if (!mobileDecls['position']) {
+        mobileDecls['position'] = 'relative';
       }
     }
 

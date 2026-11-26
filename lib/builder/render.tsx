@@ -107,7 +107,7 @@ export function RenderDoc({
             target="_blank"
             rel="noopener noreferrer"
             className={className}
-            style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', textDecoration: 'none', color: 'inherit' }}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', textDecoration: 'none', color: 'inherit' }}
           >
             <div style={{ display: 'flex', flexDirection: 'column', paddingRight: '8px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               <span style={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>
@@ -124,7 +124,7 @@ export function RenderDoc({
         const desc = props.desc as string | undefined;
 
         return (
-          <div key={node.id} className={className} style={{ width: '100%' }}>
+          <div key={node.id} className={className}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', width: '100%' }}>
               <span style={{ fontWeight: 700, fontSize: '14.5px' }}>{name}</span>
               {price && (

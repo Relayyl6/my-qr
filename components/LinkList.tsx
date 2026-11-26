@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { deleteLink, updateLink, toggleArchiveLink, checkDestinationHealth } from '@/app/actions';
 import QrCodeCard from './QrCodeCard';
@@ -64,8 +65,10 @@ export default function LinkList({
   const [activeRouterLink, setActiveRouterLink] = useState<{ link: QrLink; tab: 'schedule' | 'ai' | 'rules' } | null>(null);
   const [activeArtLink, setActiveArtLink] = useState<QrLink | null>(null);
   const [activePageLink, setActivePageLink] = useState<QrLink | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     setOrigin(window.location.origin);
   }, []);
 
@@ -496,70 +499,79 @@ export default function LinkList({
       </div>
 
       {/* AI Smart Destination Router Modal */}
-      {activeRouterLink && (
+      {mounted && activeRouterLink && createPortal(
         <div
-          className="fixed inset-0 z-50 bg-[#11140F]/40 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
+          className="fixed inset-0 z-[9999] bg-black/75 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
           onClick={(e) => {
             if (e.target === e.currentTarget) setActiveRouterLink(null);
           }}
         >
-          <AiRoutingComposer
-            linkId={activeRouterLink.link.id}
-            shortCode={activeRouterLink.link.shortCode}
-            defaultDestination={activeRouterLink.link.destinationUrl}
-            userTier={userTier}
-            isAdmin={isAdmin}
-            initialTab={activeRouterLink.tab}
-            onClose={() => setActiveRouterLink(null)}
-          />
-        </div>
+          <div className="w-full max-w-xl my-auto">
+            <AiRoutingComposer
+              linkId={activeRouterLink.link.id}
+              shortCode={activeRouterLink.link.shortCode}
+              defaultDestination={activeRouterLink.link.destinationUrl}
+              userTier={userTier}
+              isAdmin={isAdmin}
+              initialTab={activeRouterLink.tab}
+              onClose={() => setActiveRouterLink(null)}
+            />
+          </div>
+        </div>,
+        document.body
       )}
 
       {/* AI QR Art Studio Modal */}
-      {activeArtLink && (
+      {mounted && activeArtLink && createPortal(
         <div
-          className="fixed inset-0 z-50 bg-[#11140F]/40 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
+          className="fixed inset-0 z-[9999] bg-black/75 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
           onClick={(e) => {
             if (e.target === e.currentTarget) setActiveArtLink(null);
           }}
         >
-          <QrArtStudio
-            linkId={activeArtLink.id}
-            shortCode={activeArtLink.shortCode}
-            destinationUrl={activeArtLink.destinationUrl}
-            label={activeArtLink.label}
-            userTier={userTier}
-            isAdmin={isAdmin}
-            onClose={() => setActiveArtLink(null)}
-          />
-        </div>
+          <div className="w-full max-w-2xl my-auto">
+            <QrArtStudio
+              linkId={activeArtLink.id}
+              shortCode={activeArtLink.shortCode}
+              destinationUrl={activeArtLink.destinationUrl}
+              label={activeArtLink.label}
+              userTier={userTier}
+              isAdmin={isAdmin}
+              onClose={() => setActiveArtLink(null)}
+            />
+          </div>
+        </div>,
+        document.body
       )}
 
       {/* AI Instant Mobile Landing Page Modal */}
-      {activePageLink && (
+      {mounted && activePageLink && createPortal(
         <div
-          className="fixed inset-0 z-50 bg-[#11140F]/40 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
+          className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
           onClick={(e) => {
             if (e.target === e.currentTarget) setActivePageLink(null);
           }}
         >
-          <LandingPageEditor
-            linkId={activePageLink.id}
-            shortCode={activePageLink.shortCode}
-            destinationUrl={activePageLink.destinationUrl}
-            initialSpec={activePageLink.landingPage?.spec}
-            isCurrentlyActive={activePageLink.type === 'landing-page' && Boolean(activePageLink.landingPage?.published)}
-            userTier={userTier}
-            isAdmin={isAdmin}
-            onSaved={() => {
-              window.location.reload();
-            }}
-            onReverted={() => {
-              window.location.reload();
-            }}
-            onClose={() => setActivePageLink(null)}
-          />
-        </div>
+          <div className="w-full max-w-6xl my-auto">
+            <LandingPageEditor
+              linkId={activePageLink.id}
+              shortCode={activePageLink.shortCode}
+              destinationUrl={activePageLink.destinationUrl}
+              initialSpec={activePageLink.landingPage?.spec}
+              isCurrentlyActive={activePageLink.type === 'landing-page' && Boolean(activePageLink.landingPage?.published)}
+              userTier={userTier}
+              isAdmin={isAdmin}
+              onSaved={() => {
+                window.location.reload();
+              }}
+              onReverted={() => {
+                window.location.reload();
+              }}
+              onClose={() => setActivePageLink(null)}
+            />
+          </div>
+        </div>,
+        document.body
       )}
 
       {/* Custom Delete Confirmation Modal */}

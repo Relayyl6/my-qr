@@ -377,69 +377,310 @@ export function RightInspector({
 
         {/* TAB 2: LAYOUT */}
         {activeTab === 'layout' && (
-          <div className="space-y-3">
-            {/* Direction */}
+          <div className="space-y-4">
+            {/* 1. WIDTH CONTROLS */}
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="text-[11px] font-semibold uppercase opacity-60">Flex Direction</label>
-                {renderOverrideDot('direction')}
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-[11px] font-semibold uppercase opacity-60">Width</label>
+                {renderOverrideDot('width')}
               </div>
-              <div className="grid grid-cols-2 gap-1.5">
-                {(['column', 'row'] as const).map((dir) => (
-                  <button
-                    key={dir}
-                    onClick={() => onUpdateStyle(node.id, bp, { direction: dir })}
-                    className={`py-1.5 px-2 rounded-lg border text-center font-semibold capitalize text-[11px] ${
-                      resolved.direction === dir
-                        ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400'
-                        : 'border-white/10 bg-[#181D1A] text-white/60 hover:text-white'
-                    }`}
-                  >
-                    {dir}
-                  </button>
-                ))}
-              </div>
+              {(() => {
+                const widthVal = resolved.width;
+                const isHug = widthVal === 'hug';
+                const isFixed = typeof widthVal === 'object' && widthVal.u === 'px';
+                const isFill = !isHug && !isFixed;
+                const fixedPx = isFixed ? (widthVal as any).v : 240;
+
+                return (
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-3 gap-1 bg-[#181D1A] p-1 rounded-lg border border-white/10">
+                      <button
+                        type="button"
+                        onClick={() => onUpdateStyle(node.id, bp, { width: 'fill' })}
+                        className={`py-1 rounded text-[11px] font-medium transition-colors ${
+                          isFill ? 'bg-emerald-600 text-white shadow-xs font-semibold' : 'text-white/60 hover:text-white'
+                        }`}
+                      >
+                        Fill
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onUpdateStyle(node.id, bp, { width: 'hug' })}
+                        className={`py-1 rounded text-[11px] font-medium transition-colors ${
+                          isHug ? 'bg-emerald-600 text-white shadow-xs font-semibold' : 'text-white/60 hover:text-white'
+                        }`}
+                      >
+                        Hug
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onUpdateStyle(node.id, bp, { width: { u: 'px', v: fixedPx } })}
+                        className={`py-1 rounded text-[11px] font-medium transition-colors ${
+                          isFixed ? 'bg-emerald-600 text-white shadow-xs font-semibold' : 'text-white/60 hover:text-white'
+                        }`}
+                      >
+                        Fixed
+                      </button>
+                    </div>
+
+                    {isFixed && (
+                      <div className="p-2 rounded-lg bg-[#181D1A] border border-white/10 space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] text-white/50">Width (px)</span>
+                          <span className="text-[11px] font-mono text-emerald-400 font-bold">{fixedPx}px</span>
+                        </div>
+                        <input
+                          type="range"
+                          min={20}
+                          max={1200}
+                          step={10}
+                          value={fixedPx}
+                          onChange={(e) => onUpdateStyle(node.id, bp, { width: { u: 'px', v: Number(e.target.value) } })}
+                          className="w-full accent-emerald-500"
+                        />
+                        <SmoothInput
+                          type="number"
+                          min={20}
+                          max={2000}
+                          value={fixedPx.toString()}
+                          onChangeValue={(val) => {
+                            const n = parseInt(val, 10);
+                            if (!isNaN(n) && n >= 20) {
+                              onUpdateStyle(node.id, bp, { width: { u: 'px', v: n } });
+                            }
+                          }}
+                          className="w-full bg-[#121613] border border-white/10 rounded px-2 py-1 text-white text-[11px] font-mono"
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
 
-            {/* Gap Slider */}
+            {/* 2. HEIGHT CONTROLS */}
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="text-[11px] font-semibold uppercase opacity-60">Gap ({resolved.gap || 0}px)</label>
-                {renderOverrideDot('gap')}
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-[11px] font-semibold uppercase opacity-60">Height</label>
+                {renderOverrideDot('height')}
               </div>
-              <input
-                type="range"
-                min={0}
-                max={48}
-                step={4}
-                value={resolved.gap ?? 16}
-                onChange={(e) => onUpdateStyle(node.id, bp, { gap: Number(e.target.value) })}
-                className="w-full accent-emerald-500"
-              />
+              {(() => {
+                const heightVal = resolved.height;
+                const isFixed = typeof heightVal === 'object' && heightVal.u === 'px';
+                const isAuto = !isFixed;
+                const fixedPx = isFixed ? (heightVal as any).v : 120;
+
+                return (
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-2 gap-1 bg-[#181D1A] p-1 rounded-lg border border-white/10">
+                      <button
+                        type="button"
+                        onClick={() => onUpdateStyle(node.id, bp, { height: 'hug' })}
+                        className={`py-1 rounded text-[11px] font-medium transition-colors ${
+                          isAuto ? 'bg-emerald-600 text-white shadow-xs font-semibold' : 'text-white/60 hover:text-white'
+                        }`}
+                      >
+                        Auto / Hug
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onUpdateStyle(node.id, bp, { height: { u: 'px', v: fixedPx } })}
+                        className={`py-1 rounded text-[11px] font-medium transition-colors ${
+                          isFixed ? 'bg-emerald-600 text-white shadow-xs font-semibold' : 'text-white/60 hover:text-white'
+                        }`}
+                      >
+                        Fixed (px)
+                      </button>
+                    </div>
+
+                    {isFixed && (
+                      <div className="p-2 rounded-lg bg-[#181D1A] border border-white/10 space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] text-white/50">Height (px)</span>
+                          <span className="text-[11px] font-mono text-emerald-400 font-bold">{fixedPx}px</span>
+                        </div>
+                        <input
+                          type="range"
+                          min={20}
+                          max={800}
+                          step={10}
+                          value={fixedPx}
+                          onChange={(e) => onUpdateStyle(node.id, bp, { height: { u: 'px', v: Number(e.target.value) } })}
+                          className="w-full accent-emerald-500"
+                        />
+                        <SmoothInput
+                          type="number"
+                          min={20}
+                          max={2000}
+                          value={fixedPx.toString()}
+                          onChangeValue={(val) => {
+                            const n = parseInt(val, 10);
+                            if (!isNaN(n) && n >= 20) {
+                              onUpdateStyle(node.id, bp, { height: { u: 'px', v: n } });
+                            }
+                          }}
+                          className="w-full bg-[#121613] border border-white/10 rounded px-2 py-1 text-white text-[11px] font-mono"
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
 
-            {/* Grid Columns */}
-            {node.type === 'grid' && (
+            {/* 3. POSITIONING MODE (In-Flow vs Free Drag) */}
+            {node.type !== 'section' && (
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-[11px] font-semibold uppercase opacity-60">Grid Columns</label>
-                  {renderOverrideDot('columns')}
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-[11px] font-semibold uppercase opacity-60">Positioning</label>
+                  {renderOverrideDot('position')}
                 </div>
-                <div className="grid grid-cols-3 gap-1">
-                  {[1, 2, 3].map((cols) => (
-                    <button
-                      key={cols}
-                      onClick={() => onUpdateStyle(node.id, bp, { columns: cols })}
-                      className={`py-1.5 rounded-lg border font-bold text-[11px] ${
-                        resolved.columns === cols
-                          ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400'
-                          : 'border-white/10 bg-[#181D1A] text-white/60 hover:text-white'
-                      }`}
-                    >
-                      {cols} col
-                    </button>
-                  ))}
+                {(() => {
+                  const isFree = resolved.position === 'absolute' || resolved.x !== undefined || resolved.y !== undefined;
+                  const currentX = resolved.x ?? 0;
+                  const currentY = resolved.y ?? 0;
+
+                  return (
+                    <div className="space-y-2">
+                      <div className="grid grid-cols-2 gap-1 bg-[#181D1A] p-1 rounded-lg border border-white/10">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onUpdateStyle(node.id, bp, {
+                              position: undefined,
+                              x: undefined,
+                              y: undefined,
+                            });
+                          }}
+                          className={`py-1 rounded text-[11px] font-medium transition-colors ${
+                            !isFree ? 'bg-emerald-600 text-white shadow-xs font-semibold' : 'text-white/60 hover:text-white'
+                          }`}
+                        >
+                          In-Flow (Stack)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onUpdateStyle(node.id, bp, {
+                              position: 'absolute',
+                              x: resolved.x ?? 20,
+                              y: resolved.y ?? 20,
+                            });
+                          }}
+                          className={`py-1 rounded text-[11px] font-medium transition-colors ${
+                            isFree ? 'bg-emerald-600 text-white shadow-xs font-semibold' : 'text-white/60 hover:text-white'
+                          }`}
+                        >
+                          Free (Drag)
+                        </button>
+                      </div>
+
+                      {isFree && (
+                        <div className="p-2.5 rounded-lg bg-[#181D1A] border border-white/10 space-y-2">
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <label className="text-[10px] font-semibold opacity-60 block mb-0.5">X (Left px)</label>
+                              <SmoothInput
+                                type="number"
+                                value={currentX.toString()}
+                                onChangeValue={(val) => {
+                                  const n = parseInt(val, 10);
+                                  onUpdateStyle(node.id, bp, { x: isNaN(n) ? 0 : n, position: 'absolute' });
+                                }}
+                                className="w-full bg-[#121613] border border-white/10 rounded px-2 py-1 text-white text-[11px] font-mono"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] font-semibold opacity-60 block mb-0.5">Y (Top px)</label>
+                              <SmoothInput
+                                type="number"
+                                value={currentY.toString()}
+                                onChangeValue={(val) => {
+                                  const n = parseInt(val, 10);
+                                  onUpdateStyle(node.id, bp, { y: isNaN(n) ? 0 : n, position: 'absolute' });
+                                }}
+                                className="w-full bg-[#121613] border border-white/10 rounded px-2 py-1 text-white text-[11px] font-mono"
+                              />
+                            </div>
+                          </div>
+                          <p className="text-[10px] text-emerald-400/80 leading-tight">
+                            ✨ Free mode active: Drag this element directly anywhere on the canvas.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+            {/* 4. CONTAINER SETTINGS (Direction, Gap, Columns) */}
+            {['section', 'card', 'stack', 'grid', 'free'].includes(node.type) && (
+              <div className="space-y-3 pt-2 border-t border-white/10">
+                {/* Direction */}
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-[11px] font-semibold uppercase opacity-60">Flex Direction</label>
+                    {renderOverrideDot('direction')}
+                  </div>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {(['column', 'row'] as const).map((dir) => (
+                      <button
+                        key={dir}
+                        onClick={() => onUpdateStyle(node.id, bp, { direction: dir })}
+                        className={`py-1.5 px-2 rounded-lg border text-center font-semibold capitalize text-[11px] ${
+                          resolved.direction === dir
+                            ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400'
+                            : 'border-white/10 bg-[#181D1A] text-white/60 hover:text-white'
+                        }`}
+                      >
+                        {dir}
+                      </button>
+                    ))}
+                  </div>
                 </div>
+
+                {/* Gap Slider */}
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-[11px] font-semibold uppercase opacity-60">Gap ({resolved.gap || 0}px)</label>
+                    {renderOverrideDot('gap')}
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={48}
+                    step={4}
+                    value={resolved.gap ?? 16}
+                    onChange={(e) => onUpdateStyle(node.id, bp, { gap: Number(e.target.value) })}
+                    className="w-full accent-emerald-500"
+                  />
+                </div>
+
+                {/* Grid Columns */}
+                {node.type === 'grid' && (
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-[11px] font-semibold uppercase opacity-60">Grid Columns</label>
+                      {renderOverrideDot('columns')}
+                    </div>
+                    <div className="grid grid-cols-3 gap-1">
+                      {[1, 2, 3].map((cols) => (
+                        <button
+                          key={cols}
+                          onClick={() => onUpdateStyle(node.id, bp, { columns: cols })}
+                          className={`py-1.5 rounded-lg border font-bold text-[11px] ${
+                            resolved.columns === cols
+                              ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400'
+                              : 'border-white/10 bg-[#181D1A] text-white/60 hover:text-white'
+                          }`}
+                        >
+                          {cols} col
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

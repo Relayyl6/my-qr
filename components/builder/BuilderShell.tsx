@@ -135,8 +135,9 @@ export function BuilderShell({ initialDoc, pageId, onSave }: BuilderShellProps) 
           const target = draft.nodes[id];
           if (!target) return;
           const targetStyle = ui.bp === 'mobile' ? target.style.mobile : (target.style[ui.bp] ||= {});
-          targetStyle.x = x;
-          targetStyle.y = y;
+          targetStyle.position = 'absolute';
+          targetStyle.x = Math.round(x);
+          targetStyle.y = Math.round(y);
         },
       });
     },

@@ -301,10 +301,13 @@ export const createBuilderStore = (initialDoc: Doc) => {
         run: (draft) => {
           const node = draft.nodes[id];
           if (!node) return;
-          if (bp === 'mobile') {
-            node.style.mobile = { ...node.style.mobile, ...style };
-          } else {
-            node.style[bp] = { ...(node.style[bp] || {}), ...style };
+          const targetStyle = bp === 'mobile' ? node.style.mobile : (node.style[bp] ||= {});
+          for (const [k, v] of Object.entries(style)) {
+            if (v === undefined) {
+              delete (targetStyle as any)[k];
+            } else {
+              (targetStyle as any)[k] = v;
+            }
           }
         },
       });
