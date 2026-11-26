@@ -22,6 +22,9 @@ import {
   Sparkles,
   Download,
   Send,
+  Inbox,
+  MessageSquare,
+  Phone,
 } from 'lucide-react';
 import {
   updateDomainFleetSettings,
@@ -34,6 +37,7 @@ import {
   activateDomainDeliverabilityShield,
   toggleDomainBioPage,
   saveDomainBioConfig,
+  deleteDomainContact,
 } from '@/app/domains-actions';
 
 interface DomainOrderData {
@@ -74,7 +78,7 @@ export default function DomainFleetOperabilities({
 }) {
   const isUltra = userTier.toLowerCase() === 'ultra' || isAdmin;
   const isPlusOrUltra = ['plus', 'ultra'].includes(userTier.toLowerCase()) || isAdmin;
-  const [activeTab, setActiveTab] = useState<'security' | 'redirect' | 'emails' | 'nameservers' | 'bio'>('security');
+  const [activeTab, setActiveTab] = useState<'security' | 'redirect' | 'emails' | 'nameservers' | 'bio' | 'inbox'>('security');
   const [saving, setSaving] = useState(false);
   const [copiedEpp, setCopiedEpp] = useState(false);
   const [eppCode, setEppCode] = useState<string | null>(order.eppCode || null);
@@ -114,6 +118,9 @@ export default function DomainFleetOperabilities({
   const [bioPhone, setBioPhone] = useState(initialBio.phone || '');
   const [bioInstagram, setBioInstagram] = useState(initialBio.instagram || '');
   const [savingBio, setSavingBio] = useState(false);
+  const [inquiries, setInquiries] = useState<any[]>(
+    Array.isArray(initialBio.inquiries) ? initialBio.inquiries : []
+  );
 
   // Nameservers State
   const [nsMode, setNsMode] = useState<'cloudflare' | 'custom'>(
@@ -366,6 +373,25 @@ export default function DomainFleetOperabilities({
     }
   };
 
+  // 7. Delete Customer Bio Inquiry
+  const handleDeleteInquiry = async (inquiryId: string) => {
+    setSaving(true);
+    setAlert(null);
+    try {
+      const res = await deleteDomainContact(inquiryId);
+      if (res.success) {
+        setInquiries((prev) => prev.filter((inq) => inq.id !== inquiryId));
+        setAlert({ type: 'success', text: 'Inquiry deleted successfully.' });
+      } else {
+        setAlert({ type: 'error', text: res.message || 'Failed to delete inquiry.' });
+      }
+    } catch (e: any) {
+      setAlert({ type: 'error', text: e.message || 'Error deleting inquiry.' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="mt-3 pt-4 border-t border-[#11140F]/10 dark:border-white/10 space-y-4 text-xs">
       {/* Sub-tabs header */}
@@ -374,6 +400,7 @@ export default function DomainFleetOperabilities({
           { id: 'security', label: 'WHOIS & Transfer Lock', icon: ShieldCheck },
           { id: 'emails', label: 'Email, Catch-All & Spam Shield', icon: Mail },
           { id: 'bio', label: 'Instant Bio & vCard', icon: Sparkles },
+          { id: 'inbox', label: `Lead Inquiries (${inquiries.length})`, icon: Inbox, badge: inquiries.length },
           { id: 'redirect', label: 'Web / URL Forwarding', icon: Share2 },
           { id: 'nameservers', label: 'Custom Nameservers', icon: Server },
         ].map((tab) => {
@@ -395,6 +422,15 @@ export default function DomainFleetOperabilities({
             >
               <Icon className="w-3.5 h-3.5" />
               <span>{tab.label}</span>
+              {tab.id === 'inbox' && inquiries.length > 0 && (
+                <span className={`px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold ${
+                  isActive
+                    ? 'bg-emerald-500 text-white'
+                    : 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300'
+                }`}>
+                  {inquiries.length}
+                </span>
+              )}
             </button>
           );
         })}
@@ -892,6 +928,108 @@ export default function DomainFleetOperabilities({
               </a>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* TAB: LEAD INQUIRIES & INBOX */}
+      {activeTab === 'inbox' && (
+        <div className="space-y-3.5">
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="font-bold text-xs uppercase tracking-wider text-[#11140F] dark:text-white flex items-center gap-1.5">
+                <Inbox className="w-4 h-4 text-emerald-600" />
+                <span>Captured Lead Inquiries</span>
+                <span className="px-1.5 py-0.2 rounded bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 font-mono text-[10px] font-bold">
+                  {inquiries.length} received
+                </span>
+              </h4>
+              <p className="text-[11px] text-[#11140F]/60 dark:text-white/60">
+                Visitors who submitted the contact form on your brand hub ({order.domainName}).
+              </p>
+            </div>
+          </div>
+
+          {inquiries.length === 0 ? (
+            <div className="p-8 text-center rounded-2xl border border-dashed border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5]/40 dark:bg-white/[0.01] space-y-2">
+              <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 flex items-center justify-center mx-auto">
+                <MessageSquare className="w-5 h-5" />
+              </div>
+              <p className="font-semibold text-xs text-[#11140F] dark:text-white">
+                No inquiries submitted yet
+              </p>
+              <p className="text-[11px] text-[#11140F]/50 dark:text-white/50 max-w-sm mx-auto">
+                When visitors open your brand portal at <strong>https://{order.domainName}</strong> and send an inquiry, their contact details and messages will show up here in real time.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2.5">
+              {inquiries.map((inq: any) => (
+                <div
+                  key={inq.id}
+                  className="p-3.5 rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#151912] shadow-2xs space-y-2"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-xs text-[#11140F] dark:text-white">
+                          {inq.name || 'Anonymous Visitor'}
+                        </span>
+                        <span className="text-[10px] text-[#11140F]/45 dark:text-white/45 font-mono">
+                          {inq.createdAt ? new Date(inq.createdAt).toLocaleString() : 'Recent'}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 text-[11px] text-[#11140F]/65 dark:text-white/65">
+                        <a href={`mailto:${inq.email}`} className="hover:underline flex items-center gap-1 text-emerald-700 dark:text-emerald-400 font-medium">
+                          <Mail className="w-3 h-3" />
+                          <span>{inq.email}</span>
+                        </a>
+                        {inq.phone && (
+                          <span className="flex items-center gap-1 font-mono text-[10.5px]">
+                            <Phone className="w-3 h-3 text-[#11140F]/40 dark:text-white/40" />
+                            <span>{inq.phone}</span>
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <a
+                        href={`mailto:${inq.email}?subject=${encodeURIComponent(`Re: Inquiry regarding ${order.domainName}`)}`}
+                        className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[10.5px] font-semibold transition-colors flex items-center gap-1"
+                      >
+                        <Send className="w-3 h-3" />
+                        <span>Reply Email</span>
+                      </a>
+                      {inq.phone && (
+                        <a
+                          href={`https://wa.me/${inq.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hello ${inq.name}, thanks for reaching out via ${order.domainName}!`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-[10.5px] font-semibold transition-colors"
+                        >
+                          WhatsApp
+                        </a>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteInquiry(inq.id)}
+                        className="p-1 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                        title="Delete inquiry"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {inq.message && (
+                    <div className="p-2.5 rounded-lg bg-[#F7F8F5] dark:bg-black/40 text-[11px] text-[#11140F]/80 dark:text-white/80 leading-relaxed font-sans border border-[#11140F]/5 dark:border-white/5">
+                      "{inq.message}"
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

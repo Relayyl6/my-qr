@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import {
   Printer,
@@ -22,6 +22,29 @@ import {
   Wifi,
   ShoppingBag,
   Star,
+  Heart,
+  Camera,
+  Music,
+  Phone,
+  Mail,
+  Globe,
+  MapPin,
+  Award,
+  Zap,
+  Key,
+  Bell,
+  Gift,
+  Compass,
+  Bookmark,
+  DollarSign,
+  Tag,
+  Flame,
+  Smile,
+  Search,
+  RotateCcw,
+  Move,
+  Loader2,
+  Pipette,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -42,7 +65,148 @@ interface Props {
 }
 
 type TemplateType = 'table-tent' | 'window-sign' | 'card-badge' | 'full-poster';
-type CenterLogoType = 'none' | 'star' | 'utensils' | 'wifi' | 'coffee' | 'bag';
+
+export interface IconItem {
+  id: string;
+  label: string;
+  tags: string[];
+  path: string;
+  fill?: boolean;
+  color?: string;
+}
+
+export const BUILTIN_ICONS: IconItem[] = [
+  {
+    id: 'none',
+    label: 'None',
+    tags: ['clear', 'remove', 'empty'],
+    path: '',
+  },
+  {
+    id: 'star',
+    label: 'Star',
+    tags: ['rating', 'favorite', 'vip', 'top'],
+    path: 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z',
+    fill: true,
+    color: '#F59E0B',
+  },
+  {
+    id: 'utensils',
+    label: 'Food',
+    tags: ['restaurant', 'dining', 'menu', 'eat'],
+    path: 'M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2 M7 2v20 M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7',
+    color: '#11140F',
+  },
+  {
+    id: 'wifi',
+    label: 'Wi-Fi',
+    tags: ['internet', 'network', 'wireless', 'connect'],
+    path: 'M12 20h.01 M2 8.82a15 15 0 0 1 20 0 M5 12.86a10 10 0 0 1 14 0 M8.5 16.43a5 5 0 0 1 7 0',
+    color: '#2563EB',
+  },
+  {
+    id: 'coffee',
+    label: 'Cafe',
+    tags: ['drink', 'tea', 'espresso', 'barista'],
+    path: 'M10 2v2 M14 2v2 M17 8h1a4 4 0 1 1 0 8h-1 M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z M6 2v2',
+    color: '#92400E',
+  },
+  {
+    id: 'bag',
+    label: 'Shop',
+    tags: ['store', 'retail', 'cart', 'buy', 'ecommerce'],
+    path: 'M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z M3 6h18 M16 10a4 4 0 0 1-8 0',
+    color: '#2F6B4F',
+  },
+  {
+    id: 'heart',
+    label: 'Heart',
+    tags: ['love', 'like', 'health', 'charity', 'beauty'],
+    path: 'M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z',
+    fill: true,
+    color: '#EF4444',
+  },
+  {
+    id: 'sparkles',
+    label: 'Sparkles',
+    tags: ['magic', 'new', 'ai', 'clean', 'promo'],
+    path: 'm12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z',
+    fill: true,
+    color: '#8B5CF6',
+  },
+  {
+    id: 'zap',
+    label: 'Fast',
+    tags: ['speed', 'flash', 'energy', 'electric', 'power'],
+    path: 'M13 2L3 14h9l-1 8 10-12h-9l1-8z',
+    fill: true,
+    color: '#EAB308',
+  },
+  {
+    id: 'shield',
+    label: 'Security',
+    tags: ['protect', 'verified', 'safe', 'trust'],
+    path: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',
+    color: '#10B981',
+  },
+  {
+    id: 'camera',
+    label: 'Camera',
+    tags: ['photo', 'instagram', 'gallery', 'shoot'],
+    path: 'M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z M12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z',
+    color: '#0284C7',
+  },
+  {
+    id: 'music',
+    label: 'Music',
+    tags: ['sound', 'dj', 'audio', 'spotify', 'song'],
+    path: 'M9 18V5l12-2v13 M6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M18 19a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
+    color: '#EC4899',
+  },
+  {
+    id: 'phone',
+    label: 'Call',
+    tags: ['telephone', 'contact', 'support', 'mobile'],
+    path: 'M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z',
+    color: '#16A34A',
+  },
+  {
+    id: 'mail',
+    label: 'Email',
+    tags: ['newsletter', 'inbox', 'message', 'letter'],
+    path: 'M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z M22 6l-10 7L2 6',
+    color: '#EA580C',
+  },
+  {
+    id: 'globe',
+    label: 'Website',
+    tags: ['web', 'portfolio', 'internet', 'link', 'url'],
+    path: 'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zm-9.9-10h19.8M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z',
+    color: '#4F46E5',
+  },
+  {
+    id: 'flame',
+    label: 'Hot / Deal',
+    tags: ['fire', 'trend', 'sale', 'spicy', 'popular'],
+    path: 'M8.5 14.5A2.5 2.5 0 0 0 11 17c1.38 0 2.5-1.12 2.5-2.5 0-1.88-1.5-2.5-2-4-.5 1.5-2 2.12-2 4z M12 2c-4 5-8 7.5-8 12a8 8 0 0 0 16 0c0-4.5-4-7-8-12z',
+    fill: true,
+    color: '#DC2626',
+  },
+  {
+    id: 'gift',
+    label: 'Promo',
+    tags: ['present', 'discount', 'free', 'giveaway'],
+    path: 'M20 12v10H4V12 M2 7h20v5H2z M12 22V7 M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zm0 0h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z',
+    color: '#9333EA',
+  },
+  {
+    id: 'trophy',
+    label: 'Winner',
+    tags: ['award', 'first', 'champion', 'contest'],
+    path: 'M6 9H4.5a2.5 2.5 0 0 1 0-5H6 M18 9h1.5a2.5 2.5 0 0 0 0-5H18 M4 22h16 M10 14.66V17c0 .55-.45 1-1 1H8v4h8v-4h-1c-.55 0-1-.45-1-1v-2.34 M18 2H6v7a6 6 0 0 0 12 0V2z',
+    color: '#CA8A04',
+  },
+];
 
 export const COLOR_PALETTES = [
   { name: 'Classic Ink', hex: '#11140F' },
@@ -53,14 +217,39 @@ export const COLOR_PALETTES = [
   { name: 'Amber Gold', hex: '#B45309' },
 ];
 
+export const EXTENDED_SWATCHES = [
+  { name: 'Emerald Neon', hex: '#10B981' },
+  { name: 'Electric Blue', hex: '#2563EB' },
+  { name: 'Sunset Coral', hex: '#F97316' },
+  { name: 'Fuchsia Rose', hex: '#EC4899' },
+  { name: 'Midnight Indigo', hex: '#4338CA' },
+  { name: 'Deep Slate', hex: '#334155' },
+];
+
+function hslToHex(h: number, s: number, l: number): string {
+  l /= 100;
+  const a = (s * Math.min(l, 1 - l)) / 100;
+  const f = (n: number) => {
+    const k = (n + h / 30) % 12;
+    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * color)
+      .toString(16)
+      .padStart(2, '0');
+  };
+  return `#${f(0)}${f(8)}${f(4)}`.toUpperCase();
+}
+
 function drawCenterQrBadge(
   ctx: CanvasRenderingContext2D,
   centerX: number,
   centerY: number,
   qrSize: number,
-  logoType: CenterLogoType
+  activeIcon: IconItem | null,
+  customPath?: string | null
 ) {
-  if (logoType === 'none') return;
+  if (!activeIcon && !customPath) return;
+  const pathData = customPath || activeIcon?.path;
+  if (!pathData) return;
 
   const badgeRadius = qrSize * 0.088;
 
@@ -81,36 +270,20 @@ function drawCenterQrBadge(
   ctx.scale(scale, scale);
   ctx.translate(-12, -12);
 
-  if (logoType === 'star') {
-    const starPath = new Path2D(
-      'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'
-    );
-    ctx.fillStyle = '#F59E0B';
-    ctx.fill(starPath);
-  } else if (logoType === 'utensils') {
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.strokeStyle = '#11140F';
-    ctx.stroke(new Path2D('M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2 M7 2v20 M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7'));
-  } else if (logoType === 'wifi') {
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.strokeStyle = '#2563EB';
-    ctx.stroke(new Path2D('M12 20h.01 M2 8.82a15 15 0 0 1 20 0 M5 12.86a10 10 0 0 1 14 0 M8.5 16.43a5 5 0 0 1 7 0'));
-  } else if (logoType === 'coffee') {
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.strokeStyle = '#92400E';
-    ctx.stroke(new Path2D('M10 2v2 M14 2v2 M17 8h1a4 4 0 1 1 0 8h-1 M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z M6 2v2'));
-  } else if (logoType === 'bag') {
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.strokeStyle = '#2F6B4F';
-    ctx.stroke(new Path2D('M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z M3 6h18 M16 10a4 4 0 0 1-8 0'));
+  try {
+    const p = new Path2D(pathData);
+    if (activeIcon?.fill) {
+      ctx.fillStyle = activeIcon.color || '#F59E0B';
+      ctx.fill(p);
+    } else {
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = activeIcon?.color || '#11140F';
+      ctx.stroke(p);
+    }
+  } catch (err) {
+    console.error('Failed to draw custom Path2D onto canvas:', err);
   }
 
   ctx.restore();
@@ -137,17 +310,25 @@ export default function PrintTemplateModal({
   const [subline, setSubline] = useState(defaultSubline || 'Point your camera at this code');
   const [footerNote, setFooterNote] = useState(defaultFooterNote || 'Powered by Dynamic QR');
   const [accentColor, setAccentColor] = useState('#11140F');
-  const [centerLogo, setCenterLogo] = useState<CenterLogoType>('none');
+  const [hueValue, setHueValue] = useState(0);
 
-  useEffect(() => {
-    if (isOpen) {
-      if (defaultTemplate) setTemplate(defaultTemplate);
-      setHeadline(defaultHeadline || label || 'Scan to Open');
-      if (defaultHeaderTag) setHeaderTag(defaultHeaderTag);
-      if (defaultSubline) setSubline(defaultSubline);
-      setFooterNote(defaultFooterNote || 'Powered by Dynamic QR');
-    }
-  }, [isOpen, url, defaultHeadline, defaultHeaderTag, defaultSubline, defaultFooterNote, defaultTemplate, label]);
+  // Icon query & AI draw state
+  const [selectedIconId, setSelectedIconId] = useState<string>('none');
+  const [iconQuery, setIconQuery] = useState('');
+  const [customAiIcon, setCustomAiIcon] = useState<{ name: string; path: string } | null>(null);
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [isGeneratingAi, setIsGeneratingAi] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+
+  // Drag and Drop QR Placement State
+  const [qrOffset, setQrOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef<{ startX: number; startY: number; initialX: number; initialY: number }>({
+    startX: 0,
+    startY: 0,
+    initialX: 0,
+    initialY: 0,
+  });
 
   // Element visibility toggles
   const [showHeaderTag, setShowHeaderTag] = useState(true);
@@ -161,14 +342,105 @@ export default function PrintTemplateModal({
   const [lockedFeatureNotice, setLockedFeatureNotice] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
 
+  useEffect(() => {
+    if (isOpen) {
+      if (defaultTemplate) setTemplate(defaultTemplate);
+      setHeadline(defaultHeadline || label || 'Scan to Open');
+      if (defaultHeaderTag) setHeaderTag(defaultHeaderTag);
+      if (defaultSubline) setSubline(defaultSubline);
+      setFooterNote(defaultFooterNote || 'Powered by Dynamic QR');
+      setQrOffset({ x: 0, y: 0 });
+    }
+  }, [isOpen, url, defaultHeadline, defaultHeaderTag, defaultSubline, defaultFooterNote, defaultTemplate, label]);
+
+  // Pointer drag events for QR positioning
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    setIsDragging(true);
+    dragStartRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      initialX: qrOffset.x,
+      initialY: qrOffset.y,
+    };
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
+    const dx = e.clientX - dragStartRef.current.startX;
+    const dy = e.clientY - dragStartRef.current.startY;
+    setQrOffset({
+      x: dragStartRef.current.initialX + dx,
+      y: dragStartRef.current.initialY + dy,
+    });
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (isDragging) {
+      setIsDragging(false);
+      try {
+        (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+      } catch {}
+    }
+  };
+
+  // AI Icon generation handler
+  const handleGenerateAiIcon = async (promptOverride?: string) => {
+    const promptToUse = (promptOverride || aiPrompt || iconQuery).trim();
+    if (!promptToUse) return;
+
+    setIsGeneratingAi(true);
+    setAiError(null);
+    try {
+      const res = await fetch('/api/ai-draw-icon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: promptToUse }),
+      });
+      const data = await res.json();
+      if (data.success && data.svgPath) {
+        setCustomAiIcon({ name: data.name || promptToUse, path: data.svgPath });
+        setSelectedIconId('custom-ai');
+      } else {
+        setAiError(data.error || 'Could not generate icon.');
+      }
+    } catch (err: any) {
+      setAiError(err.message || 'Generation failed.');
+    } finally {
+      setIsGeneratingAi(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   const tier = userTier.toLowerCase();
-  const canCustomizeElements = isAdmin || ['pro', 'plus', 'ultra'].includes(tier);
+  const canCustomizeElements = true; // Drag & drop and colors allowed for all users as requested
   const canWhiteLabel = isAdmin || ['plus', 'ultra'].includes(tier);
-  const canUseLogos = isAdmin || ['plus', 'ultra'].includes(tier);
 
-  // Single-page isolated print routine: guarantees exactly 1 sheet of paper
+  // Find active icon definition
+  const activeIconDef: IconItem | null =
+    selectedIconId === 'custom-ai' && customAiIcon
+      ? {
+          id: 'custom-ai',
+          label: customAiIcon.name,
+          tags: ['custom', 'ai'],
+          path: customAiIcon.path,
+          color: accentColor,
+        }
+      : BUILTIN_ICONS.find((i) => i.id === selectedIconId) || null;
+
+  // Filtered icons for search
+  const filteredIcons = BUILTIN_ICONS.filter((item) => {
+    if (!iconQuery.trim()) return true;
+    const q = iconQuery.toLowerCase();
+    return (
+      item.label.toLowerCase().includes(q) ||
+      item.tags.some((t) => t.toLowerCase().includes(q))
+    );
+  });
+
+  // Single-page isolated print routine: guarantees exactly 1 sheet of paper with placed QR
   const handlePrint = () => {
     const printSheet = document.getElementById('print-sheet');
     if (!printSheet) {
@@ -237,6 +509,7 @@ export default function PrintTemplateModal({
               background: #ffffff;
               width: ${isBadge ? '420px' : isSign ? '440px' : isFullPoster ? '520px' : '360px'};
               height: ${isBadge ? '230px' : isSign ? '440px' : isFullPoster ? '700px' : '520px'};
+              position: relative;
               page-break-inside: avoid;
               break-inside: avoid;
             }
@@ -252,8 +525,6 @@ export default function PrintTemplateModal({
             .uppercase { text-transform: uppercase; }
             .tracking-widest { letter-spacing: 0.12em; }
             .tracking-wider { letter-spacing: 0.06em; }
-            .space-y-1 > * + * { margin-top: 6px; }
-            .space-y-1\\.5 > * + * { margin-top: 8px; }
             .rounded-full { border-radius: 9999px; }
             .rounded-xl { border-radius: 14px; }
             .rounded-2xl { border-radius: 20px; }
@@ -269,8 +540,6 @@ export default function PrintTemplateModal({
             .items-center { align-items: center; }
             .justify-between { justify-content: space-between; }
             .gap-4 { gap: 20px; }
-            .my-2 { margin-top: 14px; margin-bottom: 14px; }
-            .inline-block { display: inline-block; }
             .relative { position: relative; }
             .absolute { position: absolute; }
             .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
@@ -282,15 +551,8 @@ export default function PrintTemplateModal({
             .h-5 { height: 20px; }
             .w-4 { width: 16px; }
             .h-4 { height: 16px; }
-            .w-3 { width: 12px; }
-            .h-3 { height: 12px; }
             .bg-white { background-color: #ffffff; }
             .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
-            .shadow-xs { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
-            .text-amber-500 { color: #f59e0b; }
-            .fill-amber-500 { fill: #f59e0b; }
-            .text-blue-600 { color: #2563eb; }
-            .text-amber-800 { color: #92400e; }
             svg { display: block; margin: 0 auto; }
           </style>
         </head>
@@ -314,7 +576,7 @@ export default function PrintTemplateModal({
     }, 200);
   };
 
-  // High-Resolution PNG Poster Download
+  // High-Resolution PNG Poster Download factoring in dragged coordinates
   const handleDownloadPoster = () => {
     const printSheet = document.getElementById('print-sheet');
     if (!printSheet) return;
@@ -335,6 +597,12 @@ export default function PrintTemplateModal({
 
       const width = isBadge ? 900 : isSign ? 900 : isFullPoster ? 1000 : 800;
       const height = isBadge ? 520 : isSign ? 900 : isFullPoster ? 1350 : 1100;
+
+      // Scale dragged offset proportionally to canvas dimensions
+      const sheetWidth = printSheet.clientWidth || 320;
+      const scaleFactor = width / sheetWidth;
+      const scaledOffsetX = qrOffset.x * scaleFactor;
+      const scaledOffsetY = qrOffset.y * scaleFactor;
 
       const canvas = document.createElement('canvas');
       canvas.width = width;
@@ -380,12 +648,12 @@ export default function PrintTemplateModal({
           ctx.fillText(`/${shortCode}`, 64, 320);
         }
 
-        // QR Image
+        // QR Image with dragged placement
         const qrSize = 260;
-        const qrX = width - 320;
-        const qrY = (height - qrSize) / 2;
+        const qrX = width - 320 + scaledOffsetX;
+        const qrY = (height - qrSize) / 2 + scaledOffsetY;
         ctx.drawImage(img, qrX, qrY, qrSize, qrSize);
-        drawCenterQrBadge(ctx, qrX + qrSize / 2, qrY + qrSize / 2, qrSize, centerLogo);
+        drawCenterQrBadge(ctx, qrX + qrSize / 2, qrY + qrSize / 2, qrSize, activeIconDef);
       } else {
         ctx.textAlign = 'center';
         let currentY = 80;
@@ -411,12 +679,12 @@ export default function PrintTemplateModal({
           currentY += 50;
         }
 
-        // Centered QR Image
+        // Drag-and-drop QR placement
         const qrSize = isSign ? 440 : isFullPoster ? 500 : 380;
-        const qrX = (width - qrSize) / 2;
-        const qrY = (height - qrSize) / 2 + 20;
+        const qrX = (width - qrSize) / 2 + scaledOffsetX;
+        const qrY = (height - qrSize) / 2 + 20 + scaledOffsetY;
         ctx.drawImage(img, qrX, qrY, qrSize, qrSize);
-        drawCenterQrBadge(ctx, qrX + qrSize / 2, qrY + qrSize / 2, qrSize, centerLogo);
+        drawCenterQrBadge(ctx, qrX + qrSize / 2, qrY + qrSize / 2, qrSize, activeIconDef);
 
         if (showShortCode) {
           ctx.fillStyle = accentColor;
@@ -459,11 +727,16 @@ export default function PrintTemplateModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/70 backdrop-blur-xs overflow-y-auto">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/70 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-150"
+    >
       {/* Container Card */}
-      <div className="bg-white dark:bg-[#0E1017] rounded-3xl max-w-5xl w-full border border-[#11140F]/15 dark:border-white/15 shadow-2xl overflow-hidden flex flex-col h-[94vh] sm:h-[88vh] max-h-[860px] text-[#11140F] dark:text-white">
-        
-        {/* Top Header Bar (Unified for Mobile, Tablet, and Desktop) */}
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white dark:bg-[#0E1017] rounded-3xl max-w-5xl w-full border border-[#11140F]/15 dark:border-white/15 shadow-2xl overflow-hidden flex flex-col h-[94vh] sm:h-[88vh] max-h-[860px] text-[#11140F] dark:text-white"
+      >
+        {/* Top Header Bar */}
         <div className="px-4 py-3 sm:px-6 sm:py-3.5 border-b border-[#11140F]/10 dark:border-white/10 flex items-center justify-between shrink-0 bg-white dark:bg-[#0E1017] z-10">
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#2F6B4F]/10 dark:bg-[#34D399]/15 text-[#2F6B4F] dark:text-[#34D399] flex items-center justify-center shrink-0">
@@ -475,18 +748,16 @@ export default function PrintTemplateModal({
               </h3>
               <div className="flex items-center gap-1.5 text-[10.5px] sm:text-[11px] text-emerald-700 dark:text-[#34D399] font-medium truncate">
                 <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                <span className="truncate">Guaranteed 1-Page Output</span>
-                {canWhiteLabel && (
-                  <span className="ml-1 px-1.5 py-0.2 rounded bg-purple-100 dark:bg-purple-500/20 text-purple-800 dark:text-purple-300 text-[9.5px] font-mono font-bold shrink-0">
-                    White-Label
-                  </span>
-                )}
+                <span className="truncate">Drag &amp; Drop Printable Sheet</span>
+                <span className="ml-1 px-1.5 py-0.2 rounded bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-[9.5px] font-mono font-bold shrink-0">
+                  Open Studio
+                </span>
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Mobile / Tablet Segmented Tab Toggle (hidden on desktop lg:hidden) */}
+            {/* Mobile / Tablet Segmented Tab Toggle */}
             <div className="lg:hidden flex items-center p-0.5 bg-[#EEF0EA] dark:bg-white/[0.08] rounded-xl text-[11px] font-medium">
               <button
                 type="button"
@@ -524,13 +795,14 @@ export default function PrintTemplateModal({
           </div>
         </div>
 
-        {/* Modal Body: Split 50/50 on desktop (lg:flex-row), switchable tabs on mobile/tablet */}
+        {/* Modal Body: Split 50/50 on desktop */}
         <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
-          
           {/* Left Side: Controls & Customization */}
-          <div className={`p-4 sm:p-6 lg:p-7 lg:w-1/2 flex-col justify-between border-b lg:border-b-0 lg:border-r border-[#11140F]/10 dark:border-white/10 space-y-4 overflow-y-auto ${
-            mobileTab === 'editor' ? 'flex' : 'hidden lg:flex'
-          }`}>
+          <div
+            className={`p-4 sm:p-6 lg:p-7 lg:w-1/2 flex-col justify-between border-b lg:border-b-0 lg:border-r border-[#11140F]/10 dark:border-white/10 space-y-4 overflow-y-auto ${
+              mobileTab === 'editor' ? 'flex' : 'hidden lg:flex'
+            }`}
+          >
             <div className="space-y-4">
               {/* Feature Guidance Banner */}
               {featureBannerText && (
@@ -565,7 +837,7 @@ export default function PrintTemplateModal({
                 </div>
               )}
 
-              {/* Sub-tabs: Format, Text Content, Visibility Toggles, Theme */}
+              {/* Sub-tabs */}
               <div className="flex items-center gap-1.5 p-1 bg-[#EEF0EA] dark:bg-white/[0.05] rounded-xl text-[12px] font-medium">
                 <button
                   type="button"
@@ -604,653 +876,773 @@ export default function PrintTemplateModal({
                 </button>
               </div>
 
-            {/* TAB 1: Layout & Text */}
-            {activeTab === 'content' && (
-              <div className="space-y-4">
-                {/* Format Selector */}
-                <div className="space-y-1.5">
-                  <label className="text-[11.5px] font-semibold text-[#11140F]/70 dark:text-white/70 uppercase tracking-wider block">
-                    Choose Format
-                  </label>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setTemplate('table-tent');
-                        setHeaderTag('TABLE MENU & SPECIALS');
-                      }}
-                      className={`p-2.5 rounded-xl border text-left flex flex-col gap-1 transition-all cursor-pointer ${
-                        template === 'table-tent'
-                          ? 'border-[#34D399] bg-[#34D399] text-[#09110D] shadow-xs'
-                          : 'border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.04] text-[#11140F] dark:text-white hover:bg-[#EEF0EA] dark:hover:bg-white/10'
-                      }`}
-                    >
-                      <LayoutTemplate className="w-3.5 h-3.5 shrink-0" />
-                      <div className="text-[11.5px] font-semibold">Table Tent</div>
-                      <div className={`text-[9.5px] ${template === 'table-tent' ? 'text-[#09110D]/70' : 'text-[#11140F]/50 dark:text-white/50'}`}>4" × 6"</div>
-                    </button>
+              {/* TAB 1: Layout & Text */}
+              {activeTab === 'content' && (
+                <div className="space-y-4">
+                  {/* Format Selector */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11.5px] font-semibold text-[#11140F]/70 dark:text-white/70 uppercase tracking-wider block">
+                      Choose Format
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setTemplate('table-tent');
+                          setHeaderTag('TABLE MENU & SPECIALS');
+                        }}
+                        className={`p-2.5 rounded-xl border text-left flex flex-col gap-1 transition-all cursor-pointer ${
+                          template === 'table-tent'
+                            ? 'border-[#34D399] bg-[#34D399] text-[#09110D] shadow-xs'
+                            : 'border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.04] text-[#11140F] dark:text-white hover:bg-[#EEF0EA] dark:hover:bg-white/10'
+                        }`}
+                      >
+                        <LayoutTemplate className="w-3.5 h-3.5 shrink-0" />
+                        <div className="text-[11.5px] font-semibold">Table Tent</div>
+                        <div
+                          className={`text-[9.5px] ${
+                            template === 'table-tent' ? 'text-[#09110D]/70' : 'text-[#11140F]/50 dark:text-white/50'
+                          }`}
+                        >
+                          4" × 6"
+                        </div>
+                      </button>
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setTemplate('window-sign');
-                        setHeaderTag('OFFICIAL SCAN POINT');
-                      }}
-                      className={`p-2.5 rounded-xl border text-left flex flex-col gap-1 transition-all cursor-pointer ${
-                        template === 'window-sign'
-                          ? 'border-[#34D399] bg-[#34D399] text-[#09110D] shadow-xs'
-                          : 'border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.04] text-[#11140F] dark:text-white hover:bg-[#EEF0EA] dark:hover:bg-white/10'
-                      }`}
-                    >
-                      <Store className="w-3.5 h-3.5 shrink-0" />
-                      <div className="text-[11.5px] font-semibold">Window Sign</div>
-                      <div className={`text-[9.5px] ${template === 'window-sign' ? 'text-[#09110D]/70' : 'text-[#11140F]/50 dark:text-white/50'}`}>8" × 8"</div>
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setTemplate('window-sign');
+                          setHeaderTag('OFFICIAL SCAN POINT');
+                        }}
+                        className={`p-2.5 rounded-xl border text-left flex flex-col gap-1 transition-all cursor-pointer ${
+                          template === 'window-sign'
+                            ? 'border-[#34D399] bg-[#34D399] text-[#09110D] shadow-xs'
+                            : 'border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.04] text-[#11140F] dark:text-white hover:bg-[#EEF0EA] dark:hover:bg-white/10'
+                        }`}
+                      >
+                        <Store className="w-3.5 h-3.5 shrink-0" />
+                        <div className="text-[11.5px] font-semibold">Window Sign</div>
+                        <div
+                          className={`text-[9.5px] ${
+                            template === 'window-sign' ? 'text-[#09110D]/70' : 'text-[#11140F]/50 dark:text-white/50'
+                          }`}
+                        >
+                          8" × 8"
+                        </div>
+                      </button>
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setTemplate('card-badge');
-                        setHeaderTag('EVENT PASS');
-                      }}
-                      className={`p-2.5 rounded-xl border text-left flex flex-col gap-1 transition-all cursor-pointer ${
-                        template === 'card-badge'
-                          ? 'border-[#34D399] bg-[#34D399] text-[#09110D] shadow-xs'
-                          : 'border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.04] text-[#11140F] dark:text-white hover:bg-[#EEF0EA] dark:hover:bg-white/10'
-                      }`}
-                    >
-                      <CreditCard className="w-3.5 h-3.5 shrink-0" />
-                      <div className="text-[11.5px] font-semibold">Badge Card</div>
-                      <div className={`text-[9.5px] ${template === 'card-badge' ? 'text-[#09110D]/70' : 'text-[#11140F]/50 dark:text-white/50'}`}>3.5" × 2"</div>
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setTemplate('card-badge');
+                          setHeaderTag('EVENT PASS');
+                        }}
+                        className={`p-2.5 rounded-xl border text-left flex flex-col gap-1 transition-all cursor-pointer ${
+                          template === 'card-badge'
+                            ? 'border-[#34D399] bg-[#34D399] text-[#09110D] shadow-xs'
+                            : 'border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.04] text-[#11140F] dark:text-white hover:bg-[#EEF0EA] dark:hover:bg-white/10'
+                        }`}
+                      >
+                        <CreditCard className="w-3.5 h-3.5 shrink-0" />
+                        <div className="text-[11.5px] font-semibold">Badge Card</div>
+                        <div
+                          className={`text-[9.5px] ${
+                            template === 'card-badge' ? 'text-[#09110D]/70' : 'text-[#11140F]/50 dark:text-white/50'
+                          }`}
+                        >
+                          3.5" × 2"
+                        </div>
+                      </button>
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (!canWhiteLabel) {
-                          setLockedFeatureNotice('Full-Page Posters (A4/Letter) are unlocked on Plus & Ultra plans.');
-                          return;
-                        }
-                        setTemplate('full-poster');
-                        setHeaderTag('SCAN TO CONNECT');
-                      }}
-                      className={`p-2.5 rounded-xl border text-left flex flex-col gap-1 transition-all relative cursor-pointer ${
-                        template === 'full-poster'
-                          ? 'border-[#34D399] bg-[#34D399] text-[#09110D] shadow-xs'
-                          : 'border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.04] text-[#11140F] dark:text-white hover:bg-[#EEF0EA] dark:hover:bg-white/10'
-                      }`}
-                    >
-                      {!canWhiteLabel && (
-                        <span className="absolute top-1.5 right-1.5">
-                          <Lock className="w-3 h-3 text-amber-600" />
-                        </span>
-                      )}
-                      <FileText className="w-3.5 h-3.5 shrink-0" />
-                      <div className="text-[11.5px] font-semibold">Full Poster</div>
-                      <div className={`text-[9.5px] ${template === 'full-poster' ? 'text-white/70' : 'text-[#11140F]/50'}`}>A4 / Letter</div>
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setTemplate('full-poster');
+                          setHeaderTag('SCAN TO CONNECT');
+                        }}
+                        className={`p-2.5 rounded-xl border text-left flex flex-col gap-1 transition-all relative cursor-pointer ${
+                          template === 'full-poster'
+                            ? 'border-[#34D399] bg-[#34D399] text-[#09110D] shadow-xs'
+                            : 'border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.04] text-[#11140F] dark:text-white hover:bg-[#EEF0EA] dark:hover:bg-white/10'
+                        }`}
+                      >
+                        <FileText className="w-3.5 h-3.5 shrink-0" />
+                        <div className="text-[11.5px] font-semibold">Full Poster</div>
+                        <div
+                          className={`text-[9.5px] ${
+                            template === 'full-poster' ? 'text-[#09110D]/70' : 'text-[#11140F]/50 dark:text-white/50'
+                          }`}
+                        >
+                          A4 / Letter
+                        </div>
+                      </button>
+                    </div>
                   </div>
-                </div>
 
-                {/* Text Customization Inputs */}
-                <div className="space-y-2.5">
-                  {showHeaderTag && (
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <label className="text-[11.5px] font-medium text-[#11140F]/70 dark:text-white/75">Header Badge Tag</label>
-                        {!canWhiteLabel && (
-                          <span className="text-[10px] text-purple-600 dark:text-purple-400 flex items-center gap-0.5">
-                            <Lock className="w-2.5 h-2.5" /> Plus to customize
-                          </span>
-                        )}
+                  {/* Text Customization Inputs */}
+                  <div className="space-y-2.5">
+                    {showHeaderTag && (
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-[11.5px] font-medium text-[#11140F]/70 dark:text-white/75">
+                            Header Badge Tag
+                          </label>
+                        </div>
+                        <input
+                          type="text"
+                          value={headerTag}
+                          onChange={(e) => setHeaderTag(e.target.value.toUpperCase())}
+                          className="w-full px-3 py-2 text-[12.5px] border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-[#11140F] dark:text-white rounded-xl outline-none focus:border-[#34D399] font-mono"
+                          placeholder="OFFICIAL SCAN POINT"
+                        />
                       </div>
-                      <input
-                        type="text"
-                        disabled={!canWhiteLabel}
-                        value={headerTag}
-                        onChange={(e) => setHeaderTag(e.target.value.toUpperCase())}
-                        className="w-full px-3 py-2 text-[12.5px] border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-[#11140F] dark:text-white rounded-xl outline-none focus:border-[#34D399] disabled:opacity-60 font-mono"
-                        placeholder="OFFICIAL SCAN POINT"
-                      />
-                    </div>
-                  )}
+                    )}
 
-                  <div>
-                    <label className="text-[11.5px] font-medium text-[#11140F]/70 dark:text-white/75 block mb-1">Headline Text</label>
-                    <input
-                      type="text"
-                      value={headline}
-                      onChange={(e) => setHeadline(e.target.value)}
-                      className="w-full px-3 py-2 text-[12.5px] border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-[#11140F] dark:text-white rounded-xl outline-none focus:border-[#34D399]"
-                      placeholder="Scan for Menu"
-                    />
-                  </div>
-
-                  {showSubline && (
                     <div>
-                      <label className="text-[11.5px] font-medium text-[#11140F]/70 dark:text-white/75 block mb-1">Instruction Subline</label>
+                      <label className="text-[11.5px] font-medium text-[#11140F]/70 dark:text-white/75 block mb-1">
+                        Headline Text
+                      </label>
                       <input
                         type="text"
-                        value={subline}
-                        onChange={(e) => setSubline(e.target.value)}
+                        value={headline}
+                        onChange={(e) => setHeadline(e.target.value)}
                         className="w-full px-3 py-2 text-[12.5px] border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-[#11140F] dark:text-white rounded-xl outline-none focus:border-[#34D399]"
-                        placeholder="Point your phone camera"
+                        placeholder="Scan for Menu"
                       />
                     </div>
-                  )}
 
-                  {showFooterNote && (
-                    <div>
-                      <label className="text-[11.5px] font-medium text-[#11140F]/70 dark:text-white/75 block mb-1">Footer Note</label>
-                      <input
-                        type="text"
-                        value={footerNote}
-                        onChange={(e) => setFooterNote(e.target.value)}
-                        className="w-full px-3 py-2 text-[12.5px] border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-[#11140F] dark:text-white rounded-xl outline-none focus:border-[#34D399]"
-                        placeholder="Powered by Dynamic QR"
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* TAB 2: Element Toggles (Removes Extra Stuff) */}
-            {activeTab === 'toggles' && (
-              <div className="space-y-3.5">
-                <div className="p-3 rounded-xl bg-[#F7F8F5] dark:bg-white/[0.04] border border-[#11140F]/10 dark:border-white/10 text-[12px] space-y-1">
-                  <div className="font-semibold text-[#11140F] dark:text-white flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-[#34D399]" />
-                    Clean &amp; Minimalist Print Customizer
-                  </div>
-                  <p className="text-[#11140F]/65 dark:text-white/60 text-[11.5px]">
-                    Turn off extra labels to produce an ultra-minimal card containing only your QR code and title.
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  {/* Toggle 1: Header Tag */}
-                  <div className="p-3 rounded-xl border border-[#11140F]/10 dark:border-white/10 flex items-center justify-between gap-3 bg-white dark:bg-white/[0.03]">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[12.5px] font-semibold text-[#11140F] dark:text-white">Top Header Badge</span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-purple-500/15 text-purple-600 dark:text-purple-300 font-bold">
-                          Plus / White-Label
-                        </span>
+                    {showSubline && (
+                      <div>
+                        <label className="text-[11.5px] font-medium text-[#11140F]/70 dark:text-white/75 block mb-1">
+                          Instruction Subline
+                        </label>
+                        <input
+                          type="text"
+                          value={subline}
+                          onChange={(e) => setSubline(e.target.value)}
+                          className="w-full px-3 py-2 text-[12.5px] border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-[#11140F] dark:text-white rounded-xl outline-none focus:border-[#34D399]"
+                          placeholder="Point your phone camera"
+                        />
                       </div>
-                      <p className="text-[11px] text-[#11140F]/55 dark:text-white/55">
-                        Display or completely remove "OFFICIAL SCAN POINT"
-                      </p>
+                    )}
+
+                    {showFooterNote && (
+                      <div>
+                        <label className="text-[11.5px] font-medium text-[#11140F]/70 dark:text-white/75 block mb-1">
+                          Footer Note
+                        </label>
+                        <input
+                          type="text"
+                          value={footerNote}
+                          onChange={(e) => setFooterNote(e.target.value)}
+                          className="w-full px-3 py-2 text-[12.5px] border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-[#11140F] dark:text-white rounded-xl outline-none focus:border-[#34D399]"
+                          placeholder="Powered by Dynamic QR"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 2: Element Toggles */}
+              {activeTab === 'toggles' && (
+                <div className="space-y-3.5">
+                  <div className="p-3 rounded-xl bg-[#F7F8F5] dark:bg-white/[0.04] border border-[#11140F]/10 dark:border-white/10 text-[12px] space-y-1">
+                    <div className="font-semibold text-[#11140F] dark:text-white flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-[#34D399]" />
+                      Clean &amp; Minimalist Print Customizer
                     </div>
-                    {canWhiteLabel ? (
+                    <p className="text-[#11140F]/65 dark:text-white/60 text-[11.5px]">
+                      Turn off extra labels to produce an ultra-minimal card containing only your QR code and title.
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    {/* Toggle 1: Header Tag */}
+                    <div className="p-3 rounded-xl border border-[#11140F]/10 dark:border-white/10 flex items-center justify-between gap-3 bg-white dark:bg-white/[0.03]">
+                      <div>
+                        <span className="text-[12.5px] font-semibold text-[#11140F] dark:text-white block">
+                          Top Header Badge
+                        </span>
+                        <p className="text-[11px] text-[#11140F]/55 dark:text-white/55">
+                          Display or remove "OFFICIAL SCAN POINT"
+                        </p>
+                      </div>
                       <input
                         type="checkbox"
                         checked={showHeaderTag}
                         onChange={(e) => setShowHeaderTag(e.target.checked)}
                         className="w-4 h-4 accent-[#34D399] cursor-pointer"
                       />
-                    ) : (
-                      <Link
-                        href="/pricing"
-                        className="text-[11px] font-semibold text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1 shrink-0"
-                      >
-                        <Lock className="w-3 h-3" />
-                        Unlock
-                      </Link>
-                    )}
-                  </div>
-
-                  {/* Toggle 2: Instruction Subline */}
-                  <div className="p-3 rounded-xl border border-[#11140F]/10 dark:border-white/10 flex items-center justify-between gap-3 bg-white dark:bg-white/[0.03]">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[12.5px] font-semibold text-[#11140F] dark:text-white">Instruction Subline</span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/15 text-[#2F6B4F] dark:text-[#34D399] font-bold">
-                          Pro Feature
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-[#11140F]/55 dark:text-white/55">
-                        "Point your camera at this code"
-                      </p>
                     </div>
-                    {canCustomizeElements ? (
+
+                    {/* Toggle 2: Instruction Subline */}
+                    <div className="p-3 rounded-xl border border-[#11140F]/10 dark:border-white/10 flex items-center justify-between gap-3 bg-white dark:bg-white/[0.03]">
+                      <div>
+                        <span className="text-[12.5px] font-semibold text-[#11140F] dark:text-white block">
+                          Instruction Subline
+                        </span>
+                        <p className="text-[11px] text-[#11140F]/55 dark:text-white/55">
+                          "Point your camera at this code"
+                        </p>
+                      </div>
                       <input
                         type="checkbox"
                         checked={showSubline}
                         onChange={(e) => setShowSubline(e.target.checked)}
                         className="w-4 h-4 accent-[#34D399] cursor-pointer"
                       />
-                    ) : (
-                      <Link
-                        href="/pricing"
-                        className="text-[11px] font-semibold text-[#2F6B4F] dark:text-[#34D399] hover:underline flex items-center gap-1 shrink-0"
-                      >
-                        <Lock className="w-3 h-3" />
-                        Pro Plan
-                      </Link>
-                    )}
-                  </div>
-
-                  {/* Toggle 3: Shortcode Slug Pill */}
-                  <div className="p-3 rounded-xl border border-[#11140F]/10 dark:border-white/10 flex items-center justify-between gap-3 bg-white dark:bg-white/[0.03]">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[12.5px] font-semibold text-[#11140F] dark:text-white">Short URL Badge</span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/15 text-[#2F6B4F] dark:text-[#34D399] font-bold">
-                          Pro Feature
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-[#11140F]/55 dark:text-white/55">
-                        Bottom pill showing <code>/{shortCode}</code>
-                      </p>
                     </div>
-                    {canCustomizeElements ? (
+
+                    {/* Toggle 3: Shortcode Slug Pill */}
+                    <div className="p-3 rounded-xl border border-[#11140F]/10 dark:border-white/10 flex items-center justify-between gap-3 bg-white dark:bg-white/[0.03]">
+                      <div>
+                        <span className="text-[12.5px] font-semibold text-[#11140F] dark:text-white block">
+                          Short URL Badge
+                        </span>
+                        <p className="text-[11px] text-[#11140F]/55 dark:text-white/55">
+                          Bottom pill showing <code>/{shortCode}</code>
+                        </p>
+                      </div>
                       <input
                         type="checkbox"
                         checked={showShortCode}
                         onChange={(e) => setShowShortCode(e.target.checked)}
                         className="w-4 h-4 accent-[#34D399] cursor-pointer"
                       />
-                    ) : (
-                      <Link
-                        href="/pricing"
-                        className="text-[11px] font-semibold text-[#2F6B4F] dark:text-[#34D399] hover:underline flex items-center gap-1 shrink-0"
-                      >
-                        <Lock className="w-3 h-3" />
-                        Pro Plan
-                      </Link>
-                    )}
-                  </div>
-
-                  {/* Toggle 4: Footer Note */}
-                  <div className="p-3 rounded-xl border border-[#11140F]/10 dark:border-white/10 flex items-center justify-between gap-3 bg-white dark:bg-white/[0.03]">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[12.5px] font-semibold text-[#11140F] dark:text-white">Footer Note</span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/15 text-[#2F6B4F] dark:text-[#34D399] font-bold">
-                          Pro Feature
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-[#11140F]/55 dark:text-white/55">
-                        "Powered by Dynamic QR"
-                      </p>
                     </div>
-                    {canCustomizeElements ? (
+
+                    {/* Toggle 4: Footer Note */}
+                    <div className="p-3 rounded-xl border border-[#11140F]/10 dark:border-white/10 flex items-center justify-between gap-3 bg-white dark:bg-white/[0.03]">
+                      <div>
+                        <span className="text-[12.5px] font-semibold text-[#11140F] dark:text-white block">
+                          Footer Note
+                        </span>
+                        <p className="text-[11px] text-[#11140F]/55 dark:text-white/55">
+                          "Powered by Dynamic QR"
+                        </p>
+                      </div>
                       <input
                         type="checkbox"
                         checked={showFooterNote}
                         onChange={(e) => setShowFooterNote(e.target.checked)}
                         className="w-4 h-4 accent-[#34D399] cursor-pointer"
                       />
-                    ) : (
-                      <Link
-                        href="/pricing"
-                        className="text-[11px] font-semibold text-[#2F6B4F] dark:text-[#34D399] hover:underline flex items-center gap-1 shrink-0"
-                      >
-                        <Lock className="w-3 h-3" />
-                        Pro Plan
-                      </Link>
-                    )}
-                  </div>
-
-                  {/* Toggle 5: Outer Border */}
-                  <div className="p-3 rounded-xl border border-[#11140F]/10 dark:border-white/10 flex items-center justify-between gap-3 bg-white dark:bg-white/[0.03]">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[12.5px] font-semibold text-[#11140F] dark:text-white">Card Outer Border</span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/15 text-[#2F6B4F] dark:text-[#34D399] font-bold">
-                          Pro Feature
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-[#11140F]/55 dark:text-white/55">
-                        Draw outline around card or leave frameless
-                      </p>
                     </div>
-                    {canCustomizeElements ? (
+
+                    {/* Toggle 5: Outer Border */}
+                    <div className="p-3 rounded-xl border border-[#11140F]/10 dark:border-white/10 flex items-center justify-between gap-3 bg-white dark:bg-white/[0.03]">
+                      <div>
+                        <span className="text-[12.5px] font-semibold text-[#11140F] dark:text-white block">
+                          Card Outer Border
+                        </span>
+                        <p className="text-[11px] text-[#11140F]/55 dark:text-white/55">
+                          Draw outline around card or leave frameless
+                        </p>
+                      </div>
                       <input
                         type="checkbox"
                         checked={showBorder}
                         onChange={(e) => setShowBorder(e.target.checked)}
                         className="w-4 h-4 accent-[#34D399] cursor-pointer"
                       />
-                    ) : (
-                      <Link
-                        href="/pricing"
-                        className="text-[11px] font-semibold text-[#2F6B4F] dark:text-[#34D399] hover:underline flex items-center gap-1 shrink-0"
-                      >
-                        <Lock className="w-3 h-3" />
-                        Pro Plan
-                      </Link>
-                    )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* TAB 3: Colors & Logo */}
-            {activeTab === 'design' && (
-              <div className="space-y-4">
-                {/* Brand Colors */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="text-[11.5px] font-semibold text-[#11140F]/70 dark:text-white/75 uppercase tracking-wider block">
-                      Brand Accent Color
-                    </label>
-                    {!canCustomizeElements && (
-                      <span className="text-[10px] text-[#2F6B4F] dark:text-[#34D399] flex items-center gap-0.5">
-                        <Lock className="w-2.5 h-2.5" /> Pro Feature
-                      </span>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    {COLOR_PALETTES.map((color) => (
-                      <button
-                        key={color.hex}
-                        type="button"
-                        onClick={() => {
-                          if (!canCustomizeElements) {
-                            setLockedFeatureNotice('Color palettes are unlocked on Pro, Plus, and Ultra plans.');
-                            return;
-                          }
-                          setAccentColor(color.hex);
-                        }}
-                        className={`p-2 rounded-xl border flex items-center gap-2 text-left transition-all cursor-pointer ${
-                          accentColor === color.hex
-                            ? 'border-[#34D399] ring-2 ring-[#34D399]/20 font-semibold bg-white dark:bg-white/10 text-[#11140F] dark:text-white'
-                            : 'border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.04] text-[#11140F]/80 dark:text-white/80 hover:bg-[#EEF0EA] dark:hover:bg-white/10'
-                        }`}
-                      >
+              {/* TAB 3: Colors & Logo */}
+              {activeTab === 'design' && (
+                <div className="space-y-4">
+                  {/* Brand Color & Continuous Spectrum Band */}
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11.5px] font-semibold text-[#11140F]/70 dark:text-white/75 uppercase tracking-wider block">
+                        Select from Band of Colors
+                      </label>
+                      <div className="flex items-center gap-1.5">
                         <span
-                          className="w-4 h-4 rounded-full shrink-0 shadow-2xs"
-                          style={{ backgroundColor: color.hex }}
+                          className="w-3.5 h-3.5 rounded-full border border-black/10 shadow-2xs"
+                          style={{ backgroundColor: accentColor }}
                         />
-                        <span className="text-[11px] truncate">{color.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                        <span className="text-[11px] font-mono font-bold text-[#11140F] dark:text-white">
+                          {accentColor}
+                        </span>
+                      </div>
+                    </div>
 
-                {/* Center QR Logo Overlay (Plus & Ultra) */}
-                <div className="space-y-2 pt-2 border-t border-[#11140F]/10 dark:border-white/10">
-                  <div className="flex items-center justify-between">
-                    <label className="text-[11.5px] font-semibold text-[#11140F]/70 dark:text-white/75 uppercase tracking-wider block">
-                      Center QR Badge
-                    </label>
-                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-purple-500/15 text-purple-600 dark:text-purple-300 font-bold">
-                      Plus &amp; Ultra
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[
-                      { id: 'none', label: 'None', icon: X },
-                      { id: 'star', label: 'Star', icon: Star },
-                      { id: 'utensils', label: 'Food', icon: Utensils },
-                      { id: 'wifi', label: 'Wi-Fi', icon: Wifi },
-                      { id: 'coffee', label: 'Cafe', icon: Coffee },
-                      { id: 'bag', label: 'Shop', icon: ShoppingBag },
-                    ].map((item) => {
-                      const Icon = item.icon;
-                      return (
+                    {/* Interactive Rainbow / Hue Color Band Slider */}
+                    <div className="p-3 rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5] dark:bg-white/[0.03] space-y-2">
+                      <div className="flex items-center justify-between text-[11px] text-[#11140F]/60 dark:text-white/60">
+                        <span>Continuous Hue Spectrum</span>
+                        <span>Drag slider across spectrum</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="360"
+                        value={hueValue}
+                        onChange={(e) => {
+                          const val = Number(e.target.value);
+                          setHueValue(val);
+                          const hex = hslToHex(val, 85, 45);
+                          setAccentColor(hex);
+                        }}
+                        className="w-full h-4 rounded-xl cursor-pointer appearance-none outline-none shadow-xs"
+                        style={{
+                          background:
+                            'linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)',
+                        }}
+                      />
+
+                      {/* Native Color Pipette & Manual Hex Input */}
+                      <div className="flex items-center gap-2 pt-1">
+                        <div className="relative flex items-center">
+                          <input
+                            type="color"
+                            value={accentColor.startsWith('#') ? accentColor : '#11140F'}
+                            onChange={(e) => setAccentColor(e.target.value.toUpperCase())}
+                            className="w-8 h-8 rounded-xl border border-[#11140F]/15 dark:border-white/15 cursor-pointer p-0.5 bg-white dark:bg-[#1E2330]"
+                            title="Pick exact custom color"
+                          />
+                        </div>
+                        <div className="relative flex-1">
+                          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 font-mono text-[12px] text-[#11140F]/40 dark:text-white/40">
+                            #
+                          </span>
+                          <input
+                            type="text"
+                            maxLength={7}
+                            value={accentColor.replace('#', '')}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/[^0-9A-Fa-f]/g, '');
+                              if (val.length <= 6) {
+                                setAccentColor(`#${val}`.toUpperCase());
+                              }
+                            }}
+                            className="w-full pl-6 pr-3 py-1.5 text-[12px] font-mono border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#1E2330] rounded-xl outline-none text-[#11140F] dark:text-white focus:border-[#34D399]"
+                            placeholder="11140F"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Quick Swatches Grid */}
+                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5 pt-1">
+                      {[...COLOR_PALETTES, ...EXTENDED_SWATCHES].map((color) => (
                         <button
-                          key={item.id}
+                          key={color.hex}
                           type="button"
-                          onClick={() => {
-                            if (!canUseLogos) {
-                              setLockedFeatureNotice('Center QR Badges are unlocked on Plus & Ultra plans.');
-                              return;
-                            }
-                            setCenterLogo(item.id as CenterLogoType);
-                          }}
-                          className={`p-2.5 rounded-xl border flex items-center gap-2 text-left transition-all cursor-pointer ${
-                            centerLogo === item.id
-                              ? 'border-[#34D399] bg-[#34D399] text-[#09110D] font-bold shadow-xs'
-                              : 'border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.04] text-[#11140F] dark:text-white hover:bg-[#EEF0EA] dark:hover:bg-white/10'
+                          onClick={() => setAccentColor(color.hex)}
+                          className={`p-1.5 rounded-xl border flex items-center gap-1.5 transition-all cursor-pointer ${
+                            accentColor.toUpperCase() === color.hex.toUpperCase()
+                              ? 'border-[#34D399] ring-2 ring-[#34D399]/20 font-semibold bg-white dark:bg-white/10 text-[#11140F] dark:text-white'
+                              : 'border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.04] text-[#11140F]/80 dark:text-white/80 hover:bg-[#EEF0EA] dark:hover:bg-white/10'
                           }`}
                         >
-                          <Icon className="w-3.5 h-3.5 shrink-0" />
-                          <span className="text-[11px] font-medium">{item.label}</span>
+                          <span
+                            className="w-3.5 h-3.5 rounded-full shrink-0 shadow-2xs"
+                            style={{ backgroundColor: color.hex }}
+                          />
+                          <span className="text-[10px] truncate">{color.name.split(' ')[0]}</span>
                         </button>
-                      );
-                    })}
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Center QR Badge & Searchable Icons + AI Draw */}
+                  <div className="space-y-2.5 pt-3 border-t border-[#11140F]/10 dark:border-white/10">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11.5px] font-semibold text-[#11140F]/70 dark:text-white/75 uppercase tracking-wider block">
+                        Center QR Badge &amp; Icon Query
+                      </label>
+                      <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/15 text-[#2F6B4F] dark:text-[#34D399] font-bold">
+                        Search or AI Draw
+                      </span>
+                    </div>
+
+                    {/* Search Bar for Icons */}
+                    <div className="relative">
+                      <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#11140F]/40 dark:text-white/40" />
+                      <input
+                        type="text"
+                        value={iconQuery}
+                        onChange={(e) => setIconQuery(e.target.value)}
+                        placeholder="Search icon (e.g. food, wifi, camera, star, car, flame)..."
+                        className="w-full pl-8 pr-3 py-1.5 text-[12px] border border-[#11140F]/15 dark:border-white/15 bg-[#F7F8F5] dark:bg-black/40 text-[#11140F] dark:text-white rounded-xl outline-none focus:border-[#34D399]"
+                      />
+                    </div>
+
+                    {/* Filtered Icon Grid */}
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5 max-h-[160px] overflow-y-auto pr-1">
+                      {/* AI Generated Badge (if exists) */}
+                      {customAiIcon && (
+                        <button
+                          type="button"
+                          onClick={() => setSelectedIconId('custom-ai')}
+                          className={`p-2 rounded-xl border flex items-center gap-1.5 text-left transition-all cursor-pointer ${
+                            selectedIconId === 'custom-ai'
+                              ? 'border-[#34D399] bg-[#34D399] text-[#09110D] font-bold shadow-xs'
+                              : 'border-purple-300 dark:border-purple-500/40 bg-purple-500/10 text-purple-700 dark:text-purple-300'
+                          }`}
+                        >
+                          <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                          <span className="text-[11px] font-medium truncate">AI: {customAiIcon.name}</span>
+                        </button>
+                      )}
+
+                      {filteredIcons.map((item) => {
+                        const isSelected = selectedIconId === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => setSelectedIconId(item.id)}
+                            className={`p-2 rounded-xl border flex items-center gap-1.5 text-left transition-all cursor-pointer ${
+                              isSelected
+                                ? 'border-[#34D399] bg-[#34D399] text-[#09110D] font-bold shadow-xs'
+                                : 'border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.04] text-[#11140F] dark:text-white hover:bg-[#EEF0EA] dark:hover:bg-white/10'
+                            }`}
+                          >
+                            {item.id === 'none' ? (
+                              <X className="w-3.5 h-3.5 shrink-0" />
+                            ) : (
+                              <svg
+                                viewBox="0 0 24 24"
+                                className="w-3.5 h-3.5 shrink-0"
+                                fill={item.fill ? item.color || '#11140F' : 'none'}
+                                stroke={item.fill ? 'none' : item.color || '#11140F'}
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <path d={item.path} />
+                              </svg>
+                            )}
+                            <span className="text-[11px] font-medium truncate">{item.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* AI Icon Draw Option if not found or user wants custom */}
+                    <div className="p-3 rounded-2xl border border-purple-500/20 bg-purple-500/5 dark:bg-purple-950/20 space-y-2">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="font-semibold text-purple-800 dark:text-purple-300 flex items-center gap-1">
+                          <Sparkles className="w-3.5 h-3.5" /> Can't find what you fancy? Draw with AI
+                        </span>
+                        <span className="text-[9.5px] font-mono text-purple-600 dark:text-purple-400">Instant SVG</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={aiPrompt}
+                          onChange={(e) => setAiPrompt(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleGenerateAiIcon();
+                          }}
+                          placeholder={iconQuery ? `Draw "${iconQuery}" with AI...` : 'e.g. dragon, guitar, pizza, crown...'}
+                          className="flex-1 px-3 py-1.5 text-[12px] border border-purple-300 dark:border-purple-500/40 bg-white dark:bg-black/50 text-[#11140F] dark:text-white rounded-xl outline-none focus:border-purple-600"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleGenerateAiIcon()}
+                          disabled={isGeneratingAi || (!aiPrompt.trim() && !iconQuery.trim())}
+                          className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold text-[11.5px] transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shrink-0"
+                        >
+                          {isGeneratingAi ? (
+                            <>
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              <span>Drawing…</span>
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="w-3.5 h-3.5" />
+                              <span>Draw</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                      {aiError && <p className="text-[10.5px] text-red-600">{aiError}</p>}
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
 
-          {/* Action Buttons in Left Panel */}
-          <div className="pt-4 space-y-2 shrink-0 border-t border-[#11140F]/10 dark:border-white/10">
-            {/* On Mobile / Tablet: Primary button to view Live Preview & Print */}
-            <div className="lg:hidden space-y-2">
-              <button
-                type="button"
-                onClick={() => setMobileTab('preview')}
-                className="w-full py-3 px-4 rounded-xl text-white text-[13.5px] font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 cursor-pointer shadow-sm"
-                style={{ backgroundColor: accentColor }}
-              >
-                <Eye className="w-4 h-4" />
-                <span>View Live Preview &amp; Print</span>
-              </button>
-              <div className="flex items-center gap-2">
+            {/* Action Buttons in Left Panel */}
+            <div className="pt-4 space-y-2 shrink-0 border-t border-[#11140F]/10 dark:border-white/10">
+              <div className="lg:hidden space-y-2">
                 <button
                   type="button"
-                  onClick={handlePrint}
-                  className="flex-1 py-2.5 px-3 rounded-xl border border-[#11140F]/20 dark:border-white/15 bg-white dark:bg-white/[0.05] text-[#11140F] dark:text-white text-[12.5px] font-medium hover:bg-[#EEF0EA] dark:hover:bg-white/10 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  onClick={() => setMobileTab('preview')}
+                  className="w-full py-3 px-4 rounded-xl text-white text-[13.5px] font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                  style={{ backgroundColor: accentColor }}
                 >
-                  <Printer className="w-3.5 h-3.5" />
-                  <span>Quick Print</span>
+                  <Eye className="w-4 h-4" />
+                  <span>View Live Preview &amp; Print</span>
+                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handlePrint}
+                    className="flex-1 py-2.5 px-3 rounded-xl border border-[#11140F]/20 dark:border-white/15 bg-white dark:bg-white/[0.05] text-[#11140F] dark:text-white text-[12.5px] font-medium hover:bg-[#EEF0EA] dark:hover:bg-white/10 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <Printer className="w-3.5 h-3.5" />
+                    <span>Quick Print</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDownloadPoster}
+                    disabled={isExporting}
+                    className="flex-1 py-2.5 px-3 rounded-xl border border-[#11140F]/20 dark:border-white/15 bg-white dark:bg-white/[0.05] text-[#11140F] dark:text-white text-[12.5px] font-medium hover:bg-[#EEF0EA] dark:hover:bg-white/10 transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>{isExporting ? 'Exporting…' : 'PNG'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* On Desktop: Full Print & Download Buttons */}
+              <div className="hidden lg:flex items-center gap-2">
+                <button
+                  onClick={handlePrint}
+                  className="flex-1 py-3 px-4 rounded-xl text-white text-[13.5px] font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                  style={{ backgroundColor: accentColor }}
+                >
+                  <Printer className="w-4 h-4" />
+                  Print (1 Sheet) / Save PDF
                 </button>
                 <button
-                  type="button"
                   onClick={handleDownloadPoster}
                   disabled={isExporting}
-                  className="flex-1 py-2.5 px-3 rounded-xl border border-[#11140F]/20 dark:border-white/15 bg-white dark:bg-white/[0.05] text-[#11140F] dark:text-white text-[12.5px] font-medium hover:bg-[#EEF0EA] dark:hover:bg-white/10 transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  className="py-3 px-4 rounded-xl border border-[#11140F]/20 dark:border-white/15 bg-white dark:bg-white/[0.05] text-[#11140F] dark:text-white text-[13.5px] font-medium hover:bg-[#EEF0EA] dark:hover:bg-white/10 transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  title="Download high-resolution PNG poster"
                 >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>{isExporting ? 'Exporting…' : 'PNG'}</span>
+                  <Download className="w-4 h-4" />
+                  {isExporting ? 'Exporting…' : 'PNG Poster'}
                 </button>
+              </div>
+
+              <button
+                onClick={onClose}
+                className="w-full py-1.5 px-4 rounded-xl text-[#11140F]/60 dark:text-white/55 text-[12px] font-medium hover:text-[#11140F] dark:hover:text-white transition-colors cursor-pointer"
+              >
+                Close Print Studio
+              </button>
+            </div>
+          </div>
+
+          {/* Right Side: Live Printable Preview with Drag & Drop */}
+          <div
+            className={`p-4 sm:p-6 lg:p-8 lg:w-1/2 bg-[#F4F5F1] dark:bg-black/40 flex-col items-center justify-between overflow-y-auto min-h-0 select-none ${
+              mobileTab === 'preview' ? 'flex' : 'hidden lg:flex'
+            }`}
+          >
+            {/* Top Toolbar: Reset position & guidance */}
+            <div className="w-full flex items-center justify-between pb-2 mb-2 border-b border-[#11140F]/10 dark:border-white/10 shrink-0">
+              <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#11140F]/70 dark:text-white/70">
+                <Move className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Drag QR code freely on the sheet</span>
+              </div>
+              {(qrOffset.x !== 0 || qrOffset.y !== 0) && (
+                <button
+                  type="button"
+                  onClick={() => setQrOffset({ x: 0, y: 0 })}
+                  className="px-2 py-0.5 rounded-lg bg-black/10 dark:bg-white/10 hover:bg-black/20 text-[11px] font-semibold text-[#11140F] dark:text-white flex items-center gap-1 transition-all cursor-pointer"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  <span>Reset to Center</span>
+                </button>
+              )}
+            </div>
+
+            {/* Centered Preview Canvas / Scaled Sheet Container */}
+            <div className="w-full flex-1 flex items-center justify-center py-2 sm:py-4 overflow-hidden min-h-[300px]">
+              <div className="transform scale-[0.78] sm:scale-90 md:scale-95 lg:scale-100 origin-center transition-transform">
+                <div
+                  id="print-sheet"
+                  className={`bg-white shadow-2xl transition-all flex flex-col items-center justify-between text-center relative overflow-hidden ${
+                    showBorder ? 'border-2' : ''
+                  } ${
+                    template === 'table-tent'
+                      ? 'w-[280px] h-[390px] p-6 rounded-2xl'
+                      : template === 'window-sign'
+                      ? 'w-[320px] h-[320px] p-6 rounded-2xl'
+                      : template === 'full-poster'
+                      ? 'w-[330px] h-[450px] p-7 rounded-2xl'
+                      : 'w-[340px] h-[210px] p-4 rounded-xl flex-row text-left'
+                  }`}
+                  style={{ borderColor: accentColor }}
+                >
+                  {template === 'card-badge' ? (
+                    // Horizontal Card Layout
+                    <div className="flex items-center justify-between w-full gap-4">
+                      <div className="space-y-1 flex-1 min-w-0">
+                        {showHeaderTag && (
+                          <div
+                            className="text-[10px] uppercase font-mono tracking-wider font-bold"
+                            style={{ color: accentColor }}
+                          >
+                            {headerTag}
+                          </div>
+                        )}
+                        <h4 className="font-bold text-[16px] text-[#11140F] leading-tight truncate">
+                          {headline}
+                        </h4>
+                        {showSubline && <p className="text-[11px] text-[#11140F]/65">{subline}</p>}
+                        {showShortCode && (
+                          <div className="pt-1 font-mono text-[10px] text-[#11140F]/50 truncate">
+                            /{shortCode}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Draggable QR in badge */}
+                      <div
+                        onPointerDown={handlePointerDown}
+                        onPointerMove={handlePointerMove}
+                        onPointerUp={handlePointerUp}
+                        className={`p-2 border rounded-xl bg-white shadow-xs shrink-0 relative transition-shadow ${
+                          isDragging ? 'ring-2 ring-emerald-500 shadow-md cursor-grabbing' : 'cursor-grab hover:shadow-md'
+                        }`}
+                        style={{
+                          borderColor: `${accentColor}30`,
+                          transform: `translate(${qrOffset.x}px, ${qrOffset.y}px)`,
+                          touchAction: 'none',
+                        }}
+                        title="Click and drag to place anywhere on paper"
+                      >
+                        <QRCodeSVG value={url} size={96} level="H" fgColor={accentColor} />
+                        {activeIconDef && activeIconDef.path && (
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <div className="w-5 h-5 rounded-full bg-white shadow-xs border border-[#11140F]/20 flex items-center justify-center">
+                              <svg
+                                viewBox="0 0 24 24"
+                                className="w-3 h-3"
+                                fill={activeIconDef.fill ? activeIconDef.color || '#F59E0B' : 'none'}
+                                stroke={activeIconDef.fill ? 'none' : activeIconDef.color || '#11140F'}
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <path d={activeIconDef.path} />
+                              </svg>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    // Vertical / Square Posters
+                    <>
+                      <div className="space-y-1">
+                        {showHeaderTag && (
+                          <div
+                            className="text-[10px] uppercase font-mono tracking-widest font-bold"
+                            style={{ color: accentColor }}
+                          >
+                            {headerTag}
+                          </div>
+                        )}
+                        <h4 className="font-bold text-[20px] text-[#11140F] leading-tight tracking-tight">
+                          {headline}
+                        </h4>
+                        {showSubline && <p className="text-[12px] text-[#11140F]/65">{subline}</p>}
+                      </div>
+
+                      {/* Interactive Drag-and-Drop QR Container */}
+                      <div
+                        onPointerDown={handlePointerDown}
+                        onPointerMove={handlePointerMove}
+                        onPointerUp={handlePointerUp}
+                        className={`p-3 border-2 rounded-2xl bg-white shadow-sm my-2 relative transition-shadow group ${
+                          isDragging ? 'ring-2 ring-emerald-500 shadow-lg cursor-grabbing' : 'cursor-grab hover:shadow-md'
+                        }`}
+                        style={{
+                          borderColor: accentColor,
+                          transform: `translate(${qrOffset.x}px, ${qrOffset.y}px)`,
+                          touchAction: 'none',
+                        }}
+                        title="Click and drag to reposition QR anywhere on paper"
+                      >
+                        <QRCodeSVG
+                          value={url}
+                          size={template === 'window-sign' ? 140 : template === 'full-poster' ? 150 : 130}
+                          level="H"
+                          fgColor={accentColor}
+                        />
+                        {activeIconDef && activeIconDef.path && (
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <div className="w-7 h-7 rounded-full bg-white shadow-sm border border-[#11140F]/20 flex items-center justify-center">
+                              <svg
+                                viewBox="0 0 24 24"
+                                className="w-4 h-4"
+                                fill={activeIconDef.fill ? activeIconDef.color || '#F59E0B' : 'none'}
+                                stroke={activeIconDef.fill ? 'none' : activeIconDef.color || '#11140F'}
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <path d={activeIconDef.path} />
+                              </svg>
+                            </div>
+                          </div>
+                        )}
+                        <span className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-5 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded bg-black/80 text-white text-[9px] font-mono pointer-events-none whitespace-nowrap">
+                          Drag me
+                        </span>
+                      </div>
+
+                      <div className="space-y-1">
+                        {showShortCode && (
+                          <div
+                            className="inline-block px-3 py-1 rounded-full text-white text-[11px] font-mono shadow-2xs"
+                            style={{ backgroundColor: accentColor }}
+                          >
+                            /{shortCode}
+                          </div>
+                        )}
+                        {showFooterNote && <p className="text-[10px] text-[#11140F]/50">{footerNote}</p>}
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* On Desktop: Full Print & Download Buttons */}
-            <div className="hidden lg:flex items-center gap-2">
+            {/* Action Buttons in Right Panel */}
+            <div className="w-full max-w-sm pt-4 space-y-2 shrink-0">
               <button
                 onClick={handlePrint}
-                className="flex-1 py-3 px-4 rounded-xl text-white text-[13.5px] font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                className="w-full py-3 px-4 rounded-xl text-white text-[13.5px] font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 cursor-pointer shadow-sm"
                 style={{ backgroundColor: accentColor }}
               >
                 <Printer className="w-4 h-4" />
                 Print (1 Sheet) / Save PDF
               </button>
-              <button
-                onClick={handleDownloadPoster}
-                disabled={isExporting}
-                className="py-3 px-4 rounded-xl border border-[#11140F]/20 dark:border-white/15 bg-white dark:bg-white/[0.05] text-[#11140F] dark:text-white text-[13.5px] font-medium hover:bg-[#EEF0EA] dark:hover:bg-white/10 transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                title="Download high-resolution PNG poster"
-              >
-                <Download className="w-4 h-4" />
-                {isExporting ? 'Exporting…' : 'PNG Poster'}
-              </button>
-            </div>
-
-            <button
-              onClick={onClose}
-              className="w-full py-1.5 px-4 rounded-xl text-[#11140F]/60 dark:text-white/55 text-[12px] font-medium hover:text-[#11140F] dark:hover:text-white transition-colors cursor-pointer"
-            >
-              Close Print Studio
-            </button>
-          </div>
-        </div>
-
-        {/* Right Side: Live Printable Preview */}
-        <div className={`p-4 sm:p-6 lg:p-8 lg:w-1/2 bg-[#F4F5F1] dark:bg-black/40 flex-col items-center justify-between overflow-y-auto min-h-0 ${
-          mobileTab === 'preview' ? 'flex' : 'hidden lg:flex'
-        }`}>
-          {/* Mobile / Tablet Return Shortcut */}
-          <div className="w-full lg:hidden flex items-center justify-between pb-3 mb-2 border-b border-[#11140F]/10 dark:border-white/10 shrink-0">
-            <button
-              type="button"
-              onClick={() => setMobileTab('editor')}
-              className="text-[12px] font-semibold text-[#2F6B4F] dark:text-[#34D399] hover:underline flex items-center gap-1 cursor-pointer"
-            >
-              <SlidersHorizontal className="w-3.5 h-3.5" />
-              <span>← Back to Customizing</span>
-            </button>
-            <span className="text-[11px] font-mono text-[#11140F]/50 dark:text-white/50">
-              {template === 'table-tent' ? '4" × 6" Tent' : template === 'window-sign' ? '8" × 8" Sign' : template === 'full-poster' ? 'A4 Poster' : '3.5" × 2" Badge'}
-            </span>
-          </div>
-
-          {/* Centered Preview Canvas / Scaled Sheet Container */}
-          <div className="w-full flex-1 flex items-center justify-center py-2 sm:py-4 overflow-hidden min-h-[300px]">
-            <div className="transform scale-[0.78] sm:scale-90 md:scale-95 lg:scale-100 origin-center transition-transform">
-              <div
-                id="print-sheet"
-                className={`bg-white shadow-2xl transition-all flex flex-col items-center justify-between text-center relative ${
-                  showBorder ? 'border-2' : ''
-                } ${
-                  template === 'table-tent'
-                    ? 'w-[280px] h-[390px] p-6 rounded-2xl'
-                    : template === 'window-sign'
-                    ? 'w-[320px] h-[320px] p-6 rounded-2xl'
-                    : template === 'full-poster'
-                    ? 'w-[330px] h-[450px] p-7 rounded-2xl'
-                    : 'w-[340px] h-[210px] p-4 rounded-xl flex-row text-left'
-                }`}
-                style={{ borderColor: accentColor }}
-              >
-                {template === 'card-badge' ? (
-                  // Horizontal Card Layout
-                  <div className="flex items-center justify-between w-full gap-4">
-                    <div className="space-y-1 flex-1 min-w-0">
-                      {showHeaderTag && (
-                        <div
-                          className="text-[10px] uppercase font-mono tracking-wider font-bold"
-                          style={{ color: accentColor }}
-                        >
-                          {headerTag}
-                        </div>
-                      )}
-                      <h4 className="font-bold text-[16px] text-[#11140F] leading-tight truncate">
-                        {headline}
-                      </h4>
-                      {showSubline && (
-                        <p className="text-[11px] text-[#11140F]/65">{subline}</p>
-                      )}
-                      {showShortCode && (
-                        <div className="pt-1 font-mono text-[10px] text-[#11140F]/50 truncate">
-                          /{shortCode}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="p-2 border rounded-xl bg-white shadow-xs shrink-0 relative" style={{ borderColor: `${accentColor}30` }}>
-                      <QRCodeSVG value={url} size={96} level="H" fgColor={accentColor} />
-                      {centerLogo !== 'none' && (
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                          <div className="w-5 h-5 rounded-full bg-white shadow-xs border border-[#11140F]/20 flex items-center justify-center">
-                            {centerLogo === 'star' && <Star className="w-3 h-3 text-amber-500 fill-amber-500" />}
-                            {centerLogo === 'utensils' && <Utensils className="w-3 h-3 text-[#11140F]" />}
-                            {centerLogo === 'wifi' && <Wifi className="w-3 h-3 text-blue-600" />}
-                            {centerLogo === 'coffee' && <Coffee className="w-3 h-3 text-amber-800" />}
-                            {centerLogo === 'bag' && <ShoppingBag className="w-3 h-3 text-[#2F6B4F]" />}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  // Vertical / Square Posters
-                  <>
-                    <div className="space-y-1">
-                      {showHeaderTag && (
-                        <div
-                          className="text-[10px] uppercase font-mono tracking-widest font-bold"
-                          style={{ color: accentColor }}
-                        >
-                          {headerTag}
-                        </div>
-                      )}
-                      <h4 className="font-bold text-[20px] text-[#11140F] leading-tight tracking-tight">
-                        {headline}
-                      </h4>
-                      {showSubline && (
-                        <p className="text-[12px] text-[#11140F]/65">{subline}</p>
-                      )}
-                    </div>
-
-                    <div className="p-3 border-2 rounded-2xl bg-white shadow-sm my-2 relative" style={{ borderColor: accentColor }}>
-                      <QRCodeSVG
-                        value={url}
-                        size={template === 'window-sign' ? 140 : template === 'full-poster' ? 150 : 130}
-                        level="H"
-                        fgColor={accentColor}
-                      />
-                      {centerLogo !== 'none' && (
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                          <div className="w-7 h-7 rounded-full bg-white shadow-sm border border-[#11140F]/20 flex items-center justify-center">
-                            {centerLogo === 'star' && <Star className="w-4 h-4 text-amber-500 fill-amber-500" />}
-                            {centerLogo === 'utensils' && <Utensils className="w-4 h-4 text-[#11140F]" />}
-                            {centerLogo === 'wifi' && <Wifi className="w-4 h-4 text-blue-600" />}
-                            {centerLogo === 'coffee' && <Coffee className="w-4 h-4 text-amber-800" />}
-                            {centerLogo === 'bag' && <ShoppingBag className="w-4 h-4 text-[#2F6B4F]" />}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="space-y-1">
-                      {showShortCode && (
-                        <div
-                          className="inline-block px-3 py-1 rounded-full text-white text-[11px] font-mono shadow-2xs"
-                          style={{ backgroundColor: accentColor }}
-                        >
-                          /{shortCode}
-                        </div>
-                      )}
-                      {showFooterNote && (
-                        <p className="text-[10px] text-[#11140F]/50">{footerNote}</p>
-                      )}
-                    </div>
-                  </>
-                )}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleDownloadPoster}
+                  disabled={isExporting}
+                  className="flex-1 py-2.5 px-3 rounded-xl border border-[#11140F]/20 dark:border-white/15 bg-white dark:bg-white/[0.05] text-[#11140F] dark:text-white text-[12.5px] font-medium hover:bg-[#EEF0EA] dark:hover:bg-white/10 transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  <Download className="w-4 h-4" />
+                  {isExporting ? 'Exporting…' : 'PNG Poster'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMobileTab('editor')}
+                  className="lg:hidden py-2.5 px-3 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.05] text-[#11140F] dark:text-white text-[12.5px] font-medium hover:bg-[#EEF0EA] dark:hover:bg-white/10 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <SlidersHorizontal className="w-3.5 h-3.5" />
+                  <span>Edit</span>
+                </button>
               </div>
             </div>
           </div>
-
-          {/* Action Buttons in Right Panel */}
-          <div className="w-full max-w-sm pt-4 space-y-2 shrink-0">
-            <button
-              onClick={handlePrint}
-              className="w-full py-3 px-4 rounded-xl text-white text-[13.5px] font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 cursor-pointer shadow-sm"
-              style={{ backgroundColor: accentColor }}
-            >
-              <Printer className="w-4 h-4" />
-              Print (1 Sheet) / Save PDF
-            </button>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleDownloadPoster}
-                disabled={isExporting}
-                className="flex-1 py-2.5 px-3 rounded-xl border border-[#11140F]/20 dark:border-white/15 bg-white dark:bg-white/[0.05] text-[#11140F] dark:text-white text-[12.5px] font-medium hover:bg-[#EEF0EA] dark:hover:bg-white/10 transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-              >
-                <Download className="w-4 h-4" />
-                {isExporting ? 'Exporting…' : 'PNG Poster'}
-              </button>
-              <button
-                type="button"
-                onClick={() => setMobileTab('editor')}
-                className="lg:hidden py-2.5 px-3 rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-white/[0.05] text-[#11140F] dark:text-white text-[12.5px] font-medium hover:bg-[#EEF0EA] dark:hover:bg-white/10 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-              >
-                <SlidersHorizontal className="w-3.5 h-3.5" />
-                <span>Edit</span>
-              </button>
-            </div>
-          </div>
         </div>
-
       </div>
     </div>
-  </div>
-);
+  );
 }

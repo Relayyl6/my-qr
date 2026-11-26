@@ -72,11 +72,19 @@ export default async function LandingViewPage({
   }
 
   const page = migrateLegacySpec(result.spec, result.link.destinationUrl);
+  const palette = PALETTES[page.brand.palette as PaletteKey] || PALETTES.ink;
 
   return (
-    <RenderPage
-      page={page}
-      pageId={result.landingPage.id}
-    />
+    <div
+      className="min-h-screen w-full flex flex-col items-center justify-start py-8 px-4"
+      style={{ backgroundColor: palette.bg }}
+    >
+      <div className="w-full max-w-[480px] mx-auto" style={{ maxWidth: '480px' }}>
+        <RenderPage
+          page={page}
+          pageId={result.landingPage.id}
+        />
+      </div>
+    </div>
   );
 }

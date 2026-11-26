@@ -28,6 +28,12 @@ import {
   Users,
   FileSpreadsheet,
   Download,
+  Key,
+  Clock,
+  Calendar,
+  Image as ImageIcon,
+  Loader2,
+  Shield,
 } from 'lucide-react';
 import CustomerMailingListManager from '@/components/CustomerMailingListManager';
 import { PlanTier, PLANS } from '@/lib/plans';
@@ -140,6 +146,12 @@ export default function MicroSaasHub({
     utmCampaign: '',
     iosUrl: '',
     androidUrl: '',
+    ogTitle: '',
+    ogDescription: '',
+    ogImage: '',
+    password: '',
+    maxClicks: '',
+    expiresAt: '',
   });
 
   const [editMenuForm, setEditMenuForm] = useState<{
@@ -211,7 +223,45 @@ export default function MicroSaasHub({
     utmCampaign: '',
     iosUrl: '',
     androidUrl: '',
+    ogTitle: '',
+    ogDescription: '',
+    ogImage: '',
+    password: '',
+    maxClicks: '',
+    expiresAt: '',
   });
+
+  const [isScrapingMeta, setIsScrapingMeta] = useState(false);
+  const [metaScrapeError, setMetaScrapeError] = useState<string | null>(null);
+
+  const handleScrapeMeta = async () => {
+    if (!shortenerForm.destinationUrl) return;
+    setIsScrapingMeta(true);
+    setMetaScrapeError(null);
+    try {
+      const res = await fetch('/api/short-links/scrape-meta', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: shortenerForm.destinationUrl }),
+      });
+      const data = await res.json();
+      if (data.success && data.metadata) {
+        setShortenerForm((prev) => ({
+          ...prev,
+          title: prev.title || data.metadata.title || '',
+          ogTitle: data.metadata.title || prev.ogTitle || '',
+          ogDescription: data.metadata.description || prev.ogDescription || '',
+          ogImage: data.metadata.image || prev.ogImage || '',
+        }));
+      } else {
+        setMetaScrapeError(data.error || 'Failed to detect metadata.');
+      }
+    } catch (err: any) {
+      setMetaScrapeError(err.message || 'Scraping failed.');
+    } finally {
+      setIsScrapingMeta(false);
+    }
+  };
 
   const [menuForm, setMenuForm] = useState({
     title: '',
@@ -379,7 +429,22 @@ export default function MicroSaasHub({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to create short link');
       setShowShortenerModal(false);
-      setShortenerForm({ title: '', destinationUrl: '', slug: '', utmSource: '', utmMedium: '', utmCampaign: '', iosUrl: '', androidUrl: '' });
+      setShortenerForm({
+        title: '',
+        destinationUrl: '',
+        slug: '',
+        utmSource: '',
+        utmMedium: '',
+        utmCampaign: '',
+        iosUrl: '',
+        androidUrl: '',
+        ogTitle: '',
+        ogDescription: '',
+        ogImage: '',
+        password: '',
+        maxClicks: '',
+        expiresAt: '',
+      });
       setSuccessMsg('Short link generated successfully!');
       setTimeout(() => setSuccessMsg(null), 3000);
       fetchItems();
@@ -515,6 +580,12 @@ export default function MicroSaasHub({
       utmCampaign: spec.utmCampaign || '',
       iosUrl: spec.iosUrl || '',
       androidUrl: spec.androidUrl || '',
+      ogTitle: spec.ogTitle || '',
+      ogDescription: spec.ogDescription || '',
+      ogImage: spec.ogImage || '',
+      password: spec.password || '',
+      maxClicks: spec.maxClicks ? String(spec.maxClicks) : '',
+      expiresAt: spec.expiresAt ? new Date(spec.expiresAt).toISOString().slice(0, 16) : '',
     });
     setShowEditModal('shortener');
   };
@@ -1039,15 +1110,35 @@ export default function MicroSaasHub({
                           {spec.destinationUrl}
                         </td>
                         <td className="py-3.5">
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex flex-wrap items-center gap-1.5">
                             {spec.utmCampaign && (
-                              <span className="text-[10px] bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-mono border border-transparent dark:border-blue-500/20">
+                              <span className="text-[10px] bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-mono border border-blue-500/20">
                                 UTM
                               </span>
                             )}
                             {(spec.iosUrl || spec.androidUrl) && (
-                              <span className="text-[10px] bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 px-1.5 py-0.5 rounded font-mono flex items-center gap-0.5 border border-transparent dark:border-purple-500/20">
+                              <span className="text-[10px] bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 px-1.5 py-0.5 rounded font-mono flex items-center gap-0.5 border border-purple-500/20">
                                 <Smartphone className="w-2.5 h-2.5" /> OS Route
+                              </span>
+                            )}
+                            {(spec.ogTitle || spec.ogImage) && (
+                              <span className="text-[10px] bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.5 rounded font-mono flex items-center gap-0.5 border border-emerald-500/20">
+                                <Sparkles className="w-2.5 h-2.5" /> OG Meta
+                              </span>
+                            )}
+                            {spec.password && (
+                              <span className="text-[10px] bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 rounded font-mono flex items-center gap-0.5 border border-amber-500/20">
+                                <Key className="w-2.5 h-2.5" /> PIN
+                              </span>
+                            )}
+                            {spec.maxClicks && (
+                              <span className="text-[10px] bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 px-1.5 py-0.5 rounded font-mono flex items-center gap-0.5 border border-indigo-500/20">
+                                <Shield className="w-2.5 h-2.5" /> Max {spec.maxClicks}
+                              </span>
+                            )}
+                            {spec.expiresAt && (
+                              <span className="text-[10px] bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 px-1.5 py-0.5 rounded font-mono flex items-center gap-0.5 border border-rose-500/20">
+                                <Clock className="w-2.5 h-2.5" /> Exp: {new Date(spec.expiresAt).toLocaleDateString()}
                               </span>
                             )}
                           </div>
@@ -1460,8 +1551,14 @@ export default function MicroSaasHub({
 
       {/* VCARD CREATION MODAL */}
       {showVCardModal && (
-        <div className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#0E1017] rounded-3xl border border-[#11140F]/10 dark:border-white/10 shadow-2xl max-w-xl w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto text-[#11140F] dark:text-white">
+        <div
+          onClick={() => setShowVCardModal(false)}
+          className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-150"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-[#0E1017] rounded-3xl border border-[#11140F]/10 dark:border-white/10 shadow-2xl max-w-xl w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto text-[#11140F] dark:text-white"
+          >
             <div className="flex items-center justify-between border-b border-[#11140F]/10 dark:border-white/10 pb-4">
               <div className="flex items-center gap-2">
                 <Contact className="w-5 h-5 text-[#2F6B4F]" />
@@ -1773,8 +1870,14 @@ export default function MicroSaasHub({
 
       {/* SHORTENER CREATION MODAL */}
       {showShortenerModal && (
-        <div className="fixed inset-0 z-50 bg-black/65 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#101211] rounded-3xl border border-[#11140F]/10 dark:border-white/12 shadow-2xl max-w-lg w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 text-[#11140F] dark:text-white">
+        <div
+          onClick={() => setShowShortenerModal(false)}
+          className="fixed inset-0 z-50 bg-black/65 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-150"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-[#101211] rounded-3xl border border-[#11140F]/10 dark:border-white/12 shadow-2xl max-w-xl w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 text-[#11140F] dark:text-white max-h-[92vh] overflow-y-auto"
+          >
             <div className="flex items-center justify-between border-b border-[#11140F]/10 dark:border-white/10 pb-4">
               <div className="flex items-center gap-2">
                 <Link2 className="w-5 h-5 text-[#2F6B4F]" />
@@ -1790,8 +1893,28 @@ export default function MicroSaasHub({
             </div>
 
             <form onSubmit={handleCreateShortener} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Destination URL *</label>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-[#11140F] dark:text-white/90">Destination URL *</label>
+                  <button
+                    type="button"
+                    onClick={handleScrapeMeta}
+                    disabled={isScrapingMeta || !shortenerForm.destinationUrl}
+                    className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-40"
+                  >
+                    {isScrapingMeta ? (
+                      <>
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        <span>Detecting Meta...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-3 h-3" />
+                        <span>Auto-Detect Meta</span>
+                      </>
+                    )}
+                  </button>
+                </div>
                 <input
                   type="url"
                   required
@@ -1800,6 +1923,9 @@ export default function MicroSaasHub({
                   placeholder="https://yourwebsite.com/long-page-url-to-shorten"
                   className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                 />
+                {metaScrapeError && (
+                  <p className="text-[10.5px] text-red-600 dark:text-red-400">{metaScrapeError}</p>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -1809,7 +1935,7 @@ export default function MicroSaasHub({
                     type="text"
                     value={shortenerForm.title}
                     onChange={(e) => setShortenerForm({ ...shortenerForm, title: e.target.value })}
-                    placeholder="e.g. Black Friday Promo Link"
+                    placeholder="e.g. Portfolio Promo Link"
                     className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                   />
                 </div>
@@ -1821,8 +1947,111 @@ export default function MicroSaasHub({
                       type="text"
                       value={shortenerForm.slug}
                       onChange={(e) => setShortenerForm({ ...shortenerForm, slug: e.target.value })}
-                      placeholder="blackfriday26"
+                      placeholder="custom-slug"
                       className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* OpenGraph & Social Preview (Bitly / Dub style) */}
+              <div className="p-3.5 bg-[#F7F8F5] dark:bg-white/[0.03] rounded-2xl border border-[#11140F]/10 dark:border-white/10 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-[#11140F] dark:text-white uppercase tracking-wider flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Social Media Unfurl &amp; OG Metadata</span>
+                  </span>
+                  <span className="text-[10px] font-mono text-emerald-700 dark:text-emerald-400">Bitly/Dub Meta</span>
+                </div>
+
+                {/* Live Social Card Preview */}
+                {(shortenerForm.ogTitle || shortenerForm.destinationUrl) && (
+                  <div className="rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#151912] overflow-hidden text-xs shadow-2xs">
+                    {shortenerForm.ogImage && (
+                      <div className="h-28 w-full bg-cover bg-center border-b border-black/5 dark:border-white/5" style={{ backgroundImage: `url(${shortenerForm.ogImage})` }} />
+                    )}
+                    <div className="p-3 space-y-1">
+                      <div className="font-mono text-[10px] text-[#11140F]/45 dark:text-white/45 truncate">
+                        {shortenerForm.destinationUrl ? new URL(shortenerForm.destinationUrl.startsWith('http') ? shortenerForm.destinationUrl : `https://${shortenerForm.destinationUrl}`).hostname : 'yourdomain.com'}
+                      </div>
+                      <div className="font-bold text-xs text-[#11140F] dark:text-white truncate">
+                        {shortenerForm.ogTitle || shortenerForm.title || 'Dynamic Link Preview'}
+                      </div>
+                      <div className="text-[11px] text-[#11140F]/65 dark:text-white/65 line-clamp-2">
+                        {shortenerForm.ogDescription || 'High-speed smart link redirect with device routing and social preview tags.'}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={shortenerForm.ogTitle}
+                    onChange={(e) => setShortenerForm({ ...shortenerForm, ogTitle: e.target.value })}
+                    placeholder="Custom OG Card Title (e.g. My Portfolio & Services)"
+                    className="w-full px-2.5 py-1.5 text-[11px] rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white"
+                  />
+                  <textarea
+                    rows={2}
+                    value={shortenerForm.ogDescription}
+                    onChange={(e) => setShortenerForm({ ...shortenerForm, ogDescription: e.target.value })}
+                    placeholder="Custom Social Description (summary for WhatsApp / Twitter / LinkedIn)"
+                    className="w-full px-2.5 py-1.5 text-[11px] rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white resize-none"
+                  />
+                  <input
+                    type="url"
+                    value={shortenerForm.ogImage}
+                    onChange={(e) => setShortenerForm({ ...shortenerForm, ogImage: e.target.value })}
+                    placeholder="Custom OG Image URL (e.g. https://.../preview.jpg)"
+                    className="w-full px-2.5 py-1.5 text-[11px] rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white font-mono text-[10.5px]"
+                  />
+                </div>
+              </div>
+
+              {/* Security, Limits & Expiration */}
+              <div className="p-3.5 bg-[#F7F8F5] dark:bg-white/[0.03] rounded-2xl border border-[#11140F]/10 dark:border-white/10 space-y-2.5">
+                <span className="text-[11px] font-bold text-[#11140F] dark:text-white uppercase tracking-wider block">
+                  Security, Passcode &amp; Limits (Optional)
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div className="space-y-1">
+                    <label className="text-[10.5px] font-semibold text-[#11140F]/70 dark:text-white/70 flex items-center gap-1">
+                      <Key className="w-3 h-3 text-amber-600" />
+                      <span>Passcode Gate</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={shortenerForm.password}
+                      onChange={(e) => setShortenerForm({ ...shortenerForm, password: e.target.value })}
+                      placeholder="PIN / Secret"
+                      className="w-full px-2.5 py-1.5 text-[11px] rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10.5px] font-semibold text-[#11140F]/70 dark:text-white/70 flex items-center gap-1">
+                      <Shield className="w-3 h-3 text-indigo-600" />
+                      <span>Max Click Limit</span>
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={shortenerForm.maxClicks}
+                      onChange={(e) => setShortenerForm({ ...shortenerForm, maxClicks: e.target.value })}
+                      placeholder="e.g. 500"
+                      className="w-full px-2.5 py-1.5 text-[11px] rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10.5px] font-semibold text-[#11140F]/70 dark:text-white/70 flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-rose-600" />
+                      <span>Expiration Date</span>
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={shortenerForm.expiresAt}
+                      onChange={(e) => setShortenerForm({ ...shortenerForm, expiresAt: e.target.value })}
+                      className="w-full px-2 py-1.5 text-[10.5px] rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white"
                     />
                   </div>
                 </div>
@@ -1881,7 +2110,7 @@ export default function MicroSaasHub({
                 </div>
               </div>
 
-              <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10 dark:border-white/10 dark:border-white/10 dark:border-white/10">
+              <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#11140F]/10 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setShowShortenerModal(false)}
@@ -1904,8 +2133,14 @@ export default function MicroSaasHub({
 
       {/* MENU CREATION MODAL */}
       {showMenuModal && (
-        <div className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#0E1017] rounded-3xl border border-[#11140F]/10 dark:border-white/10 shadow-2xl max-w-xl w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto text-[#11140F] dark:text-white">
+        <div
+          onClick={() => setShowMenuModal(false)}
+          className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-150"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-[#0E1017] rounded-3xl border border-[#11140F]/10 dark:border-white/10 shadow-2xl max-w-xl w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto text-[#11140F] dark:text-white"
+          >
             <div className="flex items-center justify-between border-b border-[#11140F]/10 dark:border-white/10 pb-4">
               <div className="flex items-center gap-2">
                 <Utensils className="w-5 h-5 text-[#2F6B4F]" />
@@ -2013,8 +2248,14 @@ export default function MicroSaasHub({
 
       {/* WIFI CREATION MODAL */}
       {showWifiModal && (
-        <div className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#0E1017] rounded-3xl border border-[#11140F]/10 dark:border-white/10 shadow-2xl max-w-xl w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto text-[#11140F] dark:text-white">
+        <div
+          onClick={() => setShowWifiModal(false)}
+          className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-150"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-[#0E1017] rounded-3xl border border-[#11140F]/10 dark:border-white/10 shadow-2xl max-w-xl w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto text-[#11140F] dark:text-white"
+          >
             <div className="flex items-center justify-between border-b border-[#11140F]/10 dark:border-white/10 pb-4">
               <div className="flex items-center gap-2">
                 <Wifi className="w-5 h-5 text-[#2F6B4F]" />
@@ -2136,8 +2377,14 @@ export default function MicroSaasHub({
 
       {/* EDIT MODAL 1: DIGITAL VCARD */}
       {showEditModal === 'vcard' && editingItem && (
-        <div className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#0E1017] rounded-3xl border border-[#11140F]/10 dark:border-white/10 shadow-2xl max-w-xl w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto text-[#11140F] dark:text-white">
+        <div
+          onClick={() => setShowEditModal(null)}
+          className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-150"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-[#0E1017] rounded-3xl border border-[#11140F]/10 dark:border-white/10 shadow-2xl max-w-xl w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto text-[#11140F] dark:text-white"
+          >
             <div className="flex items-center justify-between border-b border-[#11140F]/10 dark:border-white/10 pb-4">
               <div className="flex items-center gap-2">
                 <Contact className="w-5 h-5 text-[#2F6B4F]" />
@@ -2460,8 +2707,14 @@ export default function MicroSaasHub({
 
       {/* EDIT MODAL 2: LINK SHORTENER */}
       {showEditModal === 'shortener' && editingItem && (
-        <div className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#0E1017] rounded-3xl border border-[#11140F]/10 dark:border-white/10 shadow-2xl max-w-xl w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto text-[#11140F] dark:text-white">
+        <div
+          onClick={() => setShowEditModal(null)}
+          className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-150"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-[#0E1017] rounded-3xl border border-[#11140F]/10 dark:border-white/10 shadow-2xl max-w-xl w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto text-[#11140F] dark:text-white"
+          >
             <div className="flex items-center justify-between border-b border-[#11140F]/10 dark:border-white/10 pb-4">
               <div className="flex items-center gap-2">
                 <Link2 className="w-5 h-5 text-[#2F6B4F]" />
@@ -2497,6 +2750,72 @@ export default function MicroSaasHub({
                   onChange={(e) => setEditShortenerForm({ ...editShortenerForm, destinationUrl: e.target.value })}
                   className="w-full px-3 py-2 text-xs rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white focus:outline-hidden focus:border-[#2F6B4F] dark:focus:border-emerald-500"
                 />
+              </div>
+
+              {/* OpenGraph & Social Preview for Edit */}
+              <div className="p-3 bg-[#F7F8F5] dark:bg-white/[0.03] rounded-xl space-y-2 border border-[#11140F]/8 dark:border-white/10">
+                <span className="text-[11px] font-semibold text-[#11140F] dark:text-white flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>OpenGraph Social Preview (Bitly / Dub style)</span>
+                </span>
+                <input
+                  type="text"
+                  value={editShortenerForm.ogTitle}
+                  onChange={(e) => setEditShortenerForm({ ...editShortenerForm, ogTitle: e.target.value })}
+                  placeholder="Custom OG Card Title"
+                  className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white"
+                />
+                <textarea
+                  rows={2}
+                  value={editShortenerForm.ogDescription}
+                  onChange={(e) => setEditShortenerForm({ ...editShortenerForm, ogDescription: e.target.value })}
+                  placeholder="Custom Social Description for unfurl previews"
+                  className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white resize-none"
+                />
+                <input
+                  type="url"
+                  value={editShortenerForm.ogImage}
+                  onChange={(e) => setEditShortenerForm({ ...editShortenerForm, ogImage: e.target.value })}
+                  placeholder="OG Image URL (https://...)"
+                  className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white font-mono text-[10.5px]"
+                />
+              </div>
+
+              {/* Security & Expiration for Edit */}
+              <div className="p-3 bg-[#F7F8F5] dark:bg-white/[0.03] rounded-xl space-y-2 border border-[#11140F]/8 dark:border-white/10">
+                <span className="text-[11px] font-semibold text-[#11140F] dark:text-white block">Security &amp; Expiration</span>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-[#11140F]/60 dark:text-white/60">Passcode PIN</label>
+                    <input
+                      type="text"
+                      value={editShortenerForm.password}
+                      onChange={(e) => setEditShortenerForm({ ...editShortenerForm, password: e.target.value })}
+                      placeholder="Optional Secret"
+                      className="w-full px-2 py-1 text-xs rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-[#11140F]/60 dark:text-white/60">Max Clicks</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={editShortenerForm.maxClicks}
+                      onChange={(e) => setEditShortenerForm({ ...editShortenerForm, maxClicks: e.target.value })}
+                      placeholder="e.g. 1000"
+                      className="w-full px-2 py-1 text-xs rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-[#11140F]/60 dark:text-white/60">Expires At</label>
+                    <input
+                      type="datetime-local"
+                      value={editShortenerForm.expiresAt}
+                      onChange={(e) => setEditShortenerForm({ ...editShortenerForm, expiresAt: e.target.value })}
+                      className="w-full px-2 py-1 text-[10px] rounded-lg border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] text-[#11140F] dark:text-white"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -2572,8 +2891,14 @@ export default function MicroSaasHub({
 
       {/* EDIT MODAL 3: RESTAURANT MENU */}
       {showEditModal === 'menu' && editingItem && (
-        <div className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#0E1017] rounded-3xl border border-[#11140F]/10 dark:border-white/10 shadow-2xl max-w-2xl w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto text-[#11140F] dark:text-white">
+        <div
+          onClick={() => setShowEditModal(null)}
+          className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-150"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-[#0E1017] rounded-3xl border border-[#11140F]/10 dark:border-white/10 shadow-2xl max-w-2xl w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto text-[#11140F] dark:text-white"
+          >
             <div className="flex items-center justify-between border-b border-[#11140F]/10 dark:border-white/10 pb-4">
               <div className="flex items-center gap-2">
                 <Utensils className="w-5 h-5 text-[#2F6B4F]" />
@@ -2791,8 +3116,14 @@ export default function MicroSaasHub({
 
       {/* EDIT MODAL 4: DYNAMIC WI-FI */}
       {showEditModal === 'wifi' && editingItem && (
-        <div className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#0E1017] rounded-3xl border border-[#11140F]/10 dark:border-white/10 shadow-2xl max-w-md w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto text-[#11140F] dark:text-white">
+        <div
+          onClick={() => setShowEditModal(null)}
+          className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-150"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-[#0E1017] rounded-3xl border border-[#11140F]/10 dark:border-white/10 shadow-2xl max-w-md w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto text-[#11140F] dark:text-white"
+          >
             <div className="flex items-center justify-between border-b border-[#11140F]/10 dark:border-white/10 pb-4">
               <div className="flex items-center gap-2">
                 <Wifi className="w-5 h-5 text-[#2F6B4F]" />
@@ -3000,8 +3331,14 @@ export default function MicroSaasHub({
 
       {/* VCARD EXCHANGED LEADS MODAL */}
       {leadsModalCard && (
-        <div className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#0E1017] rounded-3xl border border-[#11140F]/10 dark:border-white/10 shadow-2xl max-w-xl w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[85vh] flex flex-col text-[#11140F] dark:text-white">
+        <div
+          onClick={() => setLeadsModalCard(null)}
+          className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-150"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-[#0E1017] rounded-3xl border border-[#11140F]/10 dark:border-white/10 shadow-2xl max-w-xl w-full p-6 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200 max-h-[85vh] flex flex-col text-[#11140F] dark:text-white"
+          >
             <div className="flex items-center justify-between border-b border-[#11140F]/10 dark:border-white/10 pb-4 shrink-0">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-[#34D399]/10 text-emerald-800 dark:text-[#34D399] border border-emerald-200 dark:border-[#34D399]/25 flex items-center justify-center">

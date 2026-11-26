@@ -76,4 +76,6 @@ export interface DomainSearchResult {
   tld: string;
   available: boolean;
   pricing: DomainPricing | null;
+  tierCategory?: 'exact' | 'prefix' | 'extension' | 'recommended';
+  matchedPrefix?: string;
 }

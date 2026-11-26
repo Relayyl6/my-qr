@@ -38,8 +38,11 @@ export function RenderPage({ page, pageId, isLivePreview = false }: RenderPagePr
           '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
       }}
     >
-      {/* Centered Single-Column Container (Max 480px across Mobile, Tablet, Desktop) */}
-      <main className="w-full max-w-[480px] space-y-6 animate-in fade-in duration-300">
+      {/* Centered Single-Column Container (Guaranteed Max 480px across Mobile, Tablet, Desktop) */}
+      <main
+        className="w-full max-w-[480px] space-y-6 animate-in fade-in duration-300 mx-auto"
+        style={{ maxWidth: '480px' }}
+      >
         {/* 1. Brand Header */}
         <header className="text-center space-y-2 pt-2 pb-1">
           {brand.logoUrl && (
@@ -53,12 +56,14 @@ export function RenderPage({ page, pageId, isLivePreview = false }: RenderPagePr
             </div>
           )}
           <p
-            className="text-[12px] font-semibold tracking-wider uppercase opacity-75"
-            style={{ color: palette.accent }}
+            className="text-[12px] font-bold tracking-wider uppercase"
+            style={{
+              color: palette.bg === '#0F172A' ? '#38BDF8' : palette.accent,
+            }}
           >
             {brand.name}
           </p>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight leading-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-normal leading-tight">
             {brand.headline}
           </h1>
           {brand.tagline && (

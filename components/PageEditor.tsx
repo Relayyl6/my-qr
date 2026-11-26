@@ -68,6 +68,14 @@ const defaultPage = (destinationUrl: string): Page => ({
   },
 });
 
+export const DEFAULT_PLACEHOLDERS = {
+  brandName: 'My Business',
+  headline: 'Welcome to our space',
+  tagline: 'Simple, direct, and made for our community.',
+  serviceName: 'Core Offering',
+  serviceDesc: 'Direct service tailored for you.',
+};
+
 function countWords(str: string): number {
   return str.trim().split(/\s+/).filter(Boolean).length;
 }
@@ -89,6 +97,23 @@ export default function PageEditor({
   // Form State
   const [page, setPage] = useState<Page>(() => initialPage || defaultPage(destinationUrl));
   const [isActive, setIsActive] = useState(isCurrentlyActive);
+  const [showPlaceholderWarning, setShowPlaceholderWarning] = useState(false);
+
+  const palette = PALETTES[page.brand.palette as PaletteKey] || PALETTES.ink;
+
+  // Detect remaining fallback copy
+  const isBrandNamePlaceholder = page.brand.name.trim() === DEFAULT_PLACEHOLDERS.brandName;
+  const isHeadlinePlaceholder = page.brand.headline.trim() === DEFAULT_PLACEHOLDERS.headline;
+  const isTaglinePlaceholder = page.brand.tagline.trim() === DEFAULT_PLACEHOLDERS.tagline;
+  const hasServicePlaceholder = page.services.some(
+    (s) => s.name.trim() === DEFAULT_PLACEHOLDERS.serviceName
+  );
+
+  const remainingPlaceholders: string[] = [];
+  if (isBrandNamePlaceholder) remainingPlaceholders.push(`Brand Name ("${DEFAULT_PLACEHOLDERS.brandName}")`);
+  if (isHeadlinePlaceholder) remainingPlaceholders.push(`Headline ("${DEFAULT_PLACEHOLDERS.headline}")`);
+  if (isTaglinePlaceholder) remainingPlaceholders.push(`Tagline ("${DEFAULT_PLACEHOLDERS.tagline}")`);
+  if (hasServicePlaceholder) remainingPlaceholders.push(`Service ("${DEFAULT_PLACEHOLDERS.serviceName}")`);
 
   // Accordion Sections State
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
@@ -159,7 +184,13 @@ export default function PageEditor({
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = async (forcePublish = false) => {
+    if (!forcePublish && remainingPlaceholders.length > 0) {
+      setShowPlaceholderWarning(true);
+      return;
+    }
+
+    setShowPlaceholderWarning(false);
     setIsSaving(true);
     setStatusMessage(null);
 
@@ -238,7 +269,7 @@ export default function PageEditor({
           )}
 
           <button
-            onClick={handleSave}
+            onClick={() => handleSave(false)}
             disabled={isSaving}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[13px] font-semibold transition-all shadow-xs cursor-pointer disabled:opacity-50"
           >
@@ -391,9 +422,16 @@ export default function PageEditor({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[11.5px] font-semibold uppercase opacity-60 mb-1">
-                      Business / Brand Name
-                    </label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-[11.5px] font-semibold uppercase opacity-60">
+                        Business / Brand Name
+                      </label>
+                      {isBrandNamePlaceholder && (
+                        <span className="px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-700 dark:text-amber-300 text-[10px] font-semibold">
+                          Sample text
+                        </span>
+                      )}
+                    </div>
                     <input
                       type="text"
                       value={page.brand.name}
@@ -424,7 +462,14 @@ export default function PageEditor({
 
                 <div>
                   <div className="flex justify-between items-center mb-1">
-                    <label className="text-[11.5px] font-semibold uppercase opacity-60">Headline</label>
+                    <div className="flex items-center gap-1.5">
+                      <label className="text-[11.5px] font-semibold uppercase opacity-60">Headline</label>
+                      {isHeadlinePlaceholder && (
+                        <span className="px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-700 dark:text-amber-300 text-[10px] font-semibold">
+                          Sample text
+                        </span>
+                      )}
+                    </div>
                     <span className="text-[11px] font-mono opacity-50">
                       {countWords(page.brand.headline)}/{LIMITS.headlineWords} words
                     </span>
@@ -441,7 +486,14 @@ export default function PageEditor({
 
                 <div>
                   <div className="flex justify-between items-center mb-1">
-                    <label className="text-[11.5px] font-semibold uppercase opacity-60">Tagline / Bio</label>
+                    <div className="flex items-center gap-1.5">
+                      <label className="text-[11.5px] font-semibold uppercase opacity-60">Tagline / Bio</label>
+                      {isTaglinePlaceholder && (
+                        <span className="px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-700 dark:text-amber-300 text-[10px] font-semibold">
+                          Sample text
+                        </span>
+                      )}
+                    </div>
                     <span className="text-[11px] font-mono opacity-50">
                       {countWords(page.brand.tagline)}/{LIMITS.taglineWords} words
                     </span>
@@ -630,17 +682,24 @@ export default function PageEditor({
                     className="p-3 rounded-lg border border-[#11140F]/10 dark:border-white/10 space-y-2 relative"
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <input
-                        type="text"
-                        value={item.name}
-                        onChange={(e) => {
-                          const updated = [...page.services];
-                          updated[idx] = { ...updated[idx], name: e.target.value };
-                          setPage((p) => ({ ...p, services: updated }));
-                        }}
-                        placeholder="Item / Service Name"
-                        className="flex-1 px-2.5 py-1 text-[12.5px] rounded border border-[#11140F]/10 dark:border-white/10 bg-transparent font-medium"
-                      />
+                      <div className="flex-1 flex items-center gap-1.5">
+                        <input
+                          type="text"
+                          value={item.name}
+                          onChange={(e) => {
+                            const updated = [...page.services];
+                            updated[idx] = { ...updated[idx], name: e.target.value };
+                            setPage((p) => ({ ...p, services: updated }));
+                          }}
+                          placeholder="Item / Service Name"
+                          className="w-full px-2.5 py-1 text-[12.5px] rounded border border-[#11140F]/10 dark:border-white/10 bg-transparent font-medium"
+                        />
+                        {item.name.trim() === DEFAULT_PLACEHOLDERS.serviceName && (
+                          <span className="px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-700 dark:text-amber-300 text-[10px] font-semibold whitespace-nowrap">
+                            Sample
+                          </span>
+                        )}
+                      </div>
                       <input
                         type="text"
                         value={item.price || ''}
@@ -806,8 +865,10 @@ export default function PageEditor({
         {/* Right Column: Live Phone Mock Preview */}
         <div className="lg:col-span-5 flex flex-col items-center">
           <div className="w-full flex items-center justify-between pb-2 text-[12px] opacity-60 font-medium">
-            <span>Live Interactive Preview</span>
-            <span className="font-mono">480px Centered</span>
+            <span className="truncate pr-2">Live Interactive Preview</span>
+            <span className="font-mono text-[11px] bg-black/5 dark:bg-white/10 px-2 py-0.5 rounded-md whitespace-nowrap">
+              390px Mobile View
+            </span>
           </div>
 
           {/* Smartphone Frame Wrapper */}
@@ -817,8 +878,11 @@ export default function PageEditor({
               <div className="w-2.5 h-2.5 rounded-full bg-blue-900/40" />
             </div>
 
-            {/* Screen Inner Viewport */}
-            <div className="w-full h-full rounded-[34px] overflow-y-auto overflow-x-hidden bg-white scrollbar-none relative pt-4">
+            {/* Screen Inner Viewport (Seamless palette background filling safe-area notch) */}
+            <div
+              className="w-full h-full rounded-[34px] overflow-y-auto overflow-x-hidden scrollbar-none relative"
+              style={{ backgroundColor: palette.bg }}
+            >
               <RenderPage page={page} isLivePreview={true} />
             </div>
 
@@ -827,6 +891,53 @@ export default function PageEditor({
           </div>
         </div>
       </div>
+
+      {/* Placeholder Copy Warning Dialog */}
+      {showPlaceholderWarning && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowPlaceholderWarning(false);
+          }}
+        >
+          <div className="bg-white dark:bg-[#161A17] rounded-2xl p-6 max-w-md w-full shadow-2xl border border-amber-500/30 space-y-4 text-[#11140F] dark:text-white">
+            <div className="flex items-center gap-2.5 text-amber-600 dark:text-amber-400">
+              <HelpCircle className="w-5 h-5 flex-shrink-0" />
+              <h3 className="font-bold text-[16px]">Sample Placeholder Copy Detected</h3>
+            </div>
+            <p className="text-[13px] opacity-80 leading-relaxed">
+              Your page still contains default sample text that your visitors will see upon scanning:
+            </p>
+            <ul className="text-[12.5px] space-y-1.5 bg-amber-50 dark:bg-amber-950/20 p-3.5 rounded-xl border border-amber-200 dark:border-amber-900/40 text-amber-900 dark:text-amber-200">
+              {remainingPlaceholders.map((item, i) => (
+                <li key={i} className="flex items-center gap-2 font-medium">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0" />
+                  <span className="truncate">{item}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="text-[12px] opacity-65">
+              You can review and edit these fields, or publish now and customize them later anytime.
+            </p>
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowPlaceholderWarning(false)}
+                className="px-4 py-2 rounded-xl border border-[#11140F]/15 dark:border-white/12 text-[12.5px] font-semibold hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer"
+              >
+                Review & Edit
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSave(true)}
+                className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-[12.5px] font-semibold cursor-pointer"
+              >
+                Publish Anyway
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

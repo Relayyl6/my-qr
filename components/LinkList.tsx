@@ -488,7 +488,12 @@ export default function LinkList({
 
       {/* AI Smart Destination Router Modal */}
       {activeRouterLink && (
-        <div className="fixed inset-0 z-50 bg-[#11140F]/40 backdrop-blur-xs flex items-center justify-center p-4">
+        <div
+          className="fixed inset-0 z-50 bg-[#11140F]/40 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setActiveRouterLink(null);
+          }}
+        >
           <AiRoutingComposer
             linkId={activeRouterLink.link.id}
             shortCode={activeRouterLink.link.shortCode}
@@ -503,7 +508,12 @@ export default function LinkList({
 
       {/* AI QR Art Studio Modal */}
       {activeArtLink && (
-        <div className="fixed inset-0 z-50 bg-[#11140F]/40 backdrop-blur-xs flex items-center justify-center p-4">
+        <div
+          className="fixed inset-0 z-50 bg-[#11140F]/40 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setActiveArtLink(null);
+          }}
+        >
           <QrArtStudio
             linkId={activeArtLink.id}
             shortCode={activeArtLink.shortCode}
@@ -518,7 +528,12 @@ export default function LinkList({
 
       {/* AI Instant Mobile Landing Page Modal */}
       {activePageLink && (
-        <div className="fixed inset-0 z-50 bg-[#11140F]/40 backdrop-blur-xs flex items-center justify-center p-4">
+        <div
+          className="fixed inset-0 z-50 bg-[#11140F]/40 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setActivePageLink(null);
+          }}
+        >
           <LandingPageEditor
             linkId={activePageLink.id}
             shortCode={activePageLink.shortCode}

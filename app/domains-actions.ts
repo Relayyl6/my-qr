@@ -750,6 +750,46 @@ export async function submitDomainContactInquiry(
     },
   });
 
+  // Notify domain owner via transactional email if owner email is known
+  try {
+    const order = await prisma.domainOrder.findFirst({
+      where: { domainName: cleanDomain },
+    });
+
+    const ownerEmail = order?.userEmail;
+    if (ownerEmail) {
+      const { sendEmail } = await import('@/lib/email/send');
+      await sendEmail({
+        to: ownerEmail,
+        replyTo: email.trim().toLowerCase(),
+        subject: `New Lead Inquiry on ${cleanDomain} from ${name.trim()}`,
+        text: `You have received a new contact inquiry through ${cleanDomain}:\n\nFrom: ${name.trim()} <${email.trim()}>\nPhone / WhatsApp: ${phone?.trim() || 'N/A'}\nMessage:\n${message?.trim() || 'No message provided.'}\n\nReply directly to this email to respond to ${name.trim()}.`,
+        html: `
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; padding: 24px; border: 1px solid #e5e7eb; border-radius: 12px; background: #ffffff;">
+            <div style="margin-bottom: 16px;">
+              <span style="font-size: 13px; font-weight: 700; color: #059669; background: #ecfdf5; padding: 4px 10px; border-radius: 9999px;">
+                ${cleanDomain} Brand Hub
+              </span>
+            </div>
+            <h2 style="color: #111827; font-size: 19px; font-weight: 700; margin: 0 0 16px 0;">New Contact Inquiry</h2>
+            <div style="background: #f9fafb; padding: 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; color: #374151;">
+              <p style="margin: 0 0 8px 0;"><strong>Name:</strong> ${name.trim()}</p>
+              <p style="margin: 0 0 8px 0;"><strong>Email:</strong> <a href="mailto:${email.trim()}" style="color: #059669;">${email.trim()}</a></p>
+              <p style="margin: 0 0 8px 0;"><strong>Phone / WhatsApp:</strong> ${phone?.trim() ? `<a href="https://wa.me/${phone.replace(/\\D/g, '')}" style="color: #059669;">${phone.trim()}</a>` : 'Not provided'}</p>
+              <p style="margin: 0 0 6px 0;"><strong>Message:</strong></p>
+              <div style="padding: 12px; background: #ffffff; border-left: 3px solid #059669; border-radius: 4px; color: #1f2937;">
+                ${(message?.trim() || 'No message provided.').replace(/\\n/g, '<br/>')}
+              </div>
+            </div>
+            <p style="font-size: 12.5px; color: #6b7280; margin: 0;">You can click reply to respond directly to ${name.trim()}.</p>
+          </div>
+        `,
+      });
+    }
+  } catch (err) {
+    console.warn('[Domain Inquiry] Owner alert dispatch warning:', err);
+  }
+
   return { success: true, contactId: contact.id, message: 'Inquiry saved successfully.' };
 }
 
@@ -765,4 +805,21 @@ export async function getDomainContacts(domainName: string) {
     orderBy: { createdAt: 'desc' },
     take: 50,
   });
+}
+
+/**
+ * Delete a contact inquiry from the domain's inbox
+ */
+export async function deleteDomainContact(contactId: string) {
+  const user = await getCurrentUser();
+  if (!user) return { success: false, message: 'Unauthorized' };
+
+  try {
+    await prisma.domainContact.delete({
+      where: { id: contactId },
+    });
+    return { success: true, message: 'Inquiry removed.' };
+  } catch (err: any) {
+    return { success: false, message: err.message || 'Failed to remove inquiry.' };
+  }
 }

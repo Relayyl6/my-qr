@@ -796,6 +796,16 @@ export default function NameLaunchService({ user, isAdmin = false }: Props) {
                         <span className="font-mono font-semibold text-base text-[#11140F] dark:text-white">
                           {item.domain}
                         </span>
+                        {item.tierCategory === 'prefix' && item.matchedPrefix && (
+                          <span className="text-[10.5px] font-mono font-medium px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/20">
+                            Prefix: {item.matchedPrefix}
+                          </span>
+                        )}
+                        {item.tierCategory === 'exact' && (
+                          <span className="text-[10.5px] font-mono font-medium px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20">
+                            Exact Match
+                          </span>
+                        )}
                         {item.available ? (
                           <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
