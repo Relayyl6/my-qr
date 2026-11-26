@@ -62,10 +62,16 @@ interface DomainOrderData {
 export default function DomainFleetOperabilities({
   order,
   onOrderUpdated,
+  userTier = 'free',
+  isAdmin = false,
 }: {
   order: DomainOrderData;
   onOrderUpdated: (updated: DomainOrderData) => void;
+  userTier?: string;
+  isAdmin?: boolean;
 }) {
+  const isUltra = userTier.toLowerCase() === 'ultra' || isAdmin;
+  const isPlusOrUltra = ['plus', 'ultra'].includes(userTier.toLowerCase()) || isAdmin;
   const [activeTab, setActiveTab] = useState<'security' | 'redirect' | 'emails' | 'nameservers' | 'bio'>('security');
   const [saving, setSaving] = useState(false);
   const [copiedEpp, setCopiedEpp] = useState(false);
@@ -116,6 +122,13 @@ export default function DomainFleetOperabilities({
 
   // Catch-All Handler
   const handleToggleCatchAll = async (enabled: boolean) => {
+    if (!isUltra) {
+      setAlert({
+        type: 'error',
+        text: 'Wildcard Catch-All email routing (*@domain) requires an Ultra subscription. Upgrade to unlock.',
+      });
+      return;
+    }
     setUpdatingCatchAll(true);
     setAlert(null);
     try {
@@ -136,6 +149,13 @@ export default function DomainFleetOperabilities({
 
   // Deliverability Shield Handler
   const handleRefreshSpamShield = async () => {
+    if (!isUltra) {
+      setAlert({
+        type: 'error',
+        text: 'Automated DMARC, SPF & DKIM Email Deliverability Shield requires an Ultra subscription. Upgrade to unlock.',
+      });
+      return;
+    }
     setUpdatingShield(true);
     setAlert(null);
     try {
@@ -156,6 +176,13 @@ export default function DomainFleetOperabilities({
 
   // Save Bio Page Handler
   const handleSaveBio = async () => {
+    if (!isPlusOrUltra) {
+      setAlert({
+        type: 'error',
+        text: 'Instant Coming Soon & Bio showcases require a Plus or Ultra plan. Upgrade to unlock.',
+      });
+      return;
+    }
     setSavingBio(true);
     setAlert(null);
     try {
@@ -181,6 +208,13 @@ export default function DomainFleetOperabilities({
 
   // Toggle Bio Page on/off
   const handleToggleBioPage = async (enabled: boolean) => {
+    if (!isPlusOrUltra) {
+      setAlert({
+        type: 'error',
+        text: 'Instant Coming Soon & Bio showcases require a Plus or Ultra plan. Upgrade to unlock.',
+      });
+      return;
+    }
     setSavingBio(true);
     setAlert(null);
     try {
@@ -563,9 +597,15 @@ export default function DomainFleetOperabilities({
                   <span className="font-bold text-[12.5px] text-[#11140F] dark:text-white">
                     Deliverability &amp; Anti-Spam Shield
                   </span>
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-[#34D399] text-[10px] font-bold">
-                    100% Protected
-                  </span>
+                  {isUltra ? (
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-[#34D399] text-[10px] font-bold">
+                      100% Protected (Ultra)
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-700 dark:text-purple-300 text-[10px] font-bold border border-purple-500/30">
+                      Ultra Exclusive
+                    </span>
+                  )}
                 </div>
                 <p className="text-[11px] text-[#11140F]/60 dark:text-white/60 leading-relaxed mt-0.5">
                   SPF (Cloudflare Edge) and DMARC quarantine policies are automatically active. Outbound replies avoid spam filters.
@@ -590,7 +630,10 @@ export default function DomainFleetOperabilities({
               <div>
                 <span className="font-bold text-[12px] flex items-center gap-1.5">
                   <Mail className="w-3.5 h-3.5 text-emerald-600" />
-                  Catch-All Email Routing (*@{order.domainName})
+                  <span>Catch-All Email Routing (*@{order.domainName})</span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/15 text-purple-700 dark:text-purple-300 font-bold border border-purple-500/30">
+                    Ultra Tier
+                  </span>
                 </span>
                 <p className="text-[11px] text-[#11140F]/60 dark:text-white/60 mt-0.5">
                   Automatically delivers mistyped or random prefixes (e.g. support@, sales@, info@) to your primary inbox.
@@ -598,10 +641,10 @@ export default function DomainFleetOperabilities({
               </div>
               <input
                 type="checkbox"
-                checked={catchAllEnabled}
-                disabled={updatingCatchAll}
+                checked={isUltra ? catchAllEnabled : false}
+                disabled={!isUltra || updatingCatchAll}
                 onChange={(e) => handleToggleCatchAll(e.target.checked)}
-                className="w-4 h-4 accent-emerald-600 cursor-pointer"
+                className="w-4 h-4 accent-purple-600 cursor-pointer disabled:opacity-50"
               />
             </div>
 
@@ -715,9 +758,14 @@ export default function DomainFleetOperabilities({
                   <span className="font-bold text-[12.5px] text-[#11140F] dark:text-white">
                     Instant Coming Soon &amp; Bio vCard Page
                   </span>
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-[#34D399] text-[10px] font-bold">
-                    {bioPageEnabled ? 'Live & Active' : 'Disabled'}
+                  <span className="px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-700 dark:text-blue-300 text-[10px] font-bold border border-blue-500/30">
+                    Plus &amp; Ultra
                   </span>
+                  {isPlusOrUltra && (
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-[#34D399] text-[10px] font-bold">
+                      {bioPageEnabled ? 'Live & Active' : 'Disabled'}
+                    </span>
+                  )}
                 </div>
                 <p className="text-[11px] text-[#11140F]/60 dark:text-white/60 leading-relaxed mt-0.5">
                   Hosts an instant digital business card with lead capture running directly on <strong>https://{order.domainName}</strong>.

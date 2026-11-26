@@ -43,7 +43,7 @@ export async function confirmOrderPayment(paystackRef: string) {
   });
 
   if (!order) {
-    return { success: false, isNotFound: true, message: 'Checkout session ended or replaced by a new session.' };
+    return { success: false, isNotFound: true, isPending: true, message: 'Checkout session ended or replaced by a new session.' };
   }
 
   const adminEmail = (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();
@@ -94,6 +94,7 @@ export async function confirmOrderPayment(paystackRef: string) {
       ) {
         return {
           success: false,
+          isPending: true,
           order,
           message: 'Payment has not been completed yet. Complete checkout to activate your domain.',
         };
@@ -530,6 +531,11 @@ export async function updateDomainCustomNameservers(orderId: string, nameservers
 
   if (!isOwner && !isAdmin) return { success: false, message: 'Unauthorized' };
 
+  const userTier = (user?.tier || 'free').toLowerCase();
+  if (!isAdmin && userTier !== 'ultra') {
+    return { success: false, message: 'External custom nameserver delegation is exclusive to the Ultra plan. Please upgrade to unlock.' };
+  }
+
   const cleanNs = nameservers.map((ns) => ns.trim().toLowerCase()).filter(Boolean);
 
   const updated = await prisma.domainOrder.update({
@@ -560,6 +566,11 @@ export async function toggleDomainCatchAll(
   const isOwner = user && (user.id === order.userId || user.email.toLowerCase() === order.userEmail.toLowerCase());
   const isAdmin = user && user.email.toLowerCase() === (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();
   if (!isOwner && !isAdmin) return { success: false, message: 'Unauthorized' };
+
+  const userTier = (user?.tier || 'free').toLowerCase();
+  if (!isAdmin && userTier !== 'ultra') {
+    return { success: false, message: 'Wildcard Catch-All email routing (*@domain) is exclusive to the Ultra plan. Please upgrade to unlock.' };
+  }
 
   const targetEmail = (customTargetEmail || order.catchAllEmail || order.userEmail).trim().toLowerCase();
 
@@ -598,6 +609,11 @@ export async function activateDomainDeliverabilityShield(orderId: string) {
   const isAdmin = user && user.email.toLowerCase() === (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();
   if (!isOwner && !isAdmin) return { success: false, message: 'Unauthorized' };
 
+  const userTier = (user?.tier || 'free').toLowerCase();
+  if (!isAdmin && userTier !== 'ultra') {
+    return { success: false, message: 'Automated DMARC, SPF & DKIM Email Deliverability Shield is exclusive to the Ultra plan. Please upgrade to unlock.' };
+  }
+
   if (order.cloudflareZoneId) {
     await setupCloudflareSpamShield(order.cloudflareZoneId, order.domainName);
   }
@@ -626,6 +642,11 @@ export async function toggleDomainBioPage(orderId: string, enabled: boolean) {
   const isOwner = user && (user.id === order.userId || user.email.toLowerCase() === order.userEmail.toLowerCase());
   const isAdmin = user && user.email.toLowerCase() === (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();
   if (!isOwner && !isAdmin) return { success: false, message: 'Unauthorized' };
+
+  const userTier = (user?.tier || 'free').toLowerCase();
+  if (!isAdmin && !['plus', 'ultra'].includes(userTier)) {
+    return { success: false, message: 'Instant Coming Soon & Bio showcases require a Plus or Ultra plan. Please upgrade to unlock.' };
+  }
 
   const updated = await prisma.domainOrder.update({
     where: { id: orderId },
@@ -663,6 +684,11 @@ export async function saveDomainBioConfig(
   const isOwner = user && (user.id === order.userId || user.email.toLowerCase() === order.userEmail.toLowerCase());
   const isAdmin = user && user.email.toLowerCase() === (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();
   if (!isOwner && !isAdmin) return { success: false, message: 'Unauthorized' };
+
+  const userTier = (user?.tier || 'free').toLowerCase();
+  if (!isAdmin && !['plus', 'ultra'].includes(userTier)) {
+    return { success: false, message: 'Instant Coming Soon & Bio showcases require a Plus or Ultra plan. Please upgrade to unlock.' };
+  }
 
   const updated = await prisma.domainOrder.update({
     where: { id: orderId },

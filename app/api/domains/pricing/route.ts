@@ -27,10 +27,19 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json({
-      tlds,
-      extraEmailPriceNgn: config?.extraEmailPriceNgn ?? 1500,
-    });
+    return NextResponse.json(
+      {
+        tlds,
+        extraEmailPriceNgn: config?.extraEmailPriceNgn ?? 1500,
+      },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
+      }
+    );
   } catch (err: any) {
     return NextResponse.json({ tlds: [], extraEmailPriceNgn: 1500 });
   }

@@ -320,6 +320,14 @@ function PricingTableContent({ currentTier, isLoggedIn }: PricingTableProps) {
                 <Check className="w-4 h-4 text-[#2F6B4F] dark:text-[#34D399] shrink-0 mt-0.5" />
                 <span><strong>Native 1-click unsubscribe</strong> RFC 8058 compliant headers</span>
               </li>
+              <li className="flex items-start gap-2.5">
+                <Check className="w-4 h-4 text-[#2F6B4F] dark:text-[#34D399] shrink-0 mt-0.5" />
+                <span><strong>1 Mobile Landing Page</strong> with curated WCAG palettes</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <Check className="w-4 h-4 text-[#2F6B4F] dark:text-[#34D399] shrink-0 mt-0.5" />
+                <span><strong>1-Year Domain Registration</strong> &amp; 1 business email alias</span>
+              </li>
             </ul>
           </div>
 
@@ -430,6 +438,14 @@ function PricingTableContent({ currentTier, isLoggedIn }: PricingTableProps) {
               <li className="flex items-start gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] dark:text-[#34D399] shrink-0 mt-0.5" />
                 <span><strong>Real-time Diurnal Heatmap</strong> (Peak hourly scanner diagnosis)</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <Check className="w-4 h-4 text-[#2F6B4F] dark:text-[#34D399] shrink-0 mt-0.5" />
+                <span><strong>3 Mobile Landing Pages</strong> with AI copy generation</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <Check className="w-4 h-4 text-[#2F6B4F] dark:text-[#34D399] shrink-0 mt-0.5" />
+                <span><strong>2-Year Domain Bundle</strong> with 5% multi-year discount</span>
               </li>
             </ul>
           </div>
@@ -545,6 +561,18 @@ function PricingTableContent({ currentTier, isLoggedIn }: PricingTableProps) {
                 <Check className="w-4 h-4 text-[#2F6B4F] dark:text-[#34D399] shrink-0 mt-0.5" />
                 <span><strong>Webhook Ingress Stream</strong> (Pipe scans to external CRMs)</span>
               </li>
+              <li className="flex items-start gap-2.5">
+                <Check className="w-4 h-4 text-[#2F6B4F] dark:text-[#34D399] shrink-0 mt-0.5" />
+                <span><strong>10 Mobile Landing Pages</strong> with 6 WCAG AA curated palettes</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <Check className="w-4 h-4 text-[#2F6B4F] dark:text-[#34D399] shrink-0 mt-0.5" />
+                <span><strong>Instant 1-Click Bio &amp; vCard Page</strong> with lead capture</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <Check className="w-4 h-4 text-[#2F6B4F] dark:text-[#34D399] shrink-0 mt-0.5" />
+                <span><strong>2–3 Year Domain Bundles</strong> with up to 10% discount</span>
+              </li>
             </ul>
           </div>
 
@@ -658,6 +686,22 @@ function PricingTableContent({ currentTier, isLoggedIn }: PricingTableProps) {
               <li className="flex items-start gap-2.5">
                 <Check className="w-4 h-4 text-[#2F6B4F] dark:text-[#34D399] shrink-0 mt-0.5" />
                 <span><strong>Dedicated 99.99% Enterprise SLA</strong> & Priority 1h Slack lead</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <Check className="w-4 h-4 text-[#2F6B4F] dark:text-[#34D399] shrink-0 mt-0.5" />
+                <span><strong>Wildcard Catch-All Email Routing</strong> (*@yourbrand.com)</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <Check className="w-4 h-4 text-[#2F6B4F] dark:text-[#34D399] shrink-0 mt-0.5" />
+                <span><strong>Automated Deliverability Shield</strong> (SPF + DMARC quarantine)</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <Check className="w-4 h-4 text-[#2F6B4F] dark:text-[#34D399] shrink-0 mt-0.5" />
+                <span><strong>Unlimited Instant Bio Pages</strong> with live RFC 6350 vCard &amp; CRM leads</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <Check className="w-4 h-4 text-[#2F6B4F] dark:text-[#34D399] shrink-0 mt-0.5" />
+                <span><strong>Unlimited Mobile Landing Pages</strong> + Fast /r/ redirect tracking</span>
               </li>
             </ul>
           </div>

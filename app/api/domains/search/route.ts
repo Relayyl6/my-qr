@@ -13,7 +13,16 @@ export async function GET(req: Request) {
     }
 
     const results = await searchDomains(query);
-    return NextResponse.json({ results });
+    return NextResponse.json(
+      { results },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
+      }
+    );
   } catch (error: any) {
     console.error('Domain search error:', error);
     return NextResponse.json(

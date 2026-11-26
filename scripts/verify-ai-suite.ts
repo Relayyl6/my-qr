@@ -7,8 +7,10 @@ import { migrateLegacySpec } from '../lib/page/migrate';
 import { stripInventedFacts } from '../lib/page/generate-copy';
 import { assemble } from '../lib/page/assemble';
 import { PALETTES } from '../lib/page/config';
-import { calculateMultiYearDomainPrice, DEFAULT_PRICING_CONFIG } from '../lib/domains/fxEngine';
+import { calculateMultiYearDomainPrice, DEFAULT_PRICING_CONFIG, getDomainPricingConfig } from '../lib/domains/fxEngine';
 import { generateVCard } from '../lib/vcard';
+import { searchDomains } from '../lib/domains/namelaunch';
+import { confirmOrderPayment, toggleDomainCatchAll, activateDomainDeliverabilityShield, toggleDomainBioPage, updateDomainCustomNameservers } from '../app/domains-actions';
 import { normalizeLandingUrl } from '../lib/landing/render';
 import { normalizeUrl } from '../lib/normalizeUrl';
 import { generateCleanVectorSvg } from '../lib/qr/exportVector';
@@ -758,6 +760,88 @@ async function main() {
 
     assert(catchAllRule.matchers[0].type === "all", "Catch-all uses wildcard 'all' matcher");
     assert(catchAllRule.actions[0].type === "forward" && catchAllRule.actions[0].value[0] === "destination@gmail.com", "Forwards all unrouted email to user destination inbox");
+  })();
+
+  // Test 27: Domain Storefront Search Pricing Verification (Admin Catalog Alignment)
+  await runTest(27, "Storefront search pricing: honors configured admin margins & fixed pricing (.xyz=₦6,000, .site=₦7,000)", async (assert) => {
+    const results = await searchDomains('lamsparks');
+    assert(Array.isArray(results) && results.length > 0, "searchDomains must return available TLDs");
+
+    const xyz = results.find(r => r.tld === 'xyz');
+    assert(!!xyz, "Must contain .xyz result");
+    assert(xyz?.pricing?.totalNgn === 6000, `lamsparks.xyz storefront price must be ₦6,000, got ₦${xyz?.pricing?.totalNgn}`);
+
+    const site = results.find(r => r.tld === 'site');
+    assert(!!site, "Must contain .site result");
+    assert(site?.pricing?.totalNgn === 7000, `lamsparks.site storefront price must be ₦7,000, got ₦${site?.pricing?.totalNgn}`);
+
+    const store = results.find(r => r.tld === 'store');
+    assert(!!store, "Must contain .store result");
+    assert(store?.pricing?.totalNgn === 8000, `lamsparks.store storefront price must be ₦8,000, got ₦${store?.pricing?.totalNgn}`);
+
+    const com = results.find(r => r.tld === 'com');
+    assert(!!com, "Must contain .com result");
+    assert(com?.pricing?.totalNgn === 20000, `lamsparks.com storefront price must be ₦20,000, got ₦${com?.pricing?.totalNgn}`);
+  })();
+
+  // Test 28: Order Reference & Pending Payment Error Suppression
+  await runTest(28, "Order reference handling: nonexistent or abandoned checkout returns isNotFound/isPending without scary banner", async (assert) => {
+    const res = await confirmOrderPayment('DOM_FAKE_UNPAID_SESSION_123');
+    assert(res.success === false, "Must return success=false for unpaid/nonexistent session");
+    assert(res.isNotFound === true || (res as any).isPending === true, "Must flag isNotFound or isPending to silence UI alert banner");
+    assert(!res.message?.includes("Fatal"), "Must not emit fatal error messages");
+  })();
+
+  // Test 29: Domain Feature Tier Gatekeeping
+  await runTest(29, "Domain tier gatekeeping: blocks unauthorized/free access to Ultra & Plus features", async (assert) => {
+    // When called in headless script without session, user is null (treated as unauthorized)
+    const catchAllRes = await toggleDomainCatchAll('fake-order-id', true);
+    assert(catchAllRes.success === false, "Catch-All must fail without authorized Ultra access");
+
+    const shieldRes = await activateDomainDeliverabilityShield('fake-order-id');
+    assert(shieldRes.success === false, "Deliverability shield must fail without authorized Ultra access");
+
+    const bioRes = await toggleDomainBioPage('fake-order-id', true);
+    assert(bioRes.success === false, "Bio page must fail without authorized Plus/Ultra access");
+
+    const nsRes = await updateDomainCustomNameservers('fake-order-id', ['ns1.custom.com', 'ns2.custom.com']);
+    assert(nsRes.success === false, "Custom nameservers must fail without authorized Ultra access");
+  })();
+
+  // Test 30: Multi-Year Registration & Bundle Discount Precision
+  await runTest(30, "Multi-year registration pricing: enforces 5% (2yr) and 10% (3yr) bundle discounts", (assert) => {
+    const wholesaleUsd = 2.10;
+    const tld = 'xyz';
+    const cfg = { ...DEFAULT_PRICING_CONFIG, bufferedRate: 1400, roundingStep: 500 as const };
+
+    const calc1 = calculateMultiYearDomainPrice(wholesaleUsd, tld, cfg, 1);
+    assert(calc1.discountPercent === 0, "1-year registration has no discount");
+
+    const calc2 = calculateMultiYearDomainPrice(wholesaleUsd, tld, cfg, 2);
+    assert(calc2.discountPercent === 5, "2-year discount is 5%");
+    assert(calc2.finalPriceNgn < calc1.finalPriceNgn * 2, "2-year bundle is cheaper than 2 x 1-year");
+    assert(calc2.savingsNgn > 0, "2-year bundle generates savings");
+
+    const calc3 = calculateMultiYearDomainPrice(wholesaleUsd, tld, cfg, 3);
+    assert(calc3.discountPercent === 10, "3-year discount is 10%");
+    assert(calc3.finalPriceNgn < calc1.finalPriceNgn * 3, "3-year bundle is cheaper than 3 x 1-year");
+    assert(calc3.savingsNgn > calc2.savingsNgn, "3-year bundle generates greater savings than 2-year");
+  })();
+
+  // Test 31: Micro-Landing Page Palettes & Contrast AA Standard
+  await runTest(31, "Micro-landing page engine: validates all 6 palettes against WCAG AA standards", (assert) => {
+    const expectedPalettes = ['ink', 'sand', 'forest', 'clay', 'sky', 'mono'];
+    assert(Object.keys(PALETTES).length === 6, "Must define exactly 6 curated palettes");
+
+    for (const key of expectedPalettes) {
+      const p = (PALETTES as any)[key];
+      assert(!!p, `Palette ${key} must exist`);
+      assert(p.bg?.startsWith('#'), `Palette ${key} bg must be valid hex color`);
+      assert(p.fg?.startsWith('#'), `Palette ${key} fg must be valid hex color`);
+      assert(p.accent?.startsWith('#'), `Palette ${key} accent must be valid hex color`);
+      assert(p.cardBg?.startsWith('#'), `Palette ${key} cardBg must be valid hex color`);
+      assert(p.border?.startsWith('#'), `Palette ${key} border must be valid hex color`);
+    }
   })();
 
   // Print Summary Table

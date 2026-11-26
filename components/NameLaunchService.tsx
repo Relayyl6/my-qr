@@ -37,6 +37,7 @@ interface Props {
     id: string;
     email: string;
     name: string | null;
+    tier?: string;
   } | null;
   isAdmin?: boolean;
 }
@@ -57,7 +58,7 @@ function formatNaira(amount: number) {
   }).format(amount);
 }
 
-export default function NameLaunchService({ user }: Props) {
+export default function NameLaunchService({ user, isAdmin = false }: Props) {
   const [activeTab, setActiveTab] = useState<'search' | 'domains'>('search');
 
   // Search state
@@ -104,7 +105,7 @@ export default function NameLaunchService({ user }: Props) {
   useEffect(() => {
     loadOrders();
     checkUrlReference();
-    fetch('/api/domains/pricing')
+    fetch('/api/domains/pricing', { cache: 'no-store' })
       .then((r) => r.json())
       .then((d) => {
         if (Array.isArray(d?.tlds) && d.tlds.length > 0) {
@@ -169,15 +170,8 @@ export default function NameLaunchService({ user }: Props) {
           });
           loadOrders(res.order?.userEmail);
         } else {
-          // If reference was superseded or not found because the user simply didn't pay, do not show a scary error banner
-          if ((res as any).isNotFound || res.message?.includes('not found') || res.message?.includes('ended')) {
-            setActionAlert(null);
-          } else {
-            setActionAlert({
-              text: res.message || 'Payment not completed yet.',
-              type: 'error',
-            });
-          }
+          // If reference was superseded, pending checkout, or not completed, do not display a scary red error banner
+          setActionAlert(null);
           loadOrders(res.order?.userEmail);
         }
       } catch (err: any) {
@@ -196,7 +190,9 @@ export default function NameLaunchService({ user }: Props) {
     setSelectedDomain(null);
 
     try {
-      const res = await fetch(`/api/domains/search?q=${encodeURIComponent(trimmed)}`);
+      const res = await fetch(`/api/domains/search?q=${encodeURIComponent(trimmed)}`, {
+        cache: 'no-store',
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Search failed');
       setResults(data.results || []);
@@ -901,46 +897,66 @@ export default function NameLaunchService({ user }: Props) {
                 {/* 4. Frontier Built-In Features */}
                 <div className="pt-2 border-t border-[#11140F]/8 dark:border-white/8 space-y-2.5 text-xs">
                   <label className="text-xs font-bold text-[#11140F] dark:text-white uppercase tracking-wider block">
-                    Included Frontier Features
+                    Domain Operability Add-Ons
                   </label>
 
-                  {/* Catch-All Checkbox */}
-                  <label className="p-3 rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5] dark:bg-white/[0.02] flex items-start gap-2.5 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={enableCatchAll}
-                      onChange={(e) => setEnableCatchAll(e.target.checked)}
-                      className="w-4 h-4 accent-emerald-600 mt-0.5"
-                    />
-                    <div>
-                      <div className="font-semibold text-[#11140F] dark:text-white flex items-center gap-1.5">
-                        <span>Catch-All Email Routing (*@{selectedDomain.domain})</span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-700 dark:text-[#34D399] font-bold">Free</span>
-                      </div>
-                      <p className="text-[11px] text-[#11140F]/60 dark:text-white/60 mt-0.5">
-                        Never miss a lead. Delivers mistyped or random emails directly to your primary inbox.
-                      </p>
-                    </div>
-                  </label>
+                  {/* Catch-All Checkbox (Ultra Exclusive) & Bio Page (Plus & Ultra) */}
+                  {(() => {
+                    const userTier = (user?.tier || 'free').toLowerCase();
+                    const isUltraUser = userTier === 'ultra' || isAdmin;
+                    const isPlusOrUltra = ['plus', 'ultra'].includes(userTier) || isAdmin;
 
-                  {/* Instant Coming Soon & Bio Page Checkbox */}
-                  <label className="p-3 rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5] dark:bg-white/[0.02] flex items-start gap-2.5 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={enableBioPage}
-                      onChange={(e) => setEnableBioPage(e.target.checked)}
-                      className="w-4 h-4 accent-emerald-600 mt-0.5"
-                    />
-                    <div>
-                      <div className="font-semibold text-[#11140F] dark:text-white flex items-center gap-1.5">
-                        <span>Instant 1-Click &quot;Coming Soon&quot; Bio &amp; vCard Page</span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-700 dark:text-[#34D399] font-bold">Free</span>
-                      </div>
-                      <p className="text-[11px] text-[#11140F]/60 dark:text-white/60 mt-0.5">
-                        Live within 60 seconds with digital contact download, WhatsApp chat, and visitor inquiry capture.
-                      </p>
-                    </div>
-                  </label>
+                    return (
+                      <>
+                        <label className={`p-3 rounded-xl border border-[#11140F]/10 dark:border-white/10 ${isUltraUser ? 'bg-[#F7F8F5] dark:bg-white/[0.02] cursor-pointer' : 'bg-black/[0.02] dark:bg-white/[0.01] opacity-80 cursor-default'} flex items-start gap-2.5`}>
+                          <input
+                            type="checkbox"
+                            disabled={!isUltraUser}
+                            checked={isUltraUser ? enableCatchAll : false}
+                            onChange={(e) => isUltraUser && setEnableCatchAll(e.target.checked)}
+                            className="w-4 h-4 accent-purple-600 mt-0.5 disabled:opacity-50"
+                          />
+                          <div className="flex-1">
+                            <div className="font-semibold text-[#11140F] dark:text-white flex items-center justify-between gap-1.5">
+                              <span>Catch-All Email Routing (*@{selectedDomain.domain})</span>
+                              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/15 text-purple-700 dark:text-purple-300 font-bold border border-purple-500/30">
+                                Ultra Tier
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-[#11140F]/60 dark:text-white/60 mt-0.5">
+                              {isUltraUser
+                                ? 'Never miss a lead. Delivers mistyped or random emails directly to your primary inbox.'
+                                : 'Exclusive to Ultra subscribers. Upgrade your plan to route all wildcard emails automatically.'}
+                            </p>
+                          </div>
+                        </label>
+
+                        {/* Instant Coming Soon & Bio Page Checkbox */}
+                        <label className={`p-3 rounded-xl border border-[#11140F]/10 dark:border-white/10 ${isPlusOrUltra ? 'bg-[#F7F8F5] dark:bg-white/[0.02] cursor-pointer' : 'bg-black/[0.02] dark:bg-white/[0.01] opacity-80 cursor-default'} flex items-start gap-2.5`}>
+                          <input
+                            type="checkbox"
+                            disabled={!isPlusOrUltra}
+                            checked={isPlusOrUltra ? enableBioPage : false}
+                            onChange={(e) => isPlusOrUltra && setEnableBioPage(e.target.checked)}
+                            className="w-4 h-4 accent-blue-600 mt-0.5 disabled:opacity-50"
+                          />
+                          <div className="flex-1">
+                            <div className="font-semibold text-[#11140F] dark:text-white flex items-center justify-between gap-1.5">
+                              <span>Instant 1-Click &quot;Coming Soon&quot; Bio &amp; vCard Page</span>
+                              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/15 text-blue-700 dark:text-blue-300 font-bold border border-blue-500/30">
+                                Plus &amp; Ultra
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-[#11140F]/60 dark:text-white/60 mt-0.5">
+                              {isPlusOrUltra
+                                ? 'Live within 60 seconds with digital contact download, WhatsApp chat, and visitor inquiry capture.'
+                                : 'Exclusive to Plus & Ultra plans. Upgrade to launch instant bio & lead capture pages.'}
+                            </p>
+                          </div>
+                        </label>
+                      </>
+                    );
+                  })()}
                 </div>
 
                 {/* 5. Order Summary & Price Breakdown */}
@@ -1224,6 +1240,8 @@ export default function NameLaunchService({ user }: Props) {
                             {expandedOrderId === ord.id && (
                               <DomainFleetOperabilities
                                 order={ord}
+                                userTier={user?.tier || 'free'}
+                                isAdmin={isAdmin}
                                 onOrderUpdated={(updated) =>
                                   setOrders((prev) => prev.map((o) => (o.id === ord.id ? updated : o)))
                                 }
