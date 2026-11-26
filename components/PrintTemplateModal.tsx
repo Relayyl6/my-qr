@@ -464,7 +464,9 @@ export default function PrintTemplateModal({
       return;
     }
 
-    const sheetHtml = printSheet.innerHTML;
+    const cloned = printSheet.cloneNode(true) as HTMLElement;
+    cloned.querySelectorAll('[data-no-print], .no-print').forEach((el) => el.remove());
+    const sheetHtml = cloned.innerHTML;
     const isBadge = template === 'card-badge';
     const isSign = template === 'window-sign';
     const isFullPoster = template === 'full-poster';
@@ -485,6 +487,9 @@ export default function PrintTemplateModal({
               margin: 0;
               padding: 0;
               font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            }
+            [data-no-print], .no-print {
+              display: none !important;
             }
             html, body {
               width: 100%;
@@ -758,7 +763,7 @@ export default function PrintTemplateModal({
 
           <div className="flex items-center gap-2">
             {/* Mobile / Tablet Segmented Tab Toggle */}
-            <div className="lg:hidden flex items-center p-0.5 bg-[#EEF0EA] dark:bg-white/[0.08] rounded-xl text-[11px] font-medium">
+            <div className="md:hidden flex items-center p-0.5 bg-[#EEF0EA] dark:bg-white/[0.08] rounded-xl text-[11px] font-medium">
               <button
                 type="button"
                 onClick={() => setMobileTab('editor')}
@@ -781,7 +786,7 @@ export default function PrintTemplateModal({
                 }`}
               >
                 <Eye className="w-3 h-3" />
-                <span>Preview</span>
+                <span>🖐️ Drag QR Sheet</span>
               </button>
             </div>
 
@@ -795,12 +800,12 @@ export default function PrintTemplateModal({
           </div>
         </div>
 
-        {/* Modal Body: Split 50/50 on desktop */}
-        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
+        {/* Modal Body: Split 50/50 on tablets and desktop (>= 768px) */}
+        <div className="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
           {/* Left Side: Controls & Customization */}
           <div
-            className={`p-4 sm:p-6 lg:p-7 lg:w-1/2 flex-col justify-between border-b lg:border-b-0 lg:border-r border-[#11140F]/10 dark:border-white/10 space-y-4 overflow-y-auto ${
-              mobileTab === 'editor' ? 'flex' : 'hidden lg:flex'
+            className={`p-4 sm:p-6 md:p-7 md:w-1/2 flex-col justify-between border-b md:border-b-0 md:border-r border-[#11140F]/10 dark:border-white/10 space-y-4 overflow-y-auto ${
+              mobileTab === 'editor' ? 'flex' : 'hidden md:flex'
             }`}
           >
             <div className="space-y-4">
@@ -1372,15 +1377,15 @@ export default function PrintTemplateModal({
 
             {/* Action Buttons in Left Panel */}
             <div className="pt-4 space-y-2 shrink-0 border-t border-[#11140F]/10 dark:border-white/10">
-              <div className="lg:hidden space-y-2">
+              <div className="md:hidden space-y-2">
                 <button
                   type="button"
                   onClick={() => setMobileTab('preview')}
                   className="w-full py-3 px-4 rounded-xl text-white text-[13.5px] font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 cursor-pointer shadow-sm"
                   style={{ backgroundColor: accentColor }}
                 >
-                  <Eye className="w-4 h-4" />
-                  <span>View Live Preview &amp; Print</span>
+                  <Move className="w-4 h-4" />
+                  <span>🖐️ Open Sheet &amp; Drag QR Code &rarr;</span>
                 </button>
                 <div className="flex items-center gap-2">
                   <button
@@ -1389,7 +1394,7 @@ export default function PrintTemplateModal({
                     className="flex-1 py-2.5 px-3 rounded-xl border border-[#11140F]/20 dark:border-white/15 bg-white dark:bg-white/[0.05] text-[#11140F] dark:text-white text-[12.5px] font-medium hover:bg-[#EEF0EA] dark:hover:bg-white/10 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <Printer className="w-3.5 h-3.5" />
-                    <span>Quick Print</span>
+                    <span>Print (1 Sheet)</span>
                   </button>
                   <button
                     type="button"
@@ -1403,8 +1408,8 @@ export default function PrintTemplateModal({
                 </div>
               </div>
 
-              {/* On Desktop: Full Print & Download Buttons */}
-              <div className="hidden lg:flex items-center gap-2">
+              {/* On Desktop & Tablet: Full Print & Download Buttons */}
+              <div className="hidden md:flex items-center gap-2">
                 <button
                   onClick={handlePrint}
                   className="flex-1 py-3 px-4 rounded-xl text-white text-[13.5px] font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 cursor-pointer shadow-sm"
@@ -1435,8 +1440,8 @@ export default function PrintTemplateModal({
 
           {/* Right Side: Live Printable Preview with Drag & Drop */}
           <div
-            className={`p-4 sm:p-6 lg:p-8 lg:w-1/2 bg-[#F4F5F1] dark:bg-black/40 flex-col items-center justify-between overflow-y-auto min-h-0 select-none ${
-              mobileTab === 'preview' ? 'flex' : 'hidden lg:flex'
+            className={`p-4 sm:p-6 md:p-8 md:w-1/2 bg-[#F4F5F1] dark:bg-black/40 flex-col items-center justify-between overflow-y-auto min-h-0 select-none ${
+              mobileTab === 'preview' ? 'flex' : 'hidden md:flex'
             }`}
           >
             {/* Top Toolbar: Reset position & guidance */}
@@ -1589,7 +1594,10 @@ export default function PrintTemplateModal({
                             </div>
                           </div>
                         )}
-                        <span className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-5 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded bg-black/80 text-white text-[9px] font-mono pointer-events-none whitespace-nowrap">
+                        <span
+                          data-no-print="true"
+                          className="no-print opacity-0 group-hover:opacity-100 transition-opacity absolute -top-5 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded bg-black/80 text-white text-[9px] font-mono pointer-events-none whitespace-nowrap"
+                        >
                           Drag me
                         </span>
                       </div>
