@@ -28,7 +28,7 @@ export function RenderDoc({
     switch (node.type) {
       case 'section':
         return (
-          <section key={node.id} id={props.anchorId as string} className={className}>
+          <section key={node.id} id={props.anchorId as string} className={className} style={{ marginLeft: 'auto', marginRight: 'auto' }}>
             {node.children.map(renderNode)}
           </section>
         );
@@ -107,12 +107,13 @@ export function RenderDoc({
             target="_blank"
             rel="noopener noreferrer"
             className={className}
+            style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', textDecoration: 'none', color: 'inherit' }}
           >
-            <div className="flex flex-col pr-2 truncate">
-              <span className="font-semibold truncate">{label}</span>
-              {subtitle && <span className="text-[12px] opacity-70 truncate">{subtitle}</span>}
+            <div style={{ display: 'flex', flexDirection: 'column', paddingRight: '8px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <span style={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>
+              {subtitle && <span style={{ fontSize: '12px', opacity: 0.7, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{subtitle}</span>}
             </div>
-            <ExternalLink className="w-4 h-4 opacity-50 flex-shrink-0" />
+            <ExternalLink className="w-4 h-4 opacity-50 flex-shrink-0" style={{ width: '16px', height: '16px', opacity: 0.5, flexShrink: 0 }} />
           </a>
         );
       }
@@ -123,16 +124,16 @@ export function RenderDoc({
         const desc = props.desc as string | undefined;
 
         return (
-          <div key={node.id} className={className}>
-            <div className="flex items-center justify-between gap-2 w-full">
-              <span className="font-bold text-[14.5px]">{name}</span>
+          <div key={node.id} className={className} style={{ width: '100%' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', width: '100%' }}>
+              <span style={{ fontWeight: 700, fontSize: '14.5px' }}>{name}</span>
               {price && (
-                <span className="font-semibold text-[13px] px-2 py-0.5 rounded-md bg-black/5 dark:bg-white/10 whitespace-nowrap">
+                <span style={{ fontWeight: 600, fontSize: '13px', padding: '2px 8px', borderRadius: '6px', background: 'rgba(255,255,255,0.08)', whiteSpace: 'nowrap' }}>
                   {price}
                 </span>
               )}
             </div>
-            {desc && <p className="text-[12.5px] opacity-75 mt-1 leading-relaxed">{desc}</p>}
+            {desc && <p style={{ fontSize: '12.5px', opacity: 0.75, marginTop: '4px', lineHeight: 1.6, margin: '4px 0 0 0' }}>{desc}</p>}
           </div>
         );
       }

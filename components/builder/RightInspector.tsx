@@ -108,6 +108,7 @@ interface RightInspectorProps {
   onUpdateStyle: (id: string, bp: Bp, style: Partial<Style>) => void;
   onResetOverride: (id: string, bp: Bp, key: keyof Style) => void;
   onCopyStyles: (id: string, fromBp: Bp, toBp: Bp) => void;
+  onSelectNode?: (id: string) => void;
 }
 
 export function RightInspector({
@@ -120,6 +121,7 @@ export function RightInspector({
   onUpdateStyle,
   onResetOverride,
   onCopyStyles,
+  onSelectNode,
 }: RightInspectorProps) {
   const node = selectedId ? doc.nodes[selectedId] : null;
 
@@ -324,6 +326,50 @@ export function RightInspector({
                     className="w-full bg-[#181D1A] border border-white/10 rounded-lg px-2.5 py-1.5 text-white"
                   />
                 </div>
+              </div>
+            )}
+
+            {/* Container Info & Quick Child Selector */}
+            {['section', 'card', 'stack', 'grid', 'free'].includes(node.type) && (
+              <div className="space-y-3">
+                <div className="p-2.5 rounded-lg bg-white/5 border border-white/10 space-y-1">
+                  <div className="text-[11px] font-semibold text-white/90 capitalize flex items-center justify-between">
+                    <span>{node.type} Container</span>
+                    <span className="text-[10px] font-mono text-emerald-400">
+                      {node.children.length} {node.children.length === 1 ? 'element' : 'elements'}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-white/50">
+                    Click any element on canvas to edit its content, or choose below:
+                  </p>
+                </div>
+
+                {node.children.length > 0 && (
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-semibold uppercase opacity-60 block">Child Elements</label>
+                    <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
+                      {node.children.map((childId) => {
+                        const child = doc.nodes[childId];
+                        if (!child) return null;
+                        return (
+                          <button
+                            key={childId}
+                            type="button"
+                            onClick={() => onSelectNode?.(childId)}
+                            className="w-full text-left px-2 py-1.5 rounded bg-[#181D1A] hover:bg-emerald-500/10 border border-white/5 hover:border-emerald-500/30 flex items-center justify-between group transition-colors cursor-pointer"
+                          >
+                            <span className="text-[11.5px] truncate text-white/80 group-hover:text-emerald-400 font-medium">
+                              {child.name || child.type}
+                            </span>
+                            <span className="text-[9.5px] font-mono opacity-40 uppercase ml-2 flex-shrink-0">
+                              {child.type}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

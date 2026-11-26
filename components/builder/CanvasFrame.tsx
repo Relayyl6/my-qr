@@ -62,6 +62,17 @@ export function CanvasFrame({
               *, *::before, *::after { box-sizing: border-box; }
               body { margin: 0; padding: 0; overflow-x: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: ${doc.tokens?.colors?.bg || '#ffffff'}; }
               [data-node-id] { cursor: pointer; }
+              .flex { display: flex; }
+              .flex-col { flex-direction: column; }
+              .items-center { align-items: center; }
+              .justify-between { justify-content: space-between; }
+              .justify-start { justify-content: flex-start; }
+              .gap-2 { gap: 8px; }
+              .w-full { width: 100%; }
+              .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+              .font-bold { font-weight: 700; }
+              .font-semibold { font-weight: 600; }
+              .whitespace-nowrap { white-space: nowrap; }
             </style>
           </head>
           <body>

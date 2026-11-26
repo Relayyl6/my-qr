@@ -260,6 +260,14 @@ export function compileDocumentCss(doc: Doc): string {
       desktopDecls['display'] = tabletStyle.display || mobileStyle.display || 'block';
     }
 
+    // Auto-center sections when max-width applies
+    if (node.type === 'section') {
+      if (!mobileDecls['margin'] && !mobileDecls['margin-left']) {
+        mobileDecls['margin-left'] = 'auto';
+        mobileDecls['margin-right'] = 'auto';
+      }
+    }
+
     // 1. Mobile rules
     const mobileEntries = Object.entries(mobileDecls);
     if (mobileEntries.length > 0) {

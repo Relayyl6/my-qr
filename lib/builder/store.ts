@@ -227,7 +227,10 @@ export const createBuilderStore = (initialDoc: Doc) => {
 
     selectNode: (id: string, multi: boolean = false) => {
       set((state) => {
-        if (!state.doc.nodes[id]) return state;
+        // Empty string means deselect all
+        if (!id || !state.doc.nodes[id]) {
+          return { ui: { ...state.ui, selection: [] } };
+        }
         if (multi) {
           const exists = state.ui.selection.includes(id);
           const selection = exists

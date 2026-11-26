@@ -530,6 +530,7 @@ export function BuilderShell({ initialDoc, pageId, onSave }: BuilderShellProps) 
           onUpdateStyle={updateNodeStyle}
           onResetOverride={resetNodeOverride}
           onCopyStyles={copyStylesToBreakpoint}
+          onSelectNode={selectNode}
         />
       </div>
     </div>

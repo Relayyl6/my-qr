@@ -75,14 +75,13 @@ export default async function LandingViewPage({
   // If published doc is V3 Normalized Tree
   const rawSpec = result.spec as any;
   if (rawSpec && rawSpec.schemaVersion === 3 && rawSpec.nodes) {
+    const bg = rawSpec.tokens?.colors?.bg || '#0F172A';
     return (
       <div
-        className="min-h-screen w-full flex flex-col items-center justify-start py-8 px-4"
-        style={{ backgroundColor: rawSpec.tokens?.colors?.bg || '#0F172A' }}
+        className="min-h-screen w-full"
+        style={{ backgroundColor: bg }}
       >
-        <div className="w-full max-w-[1280px] mx-auto">
-          <RenderDoc doc={rawSpec} pageId={result.landingPage.id} mode="published" />
-        </div>
+        <RenderDoc doc={rawSpec} pageId={result.landingPage.id} mode="published" />
       </div>
     );
   }

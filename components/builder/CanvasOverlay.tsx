@@ -76,6 +76,13 @@ export function CanvasOverlay({
   const [resizeState, setResizeState] = useState<ResizeState | null>(null);
   const [dragMoveState, setDragMoveState] = useState<DragMoveState | null>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const dragCandidateRef = useRef<{
+    startX: number;
+    startY: number;
+    hitNodeIds: string[];
+    shiftKey: boolean;
+    pointerId: number;
+  } | null>(null);
 
   // Scan iframe DOM for exact node bounding rects in iframe unscaled coordinates
   const updateRects = useCallback(() => {
@@ -149,9 +156,152 @@ export function CanvasOverlay({
     };
   }, [updateRects, iframeRef]);
 
-  // Hit-testing hover using elementsFromPoint in iframe
+  // Unified pointer down: record start point, hit-tested nodes, and capture pointer
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if (mode === 'preview' || resizeState) return;
+    if (e.button !== 0) return; // Only primary mouse button
+
+    const iframe = iframeRef.current;
+    if (!iframe || !iframe.contentDocument) return;
+
+    const iframeRect = iframe.getBoundingClientRect();
+    const relX = (e.clientX - iframeRect.left) / zoom;
+    const relY = (e.clientY - iframeRect.top) / zoom;
+
+    const elements = iframe.contentDocument.elementsFromPoint(relX, relY);
+    const hitNodeIds: string[] = [];
+    for (const el of elements) {
+      const match = el.className?.match?.(/\bn_([a-z0-9_-]+)\b/);
+      const nodeId = match ? match[1] : el.getAttribute('data-node-id');
+      if (nodeId && doc.nodes[nodeId] && !hitNodeIds.includes(nodeId)) {
+        hitNodeIds.push(nodeId);
+      }
+    }
+
+    try {
+      (overlayRef.current as HTMLElement)?.setPointerCapture(e.pointerId);
+    } catch {}
+
+    dragCandidateRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      hitNodeIds,
+      shiftKey: e.shiftKey,
+      pointerId: e.pointerId,
+    };
+  };
+
+  // Active drag move calculation for free frames and auto-layout drop targets
+  const handleActiveDragMove = (e: React.PointerEvent) => {
+    if (!dragMoveState) return;
+
+    const deltaX = (e.clientX - dragMoveState.startPointerX) / zoom;
+    const deltaY = (e.clientY - dragMoveState.startPointerY) / zoom;
+
+    if (dragMoveState.isFree) {
+      setDragMoveState((prev) =>
+        prev
+          ? {
+              ...prev,
+              hasMoved: true,
+              currentDeltaX: deltaX,
+              currentDeltaY: deltaY,
+            }
+          : null
+      );
+    } else {
+      const iframe = iframeRef.current;
+      if (iframe?.contentDocument) {
+        const iframeRect = iframe.getBoundingClientRect();
+        const relX = (e.clientX - iframeRect.left) / zoom;
+        const relY = (e.clientY - iframeRect.top) / zoom;
+
+        const elementsAtPoint = Array.from(
+          iframe.contentDocument.elementsFromPoint(relX, relY)
+        );
+
+        const drop = calculateDropTarget({
+          doc,
+          source: {
+            type: 'canvas',
+            nodeType: doc.nodes[dragMoveState.nodeId]?.type || 'stack',
+            nodeId: dragMoveState.nodeId,
+          },
+          relX,
+          relY,
+          zoom: 1, // relX and relY are in unscaled iframe coordinates
+          elementsAtPoint,
+          nodeRects: rects,
+        });
+
+        setDragMoveState((prev) =>
+          prev
+            ? {
+                ...prev,
+                hasMoved: true,
+                currentDeltaX: deltaX,
+                currentDeltaY: deltaY,
+                dropTarget: drop,
+              }
+            : null
+        );
+      }
+    }
+  };
+
+  // Unified pointer move: handles resize, active drag, drag threshold initiation, or hover
   const handlePointerMove = (e: React.PointerEvent) => {
-    if (mode === 'preview' || resizeState || dragMoveState) return;
+    if (mode === 'preview') return;
+    if (resizeState) {
+      handleResizePointerMove(e);
+      return;
+    }
+
+    if (dragMoveState) {
+      handleActiveDragMove(e);
+      return;
+    }
+
+    if (dragCandidateRef.current) {
+      const dx = e.clientX - dragCandidateRef.current.startX;
+      const dy = e.clientY - dragCandidateRef.current.startY;
+      if (Math.hypot(dx, dy) > 3) {
+        // Pointer moved > 3px: initiate dragging!
+        const { hitNodeIds } = dragCandidateRef.current;
+        const selectedHit = hitNodeIds.find((id) => selection.includes(id));
+        const dragTargetId = selectedHit || hitNodeIds[0];
+
+        if (dragTargetId) {
+          const node = doc.nodes[dragTargetId];
+          if (node && !node.locked) {
+            if (!selection.includes(dragTargetId)) {
+              onSelectNode(dragTargetId, false);
+            }
+            const parentNode = node.parent ? doc.nodes[node.parent] : null;
+            const isFree = parentNode?.type === 'free';
+            const initialX = node.style[bp]?.x ?? node.style.mobile?.x ?? 0;
+            const initialY = node.style[bp]?.y ?? node.style.mobile?.y ?? 0;
+
+            setDragMoveState({
+              nodeId: dragTargetId,
+              isFree,
+              startPointerX: dragCandidateRef.current.startX,
+              startPointerY: dragCandidateRef.current.startY,
+              initialNodeX: initialX,
+              initialNodeY: initialY,
+              currentDeltaX: dx / zoom,
+              currentDeltaY: dy / zoom,
+              dropTarget: null,
+              hasMoved: true,
+            });
+            return;
+          }
+        }
+      }
+      return;
+    }
+
+    // Hover hit-testing
     const iframe = iframeRef.current;
     if (!iframe || !iframe.contentDocument) return;
 
@@ -171,24 +321,73 @@ export function CanvasOverlay({
     onHoverNode(undefined);
   };
 
-  // Canvas background pointer down selects elements under point or clears selection
-  const handlePointerDown = (e: React.PointerEvent) => {
-    if (mode === 'preview') return;
-    const iframe = iframeRef.current;
-    if (!iframe || !iframe.contentDocument) return;
+  // Unified pointer up: handles resize completion, drag drop commit, or click selection cycling
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (resizeState) {
+      handleResizePointerUp(e);
+      return;
+    }
 
-    const iframeRect = iframe.getBoundingClientRect();
-    const relX = (e.clientX - iframeRect.left) / zoom;
-    const relY = (e.clientY - iframeRect.top) / zoom;
+    if (dragCandidateRef.current) {
+      const { pointerId, hitNodeIds, shiftKey } = dragCandidateRef.current;
+      try {
+        (overlayRef.current as HTMLElement)?.releasePointerCapture(pointerId);
+      } catch {}
 
-    const elements = iframe.contentDocument.elementsFromPoint(relX, relY);
-    for (const el of elements) {
-      const match = el.className?.match?.(/\bn_([a-z0-9_-]+)\b/);
-      const nodeId = match ? match[1] : el.getAttribute('data-node-id');
-      if (nodeId && doc.nodes[nodeId]) {
-        onSelectNode(nodeId, e.shiftKey);
-        return;
+      if (dragMoveState && dragMoveState.hasMoved) {
+        // Commit drag gesture
+        if (dragMoveState.isFree) {
+          const finalX = Math.round(dragMoveState.initialNodeX + dragMoveState.currentDeltaX);
+          const finalY = Math.round(dragMoveState.initialNodeY + dragMoveState.currentDeltaY);
+          onMoveFreeNode?.(dragMoveState.nodeId, finalX, finalY);
+        } else if (dragMoveState.dropTarget && dragMoveState.dropTarget.isValid) {
+          onReorderNode?.(
+            dragMoveState.nodeId,
+            dragMoveState.dropTarget.containerId,
+            dragMoveState.dropTarget.index
+          );
+        }
+      } else {
+        // Pointer moved <= 3px: IT IS A CLICK!
+        if (hitNodeIds.length === 0) {
+          // Empty canvas click clears selection
+          onSelectNode('', false);
+        } else {
+          const deepest = hitNodeIds[0];
+          const currentSelected = selection[0];
+
+          if (shiftKey) {
+            onSelectNode(deepest, true);
+          } else if (!currentSelected || !hitNodeIds.includes(currentSelected)) {
+            // Select the deepest child under cursor
+            onSelectNode(deepest, false);
+          } else {
+            const currentIndex = hitNodeIds.indexOf(currentSelected);
+            if (currentIndex !== 0) {
+              // An ancestor was selected and user clicked a child: select the deepest child
+              onSelectNode(deepest, false);
+            } else {
+              // Deepest child was already selected: cycle to parent (spec 6.3)
+              const nextIndex = (currentIndex + 1) % hitNodeIds.length;
+              onSelectNode(hitNodeIds[nextIndex], false);
+            }
+          }
+        }
       }
+
+      dragCandidateRef.current = null;
+      setDragMoveState(null);
+    }
+  };
+
+  // Double click container to select first child (spec 6.3)
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    if (mode === 'preview') return;
+    const currentSelected = selection[0];
+    if (!currentSelected) return;
+    const node = doc.nodes[currentSelected];
+    if (node && node.children && node.children.length > 0) {
+      onSelectNode(node.children[0], false);
     }
   };
 
@@ -294,133 +493,15 @@ export function CanvasOverlay({
     });
   };
 
-  // --- 2. DRAG TO MOVE & REORDER HANDLERS ---
-  const handleSelectionBoxPointerDown = (
-    e: React.PointerEvent,
-    id: string,
-    r: NodeRect
-  ) => {
-    const node = doc.nodes[id];
-    if (!node || node.locked) return;
-
-    e.stopPropagation();
-    try {
-      (e.target as HTMLElement).setPointerCapture(e.pointerId);
-    } catch {}
-
-    const parentNode = node.parent ? doc.nodes[node.parent] : null;
-    const isFree = parentNode?.type === 'free';
-
-    const initialX = node.style[bp]?.x ?? node.style.mobile?.x ?? 0;
-    const initialY = node.style[bp]?.y ?? node.style.mobile?.y ?? 0;
-
-    setDragMoveState({
-      nodeId: id,
-      isFree,
-      startPointerX: e.clientX,
-      startPointerY: e.clientY,
-      initialNodeX: initialX,
-      initialNodeY: initialY,
-      currentDeltaX: 0,
-      currentDeltaY: 0,
-      dropTarget: null,
-      hasMoved: false,
-    });
-  };
-
-  const handleSelectionBoxPointerMove = (e: React.PointerEvent) => {
-    if (!dragMoveState) return;
-    e.stopPropagation();
-
-    const deltaX = (e.clientX - dragMoveState.startPointerX) / zoom;
-    const deltaY = (e.clientY - dragMoveState.startPointerY) / zoom;
-
-    if (Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2) {
-      if (dragMoveState.isFree) {
-        setDragMoveState((prev) =>
-          prev
-            ? {
-                ...prev,
-                hasMoved: true,
-                currentDeltaX: deltaX,
-                currentDeltaY: deltaY,
-              }
-            : null
-        );
-      } else {
-        // Calculate insertion drop target for stacks, grids, sections, cards
-        const iframe = iframeRef.current;
-        if (iframe?.contentDocument) {
-          const iframeRect = iframe.getBoundingClientRect();
-          const relX = (e.clientX - iframeRect.left) / zoom;
-          const relY = (e.clientY - iframeRect.top) / zoom;
-
-          const elementsAtPoint = Array.from(
-            iframe.contentDocument.elementsFromPoint(relX, relY)
-          );
-
-          const drop = calculateDropTarget({
-            doc,
-            source: {
-              type: 'canvas',
-              nodeType: doc.nodes[dragMoveState.nodeId]?.type || 'stack',
-              nodeId: dragMoveState.nodeId,
-            },
-            relX,
-            relY,
-            zoom: 1, // relX and relY are in unscaled iframe coordinates
-            elementsAtPoint,
-            nodeRects: rects,
-          });
-
-          setDragMoveState((prev) =>
-            prev
-              ? {
-                  ...prev,
-                  hasMoved: true,
-                  currentDeltaX: deltaX,
-                  currentDeltaY: deltaY,
-                  dropTarget: drop,
-                }
-              : null
-          );
-        }
-      }
-    }
-  };
-
-  const handleSelectionBoxPointerUp = (e: React.PointerEvent) => {
-    if (!dragMoveState) return;
-    e.stopPropagation();
-    try {
-      (e.target as HTMLElement).releasePointerCapture(e.pointerId);
-    } catch {}
-
-    if (dragMoveState.hasMoved) {
-      if (dragMoveState.isFree) {
-        const finalX = Math.round(dragMoveState.initialNodeX + dragMoveState.currentDeltaX);
-        const finalY = Math.round(dragMoveState.initialNodeY + dragMoveState.currentDeltaY);
-        onMoveFreeNode?.(dragMoveState.nodeId, finalX, finalY);
-      } else if (dragMoveState.dropTarget && dragMoveState.dropTarget.isValid) {
-        onReorderNode?.(
-          dragMoveState.nodeId,
-          dragMoveState.dropTarget.containerId,
-          dragMoveState.dropTarget.index
-        );
-      }
-    }
-
-    setDragMoveState(null);
-  };
-
   if (mode === 'preview') return null;
 
   return (
     <div
       ref={overlayRef}
       onPointerMove={resizeState ? handleResizePointerMove : handlePointerMove}
-      onPointerUp={resizeState ? handleResizePointerUp : undefined}
+      onPointerUp={handlePointerUp}
       onPointerDown={handlePointerDown}
+      onDoubleClick={handleDoubleClick}
       className="absolute inset-0 pointer-events-auto z-20 select-none overflow-hidden"
     >
       {/* 1. Drop Target Container Highlight */}
@@ -496,12 +577,9 @@ export function CanvasOverlay({
         return (
           <div
             key={id}
-            onPointerDown={(e) => handleSelectionBoxPointerDown(e, id, r)}
-            onPointerMove={dragMoveState ? handleSelectionBoxPointerMove : undefined}
-            onPointerUp={dragMoveState ? handleSelectionBoxPointerUp : undefined}
-            className={`absolute border-2 border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-500/5 rounded-xs select-none ${
-              node.locked ? 'cursor-default pointer-events-auto' : 'cursor-move pointer-events-auto'
-            } ${isDragging ? 'opacity-80 shadow-2xl z-40' : 'z-30'}`}
+            className={`absolute border-2 border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-500/5 rounded-xs select-none pointer-events-none ${
+              isDragging ? 'opacity-80 shadow-2xl z-40' : 'z-30'
+            }`}
             style={{
               top: `${boxTop}px`,
               left: `${boxLeft}px`,
@@ -545,7 +623,7 @@ export function CanvasOverlay({
                   onPointerMove={resizeState ? handleResizePointerMove : undefined}
                   onPointerUp={resizeState ? handleResizePointerUp : undefined}
                   onDoubleClick={(e) => handleDoubleClickHandle(e, id, 'nw')}
-                  className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-emerald-600 rounded-xs cursor-nwse-resize hover:scale-125 transition-transform z-40 shadow-xs"
+                  className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-emerald-600 rounded-xs cursor-nwse-resize hover:scale-125 transition-transform z-40 shadow-xs pointer-events-auto"
                   title="Drag to resize (Shift for aspect ratio, double-click to hug)"
                 />
 
@@ -555,7 +633,7 @@ export function CanvasOverlay({
                   onPointerMove={resizeState ? handleResizePointerMove : undefined}
                   onPointerUp={resizeState ? handleResizePointerUp : undefined}
                   onDoubleClick={(e) => handleDoubleClickHandle(e, id, 'n')}
-                  className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-2 border-emerald-600 rounded-xs cursor-ns-resize hover:scale-125 transition-transform z-40 shadow-xs"
+                  className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-2 border-emerald-600 rounded-xs cursor-ns-resize hover:scale-125 transition-transform z-40 shadow-xs pointer-events-auto"
                   title="Drag to resize height (double-click to hug)"
                 />
 
@@ -565,7 +643,7 @@ export function CanvasOverlay({
                   onPointerMove={resizeState ? handleResizePointerMove : undefined}
                   onPointerUp={resizeState ? handleResizePointerUp : undefined}
                   onDoubleClick={(e) => handleDoubleClickHandle(e, id, 'ne')}
-                  className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-emerald-600 rounded-xs cursor-nesw-resize hover:scale-125 transition-transform z-40 shadow-xs"
+                  className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-emerald-600 rounded-xs cursor-nesw-resize hover:scale-125 transition-transform z-40 shadow-xs pointer-events-auto"
                   title="Drag to resize (Shift for aspect ratio, double-click to hug)"
                 />
 
@@ -575,7 +653,7 @@ export function CanvasOverlay({
                   onPointerMove={resizeState ? handleResizePointerMove : undefined}
                   onPointerUp={resizeState ? handleResizePointerUp : undefined}
                   onDoubleClick={(e) => handleDoubleClickHandle(e, id, 'e')}
-                  className="absolute top-1/2 -right-1.5 -translate-y-1/2 w-3 h-3 bg-white border-2 border-emerald-600 rounded-xs cursor-ew-resize hover:scale-125 transition-transform z-40 shadow-xs"
+                  className="absolute top-1/2 -right-1.5 -translate-y-1/2 w-3 h-3 bg-white border-2 border-emerald-600 rounded-xs cursor-ew-resize hover:scale-125 transition-transform z-40 shadow-xs pointer-events-auto"
                   title="Drag to resize width (double-click to hug)"
                 />
 
@@ -585,7 +663,7 @@ export function CanvasOverlay({
                   onPointerMove={resizeState ? handleResizePointerMove : undefined}
                   onPointerUp={resizeState ? handleResizePointerUp : undefined}
                   onDoubleClick={(e) => handleDoubleClickHandle(e, id, 'se')}
-                  className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-emerald-600 rounded-xs cursor-nwse-resize hover:scale-125 transition-transform z-40 shadow-xs"
+                  className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-emerald-600 rounded-xs cursor-nwse-resize hover:scale-125 transition-transform z-40 shadow-xs pointer-events-auto"
                   title="Drag to resize (Shift for aspect ratio, double-click to hug)"
                 />
 
@@ -595,7 +673,7 @@ export function CanvasOverlay({
                   onPointerMove={resizeState ? handleResizePointerMove : undefined}
                   onPointerUp={resizeState ? handleResizePointerUp : undefined}
                   onDoubleClick={(e) => handleDoubleClickHandle(e, id, 's')}
-                  className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-2 border-emerald-600 rounded-xs cursor-ns-resize hover:scale-125 transition-transform z-40 shadow-xs"
+                  className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-2 border-emerald-600 rounded-xs cursor-ns-resize hover:scale-125 transition-transform z-40 shadow-xs pointer-events-auto"
                   title="Drag to resize height (double-click to hug)"
                 />
 
@@ -605,7 +683,7 @@ export function CanvasOverlay({
                   onPointerMove={resizeState ? handleResizePointerMove : undefined}
                   onPointerUp={resizeState ? handleResizePointerUp : undefined}
                   onDoubleClick={(e) => handleDoubleClickHandle(e, id, 'sw')}
-                  className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-emerald-600 rounded-xs cursor-nesw-resize hover:scale-125 transition-transform z-40 shadow-xs"
+                  className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-emerald-600 rounded-xs cursor-nesw-resize hover:scale-125 transition-transform z-40 shadow-xs pointer-events-auto"
                   title="Drag to resize (Shift for aspect ratio, double-click to hug)"
                 />
 
@@ -615,7 +693,7 @@ export function CanvasOverlay({
                   onPointerMove={resizeState ? handleResizePointerMove : undefined}
                   onPointerUp={resizeState ? handleResizePointerUp : undefined}
                   onDoubleClick={(e) => handleDoubleClickHandle(e, id, 'w')}
-                  className="absolute top-1/2 -left-1.5 -translate-y-1/2 w-3 h-3 bg-white border-2 border-emerald-600 rounded-xs cursor-ew-resize hover:scale-125 transition-transform z-40 shadow-xs"
+                  className="absolute top-1/2 -left-1.5 -translate-y-1/2 w-3 h-3 bg-white border-2 border-emerald-600 rounded-xs cursor-ew-resize hover:scale-125 transition-transform z-40 shadow-xs pointer-events-auto"
                   title="Drag to resize width (double-click to hug)"
                 />
               </>
