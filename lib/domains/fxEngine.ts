@@ -336,9 +336,8 @@ export function calculateMultiYearDomainPrice(
   const totalWholesaleNgn = Math.ceil(totalWholesaleUsd * effectiveRate);
 
   const rawSubtotal = base1Year.finalPriceNgn * periodYears;
-  const discounted = rawSubtotal * (1 - discountPercent / 100);
-  const finalPriceNgn = applyRoundingStep(discounted, config.roundingStep || 500);
-  const savingsNgn = Math.max(0, rawSubtotal - finalPriceNgn);
+  const savingsNgn = Math.round(rawSubtotal * (discountPercent / 100));
+  const finalPriceNgn = rawSubtotal - savingsNgn;
   const founderProfitNgn = Math.max(0, finalPriceNgn - totalWholesaleNgn);
 
   return {
@@ -346,7 +345,7 @@ export function calculateMultiYearDomainPrice(
     discountPercent,
     wholesaleUsd: totalWholesaleUsd,
     wholesaleNgn: totalWholesaleNgn,
-    yearlyPriceNgn: Math.round(finalPriceNgn / periodYears),
+    yearlyPriceNgn: base1Year.finalPriceNgn,
     finalPriceNgn,
     savingsNgn,
     founderProfitNgn,

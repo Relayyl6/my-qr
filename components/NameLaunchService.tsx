@@ -1073,7 +1073,13 @@ export default function NameLaunchService({ user, isAdmin = false }: Props) {
                       </div>
 
                       {checkoutError && (
-                        <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-500/30 text-xs text-red-700 dark:text-red-300">
+                        <div
+                          className={`p-3 rounded-xl border text-xs ${
+                            checkoutError.includes('Storefront pricing updated')
+                              ? 'bg-amber-500/10 text-amber-800 dark:text-amber-300 border-amber-500/30 font-medium'
+                              : 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-500/30 text-red-700 dark:text-red-300'
+                          }`}
+                        >
                           {checkoutError}
                         </div>
                       )}
