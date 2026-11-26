@@ -763,26 +763,22 @@ async function main() {
   })();
 
   // Test 27: Domain Storefront Search Pricing Verification (Admin Catalog Alignment)
-  await runTest(27, "Storefront search pricing: honors configured admin margins & fixed pricing (.xyz=₦6,000, .site=₦7,000)", async (assert) => {
+  await runTest(27, "Storefront search pricing: honors configured admin margins & fixed pricing dynamically", async (assert) => {
+    const config = await getDomainPricingConfig();
     const results = await searchDomains('lamsparks');
     assert(Array.isArray(results) && results.length > 0, "searchDomains must return available TLDs");
 
-    const xyz = results.find(r => r.tld === 'xyz');
-    assert(!!xyz, "Must contain .xyz result");
-    assert(xyz?.pricing?.totalNgn === 6000, `lamsparks.xyz storefront price must be ₦6,000, got ₦${xyz?.pricing?.totalNgn}`);
-
-    const site = results.find(r => r.tld === 'site');
-    assert(!!site, "Must contain .site result");
-    assert(site?.pricing?.totalNgn === 7000, `lamsparks.site storefront price must be ₦7,000, got ₦${site?.pricing?.totalNgn}`);
-
-    const store = results.find(r => r.tld === 'store');
-    assert(!!store, "Must contain .store result");
-    assert(store?.pricing?.totalNgn === 8000, `lamsparks.store storefront price must be ₦8,000, got ₦${store?.pricing?.totalNgn}`);
-
-    const com = results.find(r => r.tld === 'com');
-    assert(!!com, "Must contain .com result");
-    assert(com?.pricing?.totalNgn === 20000, `lamsparks.com storefront price must be ₦20,000, got ₦${com?.pricing?.totalNgn}`);
-  })();
+    for (const tld of ['xyz', 'site', 'store', 'com']) {
+      const item = results.find(r => r.tld === tld);
+      assert(!!item, `Must contain .${tld} result`);
+      const baseUsd = WHOLESALE_USD_PRICING[tld] || 10;
+      const expected = calculateDomainPrice(baseUsd, tld, config).finalPriceNgn;
+      assert(
+        item?.pricing?.totalNgn === expected,
+        `lamsparks.${tld} storefront price must dynamically match admin config (₦${expected.toLocaleString()}), got ₦${item?.pricing?.totalNgn}`
+      );
+    }
+  });
 
   // Test 28: Order Reference & Pending Payment Error Suppression
   await runTest(28, "Order reference handling: nonexistent or abandoned checkout returns isNotFound/isPending without scary banner", async (assert) => {

@@ -45,25 +45,37 @@ export async function POST(req: Request) {
       }
 
       const tld = existing.domainName.split('.').pop() || 'com';
-      const wholesaleUsd = WHOLESALE_USD_PRICING[tld] || 10.5;
+      const wholesaleUsd = existing.wholesaleUsd || WHOLESALE_USD_PRICING[tld] || 10.5;
       const pricingConfig = await getDomainPricingConfig().catch(() => null);
-      const pricing = calculateNgnPricing(wholesaleUsd, tld, pricingConfig || undefined);
       const effectiveRate = pricingConfig
         ? pricingConfig.mode === 'manual_override'
           ? pricingConfig.manualOverrideRate
           : pricingConfig.bufferedRate
         : 1400;
 
-      // Strictly rely on the active admin sovereignty pricing calculation
-      const finalChargeNgn = pricing.totalNgn;
-      const finalMarkupNgn = pricing.platformFeeNgn;
+      const periodYears = ([1, 2, 3].includes(existing.registrationYears)
+        ? existing.registrationYears
+        : 1) as 1 | 2 | 3;
+      const multiYear = calculateMultiYearDomainPrice(
+        wholesaleUsd,
+        tld,
+        pricingConfig || DEFAULT_PRICING_CONFIG,
+        periodYears
+      );
+
+      const aliasesList = Array.isArray(existing.emailAliases) ? existing.emailAliases : [];
+      const extraAliasesCount = Math.max(0, aliasesList.length - 1);
+      const extraEmailPriceNgn = pricingConfig?.extraEmailPriceNgn ?? 1500;
+      const additionalCostNgn = extraAliasesCount * extraEmailPriceNgn * periodYears;
+      const finalChargeNgn = multiYear.finalPriceNgn + additionalCostNgn;
+      const finalMarkupNgn = (multiYear.finalPriceNgn - multiYear.wholesaleNgn) + additionalCostNgn;
 
       order = await prisma.domainOrder.update({
         where: { id: existing.id },
         data: {
           paystackRef: reference,
           userId: user?.id || existing.userId,
-          wholesaleUsd: pricing.wholesaleUsd,
+          wholesaleUsd: multiYear.wholesaleUsd,
           exchangeRate: effectiveRate,
           platformMarkupNgn: finalMarkupNgn,
           totalPaidNgn: finalChargeNgn,
@@ -133,6 +145,24 @@ export async function POST(req: Request) {
       // Strictly rely on the active admin sovereignty pricing calculation
       const finalChargeNgn = totalExpectedNgn;
       const finalMarkupNgn = (multiYear.finalPriceNgn - multiYear.wholesaleNgn) + additionalCostNgn;
+
+      // Verify client expectation against authoritative pricing engine to prevent unexpected charges
+      const clientExpectedNgn = body.expectedPriceNgn ? Number(body.expectedPriceNgn) : null;
+      if (
+        clientExpectedNgn !== null &&
+        clientExpectedNgn > 0 &&
+        clientExpectedNgn !== totalExpectedNgn
+      ) {
+        return NextResponse.json(
+          {
+            error: `Storefront pricing updated: ${domainName} is ₦${multiYear.yearlyPriceNgn.toLocaleString()}/yr (Total: ₦${totalExpectedNgn.toLocaleString()}). Please review and confirm.`,
+            requiresConfirmation: true,
+            authoritativeYearlyPriceNgn: multiYear.yearlyPriceNgn,
+            authoritativeTotalNgn: totalExpectedNgn,
+          },
+          { status: 409 }
+        );
+      }
 
       // Compile complete emailAliases list (primary + additional)
       const compiledEmailAliases = [

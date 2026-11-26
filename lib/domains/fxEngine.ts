@@ -33,22 +33,22 @@ export interface DomainPricingConfig {
 }
 
 export const DEFAULT_TLD_MARGIN_PROGRESSION: Record<string, number> = {
-  xyz: 3000,    // Starts from 3,000 as added retail
-  online: 3000, // Starts from 3,000
-  site: 3000,   // Starts from 3,000
-  store: 3800,  // +₦800 step
-  com: 4800,    // +₦1,000 step
-  org: 5800,    // +₦1,000 step
-  co: 6800,     // +₦1,000 step
-  net: 7500,    // +₦700 step
-  io: 8000,     // Reaches ₦8,000 for higher priced domains
+  xyz: 3200,    // Starts from ₦3,200 (+₦200 step) -> yields ₦6,000 storefront
+  site: 3500,   // +₦500 step -> yields ₦7,000 storefront
+  online: 3500, // +₦500 step -> yields ₦7,000 storefront
+  store: 3800,  // +₦800 step -> yields ₦8,000 storefront
+  com: 4800,    // +₦1,800 step -> yields ₦20,000 storefront
+  net: 7500,    // +₦1,500 step -> yields ₦24,000 storefront
+  org: 5800,    // +₦2,800 step -> yields ₦21,000 storefront
+  co: 6800,     // +₦3,800 step -> yields ₦23,000 storefront
+  io: 8000,     // +₦5,000 step -> yields ₦57,000 storefront
 };
 
 export const DEFAULT_PRICING_CONFIG: DomainPricingConfig = {
   mode: 'auto_buffered',
-  liveMarketRate: 1333.33,
+  liveMarketRate: 1353.58,
   bufferPercent: 5.0,
-  bufferedRate: 1400,
+  bufferedRate: 1430,
   manualOverrideRate: 1500,
   platformMarkupNgn: 3000,
   budgetMarkupNgn: 3000,

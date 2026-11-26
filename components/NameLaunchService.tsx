@@ -75,7 +75,9 @@ export default function NameLaunchService({ user, isAdmin = false }: Props) {
     { tld: 'online', tagline: 'Everyday identity', priceNgn: 7000 },
     { tld: 'store', tagline: 'E-commerce & retail', priceNgn: 8000 },
     { tld: 'com', tagline: 'Global standard', priceNgn: 20000 },
+    { tld: 'net', tagline: 'Networks & infrastructure', priceNgn: 24000 },
     { tld: 'org', tagline: 'Communities & NGOs', priceNgn: 21000 },
+    { tld: 'co', tagline: 'Startups & modern brands', priceNgn: 23000 },
     { tld: 'io', tagline: 'Tech & SaaS', priceNgn: 57000 },
   ]);
 
@@ -111,6 +113,18 @@ export default function NameLaunchService({ user, isAdmin = false }: Props) {
       .then((d) => {
         if (Array.isArray(d?.tlds) && d.tlds.length > 0) {
           setFeaturedTlds(d.tlds);
+          // If a domain is actively open in the checkout drawer, sync its price with live catalog
+          setSelectedDomain((curr) => {
+            if (!curr || !curr.pricing) return curr;
+            const live = d.tlds.find((t: any) => t.tld.toLowerCase() === curr.tld.toLowerCase());
+            if (live && live.priceNgn && live.priceNgn !== curr.pricing.totalNgn) {
+              return {
+                ...curr,
+                pricing: { ...curr.pricing, totalNgn: live.priceNgn },
+              };
+            }
+            return curr;
+          });
         }
         if (typeof d?.extraEmailPriceNgn === 'number' && d.extraEmailPriceNgn > 0) {
           setExtraEmailPriceNgn(d.extraEmailPriceNgn);
@@ -196,7 +210,18 @@ export default function NameLaunchService({ user, isAdmin = false }: Props) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Search failed');
-      setResults(data.results || []);
+      const syncedResults = (data.results || []).map((r: DomainSearchResult) => {
+        if (!r.pricing) return r;
+        const live = featuredTlds.find((t) => t.tld.toLowerCase() === r.tld.toLowerCase());
+        return {
+          ...r,
+          pricing: {
+            ...r.pricing,
+            totalNgn: live?.priceNgn || r.pricing.totalNgn,
+          },
+        };
+      });
+      setResults(syncedResults);
     } catch (err: any) {
       setSearchError(err.message || 'Could not search domains');
     } finally {
@@ -269,7 +294,24 @@ export default function NameLaunchService({ user, isAdmin = false }: Props) {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Unable to start checkout');
+      if (!res.ok) {
+        if (res.status === 409 && data.authoritativeYearlyPriceNgn) {
+          setSelectedDomain((prev) => {
+            if (!prev || !prev.pricing) return prev;
+            return {
+              ...prev,
+              pricing: {
+                ...prev.pricing,
+                totalNgn: data.authoritativeYearlyPriceNgn,
+              },
+            };
+          });
+          setCheckoutError(data.error);
+          setCheckingOut(false);
+          return;
+        }
+        throw new Error(data.error || 'Unable to start checkout');
+      }
 
       window.location.href = data.authorizationUrl;
     } catch (err: any) {
@@ -648,26 +690,39 @@ export default function NameLaunchService({ user, isAdmin = false }: Props) {
                     </div>
 
                     {item.available && item.pricing ? (
-                      <div className="flex items-center justify-between sm:justify-end gap-4">
-                        <div className="font-mono font-semibold text-base text-[#11140F] dark:text-white">
-                          {formatNaira(item.pricing.totalNgn)}
-                          <span className="text-xs font-normal text-[#11140F]/50 dark:text-white/45">/yr</span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedDomain(item);
-                            setCheckoutError(null);
-                          }}
-                          className={`px-4 py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
-                            isSelected
-                              ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F]'
-                              : 'bg-emerald-600 text-white hover:bg-emerald-700'
-                          }`}
-                        >
-                          {isSelected ? 'Selected' : 'Select'}
-                        </button>
-                      </div>
+                      (() => {
+                        const authoritativePrice =
+                          featuredTlds.find((t) => t.tld.toLowerCase() === item.tld.toLowerCase())
+                            ?.priceNgn || item.pricing.totalNgn;
+                        return (
+                          <div className="flex items-center justify-between sm:justify-end gap-4">
+                            <div className="font-mono font-semibold text-base text-[#11140F] dark:text-white">
+                              {formatNaira(authoritativePrice)}
+                              <span className="text-xs font-normal text-[#11140F]/50 dark:text-white/45">/yr</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedDomain({
+                                  ...item,
+                                  pricing: {
+                                    ...item.pricing!,
+                                    totalNgn: authoritativePrice,
+                                  },
+                                });
+                                setCheckoutError(null);
+                              }}
+                              className={`px-4 py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                                isSelected
+                                  ? 'bg-[#11140F] dark:bg-white text-white dark:text-[#11140F]'
+                                  : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                              }`}
+                            >
+                              {isSelected ? 'Selected' : 'Select'}
+                            </button>
+                          </div>
+                        );
+                      })()
                     ) : (
                       <span className="text-xs text-[#11140F]/40 dark:text-white/40 font-mono">
                         Taken

@@ -1,28 +1,33 @@
 import { NextResponse } from 'next/server';
-import { calculateNgnPricing, WHOLESALE_USD_PRICING } from '@/lib/domains/namelaunch';
+import { calculateNgnPricing, WHOLESALE_USD_PRICING, SUPPORTED_TLDS } from '@/lib/domains/namelaunch';
 import { getDomainPricingConfig } from '@/lib/domains/fxEngine';
 
 export const dynamic = 'force-dynamic';
 
-const FEATURED_TLDS = [
-  { tld: 'xyz', tagline: 'Modern & startups' },
-  { tld: 'com', tagline: 'Global standard' },
-  { tld: 'com.ng', tagline: 'Nigerian brands' },
-  { tld: 'ng', tagline: 'Direct local identity' },
-  { tld: 'org', tagline: 'Communities & NGOs' },
-  { tld: 'io', tagline: 'Tech & SaaS' },
-];
+const STOREFRONT_TLD_METADATA: Record<string, string> = {
+  xyz: 'Modern & startups',
+  site: 'Portfolios & creators',
+  online: 'Everyday identity',
+  store: 'E-commerce & retail',
+  com: 'Global standard',
+  net: 'Networks & infrastructure',
+  org: 'Communities & NGOs',
+  co: 'Startups & modern brands',
+  io: 'Tech & SaaS',
+};
 
 export async function GET() {
   try {
     const config = await getDomainPricingConfig().catch(() => null);
 
-    const tlds = FEATURED_TLDS.map((item) => {
-      const baseUsd = WHOLESALE_USD_PRICING[item.tld] || 10.5;
-      const pricing = calculateNgnPricing(baseUsd, item.tld, config || undefined);
+    const priceMap: Record<string, number> = {};
+    const tlds = SUPPORTED_TLDS.map((tld) => {
+      const baseUsd = WHOLESALE_USD_PRICING[tld] || 10.5;
+      const pricing = calculateNgnPricing(baseUsd, tld, config || undefined);
+      priceMap[tld] = pricing.totalNgn;
       return {
-        tld: item.tld,
-        tagline: item.tagline,
+        tld,
+        tagline: STOREFRONT_TLD_METADATA[tld] || 'Custom domain',
         priceNgn: pricing.totalNgn,
       };
     });
@@ -30,6 +35,7 @@ export async function GET() {
     return NextResponse.json(
       {
         tlds,
+        priceMap,
         extraEmailPriceNgn: config?.extraEmailPriceNgn ?? 1500,
       },
       {
@@ -41,6 +47,6 @@ export async function GET() {
       }
     );
   } catch (err: any) {
-    return NextResponse.json({ tlds: [], extraEmailPriceNgn: 1500 });
+    return NextResponse.json({ tlds: [], priceMap: {}, extraEmailPriceNgn: 1500 });
   }
 }
