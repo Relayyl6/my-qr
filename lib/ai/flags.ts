@@ -82,7 +82,7 @@ export const AI_FEATURES: Record<
     description: "Scan intelligence, trend detection, and marketing actions",
   },
   "landing-page-builder": {
-    tier: "plus",
+    tier: "free",
     enabled: true,
     description: "Instant mobile landing page generation (Prompt-to-Page)",
   },

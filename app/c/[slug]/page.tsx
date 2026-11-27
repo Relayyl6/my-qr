@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { headers, cookies } from 'next/headers';
+import { headers } from 'next/headers';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
 import { APP_URL } from '@/lib/config';
@@ -7,6 +7,9 @@ import { getOptimizedStorageUrl } from '@/lib/media';
 import VCardInteractiveView from '@/components/VCardInteractiveView';
 
 export const dynamic = 'force-dynamic';
+
+// In-memory debounce map to prevent double-click or rapid refresh spamming (10s window)
+const recentVCardVisitsMap = new Map<string, number>();
 
 export async function generateMetadata({
   params,
@@ -88,7 +91,7 @@ export default async function VCardPublicPage({
   const currentUser = await getCurrentUser().catch(() => null);
   const isOwner = Boolean(currentUser?.id && currentUser.id === item.userId);
 
-  // Prevent inflated scan counts from owner testing, camera prefetches, crawlers, or rapid reloads
+  // Increment visits counter on real page visits (with 10-second debounce against double-clicks/rapid reloads)
   try {
     const headerList = headers();
     const purpose = headerList.get('purpose')?.toLowerCase().trim();
@@ -103,23 +106,27 @@ export default async function VCardPublicPage({
 
     const isBot = /bot|crawler|spider|crawling|facebookexternalhit|whatsapp|slackbot|twitterbot|telegrambot/i.test(userAgent);
 
-    const cookieStore = cookies();
-    const sessionScanKey = `vcard_scanned_${item.id}`;
-    const alreadyScanned = cookieStore.get(sessionScanKey);
+    const clientIp = headerList.get('x-forwarded-for')?.split(',')[0]?.trim() || headerList.get('x-real-ip') || 'ip';
+    const dedupeKey = `${item.id}:${clientIp}`;
+    const now = Date.now();
+    const lastVisit = recentVCardVisitsMap.get(dedupeKey);
 
-    if (!isOwner && !isPrefetch && !isBot && !alreadyScanned) {
-      cookieStore.set(sessionScanKey, '1', {
-        maxAge: 1800, // 30 minutes session deduplication
-        path: '/',
-        httpOnly: true,
-        sameSite: 'lax',
-      });
-      prisma.microSaasItem
+    if (!isPrefetch && !isBot && (!lastVisit || now - lastVisit > 10000)) {
+      recentVCardVisitsMap.set(dedupeKey, now);
+      // Clean up older keys
+      if (recentVCardVisitsMap.size > 2000) {
+        recentVCardVisitsMap.forEach((timestamp, k) => {
+          if (now - timestamp > 60000) recentVCardVisitsMap.delete(k);
+        });
+      }
+      await prisma.microSaasItem
         .update({
           where: { id: item.id },
           data: { scansCount: { increment: 1 } },
         })
-        .catch(() => {});
+        .catch((err) => {
+          console.warn('[vCard visit increment warn]:', err);
+        });
     }
   } catch (e) {
     // Fallback safe bypass

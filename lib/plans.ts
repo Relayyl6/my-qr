@@ -63,7 +63,7 @@ export const PLANS: Record<PlanTier, PlanEntitlements> = {
       ticket: 0,
       coupon: 0,
       signup_widget: 0,
-      landing_page: 0,
+      landing_page: 3,
     },
     routing: {
       time_scheduled: false,
@@ -96,7 +96,7 @@ export const PLANS: Record<PlanTier, PlanEntitlements> = {
       ticket: 0,
       coupon: 3,
       signup_widget: 0,
-      landing_page: 1,
+      landing_page: 3,
     },
     routing: {
       time_scheduled: true,
@@ -129,7 +129,7 @@ export const PLANS: Record<PlanTier, PlanEntitlements> = {
       ticket: 10,
       coupon: 15,
       signup_widget: 5,
-      landing_page: 3,
+      landing_page: 10,
     },
     routing: {
       time_scheduled: true,

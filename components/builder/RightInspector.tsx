@@ -1314,6 +1314,52 @@ export function RightInspector({
             </div>
           </div>
         )}
+
+        {/* TAB 5: AI ASSISTANT */}
+        {activeTab === 'ai' && (
+          <div className="space-y-4">
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400 mb-1 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>AI Design Assistant</span>
+              </span>
+              <p className="text-[11.5px] text-white/50">
+                Use natural language prompts to restyle, rewrite, or expand your mobile landing page.
+              </p>
+            </div>
+
+            {/* Quick Inspiration Prompts */}
+            <div className="space-y-2">
+              <span className="text-[10.5px] font-semibold uppercase opacity-60 block">Inspiration Chips</span>
+              <div className="flex flex-col gap-1.5">
+                {[
+                  'Artisan Coffee & Bakery Menu',
+                  'High-Converting SaaS Waitlist',
+                  'Luxury Real Estate Showcase',
+                  'Barbershop & Grooming Services',
+                  'Dark Futuristic Creator Portfolio',
+                ].map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => {
+                      const input = document.querySelector('input[placeholder*="Ask AI"]') as HTMLInputElement;
+                      if (input) {
+                        input.value = preset;
+                        input.focus();
+                        input.dispatchEvent(new Event('input', { bubbles: true }));
+                      }
+                    }}
+                    className="p-2 rounded-lg border border-white/10 bg-[#161B18] hover:border-emerald-500 hover:bg-emerald-500/10 text-left text-[11.5px] text-white/80 hover:text-white transition-all cursor-pointer flex items-center justify-between group"
+                  >
+                    <span>{preset}</span>
+                    <span className="text-[10px] text-emerald-400 opacity-0 group-hover:opacity-100 font-semibold transition-opacity">Apply →</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

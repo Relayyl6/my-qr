@@ -7,6 +7,7 @@ import { CanvasFrame } from './CanvasFrame';
 import { CanvasOverlay } from './CanvasOverlay';
 import { LeftPanel } from './LeftPanel';
 import { RightInspector } from './RightInspector';
+import { aiPromptBuilderAction } from '@/lib/ai/features/landing-page-builder';
 import {
   Smartphone,
   Tablet,
@@ -21,6 +22,7 @@ import {
   ZoomOut,
   Maximize2,
   RotateCcw,
+  Loader2,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -68,8 +70,38 @@ export function BuilderShell({ initialDoc, pageId, onSave }: BuilderShellProps) 
   const workspaceRef = useRef<HTMLDivElement>(null);
   const [activeInspectorTab, setActiveInspectorTab] = useState<'content' | 'layout' | 'style' | 'responsive' | 'ai'>('content');
   const [aiPrompt, setAiPrompt] = useState('');
+  const [isPrompting, setIsPrompting] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [saveBanner, setSaveBanner] = useState<string | null>(null);
+
+  const handleRunPrompt = async (promptToRun?: string) => {
+    const query = (promptToRun || aiPrompt).trim();
+    if (!query) return;
+    setIsPrompting(true);
+    setSaveBanner('✨ AI is generating page layout, copy, and tokens...');
+    try {
+      const res = await aiPromptBuilderAction(query, (doc.tokens as any)?.destinationUrl);
+      if (res.doc) {
+        exec({
+          label: `AI Prompt: ${query.slice(0, 30)}`,
+          run: (draft) => {
+            draft.tokens = res.doc.tokens;
+            draft.nodes = res.doc.nodes;
+            draft.root = res.doc.root;
+          },
+        });
+        setSaveBanner(`✨ Page successfully generated for "${query}"!`);
+        setAiPrompt('');
+        setTimeout(() => setSaveBanner(null), 5000);
+      }
+    } catch (err: any) {
+      console.error('[AI Prompt Error]:', err);
+      setSaveBanner(`⚠️ AI Notice: ${err.message || 'Failed to generate layout'}`);
+      setTimeout(() => setSaveBanner(null), 6000);
+    } finally {
+      setIsPrompting(false);
+    }
+  };
 
   const handleUpdateDocTokens = React.useCallback(
     (tokens: Partial<Doc['tokens']>) => {
@@ -201,7 +233,7 @@ export function BuilderShell({ initialDoc, pageId, onSave }: BuilderShellProps) 
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [clearSelection, deleteNode, redo, setBreakpoint, ui.selection, undo]);
 
-  const handleAddNode = (type: NodeType) => {
+  const handleAddNode = (type: NodeType, initialProps?: Record<string, unknown>) => {
     let createdId: string | null = null;
     exec({
       label: `Add ${type} node`,
@@ -216,8 +248,12 @@ export function BuilderShell({ initialDoc, pageId, onSave }: BuilderShellProps) 
           badge: { text: 'Featured' },
           linkRow: { label: 'New Link', href: 'https://' },
           priceItem: { name: 'Item Name', price: '₦5,000', desc: 'Item description' },
+          image: { mediaId: 'img_' + Math.random().toString(36).substring(2, 8), alt: 'Image', fit: 'cover', urlFallback: '' },
         };
-        const defaultProps: Record<string, unknown> = defaultPropsMap[type] || {};
+        const defaultProps: Record<string, unknown> = {
+          ...(defaultPropsMap[type] || {}),
+          ...(initialProps || {}),
+        };
 
         const newNode = {
           id: newId,
@@ -296,6 +332,28 @@ export function BuilderShell({ initialDoc, pageId, onSave }: BuilderShellProps) 
 
     if (createdId) {
       selectNode(createdId);
+    }
+  };
+
+  const handleInsertImage = (url: string, name?: string) => {
+    const selectedId = ui.selection[0];
+    const selectedNode = selectedId ? doc.nodes[selectedId] : null;
+
+    if (selectedNode && selectedNode.type === 'image') {
+      updateNodeProps(selectedId, {
+        urlFallback: url,
+        alt: name || (selectedNode.props.alt as string) || 'Image',
+      });
+      setSaveBanner('✨ Updated selected image element!');
+      setTimeout(() => setSaveBanner(null), 3000);
+    } else {
+      handleAddNode('image', {
+        urlFallback: url,
+        alt: name || 'Uploaded image',
+        fit: 'cover',
+      });
+      setSaveBanner('✨ Inserted media asset into canvas!');
+      setTimeout(() => setSaveBanner(null), 3000);
     }
   };
 
@@ -473,14 +531,15 @@ export function BuilderShell({ initialDoc, pageId, onSave }: BuilderShellProps) 
           onToggleHidden={toggleHiddenNode}
           onDeleteNode={deleteNode}
           onAddNode={handleAddNode}
+          onInsertImage={handleInsertImage}
         />
 
-        {/* Center Canvas Workspace - Centered vertically and horizontally */}
+        {/* Center Canvas Workspace - Clean vertical scroll ensures top header/notch is always reachable */}
         <div
           ref={workspaceRef}
-          className="flex-1 bg-[#171B18] overflow-auto relative flex flex-col items-center justify-center min-h-full py-10 px-6"
+          className="flex-1 bg-[#171B18] overflow-y-auto overflow-x-auto relative flex flex-col items-center min-h-0 pt-6 pb-28 px-6 scroll-smooth"
         >
-          <div className="relative my-auto">
+          <div className="relative shrink-0">
             <CanvasFrame
               doc={doc}
               bp={ui.bp}
@@ -519,20 +578,30 @@ export function BuilderShell({ initialDoc, pageId, onSave }: BuilderShellProps) 
                 type="text"
                 value={aiPrompt}
                 onChange={(e) => setAiPrompt(e.target.value)}
-                placeholder="Ask AI to edit layout or copy... (Ctrl+K)"
-                className="flex-1 bg-transparent border-0 text-[12.5px] text-white placeholder:text-white/40 focus:outline-hidden"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleRunPrompt();
+                  }
+                }}
+                disabled={isPrompting}
+                placeholder="Ask AI to edit layout, theme, or copy... (e.g. Italian Pizza Menu)"
+                className="flex-1 bg-transparent border-0 text-[12.5px] text-white placeholder:text-white/40 focus:outline-hidden disabled:opacity-50"
               />
               <button
                 type="button"
-                onClick={() => {
-                  if (aiPrompt.trim()) {
-                    setRightPanel('ai');
-                    setActiveInspectorTab('ai');
-                  }
-                }}
-                className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-[11.5px] transition-colors cursor-pointer"
+                onClick={() => handleRunPrompt()}
+                disabled={isPrompting || !aiPrompt.trim()}
+                className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-[11.5px] transition-colors cursor-pointer flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed shadow-xs"
               >
-                Prompt
+                {isPrompting ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Thinking...</span>
+                  </>
+                ) : (
+                  <span>Prompt</span>
+                )}
               </button>
             </div>
           </div>

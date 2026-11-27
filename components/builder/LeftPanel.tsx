@@ -25,7 +25,18 @@ import {
   Phone,
   HelpCircle,
   QrCode,
+  Upload,
+  Check,
+  Copy,
+  Loader2,
 } from 'lucide-react';
+
+interface AssetItem {
+  url: string;
+  name: string;
+  size: number;
+  date: number;
+}
 
 interface LeftPanelProps {
   doc: Doc;
@@ -39,6 +50,7 @@ interface LeftPanelProps {
   onToggleHidden: (id: string, bp: Bp) => void;
   onDeleteNode: (id: string) => void;
   onAddNode: (type: NodeType) => void;
+  onInsertImage?: (url: string, name?: string) => void;
 }
 
 function getDisplayNodeName(node: Node): string {
@@ -82,11 +94,97 @@ export function LeftPanel({
   onToggleHidden,
   onDeleteNode,
   onAddNode,
+  onInsertImage,
 }: LeftPanelProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [collapsedNodes, setCollapsedNodes] = useState<Record<string, boolean>>({});
+
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
+  const [assets, setAssets] = useState<AssetItem[]>(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const saved = localStorage.getItem('builder_assets');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const saveAssets = (newAssets: AssetItem[]) => {
+    setAssets(newAssets);
+    try {
+      localStorage.setItem('builder_assets', JSON.stringify(newAssets));
+    } catch {}
+  };
+
+  const handleFileUpload = async (file: File) => {
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      setUploadError('File size exceeds 10MB limit.');
+      return;
+    }
+    setIsUploading(true);
+    setUploadError(null);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', 'builder');
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Upload failed');
+      }
+
+      const data = await res.json();
+      if (data.url) {
+        const newItem: AssetItem = {
+          url: data.url,
+          name: file.name,
+          size: file.size,
+          date: Date.now(),
+        };
+        const updated = [newItem, ...assets.filter((a) => a.url !== data.url)];
+        saveAssets(updated);
+        if (onInsertImage) {
+          onInsertImage(data.url, file.name);
+        }
+      }
+    } catch (err: any) {
+      console.error('[Asset Upload Error]:', err);
+      setUploadError(err.message || 'Failed to upload asset');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleFileUpload(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleDeleteAsset = (url: string) => {
+    const updated = assets.filter((a) => a.url !== url);
+    saveAssets(updated);
+  };
+
+  const handleCopyUrl = (url: string) => {
+    navigator.clipboard.writeText(url);
+    setCopiedUrl(url);
+    setTimeout(() => setCopiedUrl(null), 2000);
+  };
 
   const toggleCollapse = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -372,13 +470,139 @@ export function LeftPanel({
 
       {/* Tab Content: Assets */}
       {activePanel === 'assets' && (
-        <div className="flex-1 p-3 overflow-y-auto space-y-3 text-[12.5px]">
-          <div className="border border-dashed border-white/20 rounded-xl p-4 text-center space-y-2 bg-[#161B18]">
-            <ImageIcon className="w-6 h-6 mx-auto opacity-50 text-purple-400" />
-            <p className="font-medium text-white/80 text-[12px]">Upload Media Assets</p>
-            <p className="text-[11px] opacity-50">PNG, JPG, WebP up to 5 MB</p>
+        <div className="flex-1 p-3 overflow-y-auto space-y-4 text-[12px]">
+          {/* Hidden File Input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+            onChange={(e) => {
+              if (e.target.files && e.target.files[0]) {
+                handleFileUpload(e.target.files[0]);
+              }
+            }}
+            className="hidden"
+          />
+
+          {/* Interactive Upload Dropzone */}
+          <div
+            onClick={() => !isUploading && fileInputRef.current?.click()}
+            onDragOver={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            onDrop={handleDrop}
+            className={`border-2 border-dashed rounded-xl p-5 text-center space-y-2 bg-[#161B18] transition-all cursor-pointer ${
+              isUploading
+                ? 'border-purple-500/50 bg-purple-500/5 opacity-80 cursor-wait'
+                : 'border-white/20 hover:border-purple-400 hover:bg-purple-500/10'
+            }`}
+          >
+            {isUploading ? (
+              <div className="py-2 space-y-2">
+                <Loader2 className="w-6 h-6 mx-auto animate-spin text-purple-400" />
+                <p className="font-semibold text-white/90 text-[12px]">Optimizing & Uploading...</p>
+                <p className="text-[11px] text-white/50">Processing cloud WebP asset</p>
+              </div>
+            ) : (
+              <>
+                <div className="w-10 h-10 rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mx-auto text-purple-400">
+                  <Upload className="w-5 h-5" />
+                </div>
+                <p className="font-semibold text-white/90 text-[12.5px]">Upload Media Assets</p>
+                <p className="text-[11px] text-white/50">Click or drag & drop (PNG, JPG, WebP up to 10 MB)</p>
+              </>
+            )}
           </div>
-          <p className="text-[11px] text-white/40 text-center">Media uploads are processed and resized into optimized WebP assets.</p>
+
+          {uploadError && (
+            <div className="p-2.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-[11px] flex items-center gap-2">
+              <span className="shrink-0 font-bold">⚠️</span>
+              <span className="flex-1">{uploadError}</span>
+            </div>
+          )}
+
+          {/* Uploaded Assets Gallery */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-white/40">
+                Media Library ({assets.length})
+              </span>
+              {assets.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => saveAssets([])}
+                  className="text-[10px] text-white/40 hover:text-red-400 transition-colors cursor-pointer"
+                >
+                  Clear Library
+                </button>
+              )}
+            </div>
+
+            {assets.length === 0 ? (
+              <p className="text-[11px] text-white/40 text-center py-4 border border-white/5 rounded-xl bg-white/[0.02]">
+                No media uploaded yet. Drop an image above to start.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {assets.map((asset) => (
+                  <div
+                    key={asset.url}
+                    className="p-2 rounded-xl bg-[#161B18] border border-white/10 flex items-center gap-2.5 hover:border-white/20 transition-all group"
+                  >
+                    {/* Thumbnail */}
+                    <div className="w-12 h-12 rounded-lg overflow-hidden bg-black/40 border border-white/10 shrink-0 relative flex items-center justify-center">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={asset.url}
+                        alt={asset.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+
+                    {/* Metadata & Actions */}
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <p className="font-medium text-[11.5px] text-white/90 truncate" title={asset.name}>
+                        {asset.name}
+                      </p>
+                      <p className="text-[10px] text-white/40 font-mono">
+                        {(asset.size / 1024).toFixed(0)} KB
+                      </p>
+                      <div className="flex items-center gap-1.5 pt-0.5">
+                        <button
+                          type="button"
+                          onClick={() => onInsertImage && onInsertImage(asset.url, asset.name)}
+                          className="px-2 py-0.5 rounded bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-[10.5px] font-semibold transition-colors cursor-pointer"
+                        >
+                          Insert
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyUrl(asset.url)}
+                          className="p-1 rounded hover:bg-white/10 text-white/50 hover:text-white transition-colors cursor-pointer"
+                          title="Copy Image URL"
+                        >
+                          {copiedUrl === asset.url ? (
+                            <Check className="w-3 h-3 text-emerald-400" />
+                          ) : (
+                            <Copy className="w-3 h-3" />
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteAsset(asset.url)}
+                          className="p-1 rounded hover:bg-red-500/20 text-white/40 hover:text-red-400 transition-colors ml-auto cursor-pointer"
+                          title="Remove from Library"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

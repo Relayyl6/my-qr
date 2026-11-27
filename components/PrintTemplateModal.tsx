@@ -541,6 +541,10 @@ export default function PrintTemplateModal({
     const isSign = template === 'window-sign';
     const isFullPoster = template === 'full-poster';
 
+    // WYSIWYG paper percentage ratios: identical on physical A4 paper and on-screen canvas
+    const cardWidthPct = isFullPoster ? 74 : isSign ? 66 : isBadge ? 72 : 62;
+    const cardHeightPct = isFullPoster ? 72 : isSign ? 52 : isBadge ? 26 : 45;
+
     doc.open();
     doc.write(`
       <!DOCTYPE html>
@@ -597,8 +601,8 @@ export default function PrintTemplateModal({
               justify-content: space-between !important;
               text-align: ${isBadge ? 'left' : 'center'} !important;
               background-color: #ffffff !important;
-              width: ${isBadge ? '500px' : isSign ? '540px' : isFullPoster ? '580px' : '460px'} !important;
-              height: ${isBadge ? '280px' : isSign ? '540px' : isFullPoster ? '780px' : '640px'} !important;
+              width: ${cardWidthPct}vw !important;
+              height: ${cardHeightPct}vh !important;
               page-break-inside: avoid;
               break-inside: avoid;
               box-shadow: none !important;
@@ -1803,16 +1807,16 @@ export default function PrintTemplateModal({
               </div>
             </div>
 
-            {/* Centered Preview Canvas / Scaled Paper Sheet Container */}
-            <div className="w-full flex-1 flex items-center justify-center py-2 sm:py-3 overflow-hidden min-h-[340px]">
-              <div className="transform scale-[0.88] sm:scale-[0.94] md:scale-100 lg:scale-[1.05] origin-center transition-transform">
-                {/* Physical Paper Sheet (A4 / Letter proportions) with pointer handlers */}
+            {/* Centered Preview Canvas / Scaled Paper Sheet Container (Always fits viewport so full A4 sheet is visible) */}
+            <div className="w-full flex-1 flex items-center justify-center py-2 sm:py-3 min-h-[380px] max-h-[66vh] overflow-hidden">
+              <div className="h-full flex items-center justify-center p-2">
+                {/* Physical Paper Sheet (Exact A4 210 × 297 mm aspect ratio) */}
                 <div
                   ref={paperSheetRef}
                   onPointerDown={handlePaperPointerDown}
                   onPointerMove={handlePaperPointerMove}
                   onPointerUp={handlePaperPointerUp}
-                  className="w-[380px] sm:w-[440px] md:w-[480px] h-[538px] sm:h-[622px] md:h-[678px] bg-white rounded-xl shadow-2xl border-2 border-[#11140F]/20 relative overflow-hidden transition-all select-none cursor-crosshair"
+                  className="h-[480px] max-h-[58vh] sm:max-h-[62vh] aspect-[210/297] bg-white rounded-xl shadow-2xl border-2 border-[#11140F]/20 relative overflow-hidden transition-all select-none cursor-crosshair"
                 >
                   {/* Subtle Sheet Watermark */}
                   <div
@@ -1848,7 +1852,7 @@ export default function PrintTemplateModal({
                     Position: X: {paperX}% · Y: {paperY}% · Scale: {cardScale}%
                   </div>
 
-                  {/* The Draggable Printable Card (#print-sheet) */}
+                  {/* The Draggable Printable Card (#print-sheet) - Sized strictly in A4 percentages for true WYSIWYG */}
                   <div
                     id="print-sheet"
                     className={`bg-white shadow-md transition-shadow flex flex-col items-center justify-between text-center relative overflow-hidden group/card ${
@@ -1857,12 +1861,12 @@ export default function PrintTemplateModal({
                       showBorder ? 'border-2' : ''
                     } ${
                       template === 'table-tent'
-                        ? 'w-[230px] sm:w-[260px] md:w-[280px] h-[310px] sm:h-[350px] md:h-[390px] p-4 sm:p-5 rounded-2xl'
+                        ? 'w-[62%] h-[45%] p-3 sm:p-4 rounded-2xl'
                         : template === 'window-sign'
-                        ? 'w-[250px] sm:w-[280px] md:w-[310px] h-[250px] sm:h-[280px] md:h-[310px] p-4 sm:p-5 rounded-2xl'
+                        ? 'w-[66%] h-[52%] p-3 sm:p-4 rounded-2xl'
                         : template === 'full-poster'
-                        ? 'w-[260px] sm:w-[290px] md:w-[330px] h-[370px] sm:h-[420px] md:h-[470px] p-5 sm:p-6 rounded-2xl'
-                        : 'w-[270px] sm:w-[310px] md:w-[340px] h-[160px] sm:h-[185px] md:h-[200px] p-4 sm:p-5 rounded-xl flex-row text-left'
+                        ? 'w-[74%] h-[72%] p-4 sm:p-5 rounded-2xl'
+                        : 'w-[72%] h-[26%] p-3 sm:p-4 rounded-xl flex-row text-left'
                     }`}
                     style={{
                       position: 'absolute',
