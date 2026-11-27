@@ -1,5 +1,3 @@
-import fs from 'fs';
-import path from 'path';
 import { prisma } from '@/lib/prisma';
 import { getTldTier } from './constants';
 
@@ -93,16 +91,19 @@ export const DEFAULT_PRICING_CONFIG: DomainPricingConfig = {
 };
 
 const CACHE_KEY = 'domain_pricing_config';
-const FALLBACK_FILE_PATH = path.join(process.cwd(), 'lib', 'domains', 'db-pricing-fallback.json');
 
 // Write latest admin configuration to local persistent file so server reboots or DB outages never revert to stale seeds
 function syncDiskFallback(config: DomainPricingConfig) {
+  if (typeof window !== 'undefined') return;
   try {
-    const dir = path.dirname(FALLBACK_FILE_PATH);
+    const fs = require('fs');
+    const path = require('path');
+    const filePath = path.join(process.cwd(), 'lib', 'domains', 'db-pricing-fallback.json');
+    const dir = path.dirname(filePath);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
-    fs.writeFileSync(FALLBACK_FILE_PATH, JSON.stringify(config, null, 2), 'utf-8');
+    fs.writeFileSync(filePath, JSON.stringify(config, null, 2), 'utf-8');
   } catch (err) {
     console.warn('[FX Engine] Unable to persist pricing config disk fallback:', err);
   }
@@ -110,9 +111,13 @@ function syncDiskFallback(config: DomainPricingConfig) {
 
 // Read latest configuration from disk fallback if database is temporarily unavailable
 function readDiskFallback(): DomainPricingConfig | null {
+  if (typeof window !== 'undefined') return null;
   try {
-    if (fs.existsSync(FALLBACK_FILE_PATH)) {
-      const raw = fs.readFileSync(FALLBACK_FILE_PATH, 'utf-8');
+    const fs = require('fs');
+    const path = require('path');
+    const filePath = path.join(process.cwd(), 'lib', 'domains', 'db-pricing-fallback.json');
+    if (fs.existsSync(filePath)) {
+      const raw = fs.readFileSync(filePath, 'utf-8');
       const parsed = JSON.parse(raw);
       if (parsed && typeof parsed.bufferedRate === 'number') {
         return parsed as DomainPricingConfig;
