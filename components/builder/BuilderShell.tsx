@@ -7,7 +7,7 @@ import { CanvasFrame } from './CanvasFrame';
 import { CanvasOverlay } from './CanvasOverlay';
 import { LeftPanel } from './LeftPanel';
 import { RightInspector } from './RightInspector';
-import { aiPromptBuilderAction } from '@/lib/ai/features/landing-page-builder';
+import { runBuilderAICopilotAction } from '@/lib/builder/ai-actions';
 import {
   Smartphone,
   Tablet,
@@ -78,25 +78,31 @@ export function BuilderShell({ initialDoc, pageId, onSave }: BuilderShellProps) 
     const query = (promptToRun || aiPrompt).trim();
     if (!query) return;
     setIsPrompting(true);
-    setSaveBanner('✨ AI is generating page layout, copy, and tokens...');
+    setSaveBanner('✨ AI Copilot is designing and applying updates...');
     try {
-      const res = await aiPromptBuilderAction(query, (doc.tokens as any)?.destinationUrl);
+      const res = await runBuilderAICopilotAction({
+        prompt: query,
+        doc,
+        selectedId: ui.selection[0],
+        bp: ui.bp,
+        destinationUrl: (doc.tokens as any)?.destinationUrl,
+      });
       if (res.doc) {
         exec({
-          label: `AI Prompt: ${query.slice(0, 30)}`,
+          label: `AI Copilot: ${query.slice(0, 30)}`,
           run: (draft) => {
             draft.tokens = res.doc.tokens;
             draft.nodes = res.doc.nodes;
             draft.root = res.doc.root;
           },
         });
-        setSaveBanner(`✨ Page successfully generated for "${query}"!`);
+        setSaveBanner(`✨ ${res.summary}`);
         setAiPrompt('');
         setTimeout(() => setSaveBanner(null), 5000);
       }
     } catch (err: any) {
-      console.error('[AI Prompt Error]:', err);
-      setSaveBanner(`⚠️ AI Notice: ${err.message || 'Failed to generate layout'}`);
+      console.error('[AI Copilot Error]:', err);
+      setSaveBanner(`⚠️ AI Notice: ${err.message || 'Failed to apply design'}`);
       setTimeout(() => setSaveBanner(null), 6000);
     } finally {
       setIsPrompting(false);
@@ -618,8 +624,10 @@ export function BuilderShell({ initialDoc, pageId, onSave }: BuilderShellProps) 
           onUpdateStyle={updateNodeStyle}
           onResetOverride={resetNodeOverride}
           onCopyStyles={copyStylesToBreakpoint}
-          onSelectNode={selectNode}
+          onSelectNode={(id) => (id ? selectNode(id) : clearSelection())}
           onUpdateTokens={handleUpdateDocTokens}
+          onRunPrompt={handleRunPrompt}
+          isPrompting={isPrompting}
         />
       </div>
     </div>

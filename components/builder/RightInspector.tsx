@@ -25,6 +25,8 @@ import {
   Tag,
   Layers,
   FileText,
+  Loader2,
+  Wand2,
 } from 'lucide-react';
 
 interface SmoothInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
@@ -117,8 +119,10 @@ interface RightInspectorProps {
   onUpdateStyle: (id: string, bp: Bp, style: Partial<Style>) => void;
   onResetOverride: (id: string, bp: Bp, key: keyof Style) => void;
   onCopyStyles: (id: string, fromBp: Bp, toBp: Bp) => void;
-  onSelectNode?: (id: string) => void;
+  onSelectNode?: (id: string | null) => void;
   onUpdateTokens?: (tokens: Partial<Doc['tokens']>) => void;
+  onRunPrompt?: (prompt: string) => void;
+  isPrompting?: boolean;
 }
 
 export function RightInspector({
@@ -133,128 +137,312 @@ export function RightInspector({
   onCopyStyles,
   onSelectNode,
   onUpdateTokens,
+  onRunPrompt,
+  isPrompting = false,
 }: RightInspectorProps) {
+  const [customPrompt, setCustomPrompt] = useState('');
   const node = selectedId ? doc.nodes[selectedId] : null;
+
+  // Reusable AI Copilot Panel content
+  const renderAiCopilotPanel = () => (
+    <div className="space-y-4">
+      <div>
+        <span className="text-[11.5px] font-bold uppercase tracking-wider text-emerald-400 mb-1 flex items-center gap-1.5">
+          <Sparkles className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+          <span>Figma AI Copilot</span>
+        </span>
+        <p className="text-[11.5px] text-white/60 leading-relaxed">
+          Natural-language design system engine. Restyle tokens, build responsive sections, or generate high-converting copy.
+        </p>
+      </div>
+
+      {/* Target Scope Pill */}
+      <div className="p-2.5 rounded-xl bg-[#161B18] border border-white/10 space-y-1">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-white/40 block">
+          Target Scope
+        </span>
+        {node ? (
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-semibold text-emerald-300 truncate">
+              Element: {node.name || node.type}
+            </span>
+            <button
+              type="button"
+              onClick={() => onSelectNode?.(null)}
+              className="text-[10px] text-white/50 hover:text-white underline cursor-pointer"
+            >
+              Deselect (Target Page)
+            </button>
+          </div>
+        ) : (
+          <span className="text-[11px] font-semibold text-blue-300">
+            Entire Page & Design Tokens
+          </span>
+        )}
+      </div>
+
+      {/* Custom AI Command Prompt Box */}
+      <div className="space-y-1.5">
+        <label className="text-[10.5px] font-semibold uppercase opacity-60 block">
+          Design Prompt / Command
+        </label>
+        <textarea
+          rows={3}
+          value={customPrompt}
+          onChange={(e) => setCustomPrompt(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+              e.preventDefault();
+              if (customPrompt.trim() && onRunPrompt) {
+                onRunPrompt(customPrompt);
+                setCustomPrompt('');
+              }
+            }
+          }}
+          disabled={isPrompting}
+          placeholder="e.g. Change theme to luxury dark gold with serif headlines, or Add 3 pricing tiers..."
+          className="w-full bg-[#181D1A] border border-white/10 rounded-xl p-2.5 text-[12px] text-white placeholder:text-white/30 focus:outline-emerald-500 focus:border-emerald-500 disabled:opacity-50"
+        />
+        <button
+          type="button"
+          onClick={() => {
+            if (customPrompt.trim() && onRunPrompt) {
+              onRunPrompt(customPrompt);
+              setCustomPrompt('');
+            }
+          }}
+          disabled={isPrompting || !customPrompt.trim()}
+          className="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-[11.5px] flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          {isPrompting ? (
+            <>
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              <span>Executing Design Copilot...</span>
+            </>
+          ) : (
+            <>
+              <Wand2 className="w-3.5 h-3.5" />
+              <span>Run AI Copilot (Ctrl+Enter)</span>
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* 1-Click Aesthetic Themes */}
+      <div className="space-y-2 pt-2 border-t border-white/10">
+        <span className="text-[10.5px] font-bold uppercase tracking-wider text-white/50 block">
+          Palettes & Aesthetic Themes
+        </span>
+        <div className="grid grid-cols-2 gap-1.5">
+          {[
+            { label: 'Deep Obsidian', prompt: 'Change theme to deep obsidian black with electric emerald accents and modern dark cards' },
+            { label: 'Minimal Sand', prompt: 'Change theme to warm organic sand palette with soft terracotta borders' },
+            { label: 'Cyberpunk Neon', prompt: 'Change theme to high contrast cyberpunk with vibrant violet and neon cyan' },
+            { label: 'Artisan Cafe', prompt: 'Style as warm cozy cafe and bakery with forest green and amber gold accents' },
+          ].map(({ label, prompt }) => (
+            <button
+              key={label}
+              type="button"
+              disabled={isPrompting}
+              onClick={() => onRunPrompt?.(prompt)}
+              className="p-2 rounded-lg border border-white/10 bg-[#161B18] hover:border-emerald-500 hover:bg-emerald-500/10 text-left text-[11px] text-white/80 hover:text-white transition-all cursor-pointer disabled:opacity-50 truncate"
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 1-Click Section Additions */}
+      <div className="space-y-2 pt-2 border-t border-white/10">
+        <span className="text-[10.5px] font-bold uppercase tracking-wider text-white/50 block">
+          Add Section (AI Builder)
+        </span>
+        <div className="flex flex-col gap-1.5">
+          {[
+            { label: 'Add 3-Tier Pricing Grid', prompt: 'Add a 3-tier pricing section with Starter ($29), Pro ($79), and Enterprise ($199) cards' },
+            { label: 'Add Features & Values (3-Up)', prompt: 'Add a 3-column features grid highlighting speed, security, and custom integrations' },
+            { label: 'Add Client Testimonials', prompt: 'Add customer testimonials section with verified founder quotes and star ratings' },
+            { label: 'Add Contact & WhatsApp Hub', prompt: 'Add contact details section with direct phone, WhatsApp link, and office address' },
+          ].map(({ label, prompt }) => (
+            <button
+              key={label}
+              type="button"
+              disabled={isPrompting}
+              onClick={() => onRunPrompt?.(prompt)}
+              className="p-2 rounded-lg border border-white/10 bg-[#161B18] hover:border-emerald-500 hover:bg-emerald-500/10 text-left text-[11px] text-white/80 hover:text-white transition-all cursor-pointer flex items-center justify-between group disabled:opacity-50"
+            >
+              <span>{label}</span>
+              <span className="text-[10px] text-emerald-400 opacity-0 group-hover:opacity-100 font-semibold transition-opacity">Insert +</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Complete Industry Presets */}
+      <div className="space-y-2 pt-2 border-t border-white/10">
+        <span className="text-[10.5px] font-bold uppercase tracking-wider text-white/50 block">
+          Complete Showcase Designs
+        </span>
+        <div className="flex flex-col gap-1.5">
+          {[
+            'Artisan Coffee & Bakery Menu with specials',
+            'High-Converting SaaS Waitlist for AI Tools',
+            'Luxury Real Estate & Villa Portfolio',
+            'Modern Barber & Grooming Studio Services',
+          ].map((preset) => (
+            <button
+              key={preset}
+              type="button"
+              disabled={isPrompting}
+              onClick={() => onRunPrompt?.(`Build a complete landing page for ${preset}`)}
+              className="p-2 rounded-lg border border-white/10 bg-[#161B18] hover:border-emerald-500 hover:bg-emerald-500/10 text-left text-[11px] text-white/80 hover:text-white transition-all cursor-pointer flex items-center justify-between group disabled:opacity-50"
+            >
+              <span className="truncate">{preset}</span>
+              <span className="text-[10px] text-emerald-400 opacity-0 group-hover:opacity-100 font-semibold transition-opacity shrink-0 ml-2">Build →</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 
   // Render Page Inspector when no element is selected
   if (!node) {
     return (
       <div className="w-[280px] h-full bg-[#11140F] border-l border-white/10 flex flex-col text-white text-[12px] select-none flex-shrink-0 overflow-y-auto">
         {/* Page Inspector Header */}
-        <div className="p-3 border-b border-white/10 flex items-center justify-between bg-[#151916]">
-          <div className="flex items-center gap-2">
-            <Globe className="w-4 h-4 text-emerald-400" />
-            <div>
-              <span className="font-bold text-[13px] text-white/90 block">Page Inspector</span>
-              <span className="text-[10px] font-mono opacity-50 uppercase">Global Page Settings</span>
-            </div>
+        <div className="p-2.5 border-b border-white/10 flex items-center justify-between bg-[#151916]">
+          <div className="flex items-center gap-1 bg-[#1A1F1C] p-0.5 rounded-lg border border-white/10 w-full">
+            <button
+              type="button"
+              onClick={() => onSelectTab('content')}
+              className={`flex-1 py-1 rounded text-center text-[11px] font-semibold transition-colors cursor-pointer ${
+                activeTab !== 'ai' ? 'bg-emerald-600 text-white' : 'text-white/60 hover:text-white'
+              }`}
+            >
+              Page Settings
+            </button>
+            <button
+              type="button"
+              onClick={() => onSelectTab('ai')}
+              className={`flex-1 py-1 rounded text-center text-[11px] font-semibold transition-colors cursor-pointer flex items-center justify-center gap-1 ${
+                activeTab === 'ai' ? 'bg-emerald-600 text-white' : 'text-emerald-400/80 hover:text-emerald-300'
+              }`}
+            >
+              <Sparkles className="w-3 h-3" />
+              <span>AI Copilot</span>
+            </button>
           </div>
-          <span className="px-2 py-0.5 rounded-full text-[10.5px] font-mono font-semibold uppercase border text-emerald-400 border-emerald-500/30 bg-emerald-500/10">
-            {bp}
-          </span>
         </div>
 
         <div className="p-3 space-y-4">
-          {/* 1. Locked Primary Destination */}
-          <div className="space-y-1.5">
-            <label className="text-[11px] font-semibold uppercase opacity-60 flex items-center gap-1.5">
-              <Lock className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Locked Destination URL</span>
-            </label>
-            <div className="p-2.5 rounded-lg bg-emerald-950/30 border border-emerald-500/20 space-y-1">
-              <p className="font-mono text-[11px] text-emerald-300 break-all select-all">
-                {doc.destination?.url || 'https://dynamicqr.io'}
-              </p>
-              <span className="text-[9.5px] text-emerald-400/70 block">
-                🔒 Bound by code guarantee to QR shortcode
-              </span>
-            </div>
-          </div>
+          {activeTab === 'ai' ? (
+            renderAiCopilotPanel()
+          ) : (
+            <>
+              {/* 1. Locked Primary Destination */}
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-semibold uppercase opacity-60 flex items-center gap-1.5">
+                  <Lock className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Locked Destination URL</span>
+                </label>
+                <div className="p-2.5 rounded-lg bg-emerald-950/30 border border-emerald-500/20 space-y-1">
+                  <p className="font-mono text-[11px] text-emerald-300 break-all select-all">
+                    {doc.destination?.url || 'https://dynamicqr.io'}
+                  </p>
+                  <span className="text-[9.5px] text-emerald-400/70 block">
+                    🔒 Bound by code guarantee to QR shortcode
+                  </span>
+                </div>
+              </div>
 
-          {/* 2. Page Background Color */}
-          <div className="space-y-1.5">
-            <label className="text-[11px] font-semibold uppercase opacity-60 flex items-center gap-1.5">
-              <Palette className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Page Background</span>
-            </label>
-            <div className="flex items-center gap-2">
-              <input
-                type="color"
-                value={doc.tokens?.colors?.bg?.startsWith('#') ? doc.tokens.colors.bg : '#ffffff'}
-                onChange={(e) => {
-                  onUpdateTokens?.({
-                    colors: { bg: e.target.value } as any,
-                  });
-                }}
-                className="w-8 h-8 rounded-lg border border-white/20 cursor-pointer p-0.5 bg-black"
-              />
-              <SmoothInput
-                type="text"
-                value={doc.tokens?.colors?.bg || '#ffffff'}
-                onChangeValue={(val) => {
-                  onUpdateTokens?.({
-                    colors: { bg: val } as any,
-                  });
-                }}
-                className="flex-1 bg-[#181D1A] border border-white/10 rounded-lg px-2.5 py-1.5 text-white font-mono text-[11.5px]"
-              />
-            </div>
-          </div>
+              {/* 2. Page Background Color */}
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-semibold uppercase opacity-60 flex items-center gap-1.5">
+                  <Palette className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Page Background</span>
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={doc.tokens?.colors?.bg?.startsWith('#') ? doc.tokens.colors.bg : '#ffffff'}
+                    onChange={(e) => {
+                      onUpdateTokens?.({
+                        colors: { bg: e.target.value } as any,
+                      });
+                    }}
+                    className="w-8 h-8 rounded-lg border border-white/20 cursor-pointer p-0.5 bg-black"
+                  />
+                  <SmoothInput
+                    type="text"
+                    value={doc.tokens?.colors?.bg || '#ffffff'}
+                    onChangeValue={(val) => {
+                      onUpdateTokens?.({
+                        colors: { bg: val } as any,
+                      });
+                    }}
+                    className="flex-1 bg-[#181D1A] border border-white/10 rounded-lg px-2.5 py-1.5 text-white font-mono text-[11.5px]"
+                  />
+                </div>
+              </div>
 
-          {/* 3. Global Color Palette Tokens */}
-          <div className="space-y-1.5">
-            <label className="text-[11px] font-semibold uppercase opacity-60 block">Design Color Tokens</label>
-            <div className="grid grid-cols-2 gap-2 text-[11px]">
-              {Object.entries(doc.tokens?.colors || {}).map(([key, val]) => (
-                <div key={key} className="p-2 rounded-lg bg-[#181D1A] border border-white/10 flex items-center justify-between">
-                  <span className="opacity-60 capitalize font-mono text-[10px]">{key}</span>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-3.5 h-3.5 rounded-full border border-white/20" style={{ backgroundColor: val }} />
-                    <span className="font-mono text-[10.5px] opacity-80">{val}</span>
+              {/* 3. Global Color Palette Tokens */}
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-semibold uppercase opacity-60 block">Design Color Tokens</label>
+                <div className="grid grid-cols-2 gap-2 text-[11px]">
+                  {Object.entries(doc.tokens?.colors || {}).map(([key, val]) => (
+                    <div key={key} className="p-2 rounded-lg bg-[#181D1A] border border-white/10 flex items-center justify-between">
+                      <span className="opacity-60 capitalize font-mono text-[10px]">{key}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-3.5 h-3.5 rounded-full border border-white/20" style={{ backgroundColor: val }} />
+                        <span className="font-mono text-[10.5px] opacity-80">{val}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 4. Global Typography Tokens */}
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-semibold uppercase opacity-60 block">Typography Tokens</label>
+                <div className="space-y-1.5">
+                  <div className="p-2 rounded-lg bg-[#181D1A] border border-white/10 flex justify-between items-center text-[11px]">
+                    <span className="opacity-60">Display Font:</span>
+                    <span className="font-mono text-[10.5px] text-emerald-400 font-semibold">{doc.tokens?.fonts?.display || 'System Display'}</span>
+                  </div>
+                  <div className="p-2 rounded-lg bg-[#181D1A] border border-white/10 flex justify-between items-center text-[11px]">
+                    <span className="opacity-60">Body Font:</span>
+                    <span className="font-mono text-[10.5px] text-emerald-400 font-semibold">{doc.tokens?.fonts?.body || 'System Sans'}</span>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
 
-          {/* 4. Global Typography Tokens */}
-          <div className="space-y-1.5">
-            <label className="text-[11px] font-semibold uppercase opacity-60 block">Typography Tokens</label>
-            <div className="space-y-1.5">
-              <div className="p-2 rounded-lg bg-[#181D1A] border border-white/10 flex justify-between items-center text-[11px]">
-                <span className="opacity-60">Display Font:</span>
-                <span className="font-mono text-[10.5px] text-emerald-400 font-semibold">{doc.tokens?.fonts?.display || 'System Display'}</span>
+              {/* 5. Document Structure Summary */}
+              <div className="pt-2 border-t border-white/10 space-y-2">
+                <span className="text-[11px] font-semibold uppercase opacity-60 block">Document Summary</span>
+                <div className="p-2.5 rounded-lg bg-[#181D1A] border border-white/10 text-[11px] space-y-1">
+                  <div className="flex justify-between">
+                    <span className="opacity-60">Total Elements:</span>
+                    <span className="font-mono font-bold text-white">{Object.keys(doc.nodes).length}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="opacity-60">Root Element:</span>
+                    <span className="font-mono text-emerald-400">{doc.root}</span>
+                  </div>
+                </div>
+                {doc.root && (
+                  <button
+                    type="button"
+                    onClick={() => onSelectNode?.(doc.root)}
+                    className="w-full py-2 px-3 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-emerald-400 font-semibold text-[11.5px] text-center transition-colors cursor-pointer"
+                  >
+                    Select Root Section &rarr;
+                  </button>
+                )}
               </div>
-              <div className="p-2 rounded-lg bg-[#181D1A] border border-white/10 flex justify-between items-center text-[11px]">
-                <span className="opacity-60">Body Font:</span>
-                <span className="font-mono text-[10.5px] text-emerald-400 font-semibold">{doc.tokens?.fonts?.body || 'System Sans'}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* 5. Document Structure Summary */}
-          <div className="pt-2 border-t border-white/10 space-y-2">
-            <span className="text-[11px] font-semibold uppercase opacity-60 block">Document Summary</span>
-            <div className="p-2.5 rounded-lg bg-[#181D1A] border border-white/10 text-[11px] space-y-1">
-              <div className="flex justify-between">
-                <span className="opacity-60">Total Elements:</span>
-                <span className="font-mono font-bold text-white">{Object.keys(doc.nodes).length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="opacity-60">Root Element:</span>
-                <span className="font-mono text-emerald-400">{doc.root}</span>
-              </div>
-            </div>
-            {doc.root && (
-              <button
-                type="button"
-                onClick={() => onSelectNode?.(doc.root)}
-                className="w-full py-2 px-3 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-emerald-400 font-semibold text-[11.5px] text-center transition-colors cursor-pointer"
-              >
-                Select Root Section &rarr;
-              </button>
-            )}
-          </div>
+            </>
+          )}
         </div>
       </div>
     );
@@ -310,6 +498,7 @@ export function RightInspector({
           { key: 'layout', label: 'Layout' },
           { key: 'style', label: 'Style' },
           { key: 'responsive', label: 'Resp.' },
+          { key: 'ai', label: '✨ AI' },
         ].map(({ key, label }) => (
           <button
             key={key}
@@ -1315,51 +1504,8 @@ export function RightInspector({
           </div>
         )}
 
-        {/* TAB 5: AI ASSISTANT */}
-        {activeTab === 'ai' && (
-          <div className="space-y-4">
-            <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400 mb-1 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>AI Design Assistant</span>
-              </span>
-              <p className="text-[11.5px] text-white/50">
-                Use natural language prompts to restyle, rewrite, or expand your mobile landing page.
-              </p>
-            </div>
-
-            {/* Quick Inspiration Prompts */}
-            <div className="space-y-2">
-              <span className="text-[10.5px] font-semibold uppercase opacity-60 block">Inspiration Chips</span>
-              <div className="flex flex-col gap-1.5">
-                {[
-                  'Artisan Coffee & Bakery Menu',
-                  'High-Converting SaaS Waitlist',
-                  'Luxury Real Estate Showcase',
-                  'Barbershop & Grooming Services',
-                  'Dark Futuristic Creator Portfolio',
-                ].map((preset) => (
-                  <button
-                    key={preset}
-                    type="button"
-                    onClick={() => {
-                      const input = document.querySelector('input[placeholder*="Ask AI"]') as HTMLInputElement;
-                      if (input) {
-                        input.value = preset;
-                        input.focus();
-                        input.dispatchEvent(new Event('input', { bubbles: true }));
-                      }
-                    }}
-                    className="p-2 rounded-lg border border-white/10 bg-[#161B18] hover:border-emerald-500 hover:bg-emerald-500/10 text-left text-[11.5px] text-white/80 hover:text-white transition-all cursor-pointer flex items-center justify-between group"
-                  >
-                    <span>{preset}</span>
-                    <span className="text-[10px] text-emerald-400 opacity-0 group-hover:opacity-100 font-semibold transition-opacity">Apply →</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
+        {/* TAB 5: AI COPILOT */}
+        {activeTab === 'ai' && renderAiCopilotPanel()}
       </div>
     </div>
   );

@@ -13,6 +13,7 @@ import { migrateLegacySpec, isPageSchema } from "@/lib/page/migrate";
 import { migrateV2 } from "@/lib/builder/migrate-v2";
 import { getAIProvider } from "@/lib/ai/provider";
 import { PLANS, PlanTier } from "@/lib/plans";
+import { runBuilderAICopilotAction } from "@/lib/builder/ai-actions";
 import "@/lib/ai/prompts/landing-page-builder.v1";
 
 /**
@@ -22,93 +23,16 @@ export async function aiPromptBuilderAction(
   promptText: string,
   destinationUrl?: string
 ) {
-  const user = await getCurrentUser();
-  if (!user) {
-    throw new Error("Authentication required to use AI prompt assistant.");
-  }
-
-  const access = await assertFeatureAccess(user.id, "landing-page-builder");
-  if (!access.allowed) {
-    throw new Error(access.reason || "AI Mobile Landing Pages require an active subscription.");
-  }
-
-  const provider = getAIProvider();
-  const systemPrompt = `You are an elite web designer and landing page copywriter. The user gave a brief or prompt for a mobile landing page.
-Generate a high converting, visually stunning landing page specification conforming strictly to this JSON structure:
-{
-  "schemaVersion": 1,
-  "template": "creator",
-  "brand": {
-    "name": "Brand or Business Name",
-    "headline": "Punchy, modern 4-8 word headline",
-    "tagline": "Compelling 1-2 sentence subtitle or value proposition",
-    "palette": "ink"
-  },
-  "cta": {
-    "label": "Primary action button text",
-    "url": "${destinationUrl || 'https://dynamicqr.io'}"
-  },
-  "links": [
-    { "label": "Link label 1", "url": "https://..." },
-    { "label": "Link label 2", "url": "https://..." }
-  ],
-  "services": [
-    { "name": "Feature or Service 1", "price": "$49", "desc": "Short feature description" },
-    { "name": "Feature or Service 2", "price": "$99", "desc": "Short feature description" },
-    { "name": "Feature or Service 3", "price": "$149", "desc": "Short feature description" }
-  ],
-  "contact": {
-    "phone": "+1 234 567 8900",
-    "email": "contact@business.com",
-    "whatsapp": "12345678900",
-    "instagram": "@business",
-    "address": "City, Country"
-  }
-}
-Choose palette from: "ink" | "sand" | "forest" | "clay" | "sky" | "mono".
-Respond with ONLY valid JSON. If the user prompt is brief or creative, infer an exciting and polished concept.`;
-
-  const aiRes = await provider.generateText({
-    system: systemPrompt,
+  const result = await runBuilderAICopilotAction({
     prompt: promptText,
-    temperature: 0.3,
-    feature: "landing-page-builder",
+    doc: null as any,
+    destinationUrl,
   });
 
-  let parsed: any;
-  try {
-    const cleanJson = aiRes.text.replace(/```json/gi, '').replace(/```/g, '').trim();
-    parsed = JSON.parse(cleanJson);
-  } catch (err) {
-    parsed = {
-      schemaVersion: 1,
-      template: 'creator',
-      brand: {
-        name: promptText.slice(0, 24) || 'Dynamic Studio',
-        headline: 'Engineered for Performance & Reach',
-        tagline: `Custom interactive landing experience crafted for ${promptText}.`,
-        palette: 'ink',
-      },
-      cta: {
-        label: 'Explore Our Work',
-        url: destinationUrl || 'https://dynamicqr.io',
-      },
-      links: [
-        { label: 'View Portfolio', url: 'https://github.com' },
-        { label: 'Book Consultation', url: 'https://cal.com' },
-      ],
-      services: [
-        { name: 'Core Offering', price: '₦15,000', desc: 'Direct service tailored for you.' },
-      ],
-    };
-  }
-
-  const newDoc = migrateV2(parsed, destinationUrl || 'https://dynamicqr.io');
   return {
-    success: true,
-    page: parsed,
-    doc: newDoc,
-    headline: parsed.brand?.headline || 'Updated Layout & Copy',
+    success: result.success,
+    doc: result.doc,
+    headline: result.summary,
   };
 }
 

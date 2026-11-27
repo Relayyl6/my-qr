@@ -540,10 +540,12 @@ export default function PrintTemplateModal({
     const isBadge = template === 'card-badge';
     const isSign = template === 'window-sign';
     const isFullPoster = template === 'full-poster';
+    const isTent = template === 'table-tent';
 
-    // WYSIWYG paper percentage ratios: identical on physical A4 paper and on-screen canvas
-    const cardWidthPct = isFullPoster ? 74 : isSign ? 66 : isBadge ? 72 : 62;
-    const cardHeightPct = isFullPoster ? 72 : isSign ? 52 : isBadge ? 26 : 45;
+    // Exact physical dimensions on A4 paper (8.27" × 11.69" / 210mm × 297mm)
+    // Table Tent: 4" × 6" | Window Sign: 7.8" × 7.8" (8"×8" with margin) | Badge Card: 3.5" × 2" | Full Poster: 7.8" × 11.2"
+    const printCardWidth = isTent ? '4in' : isSign ? '7.8in' : isBadge ? '3.5in' : '7.8in';
+    const printCardHeight = isTent ? '6in' : isSign ? '7.8in' : isBadge ? '2in' : '11.2in';
 
     doc.open();
     doc.write(`
@@ -567,8 +569,8 @@ export default function PrintTemplateModal({
               visibility: hidden !important;
             }
             html, body {
-              width: 100vw;
-              height: 100vh;
+              width: 8.27in;
+              height: 11.69in;
               margin: 0;
               padding: 0;
               background: #ffffff !important;
@@ -578,8 +580,8 @@ export default function PrintTemplateModal({
               print-color-adjust: exact !important;
             }
             .paper-page {
-              width: 100vw;
-              height: 100vh;
+              width: 8.27in;
+              height: 11.69in;
               position: relative;
               overflow: hidden;
               background: #ffffff !important;
@@ -593,16 +595,16 @@ export default function PrintTemplateModal({
               transform: translate(-50%, -50%) scale(${cardScale / 100});
               transform-origin: center center;
               border: ${showBorder ? `3.5px solid ${accentColor} !important` : 'none !important'};
-              border-radius: 20px !important;
-              padding: ${isBadge ? '24px 30px' : isSign ? '36px' : isFullPoster ? '48px 36px' : '40px 28px'} !important;
+              border-radius: ${isBadge ? '12px' : '20px'} !important;
+              padding: ${isBadge ? '16px 20px' : isSign ? '36px' : isFullPoster ? '48px 36px' : '32px 24px'} !important;
               display: flex !important;
               flex-direction: ${isBadge ? 'row' : 'column'} !important;
               align-items: center !important;
               justify-content: space-between !important;
               text-align: ${isBadge ? 'left' : 'center'} !important;
               background-color: #ffffff !important;
-              width: ${cardWidthPct}vw !important;
-              height: ${cardHeightPct}vh !important;
+              width: ${printCardWidth} !important;
+              height: ${printCardHeight} !important;
               page-break-inside: avoid;
               break-inside: avoid;
               box-shadow: none !important;
@@ -727,8 +729,10 @@ export default function PrintTemplateModal({
       const isFullPoster = template === 'full-poster';
 
       const scaleMultiplier = cardScale / 100;
-      const baseWidth = isBadge ? 900 : isSign ? 900 : isFullPoster ? 1000 : 800;
-      const baseHeight = isBadge ? 520 : isSign ? 900 : isFullPoster ? 1350 : 1100;
+      // 300 DPI high-resolution dimensions for physical formats:
+      // Badge (3.5"×2" = 1050×600) | Window Sign (8"×8" = 2400×2400) | Full Poster (A4 = 2480×3508) | Table Tent (4"×6" = 1200×1800)
+      const baseWidth = isBadge ? 1050 : isSign ? 2400 : isFullPoster ? 2480 : 1200;
+      const baseHeight = isBadge ? 600 : isSign ? 2400 : isFullPoster ? 3508 : 1800;
       const width = Math.round(baseWidth * scaleMultiplier);
       const height = Math.round(baseHeight * scaleMultiplier);
 
@@ -1852,7 +1856,7 @@ export default function PrintTemplateModal({
                     Position: X: {paperX}% · Y: {paperY}% · Scale: {cardScale}%
                   </div>
 
-                  {/* The Draggable Printable Card (#print-sheet) - Sized strictly in A4 percentages for true WYSIWYG */}
+                  {/* The Draggable Printable Card (#print-sheet) - Exact physical dimensions on A4 paper */}
                   <div
                     id="print-sheet"
                     className={`bg-white shadow-md transition-shadow flex flex-col items-center justify-between text-center relative overflow-hidden group/card ${
@@ -1861,12 +1865,12 @@ export default function PrintTemplateModal({
                       showBorder ? 'border-2' : ''
                     } ${
                       template === 'table-tent'
-                        ? 'w-[62%] h-[45%] p-3 sm:p-4 rounded-2xl'
+                        ? 'w-[48.4%] h-[51.3%] p-3 sm:p-4 rounded-2xl'
                         : template === 'window-sign'
-                        ? 'w-[66%] h-[52%] p-3 sm:p-4 rounded-2xl'
+                        ? 'w-[94.3%] h-[66.7%] p-4 sm:p-6 rounded-2xl'
                         : template === 'full-poster'
-                        ? 'w-[74%] h-[72%] p-4 sm:p-5 rounded-2xl'
-                        : 'w-[72%] h-[26%] p-3 sm:p-4 rounded-xl flex-row text-left'
+                        ? 'w-[94.3%] h-[95.8%] p-5 sm:p-8 rounded-2xl'
+                        : 'w-[42.3%] h-[17.1%] p-2 sm:p-3 rounded-xl flex-row text-left'
                     }`}
                     style={{
                       position: 'absolute',
