@@ -308,7 +308,7 @@ export default function MicroSaasHub({
   };
 
   const handleDownloadLeadVcf = (lead: any, cardTitle: string) => {
-    const fullName = lead.fullName || 'Exchanged Contact';
+    const fullName = lead.name || lead.fullName || 'Exchanged Contact';
     const email = lead.email || '';
     const phone = lead.phone || '';
     const nameParts = fullName.trim().split(/\s+/);
@@ -982,14 +982,17 @@ export default function MicroSaasHub({
                           </div>
                         </div>
                         <div className="flex items-center gap-1 shrink-0">
-                          <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">
-                            {card.scansCount} scans
+                          <span
+                            className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30"
+                            title="Total visits to this digital vCard URL"
+                          >
+                            {card.scansCount === 1 ? '1 visit' : `${card.scansCount} visits`}
                           </span>
                           <button
                             type="button"
                             onClick={() => handleResetScans(card)}
                             className="p-1 rounded-md text-[#11140F]/40 dark:text-white/40 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors cursor-pointer"
-                            title="Reset scan counter to 0"
+                            title="Reset visit counter to 0"
                           >
                             <RotateCcw className="w-2.5 h-2.5" />
                           </button>
@@ -3546,6 +3549,8 @@ export default function MicroSaasHub({
 
                   <div className="divide-y divide-gray-100 dark:divide-white/10 border border-gray-200 dark:border-white/10 rounded-2xl overflow-hidden">
                     {leadsModalCard.spec.leads.map((lead: any, idx: number) => {
+                      const leadName = lead.name || lead.fullName || (lead.firstName ? `${lead.firstName} ${lead.lastName || ''}`.trim() : '') || 'Anonymous';
+                      const leadDate = lead.exchangedAt || lead.createdAt || Date.now();
                       const rawPhone = lead.phone || '';
                       const cleanPhone = rawPhone.replace(/[^0-9+]/g, '');
                       const waPhone = cleanPhone.replace(/^\+/, '');
@@ -3556,9 +3561,9 @@ export default function MicroSaasHub({
                         >
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
                             <div className="text-xs font-bold text-[#11140F] dark:text-white flex items-center gap-2">
-                              <span>{lead.fullName}</span>
+                              <span>{leadName}</span>
                               <span className="text-[10px] font-mono text-gray-400 dark:text-white/40 font-normal">
-                                {new Date(lead.createdAt || Date.now()).toLocaleDateString(undefined, {
+                                {new Date(leadDate).toLocaleDateString(undefined, {
                                   month: 'short',
                                   day: 'numeric',
                                   year: 'numeric',
@@ -3625,7 +3630,7 @@ export default function MicroSaasHub({
                             {lead.phone && (
                               <>
                                 <a
-                                  href={`https://wa.me/${waPhone}?text=${encodeURIComponent(`Hi ${lead.fullName}, nice connecting with you via DynamicQR!`)}`}
+                                  href={`https://wa.me/${waPhone}?text=${encodeURIComponent(`Hi ${leadName}, nice connecting with you via DynamicQR!`)}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="px-2.5 py-1 text-[11px] font-semibold text-emerald-800 dark:text-emerald-200 bg-emerald-100/80 dark:bg-emerald-900/40 hover:bg-emerald-200 dark:hover:bg-emerald-800/60 rounded-lg flex items-center gap-1.5 transition-colors border border-emerald-300 dark:border-emerald-700/50"
@@ -3644,7 +3649,7 @@ export default function MicroSaasHub({
                             )}
                             <button
                               type="button"
-                              onClick={() => handleCopyLeadField(`Name: ${lead.fullName}\nEmail: ${lead.email}${lead.phone ? `\nPhone: ${lead.phone}` : ''}`, `all-${idx}`)}
+                              onClick={() => handleCopyLeadField(`Name: ${leadName}\nEmail: ${lead.email}${lead.phone ? `\nPhone: ${lead.phone}` : ''}`, `all-${idx}`)}
                               className="px-2.5 py-1 text-[11px] font-semibold text-gray-700 dark:text-white/80 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
                             >
                               {copiedLeadKey === `all-${idx}` ? (

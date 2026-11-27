@@ -895,10 +895,18 @@ export async function renewCustomDomainOrder(orderId: string, years: number = 1)
 
   const tld = (order.domainName.split('.').pop() || 'com').toLowerCase();
   const effectiveConfig = await getDomainPricingConfig();
+  const effectiveRate =
+    effectiveConfig.mode === 'manual_override'
+      ? effectiveConfig.manualOverrideRate
+      : effectiveConfig.bufferedRate;
   const wholesaleUsd =
     order.wholesaleUsd ||
+    (effectiveConfig.tldOverrides?.[tld]
+      ? Math.max(10.5, effectiveConfig.tldOverrides[tld] / effectiveRate)
+      : undefined) ||
+    ((effectiveConfig as any).tldWholesaleOverrides?.[tld]) ||
     (WHOLESALE_USD_PRICING as any)[tld] ||
-    (effectiveConfig.tldOverrides?.[tld] ? Math.max(10.5, effectiveConfig.tldOverrides[tld] / effectiveConfig.bufferedRate) : 10.5);
+    10.5;
   const periodYears = ([1, 2, 3].includes(years) ? years : 1) as 1 | 2 | 3;
   const multiYear = calculateMultiYearDomainPrice(wholesaleUsd, tld, effectiveConfig, periodYears);
 

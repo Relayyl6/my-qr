@@ -47,14 +47,18 @@ export async function POST(req: Request) {
 
       const tld = (existing.domainName.split('.').pop() || 'com').toLowerCase();
       const pricingConfig = await getDomainPricingConfig();
-      const wholesaleUsd =
-        existing.wholesaleUsd ||
-        WHOLESALE_USD_PRICING[tld] ||
-        (pricingConfig.tldOverrides?.[tld] ? Math.max(10.5, pricingConfig.tldOverrides[tld] / pricingConfig.bufferedRate) : 10.5);
       const effectiveRate =
         pricingConfig.mode === 'manual_override'
           ? pricingConfig.manualOverrideRate
           : pricingConfig.bufferedRate;
+      const wholesaleUsd =
+        existing.wholesaleUsd ||
+        (pricingConfig.tldOverrides?.[tld]
+          ? Math.max(10.5, pricingConfig.tldOverrides[tld] / effectiveRate)
+          : undefined) ||
+        ((pricingConfig as any).tldWholesaleOverrides?.[tld]) ||
+        WHOLESALE_USD_PRICING[tld] ||
+        10.5;
 
       const periodYears = ([1, 2, 3].includes(existing.registrationYears)
         ? existing.registrationYears
@@ -107,14 +111,18 @@ export async function POST(req: Request) {
 
       const tld = (domainName.split('.').pop() || 'com').toLowerCase();
       const pricingConfig = await getDomainPricingConfig();
-      const wholesaleUsd =
-        WHOLESALE_USD_PRICING[tld] ||
-        (pricingConfig.tldOverrides?.[tld] ? Math.max(10.5, pricingConfig.tldOverrides[tld] / pricingConfig.bufferedRate) : 10.5);
-      const pricing = calculateNgnPricing(wholesaleUsd, tld, pricingConfig);
       const effectiveRate =
         pricingConfig.mode === 'manual_override'
           ? pricingConfig.manualOverrideRate
           : pricingConfig.bufferedRate;
+      const wholesaleUsd =
+        (pricingConfig.tldOverrides?.[tld]
+          ? Math.max(10.5, pricingConfig.tldOverrides[tld] / effectiveRate)
+          : undefined) ||
+        ((pricingConfig as any).tldWholesaleOverrides?.[tld]) ||
+        WHOLESALE_USD_PRICING[tld] ||
+        10.5;
+      const pricing = calculateNgnPricing(wholesaleUsd, tld, pricingConfig);
 
       const periodYears = [1, 2, 3].includes(Number(body.periodYears))
         ? (Number(body.periodYears) as 1 | 2 | 3)

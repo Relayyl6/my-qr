@@ -40,12 +40,20 @@ const STOREFRONT_TLD_METADATA: Record<string, string> = {
 export async function GET() {
   try {
     const config = await getDomainPricingConfig();
+    const effectiveRate =
+      config.mode === 'manual_override'
+        ? config.manualOverrideRate
+        : config.bufferedRate;
 
     const priceMap: Record<string, number> = {};
     const tlds = SUPPORTED_TLDS.map((tld) => {
       const baseUsd =
+        (config.tldOverrides?.[tld]
+          ? Math.max(10.5, config.tldOverrides[tld] / effectiveRate)
+          : undefined) ||
+        ((config as any).tldWholesaleOverrides?.[tld]) ||
         WHOLESALE_USD_PRICING[tld] ||
-        (config.tldOverrides?.[tld] ? Math.max(10.5, config.tldOverrides[tld] / config.bufferedRate) : 10.5);
+        10.5;
       const pricing = calculateNgnPricing(baseUsd, tld, config);
       priceMap[tld] = pricing.totalNgn;
       return {

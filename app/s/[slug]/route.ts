@@ -5,6 +5,9 @@ import { APP_URL } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
+// In-memory rate-deduplication map to prevent rapid reloads or bot burst requests from inflating click counts
+const recentClicksMap = new Map<string, number>();
+
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
@@ -102,22 +105,35 @@ export async function GET(
       }
     } catch (e) {}
 
+    // Ignore HEAD requests for accounting
+    if (req.method === 'HEAD') {
+      return new NextResponse(null, { status: 200 });
+    }
+
     // Prevent inflated scan/click counts from owner testing, camera prefetches, crawlers, or rapid reloads
     const userAgent = (req.headers.get("user-agent") || "").toLowerCase();
     const purpose = (req.headers.get("purpose") || "").toLowerCase().trim();
     const secPurpose = (req.headers.get("sec-purpose") || "").toLowerCase().trim();
     const xPurpose = (req.headers.get("x-purpose") || "").toLowerCase().trim();
-    const isPrefetch = purpose === 'prefetch' || secPurpose === 'prefetch' || xPurpose === 'preview' || req.nextUrl.searchParams.get('preview') === 'true';
-    const isCrawler = /bot|crawler|spider|crawling|facebookexternalhit|twitterbot|whatsapp|telegrambot|slackbot|linkedinbot|discordbot|applebot|googlebot/i.test(userAgent);
+    const isRsc = req.headers.get("rsc") === "1" || req.headers.has("next-router-prefetch") || req.headers.has("next-router-state-tree");
+    const isPrefetch = purpose === 'prefetch' || secPurpose === 'prefetch' || xPurpose === 'preview' || isRsc || req.nextUrl.searchParams.get('preview') === 'true';
+    const isCrawler = /bot|crawler|spider|crawling|facebookexternalhit|twitterbot|whatsapp|telegrambot|slackbot|linkedinbot|discordbot|applebot|googlebot|bingbot|yahoo|duckduckbot|baiduspider|yandex/i.test(userAgent);
 
     const currentUser = await getCurrentUser().catch(() => null);
     const isOwner = Boolean(currentUser?.id && currentUser.id === item.userId);
     const sessionClickKey = `short_clicked_${item.id}`;
     const alreadyClicked = req.cookies.get(sessionClickKey);
 
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "ip";
+    const dedupeKey = `${item.id}:${clientIp}:${userAgent.slice(0, 30)}`;
+    const now = Date.now();
+    const lastClickTime = recentClicksMap.get(dedupeKey);
+    const isRecentDuplicate = Boolean(lastClickTime && (now - lastClickTime < 300000)); // 5 minutes
+
     let shouldSetCookie = false;
-    if (!isOwner && !isCrawler && !isPrefetch && !alreadyClicked) {
+    if (!isOwner && !isCrawler && !isPrefetch && !alreadyClicked && !isRecentDuplicate) {
       shouldSetCookie = true;
+      recentClicksMap.set(dedupeKey, now);
       prisma.microSaasItem
         .update({
           where: { id: item.id },
@@ -160,7 +176,7 @@ export async function GET(
       const escapedImage = ogImage.replace(/"/g, '&quot;');
       const safeTarget = target.replace(/"/g, '&quot;');
 
-      return new NextResponse(
+      const htmlResponse = new NextResponse(
         `<!DOCTYPE html>
         <html lang="en">
           <head>
@@ -191,6 +207,15 @@ export async function GET(
           },
         }
       );
+      if (shouldSetCookie) {
+        htmlResponse.cookies.set(sessionClickKey, '1', {
+          maxAge: 1800,
+          path: '/',
+          httpOnly: true,
+          sameSite: 'lax',
+        });
+      }
+      return htmlResponse;
     }
 
     const redirectResponse = NextResponse.redirect(target, { status: 307 });

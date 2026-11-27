@@ -365,10 +365,10 @@ export default function PrintTemplateModal({
 
   // Adjust default QR size when template changes
   useEffect(() => {
-    if (template === 'card-badge') setQrSize(68);
-    else if (template === 'window-sign') setQrSize(92);
-    else if (template === 'full-poster') setQrSize(105);
-    else setQrSize(85);
+    if (template === 'card-badge') setQrSize(85);
+    else if (template === 'window-sign') setQrSize(120);
+    else if (template === 'full-poster') setQrSize(135);
+    else setQrSize(105);
   }, [template]);
 
   // Pointer drag events for QR positioning (inside card)
@@ -522,11 +522,11 @@ export default function PrintTemplateModal({
     }
 
     const cloned = printSheet.cloneNode(true) as HTMLElement;
-    cloned.querySelectorAll('[data-no-print], .no-print').forEach((el) => el.remove());
+    cloned.querySelectorAll('[data-no-print], .no-print, [data-no-print="true"], [data-qr-drag-hint]').forEach((el) => el.remove());
     cloned.querySelectorAll('*').forEach((el) => {
       el.removeAttribute('title');
-      const txt = el.textContent?.trim();
-      if (txt === 'Drag card on paper' || txt === 'Drag QR' || txt === 'Drag me') {
+      const txt = el.textContent?.trim().toLowerCase();
+      if (txt === 'drag card on paper' || txt === 'drag qr' || txt === 'drag me' || txt === 'click and drag') {
         el.remove();
       }
     });
@@ -552,7 +552,7 @@ export default function PrintTemplateModal({
               padding: 0;
               font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             }
-            [data-no-print], .no-print, [data-no-print="true"] {
+            [data-no-print], .no-print, [data-no-print="true"], [data-qr-drag-hint] {
               display: none !important;
               visibility: hidden !important;
             }
@@ -561,78 +561,117 @@ export default function PrintTemplateModal({
               height: 100vh;
               margin: 0;
               padding: 0;
-              background: #ffffff;
+              background: #ffffff !important;
               position: relative;
               overflow: hidden;
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
             }
             .paper-page {
               width: 100vw;
               height: 100vh;
               position: relative;
               overflow: hidden;
+              background: #ffffff !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
             }
             .print-card {
               position: absolute;
               left: ${paperX}%;
               top: ${paperY}%;
               transform: translate(-50%, -50%);
-              border: ${showBorder ? `2px solid ${accentColor}` : 'none'};
-              border-radius: 16px;
-              padding: ${isBadge ? '16px 20px' : isSign ? '24px' : isFullPoster ? '32px 24px' : '28px 20px'};
-              display: flex;
-              flex-direction: ${isBadge ? 'row' : 'column'};
-              align-items: center;
-              justify-content: space-between;
-              text-align: ${isBadge ? 'left' : 'center'};
-              background: #ffffff;
-              width: ${isBadge ? '320px' : isSign ? '320px' : isFullPoster ? '380px' : '260px'};
-              height: ${isBadge ? '180px' : isSign ? '320px' : isFullPoster ? '480px' : '370px'};
+              border: ${showBorder ? `3.5px solid ${accentColor} !important` : 'none !important'};
+              border-radius: 20px !important;
+              padding: ${isBadge ? '24px 30px' : isSign ? '36px' : isFullPoster ? '48px 36px' : '40px 28px'} !important;
+              display: flex !important;
+              flex-direction: ${isBadge ? 'row' : 'column'} !important;
+              align-items: center !important;
+              justify-content: space-between !important;
+              text-align: ${isBadge ? 'left' : 'center'} !important;
+              background-color: #ffffff !important;
+              width: ${isBadge ? '500px' : isSign ? '540px' : isFullPoster ? '580px' : '460px'} !important;
+              height: ${isBadge ? '280px' : isSign ? '540px' : isFullPoster ? '780px' : '640px'} !important;
               page-break-inside: avoid;
               break-inside: avoid;
+              box-shadow: none !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            .print-card h4 {
+              font-size: ${isFullPoster ? '36px' : isSign ? '32px' : isBadge ? '24px' : '28px'} !important;
+              font-weight: 700 !important;
+              color: #11140F !important;
+              line-height: 1.2 !important;
+              margin: 6px 0 !important;
+            }
+            .print-card p {
+              font-size: ${isFullPoster ? '18px' : isSign ? '16px' : isBadge ? '14px' : '15px'} !important;
+              color: rgba(17, 20, 15, 0.7) !important;
+              line-height: 1.4 !important;
+              margin: 4px 0 !important;
+            }
+            .print-card [data-qr-drag="true"] {
+              margin: 16px auto !important;
+              padding: 16px !important;
+              border: 2px solid ${accentColor}30 !important;
+              border-radius: 20px !important;
+              background: #ffffff !important;
+              display: flex !important;
+              align-items: center !important;
+              justify-content: center !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
             }
             .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-            .font-bold { font-weight: 700; }
-            .font-semibold { font-weight: 600; }
-            .font-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
-            .text-\\[10px\\] { font-size: 11px; }
-            .text-\\[11px\\] { font-size: 12px; }
-            .text-\\[12px\\] { font-size: 13px; }
-            .text-\\[16px\\] { font-size: 18px; }
-            .text-\\[20px\\] { font-size: 24px; }
+            .font-bold { font-weight: 700 !important; }
+            .font-semibold { font-weight: 600 !important; }
+            .font-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important; }
+            .text-\\[10px\\] { font-size: 13px !important; }
+            .text-\\[11px\\] { font-size: 14px !important; }
+            .text-\\[12px\\] { font-size: 15px !important; }
+            .text-\\[16px\\] { font-size: 22px !important; }
+            .text-\\[20px\\] { font-size: 28px !important; }
             .uppercase { text-transform: uppercase; }
             .tracking-widest { letter-spacing: 0.12em; }
             .tracking-wider { letter-spacing: 0.06em; }
-            .rounded-full { border-radius: 9999px; }
-            .rounded-xl { border-radius: 14px; }
-            .rounded-2xl { border-radius: 20px; }
-            .text-white { color: #ffffff; }
-            .px-3 { padding-left: 14px; padding-right: 14px; }
-            .py-1 { padding-top: 6px; padding-bottom: 6px; }
-            .p-2 { padding: 10px; }
-            .p-3 { padding: 16px; }
-            .border-2 { border-width: 2px; }
-            .border { border-width: 1px; }
-            .flex { display: flex; }
-            .flex-1 { flex: 1 1 0%; }
-            .items-center { align-items: center; }
-            .justify-between { justify-content: space-between; }
-            .gap-4 { gap: 20px; }
-            .relative { position: relative; }
-            .absolute { position: absolute; }
+            .rounded-full { border-radius: 9999px !important; }
+            .rounded-xl { border-radius: 16px !important; }
+            .rounded-2xl { border-radius: 22px !important; }
+            .text-white { color: #ffffff !important; }
+            .px-3 { padding-left: 18px !important; padding-right: 18px !important; }
+            .py-1 { padding-top: 8px !important; padding-bottom: 8px !important; }
+            .p-2 { padding: 12px !important; }
+            .p-3 { padding: 18px !important; }
+            .border-2 { border-width: 2px !important; }
+            .border { border-width: 1px !important; }
+            .flex { display: flex !important; }
+            .flex-1 { flex: 1 1 0% !important; }
+            .items-center { align-items: center !important; }
+            .justify-between { justify-content: space-between !important; }
+            .gap-4 { gap: 24px !important; }
+            .relative { position: relative !important; }
+            .absolute { position: absolute !important; }
             .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
-            .pointer-events-none { pointer-events: none; }
-            .justify-center { justify-content: center; }
-            .w-7 { width: 28px; }
-            .h-7 { height: 28px; }
-            .w-5 { width: 20px; }
-            .h-5 { height: 20px; }
-            .w-4 { width: 16px; }
-            .h-4 { height: 16px; }
-            .bg-white { background-color: #ffffff; }
-            .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
-            svg { display: block; margin: 0 auto; }
+            .pointer-events-none { pointer-events: none !important; }
+            .justify-center { justify-content: center !important; }
+            .w-7 { width: 34px !important; }
+            .h-7 { height: 34px !important; }
+            .w-5 { width: 26px !important; }
+            .h-5 { height: 26px !important; }
+            .w-4 { width: 20px !important; }
+            .h-4 { height: 20px !important; }
+            .bg-white { background-color: #ffffff !important; }
+            .shadow-sm, .shadow-md, .shadow-xs, .shadow-2xs { box-shadow: none !important; }
+            svg {
+              display: block !important;
+              margin: 0 auto !important;
+              width: ${isFullPoster ? '280px' : isSign ? '260px' : isBadge ? '160px' : '220px'} !important;
+              height: ${isFullPoster ? '280px' : isSign ? '260px' : isBadge ? '160px' : '220px'} !important;
+              max-width: 100% !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
           </style>
         </head>
         <body>
@@ -815,7 +854,7 @@ export default function PrintTemplateModal({
       {/* Container Card */}
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white dark:bg-[#0E1017] rounded-3xl max-w-5xl w-full border border-[#11140F]/15 dark:border-white/15 shadow-2xl overflow-hidden flex flex-col h-[94vh] sm:h-[88vh] max-h-[860px] text-[#11140F] dark:text-white"
+        className="bg-white dark:bg-[#0E1017] rounded-3xl max-w-6xl xl:max-w-7xl w-full border border-[#11140F]/15 dark:border-white/15 shadow-2xl overflow-hidden flex flex-col h-[96vh] sm:h-[92vh] max-h-[960px] text-[#11140F] dark:text-white"
       >
         {/* Top Header Bar */}
         <div className="px-4 py-3 sm:px-6 sm:py-3.5 border-b border-[#11140F]/10 dark:border-white/10 flex items-center justify-between shrink-0 bg-white dark:bg-[#0E1017] z-10">
@@ -1660,22 +1699,22 @@ export default function PrintTemplateModal({
             </div>
 
             {/* Centered Preview Canvas / Scaled Paper Sheet Container */}
-            <div className="w-full flex-1 flex items-center justify-center py-2 sm:py-3 overflow-hidden min-h-[300px]">
-              <div className="transform scale-[0.72] sm:scale-[0.82] md:scale-[0.88] lg:scale-[0.94] origin-center transition-transform">
+            <div className="w-full flex-1 flex items-center justify-center py-2 sm:py-3 overflow-hidden min-h-[340px]">
+              <div className="transform scale-[0.88] sm:scale-[0.94] md:scale-100 lg:scale-[1.05] origin-center transition-transform">
                 {/* Physical Paper Sheet (A4 / Letter proportions) with pointer handlers */}
                 <div
                   ref={paperSheetRef}
                   onPointerDown={handlePaperPointerDown}
                   onPointerMove={handlePaperPointerMove}
                   onPointerUp={handlePaperPointerUp}
-                  className="w-[360px] sm:w-[400px] h-[520px] sm:h-[580px] bg-white rounded-lg shadow-2xl border-2 border-[#11140F]/20 relative overflow-hidden transition-all select-none cursor-crosshair"
+                  className="w-[380px] sm:w-[440px] md:w-[480px] h-[538px] sm:h-[622px] md:h-[678px] bg-white rounded-xl shadow-2xl border-2 border-[#11140F]/20 relative overflow-hidden transition-all select-none cursor-crosshair"
                 >
                   {/* Subtle Sheet Watermark */}
                   <div
                     data-no-print="true"
-                    className="no-print absolute top-2 right-3 text-[9px] font-mono text-black/25 uppercase tracking-wider pointer-events-none select-none"
+                    className="no-print absolute top-2 right-3 text-[9px] font-mono text-black/35 uppercase tracking-wider pointer-events-none select-none"
                   >
-                    Sheet: A4 / Letter
+                    Sheet: A4 (210 × 297 mm)
                   </div>
 
                   {/* Subtle Grid / Center Alignment Crosshairs */}
@@ -1699,7 +1738,7 @@ export default function PrintTemplateModal({
                   {/* Live Placement Tag pinned to sheet corner */}
                   <div
                     data-no-print="true"
-                    className="no-print absolute bottom-2 left-3 px-2 py-0.5 rounded bg-black/60 text-white text-[9px] font-mono pointer-events-none z-10 select-none"
+                    className="no-print absolute bottom-2 left-3 px-2 py-0.5 rounded bg-black/70 text-white text-[9px] font-mono pointer-events-none z-10 select-none"
                   >
                     Position: X: {paperX}% · Y: {paperY}%
                   </div>
@@ -1713,12 +1752,12 @@ export default function PrintTemplateModal({
                       showBorder ? 'border-2' : ''
                     } ${
                       template === 'table-tent'
-                        ? 'w-[195px] sm:w-[215px] h-[265px] sm:h-[290px] p-4 sm:p-5 rounded-xl'
+                        ? 'w-[230px] sm:w-[260px] md:w-[280px] h-[310px] sm:h-[350px] md:h-[390px] p-4 sm:p-5 rounded-2xl'
                         : template === 'window-sign'
-                        ? 'w-[205px] sm:w-[225px] h-[205px] sm:h-[225px] p-4 sm:p-5 rounded-xl'
+                        ? 'w-[250px] sm:w-[280px] md:w-[310px] h-[250px] sm:h-[280px] md:h-[310px] p-4 sm:p-5 rounded-2xl'
                         : template === 'full-poster'
-                        ? 'w-[215px] sm:w-[235px] h-[310px] sm:h-[340px] p-4 sm:p-5 rounded-xl'
-                        : 'w-[220px] sm:w-[240px] h-[135px] sm:h-[150px] p-3 sm:p-3.5 rounded-lg flex-row text-left'
+                        ? 'w-[260px] sm:w-[290px] md:w-[330px] h-[370px] sm:h-[420px] md:h-[470px] p-5 sm:p-6 rounded-2xl'
+                        : 'w-[270px] sm:w-[310px] md:w-[340px] h-[160px] sm:h-[185px] md:h-[200px] p-4 sm:p-5 rounded-xl flex-row text-left'
                     }`}
                     style={{
                       position: 'absolute',
@@ -1730,14 +1769,6 @@ export default function PrintTemplateModal({
                     }}
                     title="Click and drag to position this card anywhere on the sheet of paper"
                   >
-                    {/* Floating hint for dragging card - with data-no-print="true" and no-print */}
-                    <span
-                      data-no-print="true"
-                      className="no-print opacity-0 group-hover/card:opacity-100 transition-opacity absolute -top-5 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded bg-black/80 text-white text-[9px] font-mono pointer-events-none whitespace-nowrap z-20"
-                    >
-                      Drag card on paper
-                    </span>
-
                     {template === 'card-badge' ? (
                       // Horizontal Card Layout
                       <div className="flex items-center justify-between w-full gap-4">
@@ -1803,16 +1834,16 @@ export default function PrintTemplateModal({
                         <div className="space-y-1">
                           {showHeaderTag && (
                             <div
-                              className="text-[10px] uppercase font-mono tracking-widest font-bold"
+                              className="text-[10px] sm:text-[11px] uppercase font-mono tracking-widest font-bold"
                               style={{ color: accentColor }}
                             >
                               {headerTag}
                             </div>
                           )}
-                          <h4 className="font-bold text-[20px] text-[#11140F] leading-tight tracking-tight">
+                          <h4 className="font-bold text-[18px] sm:text-[21px] md:text-[23px] text-[#11140F] leading-tight tracking-tight">
                             {headline}
                           </h4>
-                          {showSubline && <p className="text-[12px] text-[#11140F]/65">{subline}</p>}
+                          {showSubline && <p className="text-[11.5px] sm:text-[12.5px] text-[#11140F]/65">{subline}</p>}
                         </div>
 
                         {/* Interactive Drag-and-Drop QR Container */}
@@ -1854,24 +1885,18 @@ export default function PrintTemplateModal({
                               </div>
                             </div>
                           )}
-                          <span
-                            data-no-print="true"
-                            className="no-print opacity-0 group-hover:opacity-100 transition-opacity absolute -top-5 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded bg-black/80 text-white text-[9px] font-mono pointer-events-none whitespace-nowrap"
-                          >
-                            Drag QR
-                          </span>
                         </div>
 
                         <div className="space-y-1">
                           {showShortCode && (
                             <div
-                              className="inline-block px-3 py-1 rounded-full text-white text-[11px] font-mono shadow-2xs"
+                              className="inline-block px-3 py-1 rounded-full text-white text-[11px] sm:text-[12px] font-mono shadow-2xs"
                               style={{ backgroundColor: accentColor }}
                             >
                               /{shortCode}
                             </div>
                           )}
-                          {showFooterNote && <p className="text-[10px] text-[#11140F]/50">{footerNote}</p>}
+                          {showFooterNote && <p className="text-[10px] sm:text-[11px] text-[#11140F]/50 font-medium">{footerNote}</p>}
                         </div>
                       </>
                     )}
