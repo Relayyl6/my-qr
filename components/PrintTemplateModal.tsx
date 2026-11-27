@@ -331,17 +331,12 @@ export default function PrintTemplateModal({
   });
 
   // Paper Sheet Placement State (position of card on physical sheet of paper)
-  const [paperPosition, setPaperPosition] = useState<
-    'center' | 'top' | 'bottom' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'custom'
-  >('center');
-  const [paperOffset, setPaperOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [paperX, setPaperX] = useState<number>(50); // percentage 12% - 88%
+  const [paperY, setPaperY] = useState<number>(50); // percentage 12% - 88%
+  const [qrSize, setQrSize] = useState<number>(130);
   const [isDraggingCard, setIsDraggingCard] = useState(false);
-  const cardDragStartRef = useRef<{ startX: number; startY: number; initialX: number; initialY: number }>({
-    startX: 0,
-    startY: 0,
-    initialX: 0,
-    initialY: 0,
-  });
+  const paperSheetRef = useRef<HTMLDivElement>(null);
+  const isDraggingPaperRef = useRef(false);
 
   // Element visibility toggles
   const [showHeaderTag, setShowHeaderTag] = useState(true);
@@ -363,10 +358,18 @@ export default function PrintTemplateModal({
       if (defaultSubline) setSubline(defaultSubline);
       setFooterNote(defaultFooterNote || 'Powered by Dynamic QR');
       setQrOffset({ x: 0, y: 0 });
-      setPaperPosition('center');
-      setPaperOffset({ x: 0, y: 0 });
+      setPaperX(50);
+      setPaperY(50);
     }
   }, [isOpen, url, defaultHeadline, defaultHeaderTag, defaultSubline, defaultFooterNote, defaultTemplate, label]);
+
+  // Adjust default QR size when template changes
+  useEffect(() => {
+    if (template === 'card-badge') setQrSize(96);
+    else if (template === 'window-sign') setQrSize(140);
+    else if (template === 'full-poster') setQrSize(150);
+    else setQrSize(130);
+  }, [template]);
 
   // Pointer drag events for QR positioning (inside card)
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -403,37 +406,38 @@ export default function PrintTemplateModal({
     }
   };
 
-  // Pointer drag events for Card positioning on physical paper sheet
-  const handleCardPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    // If clicking QR drag container, let QR drag handle it
+  // Pointer events for placing / dragging card anywhere across the physical paper sheet
+  const updatePaperCoords = (clientX: number, clientY: number) => {
+    if (!paperSheetRef.current) return;
+    const rect = paperSheetRef.current.getBoundingClientRect();
+    const relX = clientX - rect.left;
+    const relY = clientY - rect.top;
+    const pctX = Math.round(Math.max(12, Math.min(88, (relX / rect.width) * 100)));
+    const pctY = Math.round(Math.max(12, Math.min(88, (relY / rect.height) * 100)));
+    setPaperX(pctX);
+    setPaperY(pctY);
+  };
+
+  const handlePaperPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).closest('[data-qr-drag]')) return;
     e.preventDefault();
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    (paperSheetRef.current as HTMLElement)?.setPointerCapture(e.pointerId);
+    isDraggingPaperRef.current = true;
     setIsDraggingCard(true);
-    cardDragStartRef.current = {
-      startX: e.clientX,
-      startY: e.clientY,
-      initialX: paperOffset.x,
-      initialY: paperOffset.y,
-    };
+    updatePaperCoords(e.clientX, e.clientY);
   };
 
-  const handleCardPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isDraggingCard) return;
-    const dx = e.clientX - cardDragStartRef.current.startX;
-    const dy = e.clientY - cardDragStartRef.current.startY;
-    setPaperOffset({
-      x: Math.round(cardDragStartRef.current.initialX + dx),
-      y: Math.round(cardDragStartRef.current.initialY + dy),
-    });
-    setPaperPosition('custom');
+  const handlePaperPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDraggingPaperRef.current) return;
+    updatePaperCoords(e.clientX, e.clientY);
   };
 
-  const handleCardPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (isDraggingCard) {
+  const handlePaperPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (isDraggingPaperRef.current) {
+      isDraggingPaperRef.current = false;
       setIsDraggingCard(false);
       try {
-        (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+        (paperSheetRef.current as HTMLElement)?.releasePointerCapture(e.pointerId);
       } catch {}
     }
   };
@@ -524,34 +528,6 @@ export default function PrintTemplateModal({
     const isSign = template === 'window-sign';
     const isFullPoster = template === 'full-poster';
 
-    let alignItems = 'center';
-    let justifyContent = 'center';
-    let padding = '10mm';
-
-    if (paperPosition.startsWith('top')) {
-      alignItems = 'flex-start';
-      padding = '12mm 10mm 10mm 10mm';
-    } else if (paperPosition.startsWith('bottom')) {
-      alignItems = 'flex-end';
-      padding = '10mm 10mm 12mm 10mm';
-    }
-
-    if (paperPosition.endsWith('left')) {
-      justifyContent = 'flex-start';
-      padding = paperPosition.startsWith('top')
-        ? '12mm 10mm 10mm 12mm'
-        : paperPosition.startsWith('bottom')
-        ? '10mm 10mm 12mm 12mm'
-        : '10mm 10mm 10mm 12mm';
-    } else if (paperPosition.endsWith('right')) {
-      justifyContent = 'flex-end';
-      padding = paperPosition.startsWith('top')
-        ? '12mm 12mm 10mm 10mm'
-        : paperPosition.startsWith('bottom')
-        ? '10mm 12mm 12mm 10mm'
-        : '10mm 12mm 10mm 10mm';
-    }
-
     doc.open();
     doc.write(`
       <!DOCTYPE html>
@@ -561,7 +537,7 @@ export default function PrintTemplateModal({
           <style>
             @page {
               size: auto;
-              margin: 10mm;
+              margin: 0;
             }
             * {
               box-sizing: border-box;
@@ -569,21 +545,30 @@ export default function PrintTemplateModal({
               padding: 0;
               font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             }
-            [data-no-print], .no-print {
+            [data-no-print], .no-print, [data-no-print="true"] {
               display: none !important;
+              visibility: hidden !important;
             }
             html, body {
-              width: 100%;
-              height: 100%;
+              width: 100vw;
+              height: 100vh;
               margin: 0;
-              padding: ${padding};
+              padding: 0;
               background: #ffffff;
-              display: flex;
-              align-items: ${alignItems};
-              justify-content: ${justifyContent};
+              position: relative;
+              overflow: hidden;
+            }
+            .paper-page {
+              width: 100vw;
+              height: 100vh;
+              position: relative;
               overflow: hidden;
             }
             .print-card {
+              position: absolute;
+              left: ${paperX}%;
+              top: ${paperY}%;
+              transform: translate(-50%, -50%);
               border: ${showBorder ? `2px solid ${accentColor}` : 'none'};
               border-radius: 20px;
               padding: ${isBadge ? '24px 32px' : isSign ? '36px' : isFullPoster ? '48px 36px' : '40px 28px'};
@@ -595,10 +580,8 @@ export default function PrintTemplateModal({
               background: #ffffff;
               width: ${isBadge ? '420px' : isSign ? '440px' : isFullPoster ? '520px' : '360px'};
               height: ${isBadge ? '230px' : isSign ? '440px' : isFullPoster ? '700px' : '520px'};
-              position: relative;
               page-break-inside: avoid;
               break-inside: avoid;
-              transform: translate(${paperOffset.x}px, ${paperOffset.y}px);
             }
             .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
             .font-bold { font-weight: 700; }
@@ -644,8 +627,10 @@ export default function PrintTemplateModal({
           </style>
         </head>
         <body>
-          <div class="print-card">
-            ${sheetHtml}
+          <div class="paper-page">
+            <div class="print-card">
+              ${sheetHtml}
+            </div>
           </div>
         </body>
       </html>
@@ -1129,58 +1114,111 @@ export default function PrintTemplateModal({
                     )}
 
                     {/* Paper Placement Section */}
-                    <div className="space-y-2 pt-3 border-t border-[#11140F]/10 dark:border-white/10">
+                    <div className="space-y-3 pt-3 border-t border-[#11140F]/10 dark:border-white/10">
                       <div className="flex items-center justify-between">
                         <label className="text-[11.5px] font-semibold text-[#11140F]/70 dark:text-white/75 uppercase tracking-wider block">
-                          Paper Print Position
+                          Paper Print Placement
                         </label>
-                        <span className="text-[10.5px] font-mono font-semibold text-emerald-600 dark:text-emerald-400 capitalize">
-                          {paperPosition === 'custom' ? `Custom (${paperOffset.x}px, ${paperOffset.y}px)` : paperPosition}
+                        <span className="text-[10.5px] font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                          X: {paperX}% · Y: {paperY}%
                         </span>
                       </div>
                       <p className="text-[11px] text-[#11140F]/60 dark:text-white/60">
-                        Position this card at any point on the physical paper (e.g. Top for folding table tents, corners for badges, or drag freely).
+                        Drag anywhere on the paper preview, or use the 9-point grid and sliders below to place the card at any exact point on the sheet.
                       </p>
 
                       {/* 9-Point Alignment Grid Matrix */}
                       <div className="grid grid-cols-3 gap-1 bg-[#EEF0EA] dark:bg-white/[0.04] p-1.5 rounded-xl border border-[#11140F]/10 dark:border-white/10">
                         {[
-                          { pos: 'top-left' as const, label: '↖ Top-Left' },
-                          { pos: 'top' as const, label: '⬆ Top / Fold' },
-                          { pos: 'top-right' as const, label: '↗ Top-Right' },
-                          { pos: 'center' as const, label: '🎯 Center' },
-                          { pos: 'bottom-left' as const, label: '↙ Bottom-Left' },
-                          { pos: 'bottom' as const, label: '⬇ Bottom' },
-                          { pos: 'bottom-right' as const, label: '↘ Bottom-Right' },
-                        ].map(({ pos, label }) => (
-                          <button
-                            key={pos}
-                            type="button"
-                            onClick={() => {
-                              setPaperPosition(pos);
-                              setPaperOffset({ x: 0, y: 0 });
-                            }}
-                            className={`py-1.5 px-2 rounded-lg text-[10.5px] font-medium transition-all text-center cursor-pointer ${
-                              paperPosition === pos
-                                ? 'bg-emerald-600 text-white font-semibold shadow-xs'
-                                : 'text-[#11140F]/70 dark:text-white/70 hover:bg-white dark:hover:bg-white/10 hover:text-black dark:hover:text-white'
-                            }`}
-                          >
-                            {label}
-                          </button>
-                        ))}
+                          { x: 25, y: 22, label: '↖ Top-Left' },
+                          { x: 50, y: 22, label: '⬆ Top / Fold' },
+                          { x: 75, y: 22, label: '↗ Top-Right' },
+                          { x: 25, y: 50, label: '⬅ Mid-Left' },
+                          { x: 50, y: 50, label: '🎯 Center' },
+                          { x: 75, y: 50, label: '➡ Mid-Right' },
+                          { x: 25, y: 78, label: '↙ Btm-Left' },
+                          { x: 50, y: 78, label: '⬇ Bottom' },
+                          { x: 75, y: 78, label: '↘ Btm-Right' },
+                        ].map(({ x, y, label }) => {
+                          const isMatch = Math.abs(paperX - x) <= 5 && Math.abs(paperY - y) <= 5;
+                          return (
+                            <button
+                              key={label}
+                              type="button"
+                              onClick={() => {
+                                setPaperX(x);
+                                setPaperY(y);
+                              }}
+                              className={`py-1.5 px-2 rounded-lg text-[10.5px] font-medium transition-all text-center cursor-pointer ${
+                                isMatch
+                                  ? 'bg-emerald-600 text-white font-semibold shadow-xs'
+                                  : 'text-[#11140F]/70 dark:text-white/70 hover:bg-white dark:hover:bg-white/10 hover:text-black dark:hover:text-white'
+                              }`}
+                            >
+                              {label}
+                            </button>
+                          );
+                        })}
                       </div>
 
-                      {(paperOffset.x !== 0 || paperOffset.y !== 0) && (
+                      {/* Fine-Tuning Coordinate Sliders */}
+                      <div className="space-y-2 pt-1">
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between text-[11px] text-[#11140F]/70 dark:text-white/70">
+                            <span>Horizontal (X Coordinate)</span>
+                            <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">{paperX}%</span>
+                          </div>
+                          <input
+                            type="range"
+                            min="12"
+                            max="88"
+                            value={paperX}
+                            onChange={(e) => setPaperX(Number(e.target.value))}
+                            className="w-full h-1.5 rounded-lg accent-emerald-600 cursor-pointer"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between text-[11px] text-[#11140F]/70 dark:text-white/70">
+                            <span>Vertical (Y Coordinate)</span>
+                            <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">{paperY}%</span>
+                          </div>
+                          <input
+                            type="range"
+                            min="12"
+                            max="88"
+                            value={paperY}
+                            onChange={(e) => setPaperY(Number(e.target.value))}
+                            className="w-full h-1.5 rounded-lg accent-emerald-600 cursor-pointer"
+                          />
+                        </div>
+
+                        <div className="space-y-1 pt-1">
+                          <div className="flex items-center justify-between text-[11px] text-[#11140F]/70 dark:text-white/70">
+                            <span>QR Code Size on Sheet</span>
+                            <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">{qrSize}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            min="80"
+                            max="220"
+                            value={qrSize}
+                            onChange={(e) => setQrSize(Number(e.target.value))}
+                            className="w-full h-1.5 rounded-lg accent-emerald-600 cursor-pointer"
+                          />
+                        </div>
+                      </div>
+
+                      {(paperX !== 50 || paperY !== 50) && (
                         <div className="flex items-center justify-between text-[11px] pt-1">
                           <span className="text-[#11140F]/60 dark:text-white/60">
-                            Custom Offset: X: {paperOffset.x}px, Y: {paperOffset.y}px
+                            Custom Position: X: {paperX}%, Y: {paperY}%
                           </span>
                           <button
                             type="button"
                             onClick={() => {
-                              setPaperPosition('center');
-                              setPaperOffset({ x: 0, y: 0 });
+                              setPaperX(50);
+                              setPaperY(50);
                             }}
                             className="text-emerald-600 dark:text-emerald-400 font-semibold hover:underline cursor-pointer"
                           >
@@ -1595,12 +1633,12 @@ export default function PrintTemplateModal({
                 <span>Drag card on paper or choose position below</span>
               </div>
               <div className="flex items-center gap-1.5">
-                {(paperPosition !== 'center' || paperOffset.x !== 0 || paperOffset.y !== 0 || qrOffset.x !== 0 || qrOffset.y !== 0) && (
+                {(paperX !== 50 || paperY !== 50 || qrOffset.x !== 0 || qrOffset.y !== 0) && (
                   <button
                     type="button"
                     onClick={() => {
-                      setPaperPosition('center');
-                      setPaperOffset({ x: 0, y: 0 });
+                      setPaperX(50);
+                      setPaperY(50);
                       setQrOffset({ x: 0, y: 0 });
                     }}
                     className="px-2 py-0.5 rounded-lg bg-black/10 dark:bg-white/10 hover:bg-black/20 text-[11px] font-semibold text-[#11140F] dark:text-white flex items-center gap-1 transition-all cursor-pointer"
@@ -1614,82 +1652,85 @@ export default function PrintTemplateModal({
 
             {/* Quick Paper Position Selector Pills */}
             <div className="w-full flex items-center justify-between gap-1 pb-2 mb-1 shrink-0 text-[11px]">
-              <span className="text-[10px] uppercase font-mono opacity-50 font-semibold">Paper Position:</span>
+              <span className="text-[10px] uppercase font-mono opacity-50 font-semibold">Position:</span>
               <div className="flex items-center gap-1 bg-black/5 dark:bg-white/5 p-0.5 rounded-lg border border-black/10 dark:border-white/10">
                 {[
-                  { pos: 'top' as const, label: '⬆ Top / Fold' },
-                  { pos: 'center' as const, label: '🎯 Center' },
-                  { pos: 'bottom' as const, label: '⬇ Bottom' },
-                  { pos: 'top-left' as const, label: '↖ Top-Left' },
-                  { pos: 'top-right' as const, label: '↗ Top-Right' },
-                ].map(({ pos, label }) => (
-                  <button
-                    key={pos}
-                    type="button"
-                    onClick={() => {
-                      setPaperPosition(pos);
-                      setPaperOffset({ x: 0, y: 0 });
-                    }}
-                    className={`px-2 py-1 rounded text-[10.5px] font-medium transition-all cursor-pointer ${
-                      paperPosition === pos
-                        ? 'bg-emerald-600 text-white font-semibold shadow-xs'
-                        : 'text-[#11140F]/70 dark:text-white/70 hover:text-black dark:hover:text-white'
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
+                  { x: 50, y: 22, label: '⬆ Top / Fold' },
+                  { x: 50, y: 50, label: '🎯 Center' },
+                  { x: 50, y: 78, label: '⬇ Bottom' },
+                  { x: 25, y: 22, label: '↖ Top-Left' },
+                  { x: 75, y: 22, label: '↗ Top-Right' },
+                ].map(({ x, y, label }) => {
+                  const isMatch = Math.abs(paperX - x) <= 5 && Math.abs(paperY - y) <= 5;
+                  return (
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={() => {
+                        setPaperX(x);
+                        setPaperY(y);
+                      }}
+                      className={`px-2 py-1 rounded text-[10.5px] font-medium transition-all cursor-pointer ${
+                        isMatch
+                          ? 'bg-emerald-600 text-white font-semibold shadow-xs'
+                          : 'text-[#11140F]/70 dark:text-white/70 hover:text-black dark:hover:text-white'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
             {/* Centered Preview Canvas / Scaled Paper Sheet Container */}
             <div className="w-full flex-1 flex items-center justify-center py-2 sm:py-3 overflow-hidden min-h-[300px]">
               <div className="transform scale-[0.72] sm:scale-[0.82] md:scale-[0.88] lg:scale-[0.94] origin-center transition-transform">
-                {/* Physical Paper Sheet (A4 / Letter proportions) */}
+                {/* Physical Paper Sheet (A4 / Letter proportions) with pointer handlers */}
                 <div
-                  className="w-[360px] sm:w-[400px] h-[520px] sm:h-[580px] bg-white rounded-lg shadow-2xl border border-[#11140F]/20 relative overflow-hidden flex flex-col transition-all select-none"
-                  style={{
-                    alignItems: paperPosition.startsWith('top')
-                      ? (paperPosition.endsWith('left') ? 'flex-start' : paperPosition.endsWith('right') ? 'flex-end' : 'center')
-                      : paperPosition.startsWith('bottom')
-                      ? (paperPosition.endsWith('left') ? 'flex-start' : paperPosition.endsWith('right') ? 'flex-end' : 'center')
-                      : paperPosition.endsWith('left')
-                      ? 'flex-start'
-                      : paperPosition.endsWith('right')
-                      ? 'flex-end'
-                      : 'center',
-                    justifyContent: paperPosition.startsWith('top')
-                      ? 'flex-start'
-                      : paperPosition.startsWith('bottom')
-                      ? 'flex-end'
-                      : 'center',
-                    padding: paperPosition.startsWith('top')
-                      ? '24px 20px 20px 20px'
-                      : paperPosition.startsWith('bottom')
-                      ? '20px 20px 24px 20px'
-                      : '20px',
-                  }}
+                  ref={paperSheetRef}
+                  onPointerDown={handlePaperPointerDown}
+                  onPointerMove={handlePaperPointerMove}
+                  onPointerUp={handlePaperPointerUp}
+                  className="w-[360px] sm:w-[400px] h-[520px] sm:h-[580px] bg-white rounded-lg shadow-2xl border-2 border-[#11140F]/20 relative overflow-hidden transition-all select-none cursor-crosshair"
                 >
                   {/* Subtle Sheet Watermark */}
-                  <div className="absolute top-2 right-3 text-[9px] font-mono text-black/25 uppercase tracking-wider pointer-events-none select-none">
+                  <div
+                    data-no-print="true"
+                    className="no-print absolute top-2 right-3 text-[9px] font-mono text-black/25 uppercase tracking-wider pointer-events-none select-none"
+                  >
                     Sheet: A4 / Letter
+                  </div>
+
+                  {/* Subtle Grid / Center Alignment Crosshairs */}
+                  <div data-no-print="true" className="no-print absolute inset-0 pointer-events-none opacity-20">
+                    <div className="absolute left-1/2 top-0 bottom-0 border-r border-dashed border-black/40" />
+                    <div className="absolute top-1/2 left-0 right-0 border-b border-dashed border-black/40" />
                   </div>
 
                   {/* Table Tent Center Fold Line */}
                   {template === 'table-tent' && (
-                    <div className="absolute top-1/2 left-0 right-0 border-b border-dashed border-black/20 pointer-events-none z-10 flex items-center justify-center">
+                    <div
+                      data-no-print="true"
+                      className="no-print absolute top-1/2 left-0 right-0 border-b border-dashed border-black/30 pointer-events-none z-10 flex items-center justify-center"
+                    >
                       <span className="px-2 py-0.5 rounded bg-black/5 text-[8.5px] font-mono text-black/40 -translate-y-1/2 select-none">
                         Fold Line (for standing tent)
                       </span>
                     </div>
                   )}
 
+                  {/* Live Placement Tag pinned to sheet corner */}
+                  <div
+                    data-no-print="true"
+                    className="no-print absolute bottom-2 left-3 px-2 py-0.5 rounded bg-black/60 text-white text-[9px] font-mono pointer-events-none z-10 select-none"
+                  >
+                    Position: X: {paperX}% · Y: {paperY}%
+                  </div>
+
                   {/* The Draggable Printable Card (#print-sheet) */}
                   <div
                     id="print-sheet"
-                    onPointerDown={handleCardPointerDown}
-                    onPointerMove={handleCardPointerMove}
-                    onPointerUp={handleCardPointerUp}
                     className={`bg-white shadow-md transition-shadow flex flex-col items-center justify-between text-center relative overflow-hidden group/card ${
                       isDraggingCard ? 'cursor-grabbing ring-2 ring-emerald-500 shadow-xl' : 'cursor-grab hover:shadow-lg'
                     } ${
@@ -1704,14 +1745,20 @@ export default function PrintTemplateModal({
                         : 'w-[290px] sm:w-[320px] h-[180px] sm:h-[200px] p-3.5 sm:p-4 rounded-xl flex-row text-left'
                     }`}
                     style={{
+                      position: 'absolute',
+                      left: `${paperX}%`,
+                      top: `${paperY}%`,
+                      transform: 'translate(-50%, -50%)',
                       borderColor: accentColor,
-                      transform: `translate(${paperOffset.x}px, ${paperOffset.y}px)`,
                       touchAction: 'none',
                     }}
                     title="Click and drag to position this card anywhere on the sheet of paper"
                   >
-                    {/* Floating hint for dragging card */}
-                    <span className="opacity-0 group-hover/card:opacity-100 transition-opacity absolute -top-5 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded bg-black/80 text-white text-[9px] font-mono pointer-events-none whitespace-nowrap z-20">
+                    {/* Floating hint for dragging card - with data-no-print="true" and no-print */}
+                    <span
+                      data-no-print="true"
+                      className="no-print opacity-0 group-hover/card:opacity-100 transition-opacity absolute -top-5 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded bg-black/80 text-white text-[9px] font-mono pointer-events-none whitespace-nowrap z-20"
+                    >
                       Drag card on paper
                     </span>
 
@@ -1754,7 +1801,7 @@ export default function PrintTemplateModal({
                           }}
                           title="Click and drag to place QR inside card"
                         >
-                          <QRCodeSVG value={url} size={96} level="H" fgColor={accentColor} />
+                          <QRCodeSVG value={url} size={qrSize} level="H" fgColor={accentColor} />
                           {activeIconDef && activeIconDef.path && (
                             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                               <div className="w-5 h-5 rounded-full bg-white shadow-xs border border-[#11140F]/20 flex items-center justify-center">
@@ -1810,7 +1857,7 @@ export default function PrintTemplateModal({
                         >
                           <QRCodeSVG
                             value={url}
-                            size={template === 'window-sign' ? 140 : template === 'full-poster' ? 150 : 130}
+                            size={qrSize}
                             level="H"
                             fgColor={accentColor}
                           />
