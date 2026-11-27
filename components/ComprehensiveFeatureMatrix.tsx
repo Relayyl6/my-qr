@@ -1322,37 +1322,54 @@ export default function ComprehensiveFeatureMatrix() {
 
   return (
     <div className="space-y-6">
-      {/* Competitive Benchmark: Refined, authentic, human SaaS comparison */}
-      <div className="rounded-2xl border border-[#11140F]/10 bg-white p-6 sm:p-7 shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#11140F]/8 pb-3">
-          <div className="inline-flex items-center gap-2 text-[12px] font-mono uppercase tracking-wider text-[#11140F]/70 font-semibold">
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            Market Benchmark
+      {/* Competitive Benchmark: Compact, modern, clean value comparison */}
+      <div className="rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-white dark:bg-[#141721] p-3.5 sm:p-5 shadow-xs space-y-3">
+        <div className="flex items-center justify-between gap-2 border-b border-[#11140F]/8 dark:border-white/10 pb-2">
+          <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-wider text-[#11140F]/70 dark:text-white/70 font-semibold">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+            Market Comparison
           </div>
-          <span className="text-[12px] text-[#11140F]/45 font-mono">102 Distinct Capabilities &middot; 8 Core Domains</span>
+          <span className="text-[10.5px] text-[#11140F]/45 dark:text-white/40 font-mono hidden sm:inline">
+            Print &amp; Physical Media Ready
+          </span>
         </div>
 
-        <div className="space-y-1.5">
-          <h3 className="text-lg sm:text-xl font-bold tracking-tight text-[#11140F]" style={{ fontFamily: 'var(--font-display)' }}>
-            Architected for physical media &middot; not just Twitter bio links.
+        <div className="space-y-0.5">
+          <h3 className="text-[14.5px] sm:text-[16.5px] font-bold tracking-tight text-[#11140F] dark:text-white">
+            Built for physical media &middot; not just bio links.
           </h3>
-          <p className="text-[13.5px] text-[#11140F]/65 max-w-3xl leading-relaxed">
-            Legacy shorteners were built in 2008 for text links on desktop. If you print a QR code on packaging, flyers, or tabletop stands, you need scheduled time routing, native device switching, and 300 DPI vector exports &mdash; without paying <strong>$35/month</strong> just to connect a single domain.
+          <p className="text-[12px] text-[#11140F]/65 dark:text-white/60 leading-relaxed">
+            300 DPI print vectors, scheduled routing, and custom domains &mdash; without legacy $35/month fees.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-          <div className="p-3.5 rounded-xl bg-[#F7F7F5] border border-[#11140F]/8 space-y-1">
-            <span className="text-[11px] uppercase tracking-wider text-[#11140F]/50 font-mono font-medium">Bitly Growth ($35/mo)</span>
-            <p className="text-[12.5px] text-[#11140F]/80">10 custom links/mo &middot; No scheduled time routing &middot; Basic PNGs &middot; $35/mo for 1 domain</p>
+        {/* Compact, clean comparison grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-0.5 text-[11.5px]">
+          <div className="p-2 sm:p-2.5 rounded-xl bg-[#F7F7F5] dark:bg-white/[0.04] border border-[#11140F]/6 dark:border-white/10 flex sm:flex-col justify-between sm:justify-start items-center sm:items-start gap-1">
+            <span className="font-mono text-[10px] uppercase tracking-wider text-[#11140F]/50 dark:text-white/50">
+              Bitly Growth ($35/mo)
+            </span>
+            <span className="text-[#11140F]/70 dark:text-white/70 text-right sm:text-left text-[11px]">
+              10 links &middot; Basic PNGs &middot; No time routing
+            </span>
           </div>
-          <div className="p-3.5 rounded-xl bg-[#F7F7F5] border border-[#11140F]/8 space-y-1">
-            <span className="text-[11px] uppercase tracking-wider text-[#11140F]/50 font-mono font-medium">TinyURL Pro ($12.99/mo)</span>
-            <p className="text-[12.5px] text-[#11140F]/80">Static redirect only &middot; No mobile landing pages &middot; No device sensing &middot; No vector kits</p>
+
+          <div className="p-2 sm:p-2.5 rounded-xl bg-[#F7F7F5] dark:bg-white/[0.04] border border-[#11140F]/6 dark:border-white/10 flex sm:flex-col justify-between sm:justify-start items-center sm:items-start gap-1">
+            <span className="font-mono text-[10px] uppercase tracking-wider text-[#11140F]/50 dark:text-white/50">
+              TinyURL Pro ($12.99/mo)
+            </span>
+            <span className="text-[#11140F]/70 dark:text-white/70 text-right sm:text-left text-[11px]">
+              Static redirect &middot; No vector print kits
+            </span>
           </div>
-          <div className="p-3.5 rounded-xl bg-emerald-50/80 border border-emerald-500/30 space-y-1 ring-1 ring-emerald-500/20">
-            <span className="text-[11px] uppercase tracking-wider text-emerald-800 font-mono font-bold">DynamicQR Pro ($6/mo)</span>
-            <p className="text-[12.5px] text-[#11140F] font-medium">Autonomous Ingress &middot; 50 links &middot; 300 DPI kits &middot; Fast Edge &middot; Verified Domains</p>
+
+          <div className="p-2 sm:p-2.5 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-500/30 text-emerald-900 dark:text-emerald-200 flex sm:flex-col justify-between sm:justify-start items-center sm:items-start gap-1">
+            <span className="font-mono text-[10px] uppercase tracking-wider font-bold text-emerald-800 dark:text-emerald-300">
+              DynamicQR Pro ($5/mo)
+            </span>
+            <span className="font-medium text-[#11140F] dark:text-white text-right sm:text-left text-[11px]">
+              50 links &middot; 300 DPI vectors &middot; Smart routing &middot; Domains
+            </span>
           </div>
         </div>
       </div>
@@ -1444,7 +1461,7 @@ export default function ComprehensiveFeatureMatrix() {
                 </th>
                 <th className="py-3.5 px-4 text-center text-[12.5px] font-bold text-purple-900 uppercase tracking-wider w-40 bg-purple-50/50">
                   Ultra
-                  <span className="block text-[11px] font-normal text-purple-800/70 font-mono lowercase">$21/mo &middot; all</span>
+                  <span className="block text-[11px] font-normal text-purple-800/70 font-mono lowercase">$20/mo &middot; all</span>
                 </th>
               </tr>
             </thead>
