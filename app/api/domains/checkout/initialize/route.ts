@@ -8,6 +8,7 @@ import {
   calculateMultiYearDomainPrice,
   DEFAULT_PRICING_CONFIG,
 } from '@/lib/domains/fxEngine';
+import { getAppUrl } from '@/lib/config';
 
 export const dynamic = 'force-dynamic';
 
@@ -234,10 +235,7 @@ export async function POST(req: Request) {
       totalPaidNgn = finalChargeNgn;
     }
 
-    const appUrl =
-      req.headers.get('origin') ||
-      process.env.NEXT_PUBLIC_APP_URL ||
-      'https://my-qr-sandy.vercel.app';
+    const appUrl = getAppUrl(req);
     const paystackSecret = process.env.PAYSTACK_SECRET_KEY;
 
     // 2. If Paystack Live/Test key is available, initialize transaction

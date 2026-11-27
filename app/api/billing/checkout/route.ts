@@ -5,6 +5,7 @@ import { PLANS } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { TIER_CONFIGS } from "@/lib/ai/flags";
 import { getDomainPricingConfig } from "@/lib/domains/fxEngine";
+import { getAppUrl } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +26,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid plan selected" }, { status: 400 });
     }
 
-    const origin = req.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL || "https://my-qr-sandy.vercel.app";
+    const origin = getAppUrl(req);
 
     // 1. Validate Promo Code if provided
     let discountPercent = 0;

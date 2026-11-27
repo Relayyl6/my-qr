@@ -390,7 +390,7 @@ export async function sendPlatformSubscriptionConfirmedEmail({
             You are now subscribed to receive DynamicQR product announcements, dynamic routing insights, and feature updates.
           </p>
           <div style="margin:20px 0;">
-            <a href="${APP_URL}/product-tour" style="background:#11140F;color:#ffffff;text-decoration:none;font-size:13px;font-weight:600;padding:12px 24px;border-radius:6px;display:inline-block;">
+            <a href="${APP_URL}/product-tour?tour=true" style="background:#11140F;color:#ffffff;text-decoration:none;font-size:13px;font-weight:600;padding:12px 24px;border-radius:6px;display:inline-block;">
               Explore Features &rarr;
             </a>
           </div>

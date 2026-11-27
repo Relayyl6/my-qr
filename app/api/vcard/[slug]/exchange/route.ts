@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getAppUrl } from "@/lib/config";
 
 export async function POST(
   req: NextRequest,
@@ -83,8 +84,8 @@ export async function POST(
       },
     }).catch(() => {});
 
-    // Send instant connection emails to both parties
-    const siteUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || "https://my-qr-sandy.vercel.app";
+    // Send instant connection emails to both parties (authority from incoming request & sanitized APP_URL)
+    const siteUrl = getAppUrl(req);
     const vcardUrl = `${siteUrl}/c/${slug}`;
     const vcfDownloadUrl = `${siteUrl}/api/vcard/${slug}/download`;
     const cardOwnerName = spec.fullName || item.title || "DynamicQR User";

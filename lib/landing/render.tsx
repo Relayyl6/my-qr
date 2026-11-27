@@ -139,7 +139,7 @@ export function RenderLandingPage({
         {/* Viral Growth Footer */}
         <div className="pt-8 pb-4 text-center">
           <a
-            href={process.env.NEXT_PUBLIC_APP_URL || "https://my-qr-sandy.vercel.app"}
+            href={APP_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/5 hover:bg-black/10 transition-colors text-[11px] opacity-75 hover:opacity-100 font-medium"
@@ -263,7 +263,7 @@ export function RenderLandingPage({
         {/* Tablet Footer */}
         <div className="pt-6 pb-4 text-center">
           <a
-            href={process.env.NEXT_PUBLIC_APP_URL || "https://my-qr-sandy.vercel.app"}
+            href={APP_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-black/5 hover:bg-black/10 transition-colors text-[11px] opacity-75 hover:opacity-100 font-medium"
@@ -550,7 +550,7 @@ export function RenderLandingPage({
       {/* Desktop Footer */}
       <footer className="mt-auto py-8 text-center border-t" style={{ borderColor: `${theme.textColor}10` }}>
         <a
-          href={process.env.NEXT_PUBLIC_APP_URL || "https://my-qr-sandy.vercel.app"}
+          href={APP_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-black/5 hover:bg-black/10 transition-colors text-[12px] opacity-75 hover:opacity-100 font-medium"

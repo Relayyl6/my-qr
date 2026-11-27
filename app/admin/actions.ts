@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 import { AdminPromoConfig, DEFAULT_PROMO_CONFIG } from '@/lib/promo';
+import { APP_URL } from '@/lib/config';
 
 async function verifyAdmin() {
   const user = await getCurrentUser();
@@ -493,7 +494,7 @@ export async function adminSendPlatformBroadcast(payload: PlatformBroadcastPaylo
   // Handle single test email
   if (testEmail && testEmail.trim()) {
     const targetEmail = testEmail.trim().toLowerCase();
-    const siteUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || 'https://my-qr-sandy.vercel.app';
+    const siteUrl = APP_URL;
     const unsubUrl = `${siteUrl}/api/newsletter/unsubscribe?token=preview_token`;
 
     const personalizedBody = bodyHtml

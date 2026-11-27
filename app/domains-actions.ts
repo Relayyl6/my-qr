@@ -19,6 +19,7 @@ import {
   DomainPricingConfig,
 } from '@/lib/domains/fxEngine';
 import { WHOLESALE_USD_PRICING } from '@/lib/domains/namelaunch';
+import { APP_URL } from '@/lib/config';
 
 export async function getUserDomainOrders(emailQuery?: string) {
   const user = await getCurrentUser();
@@ -913,7 +914,7 @@ export async function renewCustomDomainOrder(orderId: string, years: number = 1)
     };
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://my-qr-sandy.vercel.app';
+  const appUrl = APP_URL;
   const paystackRes = await fetch('https://api.paystack.co/transaction/initialize', {
     method: 'POST',
     headers: {
