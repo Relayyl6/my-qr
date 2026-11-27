@@ -58,7 +58,7 @@ export default function TermsPage() {
         <section className="space-y-3">
           <h2 className="text-xl font-semibold">4. Subscriptions, AI Credits & Billing</h2>
           <p>
-            Paid plans (Pro, Plus, Ultra) are billed on a recurring monthly or yearly subscription through Stripe. Subscriptions include allocated monthly AI execution budgets. Unused AI credits do not roll over to subsequent billing cycles. You may cancel your subscription at any time via the Customer Portal.
+            Paid plans (Pro, Plus, Ultra) are billed on a recurring monthly or yearly subscription through Paystack. Subscriptions include allocated monthly AI execution budgets. Unused AI credits do not roll over to subsequent billing cycles. You may cancel your subscription at any time via the Customer Portal.
           </p>
         </section>
 

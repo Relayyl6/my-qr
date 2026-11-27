@@ -71,6 +71,24 @@ export function BuilderShell({ initialDoc, pageId, onSave }: BuilderShellProps) 
   const [isPublishing, setIsPublishing] = useState(false);
   const [saveBanner, setSaveBanner] = useState<string | null>(null);
 
+  const handleUpdateDocTokens = React.useCallback(
+    (tokens: Partial<Doc['tokens']>) => {
+      exec({
+        label: 'Update page tokens',
+        run: (draft) => {
+          if (!draft.tokens) draft.tokens = {} as any;
+          if (tokens.colors) {
+            draft.tokens.colors = { ...draft.tokens.colors, ...tokens.colors };
+          }
+          if (tokens.fonts) {
+            draft.tokens.fonts = { ...draft.tokens.fonts, ...tokens.fonts };
+          }
+        },
+      });
+    },
+    [exec]
+  );
+
   // Trackpad pinch-to-zoom & Ctrl+mousewheel non-passive listener
   useEffect(() => {
     const el = workspaceRef.current;
@@ -457,12 +475,12 @@ export function BuilderShell({ initialDoc, pageId, onSave }: BuilderShellProps) 
           onAddNode={handleAddNode}
         />
 
-        {/* Center Canvas Workspace */}
+        {/* Center Canvas Workspace - Centered vertically and horizontally */}
         <div
           ref={workspaceRef}
-          className="flex-1 bg-[#171B18] overflow-auto relative flex flex-col items-center justify-start py-10 px-6"
+          className="flex-1 bg-[#171B18] overflow-auto relative flex flex-col items-center justify-center min-h-full py-10 px-6"
         >
-          <div className="relative">
+          <div className="relative my-auto">
             <CanvasFrame
               doc={doc}
               bp={ui.bp}
@@ -501,7 +519,7 @@ export function BuilderShell({ initialDoc, pageId, onSave }: BuilderShellProps) 
                 type="text"
                 value={aiPrompt}
                 onChange={(e) => setAiPrompt(e.target.value)}
-                placeholder="Ask AI to change layout, make responsive, or write copy... (Ctrl+K)"
+                placeholder="Ask AI to edit layout or copy... (Ctrl+K)"
                 className="flex-1 bg-transparent border-0 text-[12.5px] text-white placeholder:text-white/40 focus:outline-hidden"
               />
               <button
@@ -532,6 +550,7 @@ export function BuilderShell({ initialDoc, pageId, onSave }: BuilderShellProps) 
           onResetOverride={resetNodeOverride}
           onCopyStyles={copyStylesToBreakpoint}
           onSelectNode={selectNode}
+          onUpdateTokens={handleUpdateDocTokens}
         />
       </div>
     </div>

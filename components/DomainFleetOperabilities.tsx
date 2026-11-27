@@ -38,6 +38,7 @@ import {
   toggleDomainBioPage,
   saveDomainBioConfig,
   deleteDomainContact,
+  renewCustomDomainOrder,
 } from '@/app/domains-actions';
 
 interface DomainOrderData {
@@ -121,6 +122,27 @@ export default function DomainFleetOperabilities({
   const [inquiries, setInquiries] = useState<any[]>(
     Array.isArray(initialBio.inquiries) ? initialBio.inquiries : []
   );
+
+  // Domain Renewal & Grace Period State
+  const [renewYears, setRenewYears] = useState<1 | 2 | 3>(1);
+  const [renewing, setRenewing] = useState(false);
+
+  const handleRenewDomain = async () => {
+    setRenewing(true);
+    setAlert(null);
+    try {
+      const res = await renewCustomDomainOrder(order.id, renewYears);
+      if (res.success && res.authorizationUrl) {
+        window.location.href = res.authorizationUrl;
+      } else {
+        setAlert({ type: 'error', text: res.message || 'Failed to initiate domain renewal.' });
+      }
+    } catch (err: any) {
+      setAlert({ type: 'error', text: err.message || 'Renewal error.' });
+    } finally {
+      setRenewing(false);
+    }
+  };
 
   // Nameservers State
   const [nsMode, setNsMode] = useState<'cloudflare' | 'custom'>(
@@ -454,9 +476,17 @@ export default function DomainFleetOperabilities({
       )}
 
       {/* TAB 1: SECURITY, WHOIS PRIVACY & EPP CODE */}
-      {activeTab === 'security' && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      {activeTab === 'security' && (() => {
+        const expiryDate = order.expiresAt ? new Date(order.expiresAt) : null;
+        const now = new Date();
+        const isExpired = expiryDate ? expiryDate.getTime() < now.getTime() : false;
+        const daysDiff = expiryDate ? Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)) : null;
+        const gracePeriodEnd = expiryDate ? new Date(expiryDate.getTime() + 30 * 24 * 60 * 60 * 1000) : null;
+        const isInGracePeriod = isExpired && gracePeriodEnd ? now.getTime() <= gracePeriodEnd.getTime() : false;
+
+        return (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {/* WhoisGuard Toggle */}
             <div className="p-3.5 rounded-xl border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5]/60 dark:bg-white/[0.02] space-y-2">
               <div className="flex items-center justify-between">
@@ -565,8 +595,105 @@ export default function DomainFleetOperabilities({
               )}
             </div>
           </div>
+
+          {/* Domain Lifecycle, Auto-Renewal & 30-Day ICANN Grace Period Panel */}
+          <div className="p-4 rounded-xl border border-[#11140F]/15 dark:border-white/10 bg-white dark:bg-[#161B13] space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#11140F]/10 dark:border-white/10 pb-3">
+              <div>
+                <span className="font-bold text-[13px] text-[#11140F] dark:text-white block">
+                  Domain Lifecycle &amp; Registry Renewal
+                </span>
+                <span className="text-[11px] text-[#11140F]/60 dark:text-white/60">
+                  Upstream Registrar: Namecheap / Registry API • Managed via Paystack
+                </span>
+              </div>
+
+              {isInGracePeriod ? (
+                <span className="px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 font-bold text-[11px] flex items-center gap-1.5 self-start sm:self-auto">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  <span>In 30-Day ICANN Grace Period</span>
+                </span>
+              ) : isExpired ? (
+                <span className="px-2.5 py-1 rounded-full bg-red-500/15 border border-red-500/30 text-red-600 dark:text-red-400 font-bold text-[11px] flex items-center gap-1.5 self-start sm:self-auto">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  <span>Expired</span>
+                </span>
+              ) : (
+                <span className="px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-bold text-[11px] flex items-center gap-1.5 self-start sm:self-auto">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Active • {daysDiff !== null ? `${daysDiff} days left` : 'Protected'}</span>
+                </span>
+              )}
+            </div>
+
+            {/* Grace Period Alert */}
+            {isInGracePeriod && (
+              <div className="p-3 rounded-lg border border-amber-400/40 bg-amber-50/90 dark:bg-amber-950/20 text-amber-900 dark:text-amber-200 text-[11.5px] space-y-1">
+                <div className="font-bold flex items-center gap-1.5">
+                  <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>30-Day ICANN Grace Period Protection Active</span>
+                </div>
+                <p className="leading-relaxed">
+                  This domain reached its expiration date on <strong>{expiryDate?.toLocaleDateString()}</strong>. It is currently in the standard 30-day ICANN grace period (ends <strong>{gracePeriodEnd?.toLocaleDateString()}</strong>). Your DNS routing, email aliases, and bio showcase remain fully configured and preserved. Renew now via Paystack to maintain active registry status without interruption.
+                </p>
+              </div>
+            )}
+
+            {/* Automated Renewal Info */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px]">
+              <div className="p-3 rounded-lg bg-[#F7F8F5] dark:bg-white/[0.03] border border-[#11140F]/10 dark:border-white/10 space-y-1">
+                <span className="font-semibold text-[#11140F] dark:text-white block">
+                  Automated Registry Renewal
+                </span>
+                <p className="text-[#11140F]/70 dark:text-white/70">
+                  {autoRenew
+                    ? 'Active: System automatically dispatches upstream registry renewal request before expiration and bills your saved Paystack profile.'
+                    : 'Inactive: Domain will enter standard 30-day ICANN grace period upon term expiration.'}
+                </p>
+              </div>
+              <div className="p-3 rounded-lg bg-[#F7F8F5] dark:bg-white/[0.03] border border-[#11140F]/10 dark:border-white/10 space-y-1">
+                <span className="font-semibold text-[#11140F] dark:text-white block">
+                  Current Expiration Date
+                </span>
+                <p className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">
+                  {expiryDate
+                    ? expiryDate.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+                    : '1 Year from initial registration'}
+                </p>
+              </div>
+            </div>
+
+            {/* Manual Renewal Form */}
+            <div className="pt-2 border-t border-[#11140F]/10 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <label className="text-[11.5px] font-semibold text-[#11140F]/70 dark:text-white/70">
+                  Extend Registration:
+                </label>
+                <select
+                  value={renewYears}
+                  onChange={(e) => setRenewYears(Number(e.target.value) as 1 | 2 | 3)}
+                  className="bg-[#F7F8F5] dark:bg-white/10 border border-[#11140F]/15 dark:border-white/15 rounded-lg px-2.5 py-1.5 text-[11.5px] text-[#11140F] dark:text-white font-medium outline-hidden"
+                >
+                  <option value={1}>+1 Year</option>
+                  <option value={2}>+2 Years (5% bundle off)</option>
+                  <option value={3}>+3 Years (10% bundle off)</option>
+                </select>
+              </div>
+
+              <button
+                type="button"
+                disabled={renewing}
+                onClick={handleRenewDomain}
+                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 shadow-sm"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${renewing ? 'animate-spin' : ''}`} />
+                <span>{renewing ? 'Redirecting to Paystack...' : 'Renew Domain via Paystack'}</span>
+              </button>
+            </div>
+          </div>
         </div>
-      )}
+      );
+    })()}
 
       {/* TAB 2: WEB & URL FORWARDING */}
       {activeTab === 'redirect' && (

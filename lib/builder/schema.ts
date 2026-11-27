@@ -99,7 +99,7 @@ export const StyleSchema = z
     letterSpacing: z.number().min(-0.02).max(0.2), // em. Negative floor is deliberately tiny
     textAlign: z.enum(['left', 'center', 'right']),
     color: ColorToken,
-    textTransform: z.enum(['none', 'uppercase']),
+    textTransform: z.enum(['none', 'uppercase', 'capitalize', 'lowercase']),
     objectFit: z.enum(['cover', 'contain']),
   })
   .partial()

@@ -125,10 +125,10 @@ export function RenderDoc({
 
         return (
           <div key={node.id} className={className}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', width: '100%' }}>
-              <span style={{ fontWeight: 700, fontSize: '14.5px' }}>{name}</span>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', width: '100%' }}>
+              <span style={{ fontWeight: 700, fontSize: '14.5px', wordBreak: 'break-word', flex: 1, minWidth: 0 }}>{name}</span>
               {price && (
-                <span style={{ fontWeight: 600, fontSize: '13px', padding: '2px 8px', borderRadius: '6px', background: 'rgba(255,255,255,0.08)', whiteSpace: 'nowrap' }}>
+                <span style={{ fontWeight: 600, fontSize: '13px', padding: '2px 8px', borderRadius: '6px', background: 'rgba(255,255,255,0.12)', whiteSpace: 'nowrap', flexShrink: 0, marginLeft: '8px' }}>
                   {price}
                 </span>
               )}

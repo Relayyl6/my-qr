@@ -67,6 +67,7 @@ export async function PATCH(
         active: body.active !== undefined ? Boolean(body.active) : undefined,
         title: body.title ? String(body.title).trim() : undefined,
         spec: body.spec !== undefined ? body.spec : undefined,
+        scansCount: typeof body.scansCount === 'number' ? Math.max(0, Math.floor(body.scansCount)) : undefined,
       },
     });
 

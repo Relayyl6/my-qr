@@ -56,7 +56,7 @@ export default function PrivacyPage() {
         <section className="space-y-3">
           <h2 className="text-xl font-semibold">3. Payment Information</h2>
           <p>
-            All payment transactions are handled directly through Stripe. DynamicQR does not store or process your credit card numbers or payment details on our servers.
+            All payment transactions are handled directly through Paystack. DynamicQR does not store or process your credit card numbers or payment details on our servers.
           </p>
         </section>
 

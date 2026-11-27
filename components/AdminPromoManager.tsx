@@ -925,7 +925,7 @@ export default function AdminPromoManager({
             <div>
               <h3 className="text-sm font-bold text-[#11140F]">Active Coupon & Promo Codes</h3>
               <p className="text-xs text-[#11140F]/60 mt-0.5">
-                Redeemable at Stripe checkout & developer tier upgrades. Configured codes instantly validate on `/pricing`.
+                Redeemable at Paystack checkout & developer tier upgrades. Configured codes instantly validate on `/pricing`.
               </p>
             </div>
             <button

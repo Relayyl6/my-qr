@@ -143,8 +143,26 @@ export function CanvasOverlay({
       observer.observe(cd.body, { attributes: true, childList: true, subtree: true });
     }
 
+    // Global cancel/clear handler for drag indicators on Escape or window blur
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setDragMoveState(null);
+        setResizeState(null);
+        dragCandidateRef.current = null;
+      }
+    };
+    const handleGlobalBlur = () => {
+      setDragMoveState(null);
+      setResizeState(null);
+      dragCandidateRef.current = null;
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    window.addEventListener('blur', handleGlobalBlur);
+
     return () => {
       clearInterval(interval);
+      window.removeEventListener('keydown', handleGlobalKeyDown);
+      window.removeEventListener('blur', handleGlobalBlur);
       if (cw) {
         cw.removeEventListener('scroll', updateRects);
         cw.removeEventListener('resize', updateRects);
@@ -521,6 +539,25 @@ export function CanvasOverlay({
       onPointerUp={handlePointerUp}
       onPointerDown={handlePointerDown}
       onDoubleClick={handleDoubleClick}
+      onWheel={(e) => {
+        // Forward trackpad/mousewheel scroll into iframe
+        const iframe = iframeRef.current;
+        if (iframe && iframe.contentWindow) {
+          iframe.contentWindow.scrollBy({
+            top: e.deltaY,
+            left: e.deltaX,
+            behavior: 'auto',
+          });
+          updateRects();
+        }
+      }}
+      onPointerLeave={() => {
+        // Clear drag candidate if pointer leaves window or overlay without moving
+        if (!dragMoveState?.hasMoved && !resizeState) {
+          setDragMoveState(null);
+          dragCandidateRef.current = null;
+        }
+      }}
       className="absolute inset-0 pointer-events-auto z-20 select-none overflow-hidden"
     >
       {/* 1. Drop Target Container Highlight */}

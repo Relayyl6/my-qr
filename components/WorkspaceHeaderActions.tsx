@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import BulkImportWizard from './BulkImportWizard';
 import AccountSettingsModal from './AccountSettingsModal';
-import { Layers, Activity, Shield, Settings, User } from 'lucide-react';
+import { Layers, Activity, Shield, Settings, User, Compass } from 'lucide-react';
 
 interface Props {
   isAdmin?: boolean;
@@ -30,6 +30,15 @@ export default function WorkspaceHeaderActions({ isAdmin = false, user }: Props)
         <Layers className="w-3.5 h-3.5 text-emerald-600 dark:text-[#34D399]" />
         Bulk Import (AI)
       </button>
+
+      <Link
+        href="/product-tour?tour=true"
+        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-[#11140F]/15 dark:border-white/12 bg-white dark:bg-white/[0.04] text-[12.5px] font-medium text-[#11140F]/80 dark:text-white/80 hover:text-[#11140F] dark:hover:text-white hover:bg-[#11140F]/[0.03] dark:hover:bg-white/10 transition-colors shadow-2xs"
+        title="Interactive Platform Tour"
+      >
+        <Compass className="w-3.5 h-3.5 text-emerald-600 dark:text-[#34D399]" />
+        <span>Product Tour</span>
+      </Link>
 
       {user && (
         <button

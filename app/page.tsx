@@ -176,6 +176,7 @@ export default async function Home() {
       mailLists={mailLists}
       recentScans={recentScans}
       customerContacts={customerContacts}
+      announcementBanner={effectiveAnnouncement}
       planUsageMeter={
         <PlanUsageMeter
           userTier={user.tier || 'free'}

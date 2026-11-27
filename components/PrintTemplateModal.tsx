@@ -333,7 +333,7 @@ export default function PrintTemplateModal({
   // Paper Sheet Placement State (position of card on physical sheet of paper)
   const [paperX, setPaperX] = useState<number>(50); // percentage 12% - 88%
   const [paperY, setPaperY] = useState<number>(50); // percentage 12% - 88%
-  const [qrSize, setQrSize] = useState<number>(130);
+  const [qrSize, setQrSize] = useState<number>(85);
   const [isDraggingCard, setIsDraggingCard] = useState(false);
   const paperSheetRef = useRef<HTMLDivElement>(null);
   const isDraggingPaperRef = useRef(false);
@@ -365,10 +365,10 @@ export default function PrintTemplateModal({
 
   // Adjust default QR size when template changes
   useEffect(() => {
-    if (template === 'card-badge') setQrSize(96);
-    else if (template === 'window-sign') setQrSize(140);
-    else if (template === 'full-poster') setQrSize(150);
-    else setQrSize(130);
+    if (template === 'card-badge') setQrSize(68);
+    else if (template === 'window-sign') setQrSize(92);
+    else if (template === 'full-poster') setQrSize(105);
+    else setQrSize(85);
   }, [template]);
 
   // Pointer drag events for QR positioning (inside card)
@@ -523,6 +523,13 @@ export default function PrintTemplateModal({
 
     const cloned = printSheet.cloneNode(true) as HTMLElement;
     cloned.querySelectorAll('[data-no-print], .no-print').forEach((el) => el.remove());
+    cloned.querySelectorAll('*').forEach((el) => {
+      el.removeAttribute('title');
+      const txt = el.textContent?.trim();
+      if (txt === 'Drag card on paper' || txt === 'Drag QR' || txt === 'Drag me') {
+        el.remove();
+      }
+    });
     const sheetHtml = cloned.innerHTML;
     const isBadge = template === 'card-badge';
     const isSign = template === 'window-sign';
@@ -536,7 +543,7 @@ export default function PrintTemplateModal({
           <title>Print Template - ${shortCode}</title>
           <style>
             @page {
-              size: auto;
+              size: A4 portrait;
               margin: 0;
             }
             * {
@@ -557,6 +564,8 @@ export default function PrintTemplateModal({
               background: #ffffff;
               position: relative;
               overflow: hidden;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
             }
             .paper-page {
               width: 100vw;
@@ -570,16 +579,16 @@ export default function PrintTemplateModal({
               top: ${paperY}%;
               transform: translate(-50%, -50%);
               border: ${showBorder ? `2px solid ${accentColor}` : 'none'};
-              border-radius: 20px;
-              padding: ${isBadge ? '24px 32px' : isSign ? '36px' : isFullPoster ? '48px 36px' : '40px 28px'};
+              border-radius: 16px;
+              padding: ${isBadge ? '16px 20px' : isSign ? '24px' : isFullPoster ? '32px 24px' : '28px 20px'};
               display: flex;
               flex-direction: ${isBadge ? 'row' : 'column'};
               align-items: center;
               justify-content: space-between;
               text-align: ${isBadge ? 'left' : 'center'};
               background: #ffffff;
-              width: ${isBadge ? '420px' : isSign ? '440px' : isFullPoster ? '520px' : '360px'};
-              height: ${isBadge ? '230px' : isSign ? '440px' : isFullPoster ? '700px' : '520px'};
+              width: ${isBadge ? '320px' : isSign ? '320px' : isFullPoster ? '380px' : '260px'};
+              height: ${isBadge ? '180px' : isSign ? '320px' : isFullPoster ? '480px' : '370px'};
               page-break-inside: avoid;
               break-inside: avoid;
             }
@@ -1650,39 +1659,6 @@ export default function PrintTemplateModal({
               </div>
             </div>
 
-            {/* Quick Paper Position Selector Pills */}
-            <div className="w-full flex items-center justify-between gap-1 pb-2 mb-1 shrink-0 text-[11px]">
-              <span className="text-[10px] uppercase font-mono opacity-50 font-semibold">Position:</span>
-              <div className="flex items-center gap-1 bg-black/5 dark:bg-white/5 p-0.5 rounded-lg border border-black/10 dark:border-white/10">
-                {[
-                  { x: 50, y: 22, label: '⬆ Top / Fold' },
-                  { x: 50, y: 50, label: '🎯 Center' },
-                  { x: 50, y: 78, label: '⬇ Bottom' },
-                  { x: 25, y: 22, label: '↖ Top-Left' },
-                  { x: 75, y: 22, label: '↗ Top-Right' },
-                ].map(({ x, y, label }) => {
-                  const isMatch = Math.abs(paperX - x) <= 5 && Math.abs(paperY - y) <= 5;
-                  return (
-                    <button
-                      key={label}
-                      type="button"
-                      onClick={() => {
-                        setPaperX(x);
-                        setPaperY(y);
-                      }}
-                      className={`px-2 py-1 rounded text-[10.5px] font-medium transition-all cursor-pointer ${
-                        isMatch
-                          ? 'bg-emerald-600 text-white font-semibold shadow-xs'
-                          : 'text-[#11140F]/70 dark:text-white/70 hover:text-black dark:hover:text-white'
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
             {/* Centered Preview Canvas / Scaled Paper Sheet Container */}
             <div className="w-full flex-1 flex items-center justify-center py-2 sm:py-3 overflow-hidden min-h-[300px]">
               <div className="transform scale-[0.72] sm:scale-[0.82] md:scale-[0.88] lg:scale-[0.94] origin-center transition-transform">
@@ -1737,12 +1713,12 @@ export default function PrintTemplateModal({
                       showBorder ? 'border-2' : ''
                     } ${
                       template === 'table-tent'
-                        ? 'w-[260px] sm:w-[280px] h-[340px] sm:h-[370px] p-5 sm:p-6 rounded-2xl'
+                        ? 'w-[195px] sm:w-[215px] h-[265px] sm:h-[290px] p-4 sm:p-5 rounded-xl'
                         : template === 'window-sign'
-                        ? 'w-[270px] sm:w-[300px] h-[270px] sm:h-[300px] p-5 sm:p-6 rounded-2xl'
+                        ? 'w-[205px] sm:w-[225px] h-[205px] sm:h-[225px] p-4 sm:p-5 rounded-xl'
                         : template === 'full-poster'
-                        ? 'w-[280px] sm:w-[310px] h-[380px] sm:h-[420px] p-5 sm:p-6 rounded-2xl'
-                        : 'w-[290px] sm:w-[320px] h-[180px] sm:h-[200px] p-3.5 sm:p-4 rounded-xl flex-row text-left'
+                        ? 'w-[215px] sm:w-[235px] h-[310px] sm:h-[340px] p-4 sm:p-5 rounded-xl'
+                        : 'w-[220px] sm:w-[240px] h-[135px] sm:h-[150px] p-3 sm:p-3.5 rounded-lg flex-row text-left'
                     }`}
                     style={{
                       position: 'absolute',

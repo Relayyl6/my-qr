@@ -435,7 +435,7 @@ export default function AppleProductTour({ onOpenWorkspace }: Props) {
               <span className="hover:text-white transition-colors cursor-default">Google</span>
               <span className="hover:text-white transition-colors cursor-default">amazon</span>
               <span className="hover:text-white transition-colors cursor-default">airbnb</span>
-              <span className="hover:text-white transition-colors cursor-default">Stripe</span>
+              <span className="hover:text-white transition-colors cursor-default">Paystack</span>
               <span className="hover:text-white transition-colors cursor-default">Vercel</span>
               <span className="hover:text-white transition-colors cursor-default">Shopify</span>
             </div>

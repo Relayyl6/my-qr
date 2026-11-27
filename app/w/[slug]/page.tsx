@@ -1,4 +1,6 @@
 import { notFound } from 'next/navigation';
+import { headers, cookies } from 'next/headers';
+import { getCurrentUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { APP_URL } from '@/lib/config';
 import WifiInteractiveView from '@/components/WifiInteractiveView';
@@ -76,13 +78,45 @@ export default async function WifiPublicPage({
     notFound();
   }
 
-  // Increment scan/view count asynchronously
-  prisma.microSaasItem
-    .update({
-      where: { id: item.id },
-      data: { scansCount: { increment: 1 } },
-    })
-    .catch(() => {});
+  const currentUser = await getCurrentUser().catch(() => null);
+  const isOwner = Boolean(currentUser?.id && currentUser.id === item.userId);
+
+  // Prevent inflated scan counts from owner testing, camera prefetches, crawlers, or rapid reloads
+  try {
+    const headerList = headers();
+    const purpose = headerList.get('purpose')?.toLowerCase().trim();
+    const secPurpose = headerList.get('sec-purpose')?.toLowerCase().trim();
+    const xPurpose = headerList.get('x-purpose')?.toLowerCase().trim();
+    const userAgent = headerList.get('user-agent')?.toLowerCase() || '';
+
+    const isPrefetch =
+      purpose === 'prefetch' ||
+      secPurpose === 'prefetch' ||
+      xPurpose === 'preview';
+
+    const isBot = /bot|crawler|spider|crawling|facebookexternalhit|whatsapp|slackbot|twitterbot|telegrambot/i.test(userAgent);
+
+    const cookieStore = cookies();
+    const sessionScanKey = `wifi_scanned_${item.id}`;
+    const alreadyScanned = cookieStore.get(sessionScanKey);
+
+    if (!isOwner && !isPrefetch && !isBot && !alreadyScanned) {
+      cookieStore.set(sessionScanKey, '1', {
+        maxAge: 1800, // 30 minutes session deduplication
+        path: '/',
+        httpOnly: true,
+        sameSite: 'lax',
+      });
+      prisma.microSaasItem
+        .update({
+          where: { id: item.id },
+          data: { scansCount: { increment: 1 } },
+        })
+        .catch(() => {});
+    }
+  } catch (e) {
+    // Fallback safe bypass
+  }
 
   const spec = (item.spec as any) || {};
 

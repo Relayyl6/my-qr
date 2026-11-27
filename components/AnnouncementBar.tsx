@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Tag, ArrowRight, X } from 'lucide-react';
 
 export interface BannerData {
@@ -27,8 +28,19 @@ interface AnnouncementBarProps {
 }
 
 export default function AnnouncementBar({ initialBanner }: AnnouncementBarProps) {
+  const pathname = usePathname();
+
   // If initialBanner is provided via SSR, initialize state immediately (zero delay, zero jitter)
+  const isExcludedRoute =
+    pathname?.startsWith('/c/') ||
+    pathname?.startsWith('/page/') ||
+    pathname?.startsWith('/m/') ||
+    pathname?.startsWith('/w/') ||
+    pathname?.startsWith('/s/') ||
+    pathname?.startsWith('/admin');
+
   const hasInitialContent =
+    !isExcludedRoute &&
     initialBanner &&
     initialBanner.enabled &&
     Boolean(initialBanner.messageText?.trim() || initialBanner.badgeText?.trim());
@@ -40,10 +52,21 @@ export default function AnnouncementBar({ initialBanner }: AnnouncementBarProps)
   const barRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
+    if (isExcludedRoute) {
+      setVisible(false);
+      return;
+    }
+
     // Live update check to keep bar reactive when admin toggles without hard refresh
     fetch('/api/promo/config', { cache: 'no-store' })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
+        // Suppress promo banner for logged-in paid subscribers
+        if (data?.isPaidUser) {
+          setVisible(false);
+          return;
+        }
+
         if (
           data &&
           data.banner &&
@@ -59,7 +82,7 @@ export default function AnnouncementBar({ initialBanner }: AnnouncementBarProps)
       .catch(() => {
         // Fall back to SSR state
       });
-  }, []);
+  }, [pathname, isExcludedRoute]);
 
   // Synchronize CSS variable --announcement-bar-height so any sticky child below it adjusts without clipping
   useEffect(() => {

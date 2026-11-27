@@ -1302,18 +1302,23 @@ export default function WorkspaceOverviewTab({
           
           {/* Header */}
           <div className="flex items-center justify-between shrink-0 pb-1.5 border-b border-white/[0.04]">
-            <div className="flex items-center gap-2">
-              <h3 className="text-xs font-bold text-white tracking-tight">
-                Live Routing Telemetry & Leads
-              </h3>
-            </div>
             <button
               type="button"
-              onClick={() => onNavigateSection('links')}
-              className="w-5 h-5 rounded-md bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/60 hover:text-white transition-colors cursor-pointer text-xs"
-              title="Create New QR Link"
+              onClick={() => onNavigateSection('analyst')}
+              className="flex items-center gap-1.5 text-xs font-bold text-white hover:text-emerald-400 tracking-tight transition-colors cursor-pointer text-left"
+              title="Open full Telemetry Hub & Campaign Analytics"
             >
-              +
+              <span>Live Routing Telemetry & Leads</span>
+              <ArrowUpRight className="w-3.5 h-3.5 opacity-60" />
+            </button>
+            <button
+              type="button"
+              onClick={() => onNavigateSection('analyst')}
+              className="px-2 py-0.5 rounded-md bg-white/5 hover:bg-emerald-500/20 text-white/60 hover:text-emerald-300 flex items-center gap-1 transition-colors cursor-pointer text-[10px] font-mono"
+              title="Launch full telemetry hub"
+            >
+              <span>Open Hub</span>
+              <ArrowUpRight className="w-3 h-3" />
             </button>
           </div>
 
@@ -1384,7 +1389,7 @@ export default function WorkspaceOverviewTab({
           <div className="pt-1.5 border-t border-white/5 flex items-center justify-between shrink-0">
             <button
               type="button"
-              onClick={() => onNavigateSection('mailing')}
+              onClick={() => onNavigateSection('analyst')}
               className="text-[10.5px] text-emerald-400 hover:text-emerald-300 font-medium inline-flex items-center gap-1 cursor-pointer transition-colors"
             >
               <span>View all telemetry logs & leads</span>

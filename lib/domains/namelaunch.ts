@@ -210,8 +210,8 @@ export async function searchDomains(
   const dnaUsername = process.env.DNA_USERNAME;
   const dnaPassword = process.env.DNA_PASSWORD;
 
-  // Load active dynamic pricing & scaled FX configuration
-  const pricingConfig = await getDomainPricingConfig().catch(() => null);
+  // Load active dynamic pricing & scaled FX configuration (DB -> Memory -> Persistent Disk)
+  const pricingConfig = await getDomainPricingConfig();
 
   let results: DomainSearchResult[] = [];
 

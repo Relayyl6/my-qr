@@ -44,14 +44,16 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Unauthorized.' }, { status: 403 });
       }
 
-      const tld = existing.domainName.split('.').pop() || 'com';
-      const wholesaleUsd = existing.wholesaleUsd || WHOLESALE_USD_PRICING[tld] || 10.5;
-      const pricingConfig = await getDomainPricingConfig().catch(() => null);
-      const effectiveRate = pricingConfig
-        ? pricingConfig.mode === 'manual_override'
+      const tld = (existing.domainName.split('.').pop() || 'com').toLowerCase();
+      const pricingConfig = await getDomainPricingConfig();
+      const wholesaleUsd =
+        existing.wholesaleUsd ||
+        WHOLESALE_USD_PRICING[tld] ||
+        (pricingConfig.tldOverrides?.[tld] ? Math.max(10.5, pricingConfig.tldOverrides[tld] / pricingConfig.bufferedRate) : 10.5);
+      const effectiveRate =
+        pricingConfig.mode === 'manual_override'
           ? pricingConfig.manualOverrideRate
-          : pricingConfig.bufferedRate
-        : 1400;
+          : pricingConfig.bufferedRate;
 
       const periodYears = ([1, 2, 3].includes(existing.registrationYears)
         ? existing.registrationYears
@@ -59,7 +61,7 @@ export async function POST(req: Request) {
       const multiYear = calculateMultiYearDomainPrice(
         wholesaleUsd,
         tld,
-        pricingConfig || DEFAULT_PRICING_CONFIG,
+        pricingConfig,
         periodYears
       );
 
@@ -102,15 +104,16 @@ export async function POST(req: Request) {
         );
       }
 
-      const tld = domainName.split('.').pop() || 'com';
-      const wholesaleUsd = WHOLESALE_USD_PRICING[tld] || 10.5;
-      const pricingConfig = await getDomainPricingConfig().catch(() => null);
-      const pricing = calculateNgnPricing(wholesaleUsd, tld, pricingConfig || undefined);
-      const effectiveRate = pricingConfig
-        ? pricingConfig.mode === 'manual_override'
+      const tld = (domainName.split('.').pop() || 'com').toLowerCase();
+      const pricingConfig = await getDomainPricingConfig();
+      const wholesaleUsd =
+        WHOLESALE_USD_PRICING[tld] ||
+        (pricingConfig.tldOverrides?.[tld] ? Math.max(10.5, pricingConfig.tldOverrides[tld] / pricingConfig.bufferedRate) : 10.5);
+      const pricing = calculateNgnPricing(wholesaleUsd, tld, pricingConfig);
+      const effectiveRate =
+        pricingConfig.mode === 'manual_override'
           ? pricingConfig.manualOverrideRate
-          : pricingConfig.bufferedRate
-        : 1400;
+          : pricingConfig.bufferedRate;
 
       const periodYears = [1, 2, 3].includes(Number(body.periodYears))
         ? (Number(body.periodYears) as 1 | 2 | 3)
@@ -119,7 +122,7 @@ export async function POST(req: Request) {
       const multiYear = calculateMultiYearDomainPrice(
         wholesaleUsd,
         tld,
-        pricingConfig || DEFAULT_PRICING_CONFIG,
+        pricingConfig,
         periodYears
       );
 

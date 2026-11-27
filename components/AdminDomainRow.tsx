@@ -37,28 +37,28 @@ export default function AdminDomainRow({ domain }: { domain: DomainRecord }) {
   };
 
   return (
-    <tr className="border-b border-[#11140F]/5 text-[12.5px] hover:bg-[#F7F8F5]/50 transition-colors">
-      <td className="py-3 px-4 font-mono font-semibold text-[#11140F]">
+    <tr className="border-b border-[#11140F]/5 dark:border-white/10 text-[12.5px] hover:bg-[#F7F8F5]/50 dark:hover:bg-white/[0.04] transition-colors">
+      <td className="py-3 px-4 font-mono font-semibold text-[#11140F] dark:text-white">
         <div className="flex items-center gap-1.5">
-          <Globe className="w-3.5 h-3.5 text-blue-600" />
+          <Globe className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
           <span>{domain.domain}</span>
         </div>
       </td>
-      <td className="py-3 px-4 text-[#11140F]/80">
+      <td className="py-3 px-4 text-[#11140F]/80 dark:text-white/80">
         {domain.user.email}
       </td>
       <td className="py-3 px-4">
         <span
           className={`px-2 py-0.5 rounded-full text-[11px] font-semibold font-mono ${
             status === 'verified'
-              ? 'bg-emerald-100 text-emerald-800'
-              : 'bg-amber-100 text-amber-900 border border-amber-200'
+              ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700/50'
+              : 'bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border border-amber-200 dark:border-amber-700/50'
           }`}
         >
           {status.toUpperCase()}
         </span>
       </td>
-      <td className="py-3 px-4 font-mono text-[11px] text-[#11140F]/50">
+      <td className="py-3 px-4 font-mono text-[11px] text-[#11140F]/50 dark:text-white/50">
         CNAME: {domain.cnameTarget}
       </td>
       <td className="py-3 px-4 text-right">

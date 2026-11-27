@@ -178,11 +178,11 @@ export default function HeaderNav({
             {/* Left: DynamicQR Brand Logo & Pricing Link */}
             <div className="flex items-center gap-2 sm:gap-4 shrink-0">
               <a
-                href="#top"
+                href="#workspace"
                 onClick={(e) => {
                   if (onTabChange) {
                     e.preventDefault();
-                    handleTabClick('overview');
+                    handleTabClick(user ? 'workspace' : 'overview');
                   }
                 }}
                 className="flex items-center gap-1.5 sm:gap-2.5 group cursor-pointer"

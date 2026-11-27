@@ -61,14 +61,20 @@ export default function EntryPromoModal({ forceOpen = false, onClose }: EntryPro
       return;
     }
 
-    // Exclude admin, checkout, login pages
+    // Exclude admin, checkout, login, pricing, vCard, menu, wifi, shortlink and public page routes
     if (
       pathname?.startsWith('/admin') ||
       pathname?.startsWith('/checkout') ||
       pathname?.startsWith('/login') ||
       pathname?.startsWith('/newsletter') ||
-      pathname?.startsWith('/pricing')
+      pathname?.startsWith('/pricing') ||
+      pathname?.startsWith('/c/') ||
+      pathname?.startsWith('/page/') ||
+      pathname?.startsWith('/m/') ||
+      pathname?.startsWith('/w/') ||
+      pathname?.startsWith('/s/')
     ) {
+      setIsOpen(false);
       return;
     }
 
@@ -76,6 +82,12 @@ export default function EntryPromoModal({ forceOpen = false, onClose }: EntryPro
     fetch('/api/promo/config', { cache: 'no-store' })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
+        // Only show for non-logged-in users OR free users; suppress for paid tier subscribers
+        if (data?.isPaidUser) {
+          setIsOpen(false);
+          return;
+        }
+
         if (
           data &&
           data.modal &&
@@ -221,18 +233,40 @@ export default function EntryPromoModal({ forceOpen = false, onClose }: EntryPro
 
           {/* Email Subscription Capture / CTA */}
           {submitted ? (
-            <div className="p-4 rounded-xl bg-[#2F6B4F]/20 border border-[#34D399]/30 text-[#34D399] text-center text-sm font-medium flex items-center justify-center gap-2">
-              <Check className="w-4 h-4" />
-              Check your email for your confirmation and discount link!
+            <div className="space-y-3">
+              <div className="p-4 rounded-xl bg-[#2F6B4F]/20 border border-[#34D399]/30 text-[#34D399] text-center text-sm font-medium flex items-center justify-center gap-2">
+                <Check className="w-4 h-4 shrink-0" />
+                <span>Code unlocked! Enter code <strong>{config.promoCode}</strong> at checkout.</span>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(config.promoCode);
+                  }}
+                  className="flex-1 py-3 px-4 rounded-xl bg-white/10 hover:bg-white/15 text-white font-semibold text-xs border border-white/15 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Check className="w-3.5 h-3.5 text-[#34D399]" />
+                  <span>Copy Code: {config.promoCode}</span>
+                </button>
+                <Link
+                  href={pricingTargetUrl}
+                  onClick={handleDismiss}
+                  className="flex-1 py-3 px-4 rounded-xl bg-[#34D399] text-[#11140F] font-semibold text-xs flex items-center justify-center gap-1.5 hover:bg-[#34D399]/90 transition-colors shadow-xs"
+                >
+                  <span>Apply at Pricing</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
             </div>
-          ) : (
+          ) : config.requireEmail ? (
             <form onSubmit={handleSubscribe} className="space-y-3">
               <div className="flex flex-col sm:flex-row gap-2">
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder={config.emailPlaceholder?.trim() || 'Enter your email...'}
+                  placeholder={config.emailPlaceholder?.trim() || 'Enter your email for code...'}
                   required
                   className="flex-1 bg-white/10 border border-white/15 rounded-xl px-4 py-3 text-sm text-white placeholder-white/40 focus:outline-hidden focus:border-[#34D399] transition-colors"
                 />
@@ -256,6 +290,17 @@ export default function EntryPromoModal({ forceOpen = false, onClose }: EntryPro
                 </Link>
               </div>
             </form>
+          ) : (
+            <div className="space-y-2">
+              <Link
+                href={pricingTargetUrl}
+                onClick={handleDismiss}
+                className="w-full py-3.5 px-5 rounded-xl bg-[#34D399] text-[#11140F] font-bold text-sm hover:bg-[#34D399]/90 transition-colors flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+              >
+                <span>{config.ctaText?.trim() || 'Claim Discount & Upgrade'}</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
           )}
 
           <div className="pt-2 text-[11px] text-white/40 text-center font-mono">

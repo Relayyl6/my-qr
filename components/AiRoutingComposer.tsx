@@ -763,73 +763,25 @@ export default function AiRoutingComposer({
               </div>
             )}
 
-            {/* Smart AI Natural Language Assistant (Plain Words Input Pane) */}
-            <div className="rounded-2xl border border-purple-200/90 dark:border-purple-500/30 bg-gradient-to-br from-purple-50/90 via-white to-emerald-50/50 dark:from-purple-950/30 dark:via-purple-900/10 dark:to-emerald-950/20 p-4 sm:p-5 shadow-xs space-y-3">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-xs">
-                    <Sparkles className="w-4 h-4 animate-pulse" />
+            {/* Autonomous Schedule Quick Assistant */}
+            <div className="rounded-2xl border border-[#11140F]/10 dark:border-white/10 bg-[#F7F8F5] dark:bg-white/[0.03] p-4 space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                    <Sparkles className="w-3.5 h-3.5" />
                   </div>
                   <div>
-                    <h4 className="text-[13.5px] font-bold text-[#11140F] dark:text-white flex items-center gap-2">
-                      <span>Smart AI Schedule Assistant</span>
-                      <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-700/50">
-                        Plain English • Slang • Everyday Words
-                      </span>
+                    <h4 className="text-[13px] font-bold text-[#11140F] dark:text-white">
+                      Smart Schedule Assistant
                     </h4>
-                    <p className="text-[11.5px] text-[#11140F]/70 dark:text-white/70 mt-0.5">
-                      Don&apos;t worry about technical jargon or time math. Just describe what you want in simple words, and AI will configure your schedule automatically.
-                    </p>
                   </div>
                 </div>
-              </div>
-
-              <div className="relative">
-                <textarea
-                  value={promptText}
-                  onChange={(e) => setPromptText(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-                      e.preventDefault();
-                      handleCompile(undefined, true);
-                    }
-                  }}
-                  placeholder='e.g. "Morning breakfast menu, afternoon lunch specials, and night tasting dinner" or "Weekdays go to company website, weekends send them to my WhatsApp"'
-                  rows={2}
-                  className="w-full rounded-xl border border-purple-200/90 dark:border-purple-500/30 bg-white dark:bg-white/[0.05] p-3 pr-36 text-[13px] text-[#11140F] dark:text-white placeholder:text-[#11140F]/40 dark:placeholder:text-white/40 outline-none focus:border-purple-600 dark:focus:border-purple-400 focus:ring-2 focus:ring-purple-500/10 transition-all resize-none shadow-xs"
-                />
-                <button
-                  type="button"
-                  onClick={() => handleCompile(undefined, true)}
-                  disabled={loading || !promptText.trim()}
-                  className="absolute right-2 bottom-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#11140F] dark:bg-purple-600 text-white text-[12px] font-semibold hover:bg-[#2A2E25] dark:hover:bg-purple-500 transition-all disabled:opacity-40 cursor-pointer shadow-xs"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      <span>Configuring…</span>
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-3.5 h-3.5 text-purple-300" />
-                      <span>Auto-Set with AI</span>
-                    </>
-                  )}
-                </button>
-              </div>
-
-              {/* Quick 1-Click Everyday Phrases */}
-              <div className="space-y-1.5">
-                <span className="text-[10.5px] font-semibold text-[#11140F]/60 dark:text-white/60 uppercase tracking-wider block">
-                  Or Click Any Everyday Example to Instantly Set Up:
-                </span>
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex items-center gap-1.5 flex-wrap">
                   {[
-                    { label: '🍳 Breakfast (8-12), Lunch (12-5) & Dinner (5-11)', prompt: 'Between 08:00 and 12:00 show breakfast, between 12:00 and 17:00 show lunch, and from 17:00 to 23:59 show dinner' },
-                    { label: '💼 Weekdays Website & Weekends WhatsApp', prompt: 'On weekdays Monday to Friday route to our website, and on weekends Saturday and Sunday route to WhatsApp' },
-                    { label: '📱 iPhone to App Store & Android to Play Store', prompt: 'Send iPhone and iPad users to the Apple App Store, and Android users to the Google Play Store' },
-                    { label: '🛍️ Daytime Catalog & Evening 20% Flash Deal', prompt: 'From 09:00 to 18:00 show our daytime store catalog, and after 18:00 show our 20% evening flash discount' },
-                    { label: '🌙 Nightlife VIP & Afternoon Earlybird', prompt: 'Afternoon 14:00 to 19:00 early bird event tickets, and 19:00 to 04:00 late night VIP table reservations' },
+                    { label: 'Restaurant Hours', prompt: 'Between 08:00 and 12:00 show breakfast, between 12:00 and 17:00 show lunch, and from 17:00 to 23:59 show dinner' },
+                    { label: 'Weekdays vs Weekends', prompt: 'On weekdays Monday to Friday route to our website, and on weekends Saturday and Sunday route to WhatsApp' },
+                    { label: 'iOS vs Android', prompt: 'Send iPhone and iPad users to the Apple App Store, and Android users to the Google Play Store' },
+                    { label: 'Flash Sale', prompt: 'From 09:00 to 18:00 show our store catalog, and after 18:00 show our 20% evening flash discount' },
                   ].map((chip, idx) => (
                     <button
                       key={idx}
@@ -838,12 +790,46 @@ export default function AiRoutingComposer({
                         setPromptText(chip.prompt);
                         handleCompile(chip.prompt, true);
                       }}
-                      className="text-[11px] font-medium px-2.5 py-1 rounded-lg bg-white dark:bg-white/[0.06] border border-[#11140F]/10 dark:border-white/15 hover:border-purple-400 dark:hover:border-purple-400 hover:bg-purple-50/50 dark:hover:bg-purple-900/20 text-[#11140F]/80 dark:text-white/85 transition-all cursor-pointer shadow-xs"
+                      className="text-[10.5px] font-medium px-2 py-0.5 rounded-md bg-white dark:bg-white/10 border border-[#11140F]/10 dark:border-white/15 hover:border-emerald-500 dark:hover:border-emerald-400 text-[#11140F]/70 dark:text-white/80 transition-colors cursor-pointer"
                     >
                       {chip.label}
                     </button>
                   ))}
                 </div>
+              </div>
+
+              <div className="relative">
+                <input
+                  type="text"
+                  value={promptText}
+                  onChange={(e) => setPromptText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleCompile(undefined, true);
+                    }
+                  }}
+                  placeholder='Describe schedule in plain words (e.g. "8am-12pm breakfast, 12pm-5pm lunch, evenings dinner")...'
+                  className="w-full rounded-xl border border-[#11140F]/15 dark:border-white/15 bg-white dark:bg-[#14161F] py-2 pl-3 pr-28 text-[12.5px] text-[#11140F] dark:text-white placeholder:text-[#11140F]/40 dark:placeholder:text-white/40 outline-none focus:border-emerald-500 transition-all shadow-xs"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleCompile(undefined, true)}
+                  disabled={loading || !promptText.trim()}
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#11140F] dark:bg-emerald-600 text-white text-[11.5px] font-semibold hover:bg-[#2A2E25] dark:hover:bg-emerald-500 transition-all disabled:opacity-40 cursor-pointer shadow-xs"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      <span>Configuring…</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-3 h-3 text-emerald-300" />
+                      <span>Apply</span>
+                    </>
+                  )}
+                </button>
               </div>
             </div>
 

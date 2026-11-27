@@ -50,7 +50,7 @@ export default function RefundPage() {
         <section className="space-y-3">
           <h2 className="text-xl font-semibold">3. Requesting a Refund</h2>
           <p>
-            To request a refund, simply send an email with your account email address to <a href="mailto:oseghaleleonard39@gmail.com" className="underline font-medium">oseghaleleonard39@gmail.com</a>. Refunds are processed through Stripe within 3-5 business days.
+            To request a refund, simply send an email with your account email address to <a href="mailto:oseghaleleonard39@gmail.com" className="underline font-medium">oseghaleleonard39@gmail.com</a>. Refunds are processed through Paystack within 3-5 business days.
           </p>
         </section>
       </main>

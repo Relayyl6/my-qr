@@ -31,6 +31,7 @@ import {
   TrendingUp,
   Video,
   AtSign,
+  Megaphone,
 } from 'lucide-react';
 import BulkImportWizard from './BulkImportWizard';
 import AccountSettingsModal from './AccountSettingsModal';
@@ -106,6 +107,7 @@ interface WorkspaceShellProps {
   mailLists?: any[];
   recentScans?: any[];
   customerContacts?: any[];
+  announcementBanner?: string | null;
 }
 
 export default function WorkspaceShell({
@@ -122,6 +124,7 @@ export default function WorkspaceShell({
   mailLists = [],
   recentScans = [],
   customerContacts = [],
+  announcementBanner,
 }: WorkspaceShellProps) {
   const [activeSection, setActiveSection] = useState<WorkspaceSection>('links');
   const [microSaasTab, setMicroSaasTab] = useState<'mailing' | 'vcard' | 'shortener' | 'menu' | 'wifi'>('mailing');
@@ -131,6 +134,7 @@ export default function WorkspaceShell({
   const [showAccountModal, setShowAccountModal] = useState(false);
   const [showPromoModalPreview, setShowPromoModalPreview] = useState(false);
   const [density, setDensity] = useState<'comfortable' | 'compact'>('comfortable');
+  const [broadcastDismissed, setBroadcastDismissed] = useState(false);
 
   const storageSectionKey = user?.id ? `dynamicqr_workspace_section_${user.id}` : 'dynamicqr_workspace_section';
   const storageTabKey = user?.id ? `dynamicqr_microsaas_tab_${user.id}` : 'dynamicqr_microsaas_tab';
@@ -688,19 +692,6 @@ export default function WorkspaceShell({
             )}
 
             <Link
-              href="/product-tour"
-              className={`rounded-xl text-[12.5px] font-medium transition-all ${
-                sidebarCollapsed
-                  ? 'w-10 h-10 flex items-center justify-center mx-auto text-[#11140F]/65 dark:text-white/65 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white'
-                  : 'w-full flex items-center gap-2.5 px-3 py-2 text-[#11140F]/65 dark:text-white/65 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white'
-              }`}
-              title="Product Tour"
-            >
-              <Compass className="w-4 h-4 shrink-0 opacity-75" />
-              {!sidebarCollapsed && <span className="truncate flex-1 text-left">Product Tour</span>}
-            </Link>
-
-            <Link
               href="/pricing"
               className={`rounded-xl text-[12.5px] font-medium transition-all ${
                 sidebarCollapsed
@@ -726,6 +717,19 @@ export default function WorkspaceShell({
               <Layers className="w-4 h-4 shrink-0 opacity-75" />
               {!sidebarCollapsed && <span className="truncate flex-1 text-left">Bulk Import</span>}
             </button>
+
+            <Link
+              href="/product-tour?tour=true"
+              className={`rounded-xl text-[12.5px] font-medium transition-all ${
+                sidebarCollapsed
+                  ? 'w-10 h-10 flex items-center justify-center mx-auto text-[#11140F]/65 dark:text-white/65 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white'
+                  : 'w-full flex items-center gap-2.5 px-3 py-2 text-[#11140F]/65 dark:text-white/65 hover:bg-[#11140F]/5 dark:hover:bg-white/5 hover:text-[#11140F] dark:hover:text-white'
+              }`}
+              title="Interactive Product Tour"
+            >
+              <Compass className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400 opacity-85" />
+              {!sidebarCollapsed && <span className="truncate flex-1 text-left">Product Tour</span>}
+            </Link>
 
             {isAdmin && (
               <>
@@ -972,14 +976,6 @@ export default function WorkspaceShell({
                   ALTERNATE NAVIGATION
                 </div>
                 <Link
-                  href="/product-tour"
-                  onClick={() => setMobileDrawerOpen(false)}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-[#11140F]/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5 transition-all"
-                >
-                  <Compass className="w-4 h-4 text-emerald-500" />
-                  <span>Product Tour</span>
-                </Link>
-                <Link
                   href="/pricing"
                   onClick={() => setMobileDrawerOpen(false)}
                   className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-[#11140F]/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5 transition-all"
@@ -998,6 +994,14 @@ export default function WorkspaceShell({
                   <Layers className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                   <span>Bulk Import (AI)</span>
                 </button>
+                <Link
+                  href="/product-tour?tour=true"
+                  onClick={() => setMobileDrawerOpen(false)}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-[#11140F]/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5 transition-all text-left"
+                >
+                  <Compass className="w-4 h-4 text-emerald-500" />
+                  <span>Product Tour</span>
+                </Link>
               </div>
 
               {isAdmin && (
@@ -1108,6 +1112,25 @@ export default function WorkspaceShell({
             : 'p-4 sm:p-6 lg:p-8 space-y-6'
         }`}
       >
+        {/* Platform-Wide Broadcast Banner (Available to everyone regardless of tier) */}
+        {announcementBanner && !broadcastDismissed && (
+          <div className="rounded-2xl bg-blue-600/10 dark:bg-blue-500/15 border border-blue-500/25 p-3.5 sm:p-4 text-blue-900 dark:text-blue-200 flex items-center justify-between gap-3 shadow-xs animate-in fade-in">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <Megaphone className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+              <div className="text-[12.5px] sm:text-[13px] font-medium leading-relaxed truncate sm:whitespace-normal">
+                {announcementBanner}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setBroadcastDismissed(true)}
+              className="p-1 rounded-lg hover:bg-blue-500/20 text-blue-700 dark:text-blue-300 transition-colors shrink-0 cursor-pointer"
+              title="Dismiss announcement"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
         {/* Unified Contextual Page Header (Consistent across all sidebar menu pages) */}
         {activeSection !== 'overview' && (
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#11140F]/10 dark:border-white/[0.08]">

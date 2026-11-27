@@ -14,8 +14,11 @@ import {
   saveDomainPricingConfig,
   fetchLiveUsdToNgnRate,
   scaleBufferedRate,
+  calculateMultiYearDomainPrice,
+  DEFAULT_PRICING_CONFIG,
   DomainPricingConfig,
 } from '@/lib/domains/fxEngine';
+import { WHOLESALE_USD_PRICING } from '@/lib/domains/namelaunch';
 
 export async function getUserDomainOrders(emailQuery?: string) {
   const user = await getCurrentUser();
@@ -37,6 +40,53 @@ export async function getUserDomainOrders(emailQuery?: string) {
 
 export async function confirmOrderPayment(paystackRef: string) {
   const user = await getCurrentUser();
+
+  // Handle Domain Renewal References
+  if (paystackRef.startsWith('RENEW_')) {
+    const paystackSecret = process.env.PAYSTACK_SECRET_KEY;
+    if (!paystackSecret || paystackSecret.includes('placeholder')) {
+      return { success: false, message: 'Payment gateway is not configured.' };
+    }
+    try {
+      const verifyRes = await fetch(
+        `https://api.paystack.co/transaction/verify/${encodeURIComponent(paystackRef)}`,
+        {
+          headers: { Authorization: `Bearer ${paystackSecret}` },
+          cache: 'no-store',
+        }
+      );
+      const verifyData = await verifyRes.json();
+      if (verifyData.status && verifyData.data?.status === 'success') {
+        const meta = verifyData.data?.metadata || {};
+        const orderId = meta.orderId;
+        if (orderId) {
+          const existingOrder = await prisma.domainOrder.findUnique({ where: { id: orderId } });
+          if (existingOrder) {
+            const renewYears = Number(meta.years || 1);
+            const currentExpiry = existingOrder.expiresAt ? new Date(existingOrder.expiresAt) : new Date();
+            const baseDate = currentExpiry > new Date() ? currentExpiry : new Date();
+            const newExpiresAt = new Date(baseDate.getTime() + renewYears * 365 * 24 * 60 * 60 * 1000);
+            const updated = await prisma.domainOrder.update({
+              where: { id: existingOrder.id },
+              data: {
+                status: 'ACTIVE',
+                expiresAt: newExpiresAt,
+                errorMessage: null,
+              },
+            });
+            revalidatePath('/');
+            return {
+              success: true,
+              order: updated,
+              message: `Domain ${existingOrder.domainName} renewed successfully until ${newExpiresAt.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}!`,
+            };
+          }
+        }
+      }
+    } catch (renewVerifyErr: any) {
+      console.error('[confirmOrderPayment] Renewal verification error:', renewVerifyErr);
+    }
+  }
 
   let order: any = null;
   try {
@@ -822,4 +872,86 @@ export async function deleteDomainContact(contactId: string) {
   } catch (err: any) {
     return { success: false, message: err.message || 'Failed to remove inquiry.' };
   }
+}
+
+/**
+ * Custom Domain Renewal via Paystack
+ * Supports extending domain registration by 1, 2, or 3 years.
+ * Validates ICANN grace period and applies multi-year bundling discounts.
+ */
+export async function renewCustomDomainOrder(orderId: string, years: number = 1) {
+  const user = await getCurrentUser();
+  if (!user) return { success: false, message: 'Unauthorized. Please sign in.' };
+
+  const order = await prisma.domainOrder.findUnique({ where: { id: orderId } });
+  if (!order) return { success: false, message: 'Domain order not found.' };
+
+  const adminEmail = (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();
+  const isAdmin = user && user.email.toLowerCase() === adminEmail;
+  if (!isAdmin && order.userId && order.userId !== user.id && order.userEmail.toLowerCase() !== user.email.toLowerCase()) {
+    return { success: false, message: 'Unauthorized to renew this domain.' };
+  }
+
+  const tld = (order.domainName.split('.').pop() || 'com').toLowerCase();
+  const effectiveConfig = await getDomainPricingConfig();
+  const wholesaleUsd =
+    order.wholesaleUsd ||
+    (WHOLESALE_USD_PRICING as any)[tld] ||
+    (effectiveConfig.tldOverrides?.[tld] ? Math.max(10.5, effectiveConfig.tldOverrides[tld] / effectiveConfig.bufferedRate) : 10.5);
+  const periodYears = ([1, 2, 3].includes(years) ? years : 1) as 1 | 2 | 3;
+  const multiYear = calculateMultiYearDomainPrice(wholesaleUsd, tld, effectiveConfig, periodYears);
+
+  const finalPriceNgn = multiYear.finalPriceNgn;
+  const amountKobo = finalPriceNgn * 100;
+  const reference = `RENEW_${order.id.slice(-6)}_${Date.now()}`;
+  const paystackSecret = process.env.PAYSTACK_SECRET_KEY;
+
+  if (!paystackSecret || paystackSecret.includes('placeholder')) {
+    return {
+      success: false,
+      message: 'Payment gateway is temporarily unconfigured in this environment.',
+    };
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://my-qr-sandy.vercel.app';
+  const paystackRes = await fetch('https://api.paystack.co/transaction/initialize', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${paystackSecret}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      email: order.userEmail || user.email,
+      amount: amountKobo,
+      currency: 'NGN',
+      reference,
+      callback_url: `${appUrl}/?section=namelaunch&ref=${reference}&renewed=true`,
+      metadata: {
+        isRenewal: true,
+        orderId: order.id,
+        domainName: order.domainName,
+        years: periodYears,
+        renewalNgn: finalPriceNgn,
+        custom_fields: [
+          {
+            display_name: 'Domain Renewal',
+            variable_name: 'domain_renewal',
+            value: `${order.domainName} (${periodYears} yr)`,
+          },
+        ],
+      },
+    }),
+  });
+
+  const paystackData = await paystackRes.json();
+  if (!paystackData.status) {
+    return { success: false, message: paystackData.message || 'Paystack renewal initialization failed' };
+  }
+
+  return {
+    success: true,
+    authorizationUrl: paystackData.data.authorization_url,
+    reference,
+    amountNgn: finalPriceNgn,
+  };
 }

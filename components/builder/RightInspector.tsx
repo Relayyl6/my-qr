@@ -16,6 +16,15 @@ import {
   AlignRight,
   ArrowRight,
   ChevronDown,
+  Globe,
+  Palette,
+  ExternalLink,
+  Link as LinkIcon,
+  Image as ImageIcon,
+  Check,
+  Tag,
+  Layers,
+  FileText,
 } from 'lucide-react';
 
 interface SmoothInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
@@ -109,6 +118,7 @@ interface RightInspectorProps {
   onResetOverride: (id: string, bp: Bp, key: keyof Style) => void;
   onCopyStyles: (id: string, fromBp: Bp, toBp: Bp) => void;
   onSelectNode?: (id: string) => void;
+  onUpdateTokens?: (tokens: Partial<Doc['tokens']>) => void;
 }
 
 export function RightInspector({
@@ -122,21 +132,135 @@ export function RightInspector({
   onResetOverride,
   onCopyStyles,
   onSelectNode,
+  onUpdateTokens,
 }: RightInspectorProps) {
   const node = selectedId ? doc.nodes[selectedId] : null;
 
+  // Render Page Inspector when no element is selected
   if (!node) {
     return (
-      <div className="w-[280px] h-full bg-[#11140F] border-l border-white/10 flex flex-col items-center justify-center p-6 text-center text-white/40 text-xs select-none flex-shrink-0">
-        <Sliders className="w-8 h-8 opacity-30 mb-2" />
-        <p className="font-medium">No Element Selected</p>
-        <p className="text-[11px] opacity-70 mt-1">Select an element on canvas or layers to inspect and edit its properties.</p>
+      <div className="w-[280px] h-full bg-[#11140F] border-l border-white/10 flex flex-col text-white text-[12px] select-none flex-shrink-0 overflow-y-auto">
+        {/* Page Inspector Header */}
+        <div className="p-3 border-b border-white/10 flex items-center justify-between bg-[#151916]">
+          <div className="flex items-center gap-2">
+            <Globe className="w-4 h-4 text-emerald-400" />
+            <div>
+              <span className="font-bold text-[13px] text-white/90 block">Page Inspector</span>
+              <span className="text-[10px] font-mono opacity-50 uppercase">Global Page Settings</span>
+            </div>
+          </div>
+          <span className="px-2 py-0.5 rounded-full text-[10.5px] font-mono font-semibold uppercase border text-emerald-400 border-emerald-500/30 bg-emerald-500/10">
+            {bp}
+          </span>
+        </div>
+
+        <div className="p-3 space-y-4">
+          {/* 1. Locked Primary Destination */}
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-semibold uppercase opacity-60 flex items-center gap-1.5">
+              <Lock className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Locked Destination URL</span>
+            </label>
+            <div className="p-2.5 rounded-lg bg-emerald-950/30 border border-emerald-500/20 space-y-1">
+              <p className="font-mono text-[11px] text-emerald-300 break-all select-all">
+                {doc.destination?.url || 'https://dynamicqr.io'}
+              </p>
+              <span className="text-[9.5px] text-emerald-400/70 block">
+                🔒 Bound by code guarantee to QR shortcode
+              </span>
+            </div>
+          </div>
+
+          {/* 2. Page Background Color */}
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-semibold uppercase opacity-60 flex items-center gap-1.5">
+              <Palette className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Page Background</span>
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={doc.tokens?.colors?.bg?.startsWith('#') ? doc.tokens.colors.bg : '#ffffff'}
+                onChange={(e) => {
+                  onUpdateTokens?.({
+                    colors: { bg: e.target.value } as any,
+                  });
+                }}
+                className="w-8 h-8 rounded-lg border border-white/20 cursor-pointer p-0.5 bg-black"
+              />
+              <SmoothInput
+                type="text"
+                value={doc.tokens?.colors?.bg || '#ffffff'}
+                onChangeValue={(val) => {
+                  onUpdateTokens?.({
+                    colors: { bg: val } as any,
+                  });
+                }}
+                className="flex-1 bg-[#181D1A] border border-white/10 rounded-lg px-2.5 py-1.5 text-white font-mono text-[11.5px]"
+              />
+            </div>
+          </div>
+
+          {/* 3. Global Color Palette Tokens */}
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-semibold uppercase opacity-60 block">Design Color Tokens</label>
+            <div className="grid grid-cols-2 gap-2 text-[11px]">
+              {Object.entries(doc.tokens?.colors || {}).map(([key, val]) => (
+                <div key={key} className="p-2 rounded-lg bg-[#181D1A] border border-white/10 flex items-center justify-between">
+                  <span className="opacity-60 capitalize font-mono text-[10px]">{key}</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-3.5 h-3.5 rounded-full border border-white/20" style={{ backgroundColor: val }} />
+                    <span className="font-mono text-[10.5px] opacity-80">{val}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 4. Global Typography Tokens */}
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-semibold uppercase opacity-60 block">Typography Tokens</label>
+            <div className="space-y-1.5">
+              <div className="p-2 rounded-lg bg-[#181D1A] border border-white/10 flex justify-between items-center text-[11px]">
+                <span className="opacity-60">Display Font:</span>
+                <span className="font-mono text-[10.5px] text-emerald-400 font-semibold">{doc.tokens?.fonts?.display || 'System Display'}</span>
+              </div>
+              <div className="p-2 rounded-lg bg-[#181D1A] border border-white/10 flex justify-between items-center text-[11px]">
+                <span className="opacity-60">Body Font:</span>
+                <span className="font-mono text-[10.5px] text-emerald-400 font-semibold">{doc.tokens?.fonts?.body || 'System Sans'}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 5. Document Structure Summary */}
+          <div className="pt-2 border-t border-white/10 space-y-2">
+            <span className="text-[11px] font-semibold uppercase opacity-60 block">Document Summary</span>
+            <div className="p-2.5 rounded-lg bg-[#181D1A] border border-white/10 text-[11px] space-y-1">
+              <div className="flex justify-between">
+                <span className="opacity-60">Total Elements:</span>
+                <span className="font-mono font-bold text-white">{Object.keys(doc.nodes).length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="opacity-60">Root Element:</span>
+                <span className="font-mono text-emerald-400">{doc.root}</span>
+              </div>
+            </div>
+            {doc.root && (
+              <button
+                type="button"
+                onClick={() => onSelectNode?.(doc.root)}
+                className="w-full py-2 px-3 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-emerald-400 font-semibold text-[11.5px] text-center transition-colors cursor-pointer"
+              >
+                Select Root Section &rarr;
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     );
   }
 
   const resolved = resolveStyle(node, bp);
-  const activeStyle = bp === 'mobile' ? node.style.mobile : node.style[bp] || {};
 
   // Check which properties are overridden on tablet/desktop
   const isKeyOverridden = (key: keyof Style) => isOverridden(node, bp, key);
@@ -220,27 +344,129 @@ export function RightInspector({
                   />
                 </div>
 
-                {node.props.bind === 'destination' ? (
-                  <div className="p-2.5 rounded-lg bg-emerald-950/30 border border-emerald-500/20 space-y-1">
-                    <div className="flex items-center gap-1.5 text-emerald-400 font-semibold text-[11.5px]">
-                      <Lock className="w-3.5 h-3.5" />
-                      <span>Locked Destination URL:</span>
+                {/* Variant Selector */}
+                <div>
+                  <label className="text-[11px] font-semibold uppercase opacity-60 mb-1 block">Variant</label>
+                  <div className="grid grid-cols-3 gap-1">
+                    {(['primary', 'secondary', 'ghost'] as const).map((v) => (
+                      <button
+                        key={v}
+                        type="button"
+                        onClick={() => onUpdateProps(node.id, { variant: v })}
+                        className={`py-1 rounded text-center font-semibold capitalize text-[11px] border ${
+                          node.props.variant === v
+                            ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400'
+                            : 'border-white/10 bg-[#181D1A] text-white/70 hover:text-white'
+                        }`}
+                      >
+                        {v}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Link Binding */}
+                <div>
+                  <label className="text-[11px] font-semibold uppercase opacity-60 mb-1 block">Link Target</label>
+                  <div className="grid grid-cols-2 gap-1 mb-2 bg-[#181D1A] p-1 rounded-lg border border-white/10">
+                    <button
+                      type="button"
+                      onClick={() => onUpdateProps(node.id, { bind: 'destination' })}
+                      className={`py-1 rounded text-[10.5px] font-medium transition-colors ${
+                        node.props.bind === 'destination'
+                          ? 'bg-emerald-600 text-white font-semibold'
+                          : 'text-white/60 hover:text-white'
+                      }`}
+                    >
+                      Locked QR Dest
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (node.props.bind === 'destination') {
+                          onUpdateProps(node.id, { bind: 'https://' });
+                        }
+                      }}
+                      className={`py-1 rounded text-[10.5px] font-medium transition-colors ${
+                        node.props.bind !== 'destination'
+                          ? 'bg-emerald-600 text-white font-semibold'
+                          : 'text-white/60 hover:text-white'
+                      }`}
+                    >
+                      Custom URL
+                    </button>
+                  </div>
+
+                  {node.props.bind === 'destination' ? (
+                    <div className="p-2.5 rounded-lg bg-emerald-950/30 border border-emerald-500/20 space-y-1">
+                      <div className="flex items-center gap-1.5 text-emerald-400 font-semibold text-[11.5px]">
+                        <Lock className="w-3.5 h-3.5" />
+                        <span>Locked Destination URL:</span>
+                      </div>
+                      <p className="font-mono text-[11px] text-white/70 truncate">{doc.destination?.url}</p>
                     </div>
-                    <p className="font-mono text-[11px] text-white/70 truncate">{doc.destination.url}</p>
-                  </div>
-                ) : (
-                  <div>
-                    <label className="text-[11px] font-semibold uppercase opacity-60 mb-1 block">Link URL</label>
-                    <SmoothInput
-                      key={`${node.id}_btn_bind`}
-                      type="text"
-                      value={(node.props.bind as string) || ''}
-                      onChangeValue={(val) => onUpdateProps(node.id, { bind: val })}
-                      placeholder="https://..."
-                      className="w-full bg-[#181D1A] border border-white/10 rounded-lg px-2.5 py-1.5 text-white"
-                    />
-                  </div>
-                )}
+                  ) : (
+                    <div>
+                      <SmoothInput
+                        key={`${node.id}_btn_bind`}
+                        type="text"
+                        value={(node.props.bind as string) || ''}
+                        onChangeValue={(val) => onUpdateProps(node.id, { bind: val })}
+                        placeholder="https://..."
+                        className="w-full bg-[#181D1A] border border-white/10 rounded-lg px-2.5 py-1.5 text-white font-mono text-[11px]"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* LinkRow Content (Full operability) */}
+            {node.type === 'linkRow' && (
+              <div className="space-y-3">
+                <div>
+                  <label className="text-[11px] font-semibold uppercase opacity-60 mb-1 block">Title / Label</label>
+                  <SmoothInput
+                    key={`${node.id}_link_label`}
+                    type="text"
+                    value={(node.props.label as string) || ''}
+                    onChangeValue={(val) => onUpdateProps(node.id, { label: val })}
+                    className="w-full bg-[#181D1A] border border-white/10 rounded-lg px-2.5 py-1.5 text-white"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold uppercase opacity-60 mb-1 block">Subtitle (Optional)</label>
+                  <SmoothInput
+                    key={`${node.id}_link_subtitle`}
+                    type="text"
+                    value={(node.props.subtitle as string) || ''}
+                    onChangeValue={(val) => onUpdateProps(node.id, { subtitle: val })}
+                    placeholder="e.g. Portfolio, blog, or booking"
+                    className="w-full bg-[#181D1A] border border-white/10 rounded-lg px-2.5 py-1.5 text-white text-[11.5px]"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold uppercase opacity-60 mb-1 block">Target URL</label>
+                  <SmoothInput
+                    key={`${node.id}_link_href`}
+                    type="text"
+                    value={(node.props.href as string) || ''}
+                    onChangeValue={(val) => onUpdateProps(node.id, { href: val })}
+                    placeholder="https://example.com"
+                    className="w-full bg-[#181D1A] border border-white/10 rounded-lg px-2.5 py-1.5 text-white font-mono text-[11.5px]"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold uppercase opacity-60 mb-1 block">Icon Name (Optional)</label>
+                  <SmoothInput
+                    key={`${node.id}_link_icon`}
+                    type="text"
+                    value={(node.props.icon as string) || ''}
+                    onChangeValue={(val) => onUpdateProps(node.id, { icon: val })}
+                    placeholder="e.g. arrow, globe, mail, phone"
+                    className="w-full bg-[#181D1A] border border-white/10 rounded-lg px-2.5 py-1.5 text-white text-[11.5px]"
+                  />
+                </div>
               </div>
             )}
 
@@ -289,6 +515,53 @@ export function RightInspector({
                   onChangeValue={(val) => onUpdateProps(node.id, { text: val })}
                   className="w-full bg-[#181D1A] border border-white/10 rounded-lg px-2.5 py-1.5 text-white text-[12px]"
                 />
+              </div>
+            )}
+
+            {/* Image Content */}
+            {node.type === 'image' && (
+              <div className="space-y-3">
+                <div>
+                  <label className="text-[11px] font-semibold uppercase opacity-60 mb-1 block">Alt Description</label>
+                  <SmoothInput
+                    key={`${node.id}_img_alt`}
+                    type="text"
+                    value={(node.props.alt as string) || ''}
+                    onChangeValue={(val) => onUpdateProps(node.id, { alt: val })}
+                    placeholder="Describe image for accessibility"
+                    className="w-full bg-[#181D1A] border border-white/10 rounded-lg px-2.5 py-1.5 text-white"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold uppercase opacity-60 mb-1 block">Image Fit</label>
+                  <div className="grid grid-cols-2 gap-1">
+                    {(['cover', 'contain'] as const).map((fit) => (
+                      <button
+                        key={fit}
+                        type="button"
+                        onClick={() => onUpdateProps(node.id, { fit })}
+                        className={`py-1 rounded text-center font-semibold capitalize text-[11px] border ${
+                          node.props.fit === fit
+                            ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400'
+                            : 'border-white/10 bg-[#181D1A] text-white/70 hover:text-white'
+                        }`}
+                      >
+                        {fit}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold uppercase opacity-60 mb-1 block">Image URL (Fallback)</label>
+                  <SmoothInput
+                    key={`${node.id}_img_url`}
+                    type="text"
+                    value={(node.props.urlFallback as string) || ''}
+                    onChangeValue={(val) => onUpdateProps(node.id, { urlFallback: val })}
+                    placeholder="https://images.unsplash.com/..."
+                    className="w-full bg-[#181D1A] border border-white/10 rounded-lg px-2.5 py-1.5 text-white font-mono text-[11px]"
+                  />
+                </div>
               </div>
             )}
 
@@ -419,7 +692,7 @@ export function RightInspector({
                           isFixed ? 'bg-emerald-600 text-white shadow-xs font-semibold' : 'text-white/60 hover:text-white'
                         }`}
                       >
-                        Fixed
+                        Fixed (px)
                       </button>
                     </div>
 
@@ -643,13 +916,13 @@ export function RightInspector({
                 {/* Gap Slider */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="text-[11px] font-semibold uppercase opacity-60">Gap ({resolved.gap || 0}px)</label>
+                    <label className="text-[11px] font-semibold uppercase opacity-60">Gap ({resolved.gap ?? 16}px)</label>
                     {renderOverrideDot('gap')}
                   </div>
                   <input
                     type="range"
                     min={0}
-                    max={48}
+                    max={64}
                     step={4}
                     value={resolved.gap ?? 16}
                     onChange={(e) => onUpdateStyle(node.id, bp, { gap: Number(e.target.value) })}
@@ -686,66 +959,315 @@ export function RightInspector({
           </div>
         )}
 
-        {/* TAB 3: STYLE */}
+        {/* TAB 3: STYLE (Full Typography & Visual Styling Operability) */}
         {activeTab === 'style' && (
-          <div className="space-y-3">
-            {/* Font Size */}
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="text-[11px] font-semibold uppercase opacity-60">Font Size ({resolved.fontSize || 16}px)</label>
-                {renderOverrideDot('fontSize')}
+          <div className="space-y-4">
+            {/* Section A: Typography */}
+            <div className="space-y-3">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400/90 flex items-center gap-1.5">
+                <Type className="w-3.5 h-3.5" />
+                <span>Typography</span>
+              </span>
+
+              {/* Font Family */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[10.5px] font-semibold uppercase opacity-60">Font Family</label>
+                  {renderOverrideDot('fontFamily')}
+                </div>
+                <div className="grid grid-cols-3 gap-1">
+                  {[
+                    { key: 'body', label: 'Sans' },
+                    { key: 'display', label: 'Display' },
+                    { key: 'mono', label: 'Mono' },
+                  ].map(({ key, label }) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => onUpdateStyle(node.id, bp, { fontFamily: key as any })}
+                      className={`py-1.5 rounded border text-center font-medium text-[11px] ${
+                        resolved.fontFamily === key
+                          ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400 font-semibold'
+                          : 'border-white/10 bg-[#181D1A] text-white/70 hover:text-white'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <input
-                type="range"
-                min={12}
-                max={64}
-                step={2}
-                value={resolved.fontSize ?? 16}
-                onChange={(e) => onUpdateStyle(node.id, bp, { fontSize: Number(e.target.value) })}
-                className="w-full accent-emerald-500"
-              />
+
+              {/* Font Size (Range + Number Input) */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[10.5px] font-semibold uppercase opacity-60">
+                    Font Size ({resolved.fontSize ?? 16}px)
+                  </label>
+                  {renderOverrideDot('fontSize')}
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="range"
+                    min={10}
+                    max={96}
+                    step={1}
+                    value={resolved.fontSize ?? 16}
+                    onChange={(e) => onUpdateStyle(node.id, bp, { fontSize: Number(e.target.value) })}
+                    className="flex-1 accent-emerald-500"
+                  />
+                  <SmoothInput
+                    type="number"
+                    min={10}
+                    max={120}
+                    value={(resolved.fontSize ?? 16).toString()}
+                    onChangeValue={(val) => {
+                      const n = parseInt(val, 10);
+                      if (!isNaN(n) && n >= 10 && n <= 120) {
+                        onUpdateStyle(node.id, bp, { fontSize: n });
+                      }
+                    }}
+                    className="w-14 bg-[#181D1A] border border-white/10 rounded px-1.5 py-0.5 text-center font-mono text-[11px] text-white"
+                  />
+                </div>
+              </div>
+
+              {/* Font Weight */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[10.5px] font-semibold uppercase opacity-60">Font Weight</label>
+                  {renderOverrideDot('fontWeight')}
+                </div>
+                <div className="grid grid-cols-5 gap-1">
+                  {[
+                    { val: 400, label: 'Reg' },
+                    { val: 500, label: 'Med' },
+                    { val: 600, label: 'Semi' },
+                    { val: 700, label: 'Bold' },
+                    { val: 800, label: 'Black' },
+                  ].map(({ val, label }) => (
+                    <button
+                      key={val}
+                      type="button"
+                      onClick={() => onUpdateStyle(node.id, bp, { fontWeight: val as any })}
+                      className={`py-1 rounded border text-center text-[10px] ${
+                        resolved.fontWeight === val
+                          ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400 font-bold'
+                          : 'border-white/10 bg-[#181D1A] text-white/60 hover:text-white'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Text Transform: None / UPPERCASE / Capitalize / lowercase */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[10.5px] font-semibold uppercase opacity-60">Case / Transform</label>
+                  {renderOverrideDot('textTransform')}
+                </div>
+                <div className="grid grid-cols-4 gap-1">
+                  {[
+                    { val: 'none', label: 'None' },
+                    { val: 'uppercase', label: 'UPPER' },
+                    { val: 'capitalize', label: 'Capital' },
+                    { val: 'lowercase', label: 'lower' },
+                  ].map(({ val, label }) => (
+                    <button
+                      key={val}
+                      type="button"
+                      onClick={() => onUpdateStyle(node.id, bp, { textTransform: val as any })}
+                      className={`py-1 rounded border text-center text-[10px] ${
+                        (resolved.textTransform || 'none') === val
+                          ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400 font-semibold'
+                          : 'border-white/10 bg-[#181D1A] text-white/60 hover:text-white'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Text Alignment */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[10.5px] font-semibold uppercase opacity-60">Text Alignment</label>
+                  {renderOverrideDot('textAlign')}
+                </div>
+                <div className="grid grid-cols-3 gap-1">
+                  {(['left', 'center', 'right'] as const).map((align) => (
+                    <button
+                      key={align}
+                      onClick={() => onUpdateStyle(node.id, bp, { textAlign: align })}
+                      className={`py-1.5 rounded border flex items-center justify-center ${
+                        resolved.textAlign === align
+                          ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400'
+                          : 'border-white/10 bg-[#181D1A] text-white/60 hover:text-white'
+                      }`}
+                    >
+                      {align === 'left' && <AlignLeft className="w-3.5 h-3.5" />}
+                      {align === 'center' && <AlignCenter className="w-3.5 h-3.5" />}
+                      {align === 'right' && <AlignRight className="w-3.5 h-3.5" />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Line Height & Letter Spacing */}
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <div>
+                  <label className="text-[10px] font-semibold opacity-60 block mb-0.5">
+                    Line Height ({resolved.lineHeight ?? 1.4})
+                  </label>
+                  <input
+                    type="range"
+                    min={0.9}
+                    max={2.2}
+                    step={0.1}
+                    value={resolved.lineHeight ?? 1.4}
+                    onChange={(e) => onUpdateStyle(node.id, bp, { lineHeight: Number(e.target.value) })}
+                    className="w-full accent-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-semibold opacity-60 block mb-0.5">
+                    Letter Spacing ({resolved.letterSpacing ?? 0}em)
+                  </label>
+                  <input
+                    type="range"
+                    min={-0.02}
+                    max={0.2}
+                    step={0.01}
+                    value={resolved.letterSpacing ?? 0}
+                    onChange={(e) => onUpdateStyle(node.id, bp, { letterSpacing: Number(e.target.value) })}
+                    className="w-full accent-emerald-500"
+                  />
+                </div>
+              </div>
+
+              {/* Text Color Tokens */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[10.5px] font-semibold uppercase opacity-60">Text Color</label>
+                  {renderOverrideDot('color')}
+                </div>
+                <div className="grid grid-cols-3 gap-1">
+                  {['fg', 'muted', 'accent', 'bg', 'surface', 'border'].map((token) => (
+                    <button
+                      key={token}
+                      type="button"
+                      onClick={() => onUpdateStyle(node.id, bp, { color: token as any })}
+                      className={`py-1 px-1.5 rounded border text-[10px] font-mono flex items-center justify-between ${
+                        resolved.color === token
+                          ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400 font-bold'
+                          : 'border-white/10 bg-[#181D1A] text-white/70 hover:text-white'
+                      }`}
+                    >
+                      <span className="capitalize">{token}</span>
+                      <span
+                        className="w-2.5 h-2.5 rounded-full border border-white/20"
+                        style={{ backgroundColor: `var(--c-${token})` }}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
-            {/* Text Align */}
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="text-[11px] font-semibold uppercase opacity-60">Text Alignment</label>
-                {renderOverrideDot('textAlign')}
+            {/* Section B: Appearance & Look */}
+            <div className="space-y-3 pt-3 border-t border-white/10">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400/90 flex items-center gap-1.5">
+                <Palette className="w-3.5 h-3.5" />
+                <span>Appearance</span>
+              </span>
+
+              {/* Background Color Token */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[10.5px] font-semibold uppercase opacity-60">Background</label>
+                  {renderOverrideDot('bg')}
+                </div>
+                <div className="grid grid-cols-3 gap-1">
+                  {['transparent', 'surface', 'bg', 'accent', 'muted'].map((bgToken) => (
+                    <button
+                      key={bgToken}
+                      type="button"
+                      onClick={() => onUpdateStyle(node.id, bp, { bg: bgToken === 'transparent' ? undefined : (bgToken as any) })}
+                      className={`py-1 px-1.5 rounded border text-[10px] font-mono flex items-center justify-between ${
+                        (resolved.bg || 'transparent') === bgToken
+                          ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400 font-bold'
+                          : 'border-white/10 bg-[#181D1A] text-white/70 hover:text-white'
+                      }`}
+                    >
+                      <span className="capitalize">{bgToken}</span>
+                      {bgToken !== 'transparent' && (
+                        <span
+                          className="w-2.5 h-2.5 rounded-full border border-white/20"
+                          style={{ backgroundColor: `var(--c-${bgToken})` }}
+                        />
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className="grid grid-cols-3 gap-1">
-                {(['left', 'center', 'right'] as const).map((align) => (
+
+              {/* Border Radius */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[10.5px] font-semibold uppercase opacity-60">
+                    Radius ({resolved.radius || 0}px)
+                  </label>
+                  {renderOverrideDot('radius')}
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="range"
+                    min={0}
+                    max={48}
+                    step={2}
+                    value={resolved.radius ?? 12}
+                    onChange={(e) => onUpdateStyle(node.id, bp, { radius: Number(e.target.value) })}
+                    className="flex-1 accent-emerald-500"
+                  />
                   <button
-                    key={align}
-                    onClick={() => onUpdateStyle(node.id, bp, { textAlign: align })}
-                    className={`py-1.5 rounded border flex items-center justify-center ${
-                      resolved.textAlign === align
-                        ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400'
+                    type="button"
+                    onClick={() => onUpdateStyle(node.id, bp, { radius: 999 })}
+                    className={`px-2 py-0.5 rounded text-[10px] font-mono border ${
+                      resolved.radius === 999
+                        ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400 font-bold'
                         : 'border-white/10 bg-[#181D1A] text-white/60 hover:text-white'
                     }`}
                   >
-                    {align === 'left' && <AlignLeft className="w-3.5 h-3.5" />}
-                    {align === 'center' && <AlignCenter className="w-3.5 h-3.5" />}
-                    {align === 'right' && <AlignRight className="w-3.5 h-3.5" />}
+                    Pill
                   </button>
-                ))}
+                </div>
               </div>
-            </div>
 
-            {/* Border Radius */}
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="text-[11px] font-semibold uppercase opacity-60">Radius ({resolved.radius || 0}px)</label>
-                {renderOverrideDot('radius')}
+              {/* Shadow */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[10.5px] font-semibold uppercase opacity-60">Shadow</label>
+                  {renderOverrideDot('shadow')}
+                </div>
+                <div className="grid grid-cols-4 gap-1">
+                  {(['none', 'sm', 'md', 'lg'] as const).map((sh) => (
+                    <button
+                      key={sh}
+                      type="button"
+                      onClick={() => onUpdateStyle(node.id, bp, { shadow: sh })}
+                      className={`py-1 rounded border text-center uppercase text-[10px] ${
+                        (resolved.shadow || 'none') === sh
+                          ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400 font-bold'
+                          : 'border-white/10 bg-[#181D1A] text-white/60 hover:text-white'
+                      }`}
+                    >
+                      {sh}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <input
-                type="range"
-                min={0}
-                max={32}
-                step={2}
-                value={resolved.radius ?? 12}
-                onChange={(e) => onUpdateStyle(node.id, bp, { radius: Number(e.target.value) })}
-                className="w-full accent-emerald-500"
-              />
             </div>
           </div>
         )}

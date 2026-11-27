@@ -547,12 +547,12 @@ export default function LinkList({
       {/* AI Instant Mobile Landing Page Modal */}
       {mounted && activePageLink && createPortal(
         <div
-          className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
+          className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-xl flex items-start justify-center p-4 sm:p-6 pt-8 sm:pt-12 overflow-y-auto"
           onClick={(e) => {
             if (e.target === e.currentTarget) setActivePageLink(null);
           }}
         >
-          <div className="w-full max-w-6xl my-auto">
+          <div className="w-full max-w-6xl mb-12">
             <LandingPageEditor
               linkId={activePageLink.id}
               shortCode={activePageLink.shortCode}

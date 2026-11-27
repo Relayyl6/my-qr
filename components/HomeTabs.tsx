@@ -31,7 +31,7 @@ export default function HomeTabs({
   promoBanner,
 }: HomeTabsProps) {
   // Respect user preference for default landing tab (Workspace vs Tour overview)
-  const [activeTab, setActiveTab] = useState<'workspace' | 'overview'>('overview');
+  const [activeTab, setActiveTab] = useState<'workspace' | 'overview'>(user ? 'workspace' : 'overview');
 
   useEffect(() => {
     const prefs = getStoredPreferences();
@@ -61,12 +61,11 @@ export default function HomeTabs({
         if (!user) {
           // Unauthenticated visitors always see the Product Tour
           setActiveTab('overview');
-        } else if (prefs.defaultLanding === 'overview') {
-          setActiveTab('overview');
-        } else if (prefs.defaultLanding === 'workspace') {
-          setActiveTab('workspace');
         } else {
-          setActiveTab('workspace'); // logged-in default
+          setActiveTab('workspace');
+          if (typeof window !== 'undefined' && !window.location.hash) {
+            window.location.hash = '#workspace';
+          }
         }
       }
     };

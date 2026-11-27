@@ -60,6 +60,25 @@ export function CanvasFrame({
             <style id="builder-styles"></style>
             <style>
               *, *::before, *::after { box-sizing: border-box; }
+              html {
+                color-scheme: dark light;
+                scrollbar-color: rgba(255, 255, 255, 0.25) rgba(0, 0, 0, 0.2);
+                scrollbar-width: thin;
+              }
+              ::-webkit-scrollbar {
+                width: 8px;
+                height: 8px;
+              }
+              ::-webkit-scrollbar-track {
+                background: rgba(0, 0, 0, 0.2);
+              }
+              ::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.25);
+                border-radius: 4px;
+              }
+              ::-webkit-scrollbar-thumb:hover {
+                background: rgba(255, 255, 255, 0.45);
+              }
               body { margin: 0; padding: 0; overflow-x: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: ${doc.tokens?.colors?.bg || '#ffffff'}; }
               [data-node-id] { cursor: pointer; }
               .flex { display: flex; }
@@ -235,18 +254,18 @@ export function CanvasFrame({
         )}
       </div>
 
-      {/* Custom Width Drag Handle on Frame's Right Edge */}
+      {/* Custom Width Drag Handle on Frame's Right Edge - Docked cleanly without overlapping inspector */}
       <div
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
-        className="absolute top-1/2 -right-6 -translate-y-1/2 w-4 h-16 bg-[#11140F]/80 hover:bg-emerald-600 border border-white/20 rounded-full cursor-ew-resize flex items-center justify-center transition-colors group z-30 select-none shadow-lg"
+        className="absolute top-1/2 -right-3 -translate-y-1/2 w-3 h-12 bg-[#11140F]/90 hover:bg-emerald-600 border border-white/20 rounded-full cursor-ew-resize flex items-center justify-center transition-colors group z-20 select-none shadow-md"
         title="Drag to resize custom viewport width"
       >
-        <div className="w-1 h-6 bg-white/40 group-hover:bg-white rounded-full" />
+        <div className="w-0.5 h-5 bg-white/40 group-hover:bg-white rounded-full" />
 
-        {/* Tooltip Badge */}
-        <div className="absolute left-6 whitespace-nowrap bg-black/90 text-white text-[10.5px] font-mono px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-md">
+        {/* Tooltip Badge placed to the left so it never covers the inspector */}
+        <div className="absolute right-5 whitespace-nowrap bg-black/90 text-white text-[10.5px] font-mono px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-md">
           {frameWidth}px ({bp})
         </div>
       </div>

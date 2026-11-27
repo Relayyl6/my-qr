@@ -41,6 +41,35 @@ interface LeftPanelProps {
   onAddNode: (type: NodeType) => void;
 }
 
+function getDisplayNodeName(node: Node): string {
+  if (node.name) return node.name;
+  if (node.type === 'heading') {
+    const text = (node.props?.text as string) || '';
+    return text ? `Heading: ${text.slice(0, 18)}${text.length > 18 ? '…' : ''}` : 'Heading';
+  }
+  if (node.type === 'text') {
+    const text = (node.props?.text as string) || '';
+    return text ? `Text: ${text.slice(0, 18)}${text.length > 18 ? '…' : ''}` : 'Text';
+  }
+  if (node.type === 'button') {
+    const label = (node.props?.label as string) || '';
+    return label ? `Button: ${label}` : 'Button';
+  }
+  if (node.type === 'linkRow') {
+    const label = (node.props?.label as string) || '';
+    return label ? `Link: ${label}` : 'Link Row';
+  }
+  if (node.type === 'priceItem') {
+    const name = (node.props?.name as string) || '';
+    return name ? `Price: ${name}` : 'Price Item';
+  }
+  if (node.type === 'badge') {
+    const text = (node.props?.text as string) || '';
+    return text ? `Badge: ${text}` : 'Badge';
+  }
+  return node.type.charAt(0).toUpperCase() + node.type.slice(1);
+}
+
 export function LeftPanel({
   doc,
   bp,
@@ -169,11 +198,11 @@ export function LeftPanel({
               />
             ) : (
               <span
-                onDoubleClick={(e) => handleStartRename(node.id, node.name || node.type, e)}
+                onDoubleClick={(e) => handleStartRename(node.id, getDisplayNodeName(node), e)}
                 className="truncate cursor-text"
-                title="Double click to rename"
+                title={`${getDisplayNodeName(node)} (${node.type}) - Double click to rename`}
               >
-                {node.name || node.type}
+                {getDisplayNodeName(node)}
               </span>
             )}
           </div>
@@ -241,7 +270,7 @@ export function LeftPanel({
   };
 
   return (
-    <div className="w-[260px] h-full bg-[#11140F] border-r border-white/10 flex flex-col text-white select-none flex-shrink-0">
+    <div className="w-[275px] h-full bg-[#11140F] border-r border-white/10 flex flex-col text-white select-none flex-shrink-0">
       {/* Tab Switcher */}
       <div className="flex items-center border-b border-white/10 p-1.5 gap-1 bg-[#151916]">
         {[

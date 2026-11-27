@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth";
 import { APP_URL } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
@@ -101,16 +102,31 @@ export async function GET(
       }
     } catch (e) {}
 
-    // Increment scan / click count asynchronously only after validating target is not looping
-    prisma.microSaasItem
-      .update({
-        where: { id: item.id },
-        data: { scansCount: { increment: 1 } },
-      })
-      .catch(() => {});
+    // Prevent inflated scan/click counts from owner testing, camera prefetches, crawlers, or rapid reloads
+    const userAgent = (req.headers.get("user-agent") || "").toLowerCase();
+    const purpose = (req.headers.get("purpose") || "").toLowerCase().trim();
+    const secPurpose = (req.headers.get("sec-purpose") || "").toLowerCase().trim();
+    const xPurpose = (req.headers.get("x-purpose") || "").toLowerCase().trim();
+    const isPrefetch = purpose === 'prefetch' || secPurpose === 'prefetch' || xPurpose === 'preview' || req.nextUrl.searchParams.get('preview') === 'true';
+    const isCrawler = /bot|crawler|spider|crawling|facebookexternalhit|twitterbot|whatsapp|telegrambot|slackbot|linkedinbot|discordbot|applebot|googlebot/i.test(userAgent);
+
+    const currentUser = await getCurrentUser().catch(() => null);
+    const isOwner = Boolean(currentUser?.id && currentUser.id === item.userId);
+    const sessionClickKey = `short_clicked_${item.id}`;
+    const alreadyClicked = req.cookies.get(sessionClickKey);
+
+    let shouldSetCookie = false;
+    if (!isOwner && !isCrawler && !isPrefetch && !alreadyClicked) {
+      shouldSetCookie = true;
+      prisma.microSaasItem
+        .update({
+          where: { id: item.id },
+          data: { scansCount: { increment: 1 } },
+        })
+        .catch(() => {});
+    }
 
     // 4. Device OS Conditional Routing
-    const userAgent = (req.headers.get("user-agent") || "").toLowerCase();
     const isIos = /iphone|ipad|ipod/.test(userAgent);
     const isAndroid = /android/.test(userAgent);
 
@@ -134,7 +150,6 @@ export async function GET(
     }
 
     // 6. Social Media Crawler OpenGraph Unfurl
-    const isCrawler = /facebookexternalhit|twitterbot|whatsapp|telegrambot|slackbot|linkedinbot|discordbot|applebot|googlebot/i.test(userAgent);
     const ogTitle = spec.ogTitle || item.title || "DynamicQR Short Link";
     const ogDesc = spec.ogDescription || `Visit link on DynamicQR: ${target}`;
     const ogImage = spec.ogImage || "";
@@ -178,7 +193,16 @@ export async function GET(
       );
     }
 
-    return NextResponse.redirect(target, { status: 307 });
+    const redirectResponse = NextResponse.redirect(target, { status: 307 });
+    if (shouldSetCookie) {
+      redirectResponse.cookies.set(sessionClickKey, '1', {
+        maxAge: 1800,
+        path: '/',
+        httpOnly: true,
+        sameSite: 'lax',
+      });
+    }
+    return redirectResponse;
   } catch (err) {
     return NextResponse.redirect(new URL("/", req.url));
   }

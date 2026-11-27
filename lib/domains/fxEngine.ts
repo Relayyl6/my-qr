@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import { prisma } from '@/lib/prisma';
 import { getTldTier } from './constants';
 
@@ -74,14 +76,14 @@ export const DEFAULT_TLD_MARGIN_PROGRESSION: Record<string, number> = {
 
 export const DEFAULT_PRICING_CONFIG: DomainPricingConfig = {
   mode: 'auto_buffered',
-  liveMarketRate: 1353.58,
+  liveMarketRate: 1450.0,
   bufferPercent: 5.0,
-  bufferedRate: 1430,
-  manualOverrideRate: 1500,
-  platformMarkupNgn: 3000,
-  budgetMarkupNgn: 3000,
-  standardMarkupNgn: 5500,
-  premiumMarkupNgn: 8000,
+  bufferedRate: 1550,
+  manualOverrideRate: 1550,
+  platformMarkupNgn: 3500,
+  budgetMarkupNgn: 3500,
+  standardMarkupNgn: 6000,
+  premiumMarkupNgn: 8500,
   tldMargins: { ...DEFAULT_TLD_MARGIN_PROGRESSION },
   tldOverrides: {},
   roundingStep: 100,
@@ -91,12 +93,48 @@ export const DEFAULT_PRICING_CONFIG: DomainPricingConfig = {
 };
 
 const CACHE_KEY = 'domain_pricing_config';
+const FALLBACK_FILE_PATH = path.join(process.cwd(), 'lib', 'domains', 'db-pricing-fallback.json');
+
+// Write latest admin configuration to local persistent file so server reboots or DB outages never revert to stale seeds
+function syncDiskFallback(config: DomainPricingConfig) {
+  try {
+    const dir = path.dirname(FALLBACK_FILE_PATH);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(FALLBACK_FILE_PATH, JSON.stringify(config, null, 2), 'utf-8');
+  } catch (err) {
+    console.warn('[FX Engine] Unable to persist pricing config disk fallback:', err);
+  }
+}
+
+// Read latest configuration from disk fallback if database is temporarily unavailable
+function readDiskFallback(): DomainPricingConfig | null {
+  try {
+    if (fs.existsSync(FALLBACK_FILE_PATH)) {
+      const raw = fs.readFileSync(FALLBACK_FILE_PATH, 'utf-8');
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed.bufferedRate === 'number') {
+        return parsed as DomainPricingConfig;
+      }
+    }
+  } catch (err) {
+    console.warn('[FX Engine] Unable to load pricing config disk fallback:', err);
+  }
+  return null;
+}
 
 // Active in-memory cache of the admin's database configuration to guarantee synchronous calls never use stale static seeds
 let activeAdminPricingConfig: DomainPricingConfig | null = null;
 
 export function getActivePricingConfigSync(): DomainPricingConfig {
-  return activeAdminPricingConfig || DEFAULT_PRICING_CONFIG;
+  if (activeAdminPricingConfig) return activeAdminPricingConfig;
+  const disk = readDiskFallback();
+  if (disk) {
+    activeAdminPricingConfig = disk;
+    return disk;
+  }
+  return DEFAULT_PRICING_CONFIG;
 }
 
 /**
@@ -160,9 +198,11 @@ export async function fetchLiveUsdToNgnRate(): Promise<{ rate: number; source: s
 }
 
 /**
- * Get current Domain Pricing Configuration from persistent database cache
+ * Get current Domain Pricing Configuration from persistent database cache, with memory + disk resilience.
+ * Always prefers what admin configured in DB; updates local fallbacks so DB crashes never cause money loss.
  */
 export async function getDomainPricingConfig(): Promise<DomainPricingConfig> {
+  // 1. Primary: Attempt reading directly from Neon database
   try {
     const record = await prisma.aiCache.findUnique({
       where: { key: CACHE_KEY },
@@ -184,14 +224,29 @@ export async function getDomainPricingConfig(): Promise<DomainPricingConfig> {
       if (typeof merged.extraEmailPriceNgn !== 'number' || merged.extraEmailPriceNgn <= 0) {
         merged.extraEmailPriceNgn = 1500;
       }
+
+      // Update in-memory cache and write to persistent disk fallback
       activeAdminPricingConfig = merged;
+      syncDiskFallback(merged);
       return merged;
     }
   } catch (err) {
-    console.warn('[FX Engine] Could not read pricing config cache:', err);
+    console.warn('[FX Engine] Database read failed for domain pricing config:', err);
   }
 
-  // If uninitialized, fetch live rate once and populate
+  // 2. Secondary: If DB failed, use active in-memory cache (holds what admin set in DB)
+  if (activeAdminPricingConfig) {
+    return activeAdminPricingConfig;
+  }
+
+  // 3. Tertiary: If memory empty, read the disk fallback file synced from previous DB writes
+  const diskFallback = readDiskFallback();
+  if (diskFallback) {
+    activeAdminPricingConfig = diskFallback;
+    return diskFallback;
+  }
+
+  // 4. Initial Bootstrap: Fetch live rate once and populate DB
   try {
     const { rate, source } = await fetchLiveUsdToNgnRate();
     const buffered = scaleBufferedRate(rate, 5.0);
@@ -202,6 +257,9 @@ export async function getDomainPricingConfig(): Promise<DomainPricingConfig> {
       source,
       lastFetchedAt: new Date().toISOString(),
     };
+
+    activeAdminPricingConfig = initialConfig;
+    syncDiskFallback(initialConfig);
 
     await prisma.aiCache.upsert({
       where: { key: CACHE_KEY },
@@ -251,7 +309,9 @@ export async function saveDomainPricingConfig(updates: Partial<DomainPricingConf
     },
   });
 
+  // Keep in-memory and disk fallback in 100% lockstep with DB
   activeAdminPricingConfig = next;
+  syncDiskFallback(next);
   return next;
 }
 

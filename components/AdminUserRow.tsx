@@ -172,25 +172,25 @@ export default function AdminUserRow({ user, isSelf }: { user: UserRecord; isSel
 
   return (
     <>
-      <tr className="border-b border-[#11140F]/5 hover:bg-[#F7F8F5]/50 transition-colors text-[13px]">
+      <tr className="border-b border-[#11140F]/5 dark:border-white/10 hover:bg-[#F7F8F5]/50 dark:hover:bg-white/[0.04] transition-colors text-[13px]">
         <td className="py-3.5 px-4">
-          <div className="font-medium text-[#11140F] flex items-center gap-1.5">
-            {user.email}
+          <div className="font-medium text-[#11140F] dark:text-white flex items-center gap-1.5 flex-wrap">
+            <span>{user.email}</span>
             {isSelf && (
-              <span className="rounded-full bg-emerald-100 text-emerald-800 px-2 py-0.5 text-[10.5px] font-mono font-semibold">
+              <span className="rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 px-2 py-0.5 text-[10.5px] font-mono font-semibold border border-emerald-200 dark:border-emerald-700/50">
                 YOU (SUPER ADMIN)
               </span>
             )}
             {user.isDeactivated && (
-              <span className="rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-[10.5px] font-mono font-semibold">
+              <span className="rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 px-2 py-0.5 text-[10.5px] font-mono font-semibold border border-amber-200 dark:border-amber-700/50">
                 DEACTIVATED
               </span>
             )}
           </div>
-          {user.name && <div className="text-[12px] text-[#11140F]/50">{user.name}</div>}
+          {user.name && <div className="text-[12px] text-[#11140F]/50 dark:text-white/50">{user.name}</div>}
         </td>
 
-        <td className="py-3.5 px-4 font-mono text-[12px] text-[#11140F]/70">
+        <td className="py-3.5 px-4 font-mono text-[12px] text-[#11140F]/70 dark:text-white/70">
           {new Date(user.createdAt).toLocaleDateString()}
         </td>
 
@@ -201,21 +201,21 @@ export default function AdminUserRow({ user, isSelf }: { user: UserRecord; isSel
             onChange={(e) => handleTierChange(e.target.value)}
             className={`rounded-lg border px-2.5 py-1 text-[12px] font-semibold outline-none transition-all cursor-pointer ${
               currentTier === 'ultra'
-                ? 'bg-purple-50 border-purple-200 text-purple-800'
+                ? 'bg-purple-50 dark:bg-purple-950/50 border-purple-200 dark:border-purple-800 text-purple-800 dark:text-purple-300'
                 : currentTier === 'plus'
-                ? 'bg-blue-50 border-blue-200 text-blue-800'
+                ? 'bg-blue-50 dark:bg-blue-950/50 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-300'
                 : currentTier === 'pro'
-                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                ? 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300'
                 : currentTier === 'enterprise'
-                ? 'bg-amber-50 border-amber-300 text-amber-900 font-bold'
-                : 'bg-gray-50 border-gray-200 text-gray-700'
+                ? 'bg-amber-50 dark:bg-amber-950/50 border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-200 font-bold'
+                : 'bg-gray-50 dark:bg-white/10 border-gray-200 dark:border-white/15 text-gray-700 dark:text-white/80'
             }`}
           >
-            <option value="free">FREE (5 links)</option>
-            <option value="pro">PRO ($6/mo)</option>
-            <option value="plus">PLUS ($13/mo)</option>
-            <option value="ultra">ULTRA ($21/mo)</option>
-            <option value="enterprise">ENTERPRISE (Sovereign Unlimited)</option>
+            <option value="free" className="dark:bg-[#14161F] dark:text-white">FREE (5 links)</option>
+            <option value="pro" className="dark:bg-[#14161F] dark:text-white">PRO ($6/mo)</option>
+            <option value="plus" className="dark:bg-[#14161F] dark:text-white">PLUS ($13/mo)</option>
+            <option value="ultra" className="dark:bg-[#14161F] dark:text-white">ULTRA ($21/mo)</option>
+            <option value="enterprise" className="dark:bg-[#14161F] dark:text-white">ENTERPRISE (Sovereign Unlimited)</option>
           </select>
         </td>
 
@@ -223,17 +223,17 @@ export default function AdminUserRow({ user, isSelf }: { user: UserRecord; isSel
           <button
             type="button"
             onClick={handleOpenInspect}
-            className="font-mono font-semibold text-[#11140F] hover:text-emerald-700 hover:underline flex items-center gap-1 cursor-pointer"
+            className="font-mono font-semibold text-[#11140F] dark:text-white hover:text-emerald-700 dark:hover:text-emerald-400 hover:underline flex items-center gap-1 cursor-pointer"
             title="Inspect links owned by this customer"
           >
-            <QrCode className="w-3.5 h-3.5 text-emerald-600" />
+            <QrCode className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
             <span>{user._count.links} links</span>
           </button>
         </td>
 
-        <td className="py-3.5 px-4 font-mono text-[11px] text-[#11140F]/50">
+        <td className="py-3.5 px-4 font-mono text-[11px] text-[#11140F]/50 dark:text-white/50">
           {user.stripeCustomerId ? (
-            <span className="text-emerald-700 font-medium">✓ Subscribed</span>
+            <span className="text-emerald-700 dark:text-emerald-400 font-medium">✓ Subscribed</span>
           ) : (
             <span>Manual / Admin</span>
           )}
@@ -242,38 +242,38 @@ export default function AdminUserRow({ user, isSelf }: { user: UserRecord; isSel
         <td className="py-3.5 px-4 text-right">
           <div className="flex items-center justify-end gap-1.5 flex-wrap">
             {statusMsg && (
-              <span className="text-[11px] text-emerald-700 font-medium animate-pulse mr-1">
+              <span className="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium animate-pulse mr-1">
                 {statusMsg}
               </span>
             )}
 
             <button
               onClick={handleOpenInspect}
-              className="rounded-lg border border-[#11140F]/15 px-2 py-1 text-[11px] font-medium text-[#11140F]/70 hover:text-[#11140F] hover:bg-white transition-all flex items-center gap-1 cursor-pointer"
+              className="rounded-lg border border-[#11140F]/15 dark:border-white/15 px-2 py-1 text-[11px] font-medium text-[#11140F]/70 dark:text-white/75 hover:text-[#11140F] dark:hover:text-white hover:bg-white dark:hover:bg-white/10 transition-all flex items-center gap-1 cursor-pointer"
               title="Inspect customer's QR link fleet"
             >
-              <Eye className="w-3 h-3 text-blue-600" />
-              Inspect
+              <Eye className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+              <span>Inspect</span>
             </button>
 
             <button
               onClick={handleResetCredit}
               disabled={loading}
               title="Reset monthly AI compute usage to zero"
-              className="rounded-lg border border-[#11140F]/15 px-2 py-1 text-[11px] font-medium text-[#11140F]/70 hover:text-[#11140F] hover:bg-white transition-all flex items-center gap-1 cursor-pointer"
+              className="rounded-lg border border-[#11140F]/15 dark:border-white/15 px-2 py-1 text-[11px] font-medium text-[#11140F]/70 dark:text-white/75 hover:text-[#11140F] dark:hover:text-white hover:bg-white dark:hover:bg-white/10 transition-all flex items-center gap-1 cursor-pointer"
             >
               <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
-              Reset AI
+              <span>Reset AI</span>
             </button>
 
             <button
               onClick={() => handleSetAiLimit(50)}
               disabled={loading}
               title="Grant $50 monthly AI budget"
-              className="rounded-lg border border-purple-200 bg-purple-50 px-2 py-1 text-[11px] font-medium text-purple-800 hover:bg-purple-100 transition-all flex items-center gap-0.5 cursor-pointer"
+              className="rounded-lg border border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-950/40 px-2 py-1 text-[11px] font-medium text-purple-800 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-all flex items-center gap-0.5 cursor-pointer"
             >
               <DollarSign className="w-3 h-3" />
-              $50 Budget
+              <span>$50 Budget</span>
             </button>
 
             {!isSelf && (

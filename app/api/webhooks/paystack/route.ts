@@ -72,8 +72,34 @@ export async function POST(req: Request) {
         }
       }
 
-      // 2. Handle Subscription Upgrades (Paystack SUB_ reference or planId metadata)
+      // 1.5. Handle Domain Renewals (Paystack RENEW_ reference or metadata.isRenewal)
       const meta = event.data?.metadata || {};
+      if (meta.isRenewal && meta.orderId) {
+        try {
+          const existingOrder = await prisma.domainOrder.findUnique({
+            where: { id: meta.orderId },
+          });
+          if (existingOrder) {
+            const renewYears = Number(meta.years || 1);
+            const currentExpiry = existingOrder.expiresAt ? new Date(existingOrder.expiresAt) : new Date();
+            const baseDate = currentExpiry > new Date() ? currentExpiry : new Date();
+            const newExpiresAt = new Date(baseDate.getTime() + renewYears * 365 * 24 * 60 * 60 * 1000);
+            await prisma.domainOrder.update({
+              where: { id: existingOrder.id },
+              data: {
+                status: 'ACTIVE',
+                expiresAt: newExpiresAt,
+                errorMessage: null,
+              },
+            });
+            console.info(`[Paystack Webhook] Successfully renewed domain ${existingOrder.domainName} until ${newExpiresAt.toISOString()}`);
+          }
+        } catch (renewErr: any) {
+          console.error('[Paystack Webhook] Domain renewal error:', renewErr);
+        }
+      }
+
+      // 2. Handle Subscription Upgrades (Paystack SUB_ reference or planId metadata)
       const planId = (meta.planId || meta.tier || '').toLowerCase();
       const userId = meta.userId;
 

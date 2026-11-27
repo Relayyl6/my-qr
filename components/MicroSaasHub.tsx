@@ -34,7 +34,11 @@ import {
   Image as ImageIcon,
   Loader2,
   Shield,
+  RotateCcw,
+  MessageSquare,
+  Phone,
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import CustomerMailingListManager from '@/components/CustomerMailingListManager';
 import { PlanTier, PLANS } from '@/lib/plans';
 import PrintTemplateModal from '@/components/PrintTemplateModal';
@@ -113,6 +117,8 @@ export default function MicroSaasHub({
   const [printWifi, setPrintWifi] = useState<MicroItem | null>(null);
   const [deleteConfirmTarget, setDeleteConfirmTarget] = useState<{ id: string; title: string } | null>(null);
   const [leadsModalCard, setLeadsModalCard] = useState<MicroItem | null>(null);
+  const [copiedLeadKey, setCopiedLeadKey] = useState<string | null>(null);
+  const [quickQrItem, setQuickQrItem] = useState<MicroItem | null>(null);
 
   // Edit form states
   const [editVcardForm, setEditVcardForm] = useState({
@@ -299,6 +305,62 @@ export default function MicroSaasHub({
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleDownloadLeadVcf = (lead: any, cardTitle: string) => {
+    const fullName = lead.fullName || 'Exchanged Contact';
+    const email = lead.email || '';
+    const phone = lead.phone || '';
+    const nameParts = fullName.trim().split(/\s+/);
+    const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
+    const firstName = nameParts.length > 1 ? nameParts.slice(0, -1).join(' ') : nameParts[0] || '';
+
+    const lines = [
+      'BEGIN:VCARD',
+      'VERSION:3.0',
+      `FN:${fullName}`,
+      `N:${lastName};${firstName};;;`,
+      email ? `EMAIL;TYPE=INTERNET:${email}` : '',
+      phone ? `TEL;TYPE=CELL:${phone}` : '',
+      `NOTE:Exchanged via DynamicQR Digital Card (${cardTitle})`,
+      'END:VCARD',
+    ].filter(Boolean).join('\r\n');
+
+    const blob = new Blob([lines], { type: 'text/vcard;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${fullName.replace(/[^a-zA-Z0-9_-]/g, '_')}.vcf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleCopyLeadField = (text: string, key: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedLeadKey(key);
+    setTimeout(() => setCopiedLeadKey(null), 2000);
+  };
+
+  const handleResetScans = async (item: MicroItem) => {
+    if (!window.confirm(`Reset scan/click counter for "${item.title}" to 0?`)) return;
+    try {
+      const res = await fetch(`/api/microsaas/${item.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scansCount: 0 }),
+      });
+      if (!res.ok) throw new Error('Failed to reset counter');
+      setVcards((prev) => prev.map((v) => (v.id === item.id ? { ...v, scansCount: 0 } : v)));
+      setShorteners((prev) => prev.map((s) => (s.id === item.id ? { ...s, scansCount: 0 } : s)));
+      setMenus((prev) => prev.map((m) => (m.id === item.id ? { ...m, scansCount: 0 } : m)));
+      setWifis((prev) => prev.map((w) => (w.id === item.id ? { ...w, scansCount: 0 } : w)));
+      setSuccessMsg(`Scan counter for "${item.title}" reset to 0.`);
+      setTimeout(() => setSuccessMsg(null), 3000);
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Error resetting counter');
+    }
   };
 
   const normalizedTier = (userTier || 'free').toLowerCase() as PlanTier;
@@ -919,9 +981,19 @@ export default function MicroSaasHub({
                             </p>
                           </div>
                         </div>
-                        <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 shrink-0">
-                          {card.scansCount} scans
-                        </span>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">
+                            {card.scansCount} scans
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleResetScans(card)}
+                            className="p-1 rounded-md text-[#11140F]/40 dark:text-white/40 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors cursor-pointer"
+                            title="Reset scan counter to 0"
+                          >
+                            <RotateCcw className="w-2.5 h-2.5" />
+                          </button>
+                        </div>
                       </div>
 
                       <div className="space-y-1 text-xs text-[#11140F]/70 dark:text-white/70">
@@ -1144,7 +1216,17 @@ export default function MicroSaasHub({
                           </div>
                         </td>
                         <td className="py-3.5 text-right font-mono font-bold text-sm text-[#11140F] dark:text-white">
-                          {link.scansCount}
+                          <div className="flex items-center justify-end gap-1.5">
+                            <span>{link.scansCount}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleResetScans(link)}
+                              className="p-1 rounded-md text-[#11140F]/40 dark:text-white/40 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                              title="Reset click count to 0"
+                            >
+                              <RotateCcw className="w-2.5 h-2.5" />
+                            </button>
+                          </div>
                         </td>
                         <td className="py-3.5 text-right">
                           <div className="flex items-center justify-end gap-1.5">
@@ -1164,6 +1246,14 @@ export default function MicroSaasHub({
                             >
                               <ExternalLink className="w-3.5 h-3.5" />
                             </Link>
+                            <button
+                              type="button"
+                              onClick={() => setQuickQrItem(link)}
+                              className="p-1.5 rounded-lg bg-[#F7F8F5] dark:bg-white/10 hover:bg-[#EEF0EA] dark:hover:bg-white/20 text-[#11140F] dark:text-white transition-colors cursor-pointer border border-transparent dark:border-white/10"
+                              title="Quick QR Code & Download"
+                            >
+                              <QrCode className="w-3.5 h-3.5" />
+                            </button>
                             <button
                               type="button"
                               onClick={() => handleOpenEditShortener(link)}
@@ -1306,9 +1396,19 @@ export default function MicroSaasHub({
                           <h4 className="text-sm font-bold text-[#11140F] dark:text-white">{menu.title}</h4>
                           <p className="text-xs text-[#2F6B4F] dark:text-emerald-400 font-medium">{sectionsCount} Menu Categories • Currency: {spec.currency || '$'}</p>
                         </div>
-                        <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                          {menu.scansCount} table scans
-                        </span>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">
+                            {menu.scansCount} table scans
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleResetScans(menu)}
+                            className="p-1 rounded-md text-[#11140F]/40 dark:text-white/40 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors cursor-pointer"
+                            title="Reset scan counter to 0"
+                          >
+                            <RotateCcw className="w-2.5 h-2.5" />
+                          </button>
+                        </div>
                       </div>
 
                       <div className="space-y-1 text-xs text-[#11140F]/70 dark:text-white/70">
@@ -1462,9 +1562,22 @@ export default function MicroSaasHub({
                             <p className="text-xs text-[#11140F]/60 dark:text-white/60 mt-0.5">📍 {spec.location}</p>
                           )}
                         </div>
-                        <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30">
-                          {spec.authType || 'WPA'}
-                        </span>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30">
+                            {wifi.scansCount || 0} scans
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleResetScans(wifi)}
+                            className="p-1 rounded-md text-[#11140F]/40 dark:text-white/40 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors cursor-pointer"
+                            title="Reset scan counter to 0"
+                          >
+                            <RotateCcw className="w-2.5 h-2.5" />
+                          </button>
+                          <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30">
+                            {spec.authType || 'WPA'}
+                          </span>
+                        </div>
                       </div>
 
                       <div className="p-2.5 rounded-xl bg-[#F7F8F5] dark:bg-white/[0.04] border border-[#11140F]/5 dark:border-white/10 text-xs space-y-1">
@@ -2059,9 +2172,35 @@ export default function MicroSaasHub({
 
               {/* UTM Builder */}
               <div className="p-3 bg-[#F7F8F5] dark:bg-white/[0.03] rounded-xl border border-[#11140F]/10 dark:border-white/10 space-y-2.5">
-                <span className="text-[11px] font-bold text-[#11140F] dark:text-white uppercase tracking-wider block">
-                  UTM Analytics Parameters (Optional)
-                </span>
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <span className="text-[11px] font-bold text-[#11140F] dark:text-white uppercase tracking-wider block">
+                    UTM Analytics Parameters (Optional)
+                  </span>
+                  <div className="flex items-center gap-1 flex-wrap">
+                    {[
+                      { label: '𝕏 Twitter', s: 'twitter', m: 'social', c: 'share' },
+                      { label: 'LinkedIn', s: 'linkedin', m: 'social', c: 'post' },
+                      { label: 'Instagram', s: 'instagram', m: 'social', c: 'bio' },
+                      { label: 'Facebook', s: 'facebook', m: 'social', c: 'feed' },
+                      { label: 'Google Ads', s: 'google', m: 'cpc', c: 'ad' },
+                      { label: 'Newsletter', s: 'newsletter', m: 'email', c: 'blast' },
+                    ].map((p) => (
+                      <button
+                        key={p.label}
+                        type="button"
+                        onClick={() => setShortenerForm(prev => ({
+                          ...prev,
+                          utmSource: p.s,
+                          utmMedium: p.m,
+                          utmCampaign: p.c,
+                        }))}
+                        className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-white dark:bg-white/10 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-[#11140F]/70 dark:text-white/70 hover:text-emerald-700 dark:hover:text-emerald-300 border border-[#11140F]/10 dark:border-white/10 transition-colors cursor-pointer"
+                      >
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <div className="grid grid-cols-3 gap-2">
                   <input
                     type="text"
@@ -2842,7 +2981,33 @@ export default function MicroSaasHub({
               </div>
 
               <div className="p-3 bg-[#F7F8F5] dark:bg-white/[0.03] rounded-xl space-y-2 border border-[#11140F]/8 dark:border-white/10">
-                <span className="text-[11px] font-semibold text-[#11140F] dark:text-white block">Marketing UTM Parameters</span>
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <span className="text-[11px] font-semibold text-[#11140F] dark:text-white block">Marketing UTM Parameters</span>
+                  <div className="flex items-center gap-1 flex-wrap">
+                    {[
+                      { label: '𝕏 Twitter', s: 'twitter', m: 'social', c: 'share' },
+                      { label: 'LinkedIn', s: 'linkedin', m: 'social', c: 'post' },
+                      { label: 'Instagram', s: 'instagram', m: 'social', c: 'bio' },
+                      { label: 'Facebook', s: 'facebook', m: 'social', c: 'feed' },
+                      { label: 'Google Ads', s: 'google', m: 'cpc', c: 'ad' },
+                      { label: 'Newsletter', s: 'newsletter', m: 'email', c: 'blast' },
+                    ].map((p) => (
+                      <button
+                        key={p.label}
+                        type="button"
+                        onClick={() => setEditShortenerForm(prev => ({
+                          ...prev,
+                          utmSource: p.s,
+                          utmMedium: p.m,
+                          utmCampaign: p.c,
+                        }))}
+                        className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-white dark:bg-white/10 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-[#11140F]/70 dark:text-white/70 hover:text-emerald-700 dark:hover:text-emerald-300 border border-[#11140F]/10 dark:border-white/10 transition-colors cursor-pointer"
+                      >
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <div className="grid grid-cols-3 gap-2">
                   <input
                     type="text"
@@ -3380,34 +3545,124 @@ export default function MicroSaasHub({
                   </div>
 
                   <div className="divide-y divide-gray-100 dark:divide-white/10 border border-gray-200 dark:border-white/10 rounded-2xl overflow-hidden">
-                    {leadsModalCard.spec.leads.map((lead: any, idx: number) => (
-                      <div key={idx} className="p-3.5 bg-white dark:bg-[#14161F] hover:bg-gray-50/80 dark:hover:bg-white/[0.04] transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <div className="space-y-0.5">
-                          <div className="text-xs font-bold text-[#11140F] dark:text-white flex items-center gap-2">
-                            <span>{lead.fullName}</span>
-                            <span className="text-[10px] font-mono text-gray-400 dark:text-white/40 font-normal">
-                              {new Date(lead.createdAt || Date.now()).toLocaleDateString(undefined, {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
-                            </span>
+                    {leadsModalCard.spec.leads.map((lead: any, idx: number) => {
+                      const rawPhone = lead.phone || '';
+                      const cleanPhone = rawPhone.replace(/[^0-9+]/g, '');
+                      const waPhone = cleanPhone.replace(/^\+/, '');
+                      return (
+                        <div
+                          key={idx}
+                          className="p-3.5 bg-white dark:bg-[#14161F] hover:bg-gray-50/80 dark:hover:bg-white/[0.04] transition-colors flex flex-col gap-2.5"
+                        >
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                            <div className="text-xs font-bold text-[#11140F] dark:text-white flex items-center gap-2">
+                              <span>{lead.fullName}</span>
+                              <span className="text-[10px] font-mono text-gray-400 dark:text-white/40 font-normal">
+                                {new Date(lead.createdAt || Date.now()).toLocaleDateString(undefined, {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleDownloadLeadVcf(lead, leadsModalCard.title)}
+                              className="px-2.5 py-1 text-[11px] font-semibold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 rounded-lg flex items-center gap-1.5 cursor-pointer self-start sm:self-auto border border-purple-200 dark:border-purple-800/40"
+                              title="Download contact card (.vcf) to import into phone contacts"
+                            >
+                              <Download className="w-3 h-3" />
+                              <span>Save Contact (.vcf)</span>
+                            </button>
                           </div>
-                          <div className="text-xs text-gray-600 dark:text-white/60 flex items-center gap-3 flex-wrap">
-                            <span>📧 {lead.email}</span>
-                            {lead.phone && <span>📞 {lead.phone}</span>}
+
+                          <div className="text-xs text-gray-600 dark:text-white/70 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 flex-wrap">
+                            <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-white/[0.04] px-2 py-1 rounded-lg border border-gray-100 dark:border-white/5">
+                              <span>📧 {lead.email}</span>
+                              <button
+                                type="button"
+                                onClick={() => handleCopyLeadField(lead.email, `email-${idx}`)}
+                                className="p-0.5 text-gray-400 hover:text-gray-700 dark:hover:text-white rounded transition-colors cursor-pointer"
+                                title="Copy email address"
+                              >
+                                {copiedLeadKey === `email-${idx}` ? (
+                                  <Check className="w-3 h-3 text-emerald-500" />
+                                ) : (
+                                  <Copy className="w-3 h-3" />
+                                )}
+                              </button>
+                            </div>
+                            {lead.phone && (
+                              <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-white/[0.04] px-2 py-1 rounded-lg border border-gray-100 dark:border-white/5">
+                                <span>📞 {lead.phone}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCopyLeadField(lead.phone, `phone-${idx}`)}
+                                  className="p-0.5 text-gray-400 hover:text-gray-700 dark:hover:text-white rounded transition-colors cursor-pointer"
+                                  title="Copy phone number"
+                                >
+                                  {copiedLeadKey === `phone-${idx}` ? (
+                                    <Check className="w-3 h-3 text-emerald-500" />
+                                  ) : (
+                                    <Copy className="w-3 h-3" />
+                                  )}
+                                </button>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Quick Message Actions */}
+                          <div className="flex items-center gap-1.5 flex-wrap pt-1 border-t border-gray-100 dark:border-white/5">
+                            <a
+                              href={`mailto:${lead.email}?subject=Connecting%20via%20${encodeURIComponent(leadsModalCard.title)}`}
+                              className="px-2.5 py-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 rounded-lg flex items-center gap-1.5 transition-colors border border-emerald-200 dark:border-emerald-800/40"
+                            >
+                              <Mail className="w-3 h-3" />
+                              <span>Send Email</span>
+                            </a>
+                            {lead.phone && (
+                              <>
+                                <a
+                                  href={`https://wa.me/${waPhone}?text=${encodeURIComponent(`Hi ${lead.fullName}, nice connecting with you via DynamicQR!`)}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="px-2.5 py-1 text-[11px] font-semibold text-emerald-800 dark:text-emerald-200 bg-emerald-100/80 dark:bg-emerald-900/40 hover:bg-emerald-200 dark:hover:bg-emerald-800/60 rounded-lg flex items-center gap-1.5 transition-colors border border-emerald-300 dark:border-emerald-700/50"
+                                >
+                                  <MessageSquare className="w-3 h-3" />
+                                  <span>WhatsApp</span>
+                                </a>
+                                <a
+                                  href={`tel:${cleanPhone}`}
+                                  className="px-2.5 py-1 text-[11px] font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg flex items-center gap-1.5 transition-colors border border-blue-200 dark:border-blue-800/40"
+                                >
+                                  <Phone className="w-3 h-3" />
+                                  <span>Call / SMS</span>
+                                </a>
+                              </>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => handleCopyLeadField(`Name: ${lead.fullName}\nEmail: ${lead.email}${lead.phone ? `\nPhone: ${lead.phone}` : ''}`, `all-${idx}`)}
+                              className="px-2.5 py-1 text-[11px] font-semibold text-gray-700 dark:text-white/80 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
+                            >
+                              {copiedLeadKey === `all-${idx}` ? (
+                                <>
+                                  <Check className="w-3 h-3 text-emerald-500" />
+                                  <span>Copied Full Info</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="w-3 h-3" />
+                                  <span>Copy All</span>
+                                </>
+                              )}
+                            </button>
                           </div>
                         </div>
-                        <a
-                          href={`mailto:${lead.email}?subject=Nice to connect!`}
-                          className="px-2.5 py-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 rounded-lg shrink-0 self-start sm:self-auto"
-                        >
-                          Send Email
-                        </a>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               ) : (
@@ -3431,6 +3686,92 @@ export default function MicroSaasHub({
                 className="px-4 py-2 text-xs font-semibold rounded-xl bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 text-[#11140F] dark:text-white/85 cursor-pointer"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* QUICK QR CODE PREVIEW & DOWNLOAD MODAL */}
+      {quickQrItem && (
+        <div
+          onClick={() => setQuickQrItem(null)}
+          className="fixed inset-0 z-50 bg-[#11140F]/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-150"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-[#0E1017] rounded-3xl border border-[#11140F]/10 dark:border-white/10 shadow-2xl max-w-sm w-full p-6 text-center space-y-4 text-[#11140F] dark:text-white"
+          >
+            <div className="flex items-center justify-between border-b border-[#11140F]/10 dark:border-white/10 pb-3">
+              <div className="text-left">
+                <h3 className="text-sm font-bold text-[#11140F] dark:text-white truncate max-w-[220px]">
+                  {quickQrItem.title}
+                </h3>
+                <p className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400">
+                  /s/{quickQrItem.slug}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setQuickQrItem(null)}
+                className="text-[#11140F]/50 dark:text-white/50 hover:text-[#11140F] dark:hover:text-white text-sm font-bold p-1 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="bg-white p-4 rounded-2xl shadow-inner border border-gray-100 flex items-center justify-center mx-auto w-fit">
+              <QRCodeSVG
+                id={`quick-qr-svg-${quickQrItem.id}`}
+                value={`${APP_URL}/s/${quickQrItem.slug}`}
+                size={200}
+                level="H"
+                includeMargin={true}
+              />
+            </div>
+
+            <p className="text-[11px] text-[#11140F]/60 dark:text-white/60 truncate max-w-full px-2 font-mono">
+              → {quickQrItem.spec?.destinationUrl || APP_URL}
+            </p>
+
+            <div className="grid grid-cols-2 gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const svgEl = document.getElementById(`quick-qr-svg-${quickQrItem.id}`);
+                  if (!svgEl) return;
+                  const svgData = new XMLSerializer().serializeToString(svgEl);
+                  const canvas = document.createElement('canvas');
+                  canvas.width = 1000;
+                  canvas.height = 1000;
+                  const ctx = canvas.getContext('2d');
+                  const img = new Image();
+                  img.onload = () => {
+                    if (ctx) {
+                      ctx.fillStyle = '#ffffff';
+                      ctx.fillRect(0, 0, 1000, 1000);
+                      ctx.drawImage(img, 0, 0, 1000, 1000);
+                      const pngUrl = canvas.toDataURL('image/png');
+                      const dl = document.createElement('a');
+                      dl.download = `qr-${quickQrItem.slug}.png`;
+                      dl.href = pngUrl;
+                      dl.click();
+                    }
+                  };
+                  img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+                }}
+                className="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Download PNG</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCopyLink(`/s/${quickQrItem.slug}`, quickQrItem.id)}
+                className="px-3 py-2 rounded-xl bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 text-[#11140F] dark:text-white text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+              >
+                {copiedId === quickQrItem.id ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copiedId === quickQrItem.id ? 'Copied' : 'Copy URL'}</span>
               </button>
             </div>
           </div>

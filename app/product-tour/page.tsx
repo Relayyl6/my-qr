@@ -1,6 +1,7 @@
 import { getCurrentUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import Footer from '@/components/Footer';
 import AnnouncementBar from '@/components/AnnouncementBar';
 import HeaderNav from '@/components/HeaderNav';
@@ -42,8 +43,17 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function ProductTourPage() {
+export default async function ProductTourPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ tour?: string }>;
+}) {
+  const resolvedParams = searchParams ? await searchParams : {};
   const user = await getCurrentUser();
+  if (user && resolvedParams.tour !== 'true') {
+    redirect('/#workspace');
+  }
+
   const adminEmail = (process.env.ADMIN_EMAIL || 'oseghaleleonard39@gmail.com').toLowerCase();
   const isAdmin = !!(user && user.email.toLowerCase() === adminEmail);
 
